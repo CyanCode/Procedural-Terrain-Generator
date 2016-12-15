@@ -1,15 +1,26 @@
 ﻿using UnityEngine;
 
 public class Tile {
-	public bool isActive
-	{
-		set
-		{
+	/// <summary>
+	/// Whether the tile is "active" in the scene or not. If active, 
+	/// the tile is rendered in the world. If inactive, it is not rendered 
+	/// but the mesh data is still cached (if it was already computed)
+	/// </summary>
+	public bool isActive {
+		get { return isActive; }
+		set {
 			isActive = value;
+			mesh.displayMesh = value;
+		}
+	}
 
-			if (value) {
-				
-			}
+	/// <summary>
+	/// Sets the position of the tile in world space
+	/// </summary>
+	public Vector2 tilePosition {
+		get { return tilePosition; }
+		set {
+			this.mesh.GetMeshGameObject().transform.position = new Vector3(value.x, 0, value.y);
 		}
 	}
 
@@ -29,10 +40,6 @@ public class Tile {
 
 	public void CreateTerrainTile(int resolution, int zSize, int xSize) {
 		this.mesh = new TerrainMesh(resolution, zSize, xSize);
-	}
-
-	public void PlaceTerrainTile(int x, int y, int z){ 
-		this.mesh.GetMeshGameObject().transform.position = new Vector3(x, y, z);
 	}
 
 	public void ApplyNoise(FastNoise noise) {

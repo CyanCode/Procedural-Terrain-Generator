@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Caching;
 using System.Collections.Generic;
+using LRUCache;
 
 /// <summary>
 /// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
@@ -13,7 +12,7 @@ public class TilePool {
 	private const int CACHE_SIZE = 16;
 
 	private List<Tile> activeTiles = new List<Tile>();
-	private LRUCache<string, Tile> oldTiles = new LRUCache<string, Tile>(capacity: CACHE_SIZE);
+	private LRUCache<Tile> oldTiles = new LRUCache<Tile>(CACHE_SIZE);
 
 	/// <summary>
 	/// Creates a new TilePool instance with a GameObject that is used 
@@ -39,6 +38,16 @@ public class TilePool {
 	/// </summary>
 	public void UpdateTiles() {
 
+	}
+
+	private void UpdateActiveTiles() {
+		List<Vector2> nearbyPositions = GetTilePositionsFromRadius();
+		List<Tile> toAdd = new List<Tile>();
+		
+		//Check if in cache
+		foreach (Tile t in oldTiles) {
+
+		}
 	}
 
 	/// <summary>

@@ -1,7 +1,17 @@
 ﻿using UnityEngine;
 
 public class TerrainMesh {
-	
+	public bool displayMesh {
+		set {
+			displayMesh = value;
+
+			if (value) { //Remove meshObject from scene
+				if (meshObj) Object.Destroy(meshObj);
+			} else { //Add meshObject to scene again
+				GetMeshGameObject();
+			}
+		}
+	}
 	public Vector3[] vertices {
 		get {
 			return mesh.vertices;

@@ -11,8 +11,12 @@ public class TerrainTiler : MonoBehaviour {
 		if (testNoise) {
 			Tile t = new Tile(50);
 			t.CreateTerrainTile(resolution, tileSize, tileSize);
-			t.PlaceTerrainTile(0, 0, 0);
+			t.tilePosition = new Vector2(0, 0);
 			t.ApplyNoise();
+		}
+
+		if (generateOnStart) {
+			//TODO Start tiling process
 		}
 	}
 }

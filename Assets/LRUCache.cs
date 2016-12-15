@@ -1,260 +1,247 @@
-﻿using System;
+﻿// Copyright (C) 2009 Robert Rossney <rrossney@gmail.com>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
-namespace Caching {
-	/// <summary>
-	/// An LRU Cache implementation.
-	/// </summary>
-	/// <typeparam name="K">The key type.</typeparam>
-	/// <typeparam name="V">The value type.</typeparam>
-	public class LRUCache<K, V> {
-		private readonly Dictionary<K, CacheNode> _entries;
-		private readonly int _capacity;
-		private CacheNode _head;
-		private CacheNode _tail;
-		private TimeSpan _ttl;
-		private Timer _timer;
-		private int _count;
-		private bool _refreshEntries;
+namespace LRUCache
+{
+    public class LRUCache<T> : ICollection<T>
+    {
 
-		/// <summary>
-		/// A least recently used cache with a time to live.
-		/// </summary>
-		/// <param name="capacity">
-		/// The number of entries the cache will hold
-		/// </param>
-		/// <param name="hours">The number of hours in the TTL</param>
-		/// <param name="minutes">The number of minutes in the TTL</param>
-		/// <param name="seconds">The number of seconds in the TTL</param>
-		/// <param name="refreshEntries">
-		/// Whether the TTL should be refreshed upon retrieval
-		/// </param>
-		public LRUCache(
-			int capacity,
-			int hours = 0,
-			int minutes = 0,
-			int seconds = 0,
-			bool refreshEntries = true) {
-			this._capacity = capacity;
-			this._entries = new Dictionary<K, CacheNode>(this._capacity);
-			this._head = null;
-			this._tail = null;
-			this._count = 0;
-			this._ttl = new TimeSpan(hours, minutes, seconds);
-			this._refreshEntries = refreshEntries;
-			if (this._ttl > TimeSpan.Zero) {
-				this._timer = new Timer(
-					Purge,
-					null,
-					(int)this._ttl.TotalMilliseconds,
-					5000); // 5 seconds
-			}
-		}
+        private const int _DefaultCapacity = 1000;
 
-		private class CacheNode {
-			public CacheNode Next { get; set; }
-			public CacheNode Prev { get; set; }
-			public K Key { get; set; }
-			public V Value { get; set; }
-			public DateTime LastAccessed { get; set; }
-		}
+        /// <summary>
+        /// The default Capacity that the LRUCache uses if none is provided in the constructor.
+        /// </summary>
+        public static int DefaultCapacity { get { return _DefaultCapacity;  } }
 
-		/// <summary>
-		/// Gets the current number of entries in the cache.
-		/// </summary>
-		public int Count
-		{
-			get { return _entries.Count; }
-		}
+        // The list of items in the cache.  New items are added to the end of the list;
+        // existing items are moved to the end when added; the items thus appear in
+        // the list in the order they were added/used, with the least recently used
+        // item being the first.  This is internal because the LRUCacheEnumerator
+        // needs to access it.
+        internal readonly LinkedList<T> List = new LinkedList<T>();
 
-		/// <summary>
-		/// Gets the maximum number of entries in the cache.
-		/// </summary>
-		public int Capacity
-		{
-			get { return this._capacity; }
-		}
+        // The index into the list, used by Add, Remove, and Contains.
+        private readonly Dictionary<T, LinkedListNode<T>> Index = 
+            new Dictionary<T, LinkedListNode<T>>();
+        
+        // Add, Clear, CopyTo, and Remove lock on this object to keep them threadsafe.
+        private readonly object Lock = new object();
 
-		/// <summary>
-		/// Gets whether or not the cache is full.
-		/// </summary>
-		public bool IsFull
-		{
-			get { return this._count == this._capacity; }
-		}
+        #region LRUCache Members
 
-		/// <summary>
-		/// Gets the item being stored.
-		/// </summary>
-		/// <returns>The cached value at the given key.</returns>
-		public bool TryGetValue(K key, out V value) {
-			CacheNode entry;
-			value = default(V);
+        /// <summary>
+        /// Initializes a new instance of the LRUCache class that is empty and has the default
+        /// capacity.
+        /// </summary>
+        public LRUCache() : this(_DefaultCapacity) {}
 
-			if (!this._entries.TryGetValue(key, out entry)) {
-				return false;
-			}
+        /// <summary>
+        /// Initializes a new instance of the LRUCache class that is empty and has the specified
+        /// initial capacity.
+        /// </summary>
+        /// <param name="capacity"></param>
+        public LRUCache(int capacity)
+        {
+            if (capacity < 0)
+            {
+                throw new InvalidOperationException("LRUCache capacity must be positive.");
+            }
+            Capacity = capacity;
+        }
 
-			if (this._refreshEntries) {
-				MoveToHead(entry);
-			}
+        /// <summary>
+        /// Occurs when the LRUCache is about to discard its oldest item
+        /// because its capacity has been reached and a new item is being added.  
+        /// </summary>
+        /// <remarks>The item has not been discarded yet, and thus is still contained in 
+        /// the Oldest property.</remarks>
+        public event EventHandler DiscardingOldestItem;
+        
+        /// <summary>
+        /// The maximum number of items that the LRUCache can contain without discarding
+        /// the oldest item when a new one is added.
+        /// </summary>
+        public int Capacity { get; private set; }
 
-			lock (entry) {
-				value = entry.Value;
-			}
+        /// <summary>
+        /// The oldest (i.e. least recently used) item in the LRUCache.
+        /// </summary>
+        public T Oldest
+        {
+            get
+            {
+                return List.First.Value;
+            }
+        }
 
-			return true;
-		}
+        #endregion
 
-		/// <summary>
-		/// Sets the item being stored to the supplied value.
-		/// </summary>
-		/// <param name="key">The cache key.</param>
-		/// <param name="value">The value to set in the cache.</param>
-		public void Add(K key, V value) {
-			TryAdd(key, value);
-		}
+        #region ICollection<T> Members
 
-		/// <summary>
-		/// Sets the item being stored to the supplied value.
-		/// </summary>
-		/// <param name="key">The cache key.</param>
-		/// <param name="value">The value to set in the cache.</param>
-		/// <returns>True if the set was successful. False otherwise.</returns>
-		public bool TryAdd(K key, V value) {
-			CacheNode entry;
-			if (!this._entries.TryGetValue(key, out entry)) {
-				// Add the entry
-				lock (this) {
-					if (!this._entries.TryGetValue(key, out entry)) {
-						if (this.IsFull) {
-							// Re-use the CacheNode entry
-							entry = this._tail;
-							_entries.Remove(this._tail.Key);
+        /// <summary>
+        /// Add an item to the LRUCache, making it the newest item (i.e. the last
+        /// item in the list).  If the item is already in the LRUCache, it is moved to the end
+        /// of the list and becomes the newest item in the LRUCache.
+        /// </summary>
+        /// <param name="item">The item that is being used.</param>
+        /// <remarks>If the LRUCache has a nonzero capacity, and it is at its capacity, this 
+        /// method will discard the oldest item, raising the DiscardingOldestItem event before 
+        /// it does so.</remarks>
+        public void Add(T item)
+        {
+            lock (Lock)
+            {
+                if (Index.ContainsKey(item))
+                {
+                    List.Remove(Index[item]);
+                    Index[item] = List.AddLast(item);
+                    return;
+                }
+                
+                if (Count >= Capacity && Capacity != 0)
+                {
+                    EventHandler h = DiscardingOldestItem;
+                    if (h != null)
+                    {
+                        h(this, new EventArgs());
+                    }
+                    Remove(Oldest);
+                }
+                Index.Add(item, List.AddLast(item));
 
-							// Reset with new values
-							entry.Key = key;
-							entry.Value = value;
-							entry.LastAccessed = DateTime.UtcNow;
+            }
 
-							// Next and Prev don't need to be reset.
-							// Move to front will do the right thing.
-						} else {
-							this._count++;
-							entry = new CacheNode() {
-								Key = key,
-								Value = value,
-								LastAccessed = DateTime.UtcNow
-							};
-						}
-						_entries.Add(key, entry);
-					}
-				}
-			} else {
-				// If V is a nonprimitive Value type (struct) then sets are
-				// not atomic, therefore we need to lock on the entry.
-				lock (entry) {
-					entry.Value = value;
-				}
-			}
+        }
 
-			MoveToHead(entry);
+        /// <summary>
+        /// Determines whether the LRUCache contains a specific value.
+        /// </summary>
+        /// <param name="item">The item to locate in the LRUCache.</param>
+        /// <returns>true if the item is in the LRUCache, otherwise false.</returns>
+        public bool Contains(T item)
+        {
+            return Index.ContainsKey(item);
+        }
 
-			// We don't need to lock here because two threads at this point
-			// can both happily perform this check and set, since they are
-			// both atomic.
-			if (null == this._tail) {
-				this._tail = this._head;
-			}
+        /// <summary>
+        /// Copies the elements of the LRUCache to an array, starting at a particular 
+        /// array index.
+        /// </summary>
+        /// <param name="array">The one-dimensional array that is the destination of
+        /// items copied from the LRUCache.</param>
+        /// <param name="arrayIndex">The index in array at which copying begins.</param>
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            lock (Lock)
+            {
+                foreach (T item in this)
+                {
+                    array[arrayIndex++] = item;
+                }
+            }
+        }
 
-			return true;
-		}
+        /// <summary>
+        /// Clear the contents of the LRUCache.
+        /// </summary>
+        public void Clear()
+        {
+            lock (Lock)
+            {
+                List.Clear();
+                Index.Clear();
+            }
+        }
 
-		/// <summary>
-		/// Removes the stored data.
-		/// </summary>
-		/// <returns>True if the removal was successful. False otherwise.</returns>
-		public bool Clear() {
-			lock (this) {
-				this._entries.Clear();
-				this._head = null;
-				this._tail = null;
-				return true;
-			}
-		}
+        /// <summary>
+        /// Gets the number of items contained in the LRUCache.
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return List.Count;
+            }
+        }
 
-		/// <summary>
-		/// Moved the provided entry to the head of the list.
-		/// </summary>
-		/// <param name="entry">The CacheNode entry to move up.</param>
-		private void MoveToHead(CacheNode entry) {
-			if (entry == this._head) {
-				return;
-			}
+        /// <summary>
+        /// Gets a value indicating whether the LRUCache is read-only.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
 
-			// We need to lock here because we're modifying the entry
-			// which is not thread safe by itself.
-			lock (this) {
-				RemoveFromLL(entry);
-				AddToHead(entry);
-			}
-		}
+        /// <summary>
+        /// Remove the specified item from the LRUCache.
+        /// </summary>
+        /// <param name="item">The item to remove from the LRUCache.</param>
+        /// <returns>true if the item was successfully removed from the LRUCache,
+        /// otherwise false.  This method also returns false if the item was not
+        /// found in the LRUCache.</returns>
+        public bool Remove(T item)
+        {
+            lock (Lock)
+            {
+                if (Index.ContainsKey(item))
+                {
+                    List.Remove(Index[item]);
+                    Index.Remove(item);
+                    return true;
+                }
+                return false;
+            }
+        }
 
-		private void Purge(object state) {
-			if (this._ttl <= TimeSpan.Zero || this._count == 0) {
-				return;
-			}
+        #endregion
 
-			lock (this) {
-				var current = this._tail;
-				var now = DateTime.UtcNow;
+        #region IEnumerable<T> Members
 
-				while (null != current
-					&& (now - current.LastAccessed) > this._ttl) {
-					Remove(current);
-					// Going backwards
-					current = current.Prev;
-				}
-			}
-		}
+        /// <summary>
+        /// Returns an enumerator that iterates through the items in the LRUCache.
+        /// </summary>
+        /// <returns>An IEnumerator object that may be used to iterate through the 
+        /// LRUCache./></returns>
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            LinkedListNode<T> node = List.First;
+            while (node != null)
+            {
+                yield return node.Value;
+                node = node.Next;
+            }
+        }
 
-		private void AddToHead(CacheNode entry) {
-			entry.Prev = null;
-			entry.Next = this._head;
+        #endregion
 
-			if (null != this._head) {
-				this._head.Prev = entry;
-			}
+        #region IEnumerable Members
 
-			this._head = entry;
-		}
+        /// <summary>
+        /// Returns an enumerator that iterates through the items in the LRUCache.
+        /// </summary>
+        /// <returns>An LRUCacheEnumerator object that may be used it iterate through the 
+        /// LRUCache./></returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new LRUCacheEnumerator<T>(this);
+        }
 
-		private void RemoveFromLL(CacheNode entry) {
-			var next = entry.Next;
-			var prev = entry.Prev;
-
-			if (null != next) {
-				next.Prev = entry.Prev;
-			}
-			if (null != prev) {
-				prev.Next = entry.Next;
-			}
-
-			if (this._head == entry) {
-				this._head = next;
-			}
-
-			if (this._tail == entry) {
-				this._tail = prev;
-			}
-		}
-
-		private void Remove(CacheNode entry) {
-			// Only to be called while locked from Purge
-			RemoveFromLL(entry);
-			_entries.Remove(entry.Key);
-			this._count--;
-		}
-	}
+        #endregion
+    }
 }

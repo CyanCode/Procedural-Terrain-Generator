@@ -7,8 +7,9 @@ public class Tile {
 	/// but the mesh data is still cached (if it was already computed)
 	/// </summary>
 	public bool isActive {
-		get { return isActive; }
-		set {
+		get {
+			return isActive;
+		} set {
 			isActive = value;
 			mesh.displayMesh = value;
 		}
@@ -18,9 +19,10 @@ public class Tile {
 	/// Sets the position of the tile in world space
 	/// </summary>
 	public Vector2 tilePosition {
-		get { return tilePosition; }
-		set {
-			this.mesh.GetMeshGameObject().transform.position = new Vector3(value.x, 0, value.y);
+		get {
+			return tilePosition;
+		} set {
+			this.mesh.gameobject.transform.position = new Vector3(value.x, 0, value.y);
 		}
 	}
 
@@ -38,22 +40,27 @@ public class Tile {
 		this.gain = gain;
 	}
 
-	public void CreateTerrainTile(int resolution, int zSize, int xSize) {
-		this.mesh = new TerrainMesh(resolution, zSize, xSize);
+	public void CreateTerrainTile(int resolution, float zSize, float xSize, float xPos, float zPos) {
+		mesh = new TerrainMesh(resolution, zSize, xSize);
+		mesh.CreateTerrainMesh(xPos, zPos);
 	}
 
 	public void ApplyNoise(FastNoise noise) {
-		Vector3[] vertices = mesh.vertices;
+		MeshFilter[] filters = mesh.filters;
 
-		for (int i = 0; i < vertices.Length; i++) {
-			float x = vertices[i].x;
-			float z = vertices[i].z;
-			float y = noise.GetNoise(x, z) * gain;
+		for (int i = 0; i < filters.Length; i++) {
+			Vector3[] vertices = filters[i].mesh.vertices;
 
-			vertices[i] = new Vector3(x, y, z);
+			for (int j = 0; j < vertices.Length; j++) {
+				Vector3 worldVert = filters[i].transform.TransformPoint(vertices[j]);
+				float y = noise.GetNoise(worldVert.x, worldVert.z) * gain;
+
+				vertices[j] = new Vector3(vertices[j].x, y, vertices[j].z);
+			}
+
+			filters[i].mesh.vertices = vertices;
+			filters[i].mesh.RecalculateNormals();
 		}
-
-		SetVertices(vertices);
 	}
 
 	public void ApplyNoise() {
@@ -66,9 +73,5 @@ public class Tile {
 		noise.SetFractalGain(0.5f);
 
 		ApplyNoise(noise);
-	}
-
-	private void SetVertices(Vector3[] vertices) {
-		mesh.vertices = vertices;
 	}
 }

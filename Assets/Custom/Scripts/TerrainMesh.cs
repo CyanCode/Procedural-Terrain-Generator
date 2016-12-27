@@ -1,126 +1,118 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
+/// <summary>
+/// TerrainMesh contains a collection of many smaller meshes 
+/// that are placed adjacent to each other. This allows many 
+/// different materials to be displayed at the same time.
+/// 
+/// TerrainMesh will statically batch internal meshes for
+/// increases in performance.
+/// </summary>
 public class TerrainMesh {
 	public bool displayMesh {
 		set {
 			displayMesh = value;
 
-			if (value) { //Remove meshObject from scene
-				if (meshObj) Object.Destroy(meshObj);
-			} else { //Add meshObject to scene again
-				GetMeshGameObject();
+			if (value) {
+				if (gameobject) gameobject.SetActive(false);
+			} else {
+				if (gameobject) gameobject.SetActive(true);
 			}
 		}
 	}
-	public Vector3[] vertices {
-		get {
-			return mesh.vertices;
-		}
-
-		set {
-			mesh.vertices = value;
+	public MeshFilter[] filters {
+		get { 
+			return gameobject.GetComponentsInChildren<MeshFilter>();
 		}
 	}
+	public GameObject gameobject;
 
-    private Mesh mesh;
-	private GameObject meshObj;
     private int resolution;
-    private int zSize;
-	private int xSize;
+    private float cellWidth;
+	private float cellLength;
 
-    public TerrainMesh(int resolution, int zSize, int xSize) {
+	/// <summary>
+	/// Creates a new TerrainMesh with the specified resolution, cell width, and cell length.
+	/// </summary>
+	/// <param name="resolution">
+	/// How many mesh cells to create along the length of the terrain. This is simply the resolution
+	/// of the whole mesh so therefore the total internal mesh cells will be the resolution squared.
+	/// </param>
+	/// <param name="cellWidth">The width of internal (individual) cells</param>
+	/// <param name="cellLength">The length of internal (individual) cells</param>
+	public TerrainMesh(int resolution, float cellWidth, float cellLength) {
         this.resolution = resolution >= 2 ? resolution : 2;
-        this.zSize = zSize;
-        this.xSize = xSize;
-    }
+        this.cellWidth = cellWidth;
+        this.cellLength = cellLength;
+	}
 
     public TerrainMesh() {
         resolution = 10;
-        zSize = 20;
-        xSize = 20;
-    }
+		cellWidth = 1f;
+		cellLength = 1f;
+	}
 
-	~TerrainMesh() {
-		if (meshObj) Object.Destroy(meshObj);
+	public void SetParentGameObject(GameObject parent) {
+		gameobject.transform.parent = parent.transform;
 	}
 
 	public void ApplyMaterial(Material mat) {
-		if (meshObj) meshObj.GetComponent<MeshRenderer>().material = mat;
+		if (gameobject) gameobject.GetComponent<MeshRenderer>().material = mat;
 	}
 
 	public void ApplyMaterial() {
 		ApplyMaterial(Resources.Load<Material>("Default"));
 	}
 
-    public GameObject GetMeshGameObject() {
-		if (!mesh) {
-			CreateMesh();
-		} if (!meshObj) { 
-			meshObj = new GameObject();
-			meshObj.AddComponent<MeshFilter>().mesh = mesh;
-			meshObj.AddComponent<MeshRenderer>();
-			meshObj.AddComponent<MeshCollider>();
+    public void CreateTerrainMesh(float xPos, float zPos) {
+		this.gameobject = new GameObject();
+		List<GameObject> cells = new List<GameObject>(resolution * resolution);
 
-			ApplyMaterial();
+		for (int i = 0; i < resolution; i++) { //Rows
+			for (int j = 0; j < resolution; j++) { //Cols
+				GameObject cell = new GameObject();
+				Mesh mesh = CreateSquare(cellWidth, cellLength);
+				
+				cell.AddComponent<MeshFilter>().mesh = mesh;
+				cell.AddComponent<MeshRenderer>();
+
+				cell.transform.position = new Vector3(cellWidth * i, 0f, cellLength * j);
+				cells.Add(cell);
+			}
 		}
 
-        return meshObj;
+		//Add each cell as child of container gameobject
+		cells.ForEach(cell => cell.transform.parent = this.gameobject.transform);
+
+		//Set x & z pos
+		this.gameobject.transform.position = new Vector3(xPos, 0f, zPos);
     }
-
-
 
 	/// <summary>
-	/// Creates a Mesh object with the specified resolution and 
-	/// x / z sizes. The created Mesh is cached.
+	/// Creates a square with the passed width and height.
+	/// Note: This does not recalculate normals.
 	/// </summary>
-    private void CreateMesh() {
-        this.mesh = new Mesh();
-        this.mesh.Clear();
+	/// <returns>A mesh that is a simple square</returns>
+	private Mesh CreateSquare(float width, float length) {
+		Mesh m = new Mesh();
+		width /= 2;
+		length /= 2;
 
-        float length = zSize;
-        float width = xSize;
-        int resX = resolution;
-        int resZ = resolution;
+		m.vertices = new Vector3[] {
+			new Vector3(-width, 0f, -length),
+			new Vector3(width, 0f, -length),
+			new Vector3(width, 0f, length),
+			new Vector3(-width, 0f, length)
+		};
+		m.uv = new Vector2[] {
+			new Vector2 (0, 0),
+			 new Vector2 (0, 1),
+			 new Vector2(1, 1),
+			 new Vector2 (1, 0)
+		};
+		m.triangles = new int[] { 2, 1, 0, 3, 2, 0 };
 
-        Vector3[] vertices = new Vector3[resX * resZ];
-        for (int z = 0; z < resZ; z++) {
-            float zPos = ((float)z / (resZ - 1) - .5f) * length;
-
-            for (int x = 0; x < resX; x++) {
-                float xPos = ((float)x / (resX - 1) - .5f) * width;
-                vertices[x + z * resX] = new Vector3(xPos, 0f, zPos);
-            }
-        }
-
-        Vector3[] normales = new Vector3[vertices.Length];
-        for (int n = 0; n < normales.Length; n++)
-            normales[n] = Vector3.up;
-
-        Vector2[] uvs = new Vector2[vertices.Length];
-        for (int v = 0; v < resZ; v++) {
-            for (int u = 0; u < resX; u++) {
-                uvs[u + v * resX] = new Vector2((float)u / (resX - 1), (float)v / (resZ - 1));
-            }
-        }
-
-        int nbFaces = (resX - 1) * (resZ - 1);
-        int[] triangles = new int[nbFaces * 6];
-        int t = 0;
-        for (int face = 0; face < nbFaces; face++) {
-            int i = face % (resX - 1) + (face / (resZ - 1) * resX);
-
-            triangles[t++] = i + resX;
-            triangles[t++] = i + 1;
-            triangles[t++] = i;
-
-            triangles[t++] = i + resX;
-            triangles[t++] = i + resX + 1;
-            triangles[t++] = i + 1;
-        }
-
-        mesh.vertices = vertices;
-        mesh.normals = normales;
-        mesh.uv = uvs;
-        mesh.triangles = triangles;
-    }
+		return m;
+	}
 }

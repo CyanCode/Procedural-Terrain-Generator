@@ -22,6 +22,7 @@ public class TilePool {
 	/// <param name="generationRadius">Radius to generate outward</param>
 	public TilePool(GameObject trackedObject, int generationRadius) {
 		this.trackedObject = trackedObject;
+		this.generationRadius = generationRadius;
 	}
 
 	/// <summary>
@@ -43,10 +44,10 @@ public class TilePool {
 	private void UpdateActiveTiles() {
 		List<Vector2> nearbyPositions = GetTilePositionsFromRadius();
 		List<Tile> toAdd = new List<Tile>();
-		
-		//Check if in cache
-		foreach (Tile t in oldTiles) {
 
+		//Check if in cache
+		for (int i = 0; i < nearbyPositions.Count; i++) {
+			//if (oldTiles.Contains()
 		}
 	}
 

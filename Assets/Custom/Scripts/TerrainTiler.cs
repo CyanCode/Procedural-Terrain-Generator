@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(MaterialSetting))]
 public class TerrainTiler : MonoBehaviour {
 	public bool generateOnStart = true;
 	public bool testNoise = false;
-	
+
+	public MaterialSetting MaterialSettings;
 	public int Resolution = 20;
 	public float TileSize = 0.5f;
 	public int gain = 25;

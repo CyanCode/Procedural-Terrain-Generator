@@ -55,17 +55,47 @@ public class TerrainMesh {
 		gameobject.transform.parent = parent.transform;
 	}
 
+	/// <summary>
+	/// Applies the passed material to the entire mesh
+	/// </summary>
+	/// <param name="mat">Material to apply</param>
 	public void ApplyMaterial(Material mat) {
 		if (gameobject) {
-			foreach (Transform obj in gameobject.GetComponentsInChildren<Transform>()) {
+			foreach (Transform obj in gameobject.GetComponentsInChildren<Transform>(true)) {
 				MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
 				if (renderer != null) renderer.material = mat;
 			}
 		}
 	}
 
+	/// <summary>
+	/// Applies the default (white) material to the entire mesh
+	/// </summary>
 	public void ApplyDefaultMaterial() {
 		ApplyMaterial(Resources.Load<Material>("Default"));
+	}
+
+	/// <summary>
+	/// Applies the passed material settings to the entire mesh. 
+	/// It's suggested that this method is called <b>after</b> applying 
+	/// noise to the mesh.
+	/// </summary>
+	/// <param name="settings">Settings to apply to the mesh</param>
+	public void ApplyMaterialSettings(MaterialSetting settings) {
+		foreach (MeshFilter filter in filters) {
+			MeshRenderer render = filter.gameObject.GetComponent<MeshRenderer>();
+
+			if (render != null) {
+				//Find normal angle
+				float dot = Vector3.Dot(filter.mesh.normals[0], Vector3.forward);
+				float angle = Mathf.Abs(dot) * 100;
+
+				//Find height
+				float height = filter.gameObject.transform.position.y;
+
+				render.material = settings.GetMaterial(height, angle);
+			}
+		}
 	}
 
 	/// <summary>

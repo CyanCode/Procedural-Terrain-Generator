@@ -46,8 +46,6 @@ public class Tile {
 	public void CreateTerrainTile(int resolution, float zSize, float xSize, float xPos, float zPos) {
 		mesh = new TerrainMesh(resolution, zSize, xSize);
 		mesh.CreateTerrainMesh(xPos, zPos);
-		//TODO: Calculate mesh materials
-		mesh.ApplyDefaultMaterial();
 	}
 
 	public void ApplyNoise(FastNoise noise) {

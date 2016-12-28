@@ -10,7 +10,6 @@ public class Tile {
 		get {
 			return isActive;
 		} set {
-			isActive = value;
 			mesh.displayMesh = value;
 		}
 	}
@@ -26,10 +25,14 @@ public class Tile {
 		}
 	}
 
+	/// <summary>
+	/// The internal mesh
+	/// </summary>
+	public TerrainMesh mesh;
+
 	private int seed;
 	private float gain;
-	private TerrainMesh mesh;
-
+	
 	public Tile(int seed, float gain) {
 		this.seed = seed;
 		this.gain = gain;
@@ -43,6 +46,8 @@ public class Tile {
 	public void CreateTerrainTile(int resolution, float zSize, float xSize, float xPos, float zPos) {
 		mesh = new TerrainMesh(resolution, zSize, xSize);
 		mesh.CreateTerrainMesh(xPos, zPos);
+		//TODO: Calculate mesh materials
+		mesh.ApplyDefaultMaterial();
 	}
 
 	public void ApplyNoise(FastNoise noise) {
@@ -60,6 +65,7 @@ public class Tile {
 
 			filters[i].mesh.vertices = vertices;
 			filters[i].mesh.RecalculateNormals();
+			filters[i].gameObject.AddComponent<MeshCollider>();
 		}
 	}
 

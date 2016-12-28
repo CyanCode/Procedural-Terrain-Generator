@@ -12,8 +12,6 @@ using System.Collections.Generic;
 public class TerrainMesh {
 	public bool displayMesh {
 		set {
-			displayMesh = value;
-
 			if (value) {
 				if (gameobject) gameobject.SetActive(false);
 			} else {
@@ -22,14 +20,14 @@ public class TerrainMesh {
 		}
 	}
 	public MeshFilter[] filters {
-		get { 
+		get {
 			return gameobject.GetComponentsInChildren<MeshFilter>();
 		}
 	}
 	public GameObject gameobject;
 
-    private int resolution;
-    private float cellWidth;
+	private int resolution;
+	private float cellWidth;
 	private float cellLength;
 
 	/// <summary>
@@ -42,13 +40,13 @@ public class TerrainMesh {
 	/// <param name="cellWidth">The width of internal (individual) cells</param>
 	/// <param name="cellLength">The length of internal (individual) cells</param>
 	public TerrainMesh(int resolution, float cellWidth, float cellLength) {
-        this.resolution = resolution >= 2 ? resolution : 2;
-        this.cellWidth = cellWidth;
-        this.cellLength = cellLength;
+		this.resolution = resolution >= 2 ? resolution : 2;
+		this.cellWidth = cellWidth;
+		this.cellLength = cellLength;
 	}
 
-    public TerrainMesh() {
-        resolution = 10;
+	public TerrainMesh() {
+		resolution = 10;
 		cellWidth = 1f;
 		cellLength = 1f;
 	}
@@ -58,14 +56,26 @@ public class TerrainMesh {
 	}
 
 	public void ApplyMaterial(Material mat) {
-		if (gameobject) gameobject.GetComponent<MeshRenderer>().material = mat;
+		if (gameobject) {
+			foreach (Transform obj in gameobject.GetComponentsInChildren<Transform>()) {
+				MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
+				if (renderer != null) renderer.material = mat;
+			}
+		}
 	}
 
-	public void ApplyMaterial() {
+	public void ApplyDefaultMaterial() {
 		ApplyMaterial(Resources.Load<Material>("Default"));
 	}
 
-    public void CreateTerrainMesh(float xPos, float zPos) {
+	/// <summary>
+	/// Creates a flat terrain mesh at the specified x and z positions. 
+	/// The mesh created follows the assigned resolution specified in the 
+	/// constructor.
+	/// </summary>
+	/// <param name="xPos">x position to create terrain at</param>
+	/// <param name="zPos">z position to create terrain at</param>
+	public void CreateTerrainMesh(float xPos, float zPos) {
 		this.gameobject = new GameObject();
 		List<GameObject> cells = new List<GameObject>(resolution * resolution);
 
@@ -73,7 +83,7 @@ public class TerrainMesh {
 			for (int j = 0; j < resolution; j++) { //Cols
 				GameObject cell = new GameObject();
 				Mesh mesh = CreateSquare(cellWidth, cellLength);
-				
+
 				cell.AddComponent<MeshFilter>().mesh = mesh;
 				cell.AddComponent<MeshRenderer>();
 
@@ -87,7 +97,51 @@ public class TerrainMesh {
 
 		//Set x & z pos
 		this.gameobject.transform.position = new Vector3(xPos, 0f, zPos);
-    }
+	}
+
+	public void CombineMeshes() {
+		//Collect all material types
+		Dictionary<string, Material> materialTypes = new Dictionary<string, Material>();
+
+		foreach (Transform child in gameobject.GetComponentsInChildren<Transform>()) {
+			MeshRenderer renderer = child.GetComponent<MeshRenderer>();
+			if (renderer != null && !materialTypes.ContainsKey(renderer.material.name))
+				materialTypes.Add(renderer.material.name, renderer.material);
+		}
+
+		//Collect meshes of the same type
+		List<Mesh> allMeshes = new List<Mesh>();
+		foreach (KeyValuePair<string, Material> mat in materialTypes) {
+			List<CombineInstance> toCombine = new List<CombineInstance>();
+			
+			foreach (Transform child in gameobject.GetComponentsInChildren<Transform>()) {
+				MeshRenderer renderer = child.GetComponent<MeshRenderer>();
+				
+				if (renderer != null && renderer.material.name == mat.Key) {
+					GameObject go = child.gameObject;
+					go.SetActive(false);
+
+					CombineInstance comb = new CombineInstance();
+					comb.mesh = go.GetComponent<MeshFilter>().mesh;
+					comb.transform = go.transform.localToWorldMatrix;
+					toCombine.Add(comb);
+				}
+			}
+
+			Mesh combinedMesh = new Mesh();
+			combinedMesh.CombineMeshes(toCombine.ToArray());
+
+			GameObject container = new GameObject();
+			container.AddComponent<MeshFilter>().mesh = combinedMesh;
+			container.AddComponent<MeshRenderer>();
+			container.transform.parent = gameobject.transform;
+			allMeshes.Add(combinedMesh);
+			//StaticBatchingUtility.Combine(toBatch.ToArray(), gameobject);
+			//Debug.Log("Batched " + toBatch.Count + " items");
+		}
+
+		Debug.Log("Meshes: " + allMeshes.Count);
+	}
 
 	/// <summary>
 	/// Creates a square with the passed width and height.

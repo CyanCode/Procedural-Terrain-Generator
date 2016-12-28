@@ -21,7 +21,7 @@ public class TerrainMesh {
 	}
 	public MeshFilter[] filters {
 		get {
-			return gameobject.GetComponentsInChildren<MeshFilter>();
+			return gameobject.GetComponentsInChildren<MeshFilter>(true);
 		}
 	}
 	public GameObject gameobject;
@@ -71,7 +71,8 @@ public class TerrainMesh {
 	/// <summary>
 	/// Creates a flat terrain mesh at the specified x and z positions. 
 	/// The mesh created follows the assigned resolution specified in the 
-	/// constructor.
+	/// constructor. This does not render the mesh, rather just creates it. 
+	/// To render, call the Render method.
 	/// </summary>
 	/// <param name="xPos">x position to create terrain at</param>
 	/// <param name="zPos">z position to create terrain at</param>
@@ -82,6 +83,7 @@ public class TerrainMesh {
 		for (int i = 0; i < resolution; i++) { //Rows
 			for (int j = 0; j < resolution; j++) { //Cols
 				GameObject cell = new GameObject();
+				cell.SetActive(false);
 				Mesh mesh = CreateSquare(cellWidth, cellLength);
 
 				cell.AddComponent<MeshFilter>().mesh = mesh;
@@ -99,22 +101,29 @@ public class TerrainMesh {
 		this.gameobject.transform.position = new Vector3(xPos, 0f, zPos);
 	}
 
-	public void CombineMeshes() {
+	/// <summary>
+	/// This takes all changes made to the mesh (creation, material application, noise, etc.) 
+	/// and combines them into a single mesh. The combined mesh increases performance and is 
+	/// made active, rendering it in the scene.
+	/// 
+	/// Old individual meshes are discarded in this process, freeing memory. Because of this,
+	/// this operation cannot be undone.
+	/// </summary>
+	public void Render() {
 		//Collect all material types
 		Dictionary<string, Material> materialTypes = new Dictionary<string, Material>();
 
-		foreach (Transform child in gameobject.GetComponentsInChildren<Transform>()) {
+		foreach (Transform child in gameobject.GetComponentsInChildren<Transform>(true)) {
 			MeshRenderer renderer = child.GetComponent<MeshRenderer>();
 			if (renderer != null && !materialTypes.ContainsKey(renderer.material.name))
 				materialTypes.Add(renderer.material.name, renderer.material);
 		}
 
 		//Collect meshes of the same type
-		List<Mesh> allMeshes = new List<Mesh>();
 		foreach (KeyValuePair<string, Material> mat in materialTypes) {
 			List<CombineInstance> toCombine = new List<CombineInstance>();
 			
-			foreach (Transform child in gameobject.GetComponentsInChildren<Transform>()) {
+			foreach (Transform child in gameobject.GetComponentsInChildren<Transform>(true)) {
 				MeshRenderer renderer = child.GetComponent<MeshRenderer>();
 				
 				if (renderer != null && renderer.material.name == mat.Key) {
@@ -128,19 +137,18 @@ public class TerrainMesh {
 				}
 			}
 
+			//Combine
 			Mesh combinedMesh = new Mesh();
 			combinedMesh.CombineMeshes(toCombine.ToArray());
 
+			//Add to container G.O.
 			GameObject container = new GameObject();
+			container.SetActive(true);
 			container.AddComponent<MeshFilter>().mesh = combinedMesh;
-			container.AddComponent<MeshRenderer>();
+			container.AddComponent<MeshCollider>();
+			container.AddComponent<MeshRenderer>().material = mat.Value;
 			container.transform.parent = gameobject.transform;
-			allMeshes.Add(combinedMesh);
-			//StaticBatchingUtility.Combine(toBatch.ToArray(), gameobject);
-			//Debug.Log("Batched " + toBatch.Count + " items");
 		}
-
-		Debug.Log("Meshes: " + allMeshes.Count);
 	}
 
 	/// <summary>

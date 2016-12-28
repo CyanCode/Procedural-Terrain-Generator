@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class TilePool {
 	private TerrainTiler Tiler;
 	private GameObject TrackedObject;
-	private int GenerationRadius = 3;
+	private int GenerationRadius = 4;
 	private TileCache Cache = new TileCache(CACHE_SIZE);
 
 	private const int CACHE_SIZE = 16;
@@ -43,7 +43,7 @@ public class TilePool {
 
 				t.CreateTerrainTile(Tiler.Resolution, Tiler.TileSize, Tiler.TileSize, meshSize * pos.x, meshSize * pos.y);
 				t.ApplyNoise();
-				t.mesh.CombineMeshes();
+				t.mesh.Render();
 				toAdd.Add(t);
 			}
 		}

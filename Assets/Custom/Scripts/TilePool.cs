@@ -39,12 +39,12 @@ public class TilePool {
 			if (cached != null) { //Pull from cache
 				toAdd.Add(cached);
 			} else { //Generate
-				Tile t = new Tile(Tiler.gain);
+				Tile t = new Tile(Tiler.gain, Tiler.Resolution, Tiler.TileSize, Tiler.TileSize);
 
-				t.CreateTerrainTile(Tiler.Resolution, Tiler.TileSize, Tiler.TileSize, meshSize * pos.x, meshSize * pos.y);
+				t.CreateTerrainTile(meshSize * pos.x, meshSize * pos.y);
 				t.ApplyNoise();
-				t.mesh.ApplyMaterialSettings(Tiler.MaterialSettings);
-				t.mesh.Render();
+				t.ApplyMaterialSettings(Tiler.MaterialSettings);
+				t.Render();
 				toAdd.Add(t);
 			}
 		}

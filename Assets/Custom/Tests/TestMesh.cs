@@ -23,17 +23,17 @@ public class TestMesh : MonoBehaviour {
 	}
 
 	private void Plane() {
-		TerrainMesh tm = new TerrainMesh(10, 0.5f, 0.5f);
-		tm.CreateTerrainMesh(0f, 0f);
+		Tile t = new Tile(25, 20, .5f, .5f);
+		t.CreateTerrainTile(0, 0);
+		t.Render();
 	}
 
 	private void PerlinPlane() {
 		var sw = new System.Diagnostics.Stopwatch();
 		sw.Start();
 
-		Tile t = new Tile(25);
-		//t.CreateTerrainTile(10, .5f, .5f, 0, 0);
-		t.CreateTerrainTile(20, .5f, .5f, 0, 0);
+		Tile t = new Tile(25, 20, .5f, .5f);
+		t.CreateTerrainTile(0, 0);
 		t.ApplyNoise();
 
 		sw.Stop();

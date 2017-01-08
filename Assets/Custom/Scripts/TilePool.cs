@@ -1,55 +1,61 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Threading;
+using System.Collections;
 
 /// <summary>
 /// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
 /// </summary>
-public class TilePool {
-	private TerrainTiler Tiler;
-	private GameObject TrackedObject;
-	private int GenerationRadius = 3;
+public class TilePool: MonoBehaviour {
+	public TerrainSettings Settings;
+
 	private TileCache Cache = new TileCache(CACHE_SIZE);
+	private int queuedTiles = 0;
+	private const int CACHE_SIZE = 30;
 
-	private const int CACHE_SIZE = 16;
-
-	/// <summary>
-	/// Creates a new TilePool instance with a GameObject that is used 
-	/// to keep track of where to generate new tiles
-	/// </summary>
-	/// <param name="trackedObject">GameObject to generate around</param>
-	/// <param name="generationRadius">Radius to generate outward</param>
-	public TilePool(GameObject trackedObject, TerrainTiler tiler, int generationRadius = 4) {
-		this.TrackedObject = trackedObject;
-		this.GenerationRadius = generationRadius;
-		this.Tiler = tiler;
+	void Update() {
+		if (queuedTiles < 1) {
+			UpdateTiles();
+		}
 	}
 
 	/// <summary>
-	/// Updates tiles that are surrounding the tracked GameObject
+	/// Updates tiles that are surrounding the tracked GameObject 
+	/// asynchronously
 	/// </summary>
 	public void UpdateTiles() {
-		float meshSize = Tiler.TileSize * Tiler.Resolution;
-
 		List<Vector2> nearbyPositions = GetTilePositionsFromRadius();
-		List<Tile> toAdd = new List<Tile>();
+		List<Vector2> newPositions = Cache.GetNewTilePositions(nearbyPositions);
 
-		foreach (Vector2 pos in nearbyPositions) {
-			Tile cached = Cache.GetCachedTileAtPosition(pos);
+		//Add new positions
+		foreach (Vector2 pos in newPositions) {
+			TerrainTile cached = Cache.GetCachedTileAtPosition(pos);
 
-			if (cached != null) { //Pull from cache
-				toAdd.Add(cached);
-			} else { //Generate
-				Tile t = new Tile(Tiler.gain, Tiler.Resolution, Tiler.TileSize, Tiler.TileSize);
-
-				t.CreateTerrainTile(meshSize * pos.x, meshSize * pos.y);
-				t.ApplyNoise();
-				t.ApplyMaterialSettings(Tiler.MaterialSettings);
-				t.Render();
-				toAdd.Add(t);
+			//Attempt to pull from cache, generate if not available
+			if (cached != null) {
+				Cache.AddActiveTile(cached);
+			} else {
+				AddTileAsync(pos);
 			}
 		}
-		
-		Cache.UpdateActiveTiles(toAdd);
+
+		//Remove old positions
+		for (int i = 0; i < Cache.ActiveTiles.Count; i++) {
+			bool found = false;
+
+			foreach (Vector2 nearby in nearbyPositions) {
+				if (Cache.ActiveTiles[i].Position == nearby) { //Position found, ignore
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				Cache.CacheTile(Cache.ActiveTiles[i]);
+				Cache.ActiveTiles.RemoveAt(i);
+				i--;
+			}
+		}
 	}
 
 	/// <summary>
@@ -57,16 +63,39 @@ public class TilePool {
 	/// </summary>
 	/// <returns>Tile x & z positions to add to world</returns>
 	private List<Vector2> GetTilePositionsFromRadius() {
-		Vector3 trackedPos = TrackedObject.transform.position;
-		List<Vector2> result = new List<Vector2>();
+		int xPos = Mathf.FloorToInt(Settings.TrackedObject.transform.position.x / Settings.Length);
+		int zPos = Mathf.FloorToInt(Settings.TrackedObject.transform.position.z / Settings.Length);
+		List<Vector2> result = new List<Vector2>(25);
 
-		for (var zCircle = -GenerationRadius; zCircle <= GenerationRadius; zCircle++) {
-			for (var xCircle = -GenerationRadius; xCircle <= GenerationRadius; xCircle++) {
-				if (xCircle * xCircle + zCircle * zCircle < GenerationRadius * GenerationRadius)
-					result.Add(new Vector2(trackedPos.x + xCircle, trackedPos.z + zCircle));
+		for (var zCircle = -Settings.GenerationRadius; zCircle <= Settings.GenerationRadius; zCircle++) {
+			for (var xCircle = -Settings.GenerationRadius; xCircle <= Settings.GenerationRadius; xCircle++) {
+				if (xCircle * xCircle + zCircle * zCircle < Settings.GenerationRadius * Settings.GenerationRadius)
+					result.Add(new Vector2(xPos + xCircle, zPos + zCircle));
 			}
 		}
-		
+
 		return result;
+	}
+
+	/// <summary>
+	/// Adds a tile at the passed position asynchronously
+	/// </summary>
+	/// <param name="pos">Position to add tile at</param>
+	private void AddTileAsync(Vector2 pos) {
+		TerrainTile tile = new TerrainTile(pos, Settings);
+		queuedTiles++;
+
+		ThreadPool.QueueUserWorkItem((obj) => {
+			float[,] heights = tile.GetNoiseHeights();
+
+			UnityMainThreadDispatcher.Instance().Enqueue(() => {
+				tile.CreateTerrain();
+				tile.ApplyNoise(heights);
+				tile.ApplyTextures();
+				Cache.AddActiveTile(tile);
+
+				queuedTiles--;
+			});
+		});
 	}
 }

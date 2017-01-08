@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 
 public class TileCache {
+	public List<TerrainTile> ActiveTiles { get; private set; }
+
 	private int CacheCapacity;
-	private List<Tile> ActiveTiles = new List<Tile>();
-	private LinkedList<Tile> CachedTiles = new LinkedList<Tile>();
+	private LinkedList<TerrainTile> CachedTiles = new LinkedList<TerrainTile>();
 
 	public TileCache(int cacheCapacity = 20) {
 		CacheCapacity = cacheCapacity;
+		ActiveTiles = new List<TerrainTile>();
 	}
 
 	/// <summary>
@@ -19,42 +21,74 @@ public class TileCache {
 	/// Returns the cached tile if it exists in the cache. If the tile
 	/// is not cached, returns null.
 	/// </returns>
-	public Tile GetCachedTileAtPosition(Vector2 position) {
-		LinkedListNode<Tile> node = CachedTiles.First;
+	public TerrainTile GetCachedTileAtPosition(Vector2 position) {
+		LinkedListNode<TerrainTile> node = CachedTiles.First;
 
 		while (node != null) {
-			LinkedListNode<Tile> next = node.Next;
+			LinkedListNode<TerrainTile> next = node.Next;
 
-			if (node.Value.tilePosition == position) { //Move Tile to front of cache
-				CachedTiles.Remove(next);
-				CachedTiles.AddFirst(next);
+			if (node.Value.Position == position) { //Move Tile to front of cache
+				CachedTiles.Remove(node);
+				CachedTiles.AddFirst(node);
 
 				return node.Value;
 			}
 
-			node = next;
+			node = node.Next;
 		}
 
 		return null;
 	}
-	
+
 	/// <summary>
-	/// Updates the active tiles internally. Old tiles which were not added 
-	/// to the update are sent to the cache and the cache size is enforced.
+	/// Checks if there is a tile active at the passed Vector2 position
 	/// </summary>
-	/// <param name="tiles">Tiles to make active</param>
-	public void UpdateActiveTiles(IEnumerable<Tile> tiles) {
-		foreach (Tile t in tiles) { //Cache old tiles
-			if (!ActiveTiles.Contains(t)) {
-				t.isActive = false;
-				CachedTiles.AddFirst(t);
-			} else {
-				t.isActive = true;
-			}
+	/// <param name="position">Position to look for</param>
+	/// <returns>True if tile at position was found, false otherwise</returns>
+	public bool TileActiveAtPosition(Vector2 position) {
+		foreach (TerrainTile t in ActiveTiles) {
+			if (t.Position == position)
+				return true;
 		}
 
+		return false;
+	}
+
+	/// <summary>
+	/// Finds all of the tile positions that aren't currently active in the scene 
+	/// out of the passed positions collection.
+	/// </summary>
+	/// <param name="positions">Positions to compare</param>
+	/// <returns>New positions to add</returns>
+	public List<Vector2> GetNewTilePositions(List<Vector2> positions) {
+		List<Vector2> newPositions = new List<Vector2>(ActiveTiles.Count);
+
+		foreach (Vector2 position in positions)  {
+			bool matched = false;
+
+			foreach (TerrainTile t in ActiveTiles) {
+				if (t.Position == position) {
+					matched = true;
+					break;
+				}
+			}
+
+			if (!matched)
+				newPositions.Add(position);
+		}
+
+		return newPositions;
+	}
+
+	public void CacheTile(TerrainTile tile) {
+		tile.Active = false;
+		CachedTiles.AddFirst(tile);
 		EnforceCacheSize();
-		ActiveTiles = new List<Tile>(tiles);
+	}
+
+	public void AddActiveTile(TerrainTile tile) {
+		ActiveTiles.Add(tile);
+		tile.Active = true;
 	}
 
 	/// <summary>
@@ -65,6 +99,7 @@ public class TileCache {
 		int removalAmount = CachedTiles.Count - CacheCapacity;
 
 		while (removalAmount > 0) {
+			CachedTiles.Last.Value.DestroyTerrain();
 			CachedTiles.RemoveLast();
 			removalAmount--;
 		}

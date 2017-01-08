@@ -1,17 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class TestMesh : MonoBehaviour {
 	public bool testSquare = true;
 	public bool testPlane = true;
 	public bool testPerlinPlane = true;
+	public bool testTerrain = true;
 	public bool testTiling = true;
-	
+
+	public Texture2D[] Textures;
+
 	void Start () {
 		if (testSquare) Square();
 		if (testPlane) Plane();
 		if (testPerlinPlane) PerlinPlane();
 		if (testTiling) Tiling();
+		if (testTerrain) Terrain();
 	}
 
 	private void Square() {
@@ -39,6 +42,14 @@ public class TestMesh : MonoBehaviour {
 		sw.Stop();
 		Debug.Log("Plane generation time in milliseconds: " + sw.ElapsedMilliseconds);
 		Debug.Log("In seconds: " + sw.Elapsed.Seconds);
+	}
+
+	private void Terrain() {
+		GameObject toTrack = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		toTrack.transform.position = new Vector3(0, 0, 0);
+
+
+		//new TilePool(toTrack, null).UpdateTiles2(Textures);
 	}
 
 	private void Tiling() {

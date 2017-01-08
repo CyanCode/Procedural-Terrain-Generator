@@ -117,6 +117,8 @@ public class Tile {
 		}
 	}
 
+
+
 	/// <summary>
 	/// Creates a flat terrain mesh at the specified x and z positions. 
 	/// The mesh created follows the assigned resolution specified in the 
@@ -148,6 +150,42 @@ public class Tile {
 
 		//Set x & z pos
 		this.gameobject.transform.position = new Vector3(xPos, 0f, zPos);
+	}
+	
+	/// <summary>
+	/// Applies the specified noise settings to the mesh.
+	/// </summary>
+	/// <param name="noise">FastNoise object to apply</param>
+	public void ApplyNoise(FastNoise noise) {
+		for (int i = 0; i < filters.Length; i++) {
+			Vector3[] vertices = filters[i].mesh.vertices;
+
+			for (int j = 0; j < vertices.Length; j++) {
+				Vector3 worldVert = filters[i].transform.TransformPoint(vertices[j]);
+				float y = noise.GetNoise(worldVert.x, worldVert.z) * Gain;
+
+				vertices[j] = new Vector3(vertices[j].x, y, vertices[j].z);
+			}
+
+			filters[i].mesh.vertices = vertices;
+			filters[i].mesh.RecalculateNormals();
+			filters[i].gameObject.AddComponent<MeshCollider>();
+		}
+	}
+
+	/// <summary>
+	/// Applies default noise settings to the mesh.
+	/// </summary>
+	public void ApplyNoise() {
+		FastNoise noise = new FastNoise(Seed);
+
+		noise.SetNoiseType(FastNoise.NoiseType.SimplexFractal);
+		noise.SetFrequency(.004f);
+		noise.SetFractalOctaves(5);
+		noise.SetFractalLacunarity(2);
+		noise.SetFractalGain(0.5f);
+
+		ApplyNoise(noise);
 	}
 
 	/// <summary>
@@ -198,42 +236,6 @@ public class Tile {
 			container.AddComponent<MeshRenderer>().material = mat.Value;
 			container.transform.parent = gameobject.transform;
 		}
-	}
-
-	/// <summary>
-	/// Applies the specified noise settings to the mesh.
-	/// </summary>
-	/// <param name="noise">FastNoise object to apply</param>
-	public void ApplyNoise(FastNoise noise) {
-		for (int i = 0; i < filters.Length; i++) {
-			Vector3[] vertices = filters[i].mesh.vertices;
-
-			for (int j = 0; j < vertices.Length; j++) {
-				Vector3 worldVert = filters[i].transform.TransformPoint(vertices[j]);
-				float y = noise.GetNoise(worldVert.x, worldVert.z) * Gain;
-
-				vertices[j] = new Vector3(vertices[j].x, y, vertices[j].z);
-			}
-
-			filters[i].mesh.vertices = vertices;
-			filters[i].mesh.RecalculateNormals();
-			filters[i].gameObject.AddComponent<MeshCollider>();
-		}
-	}
-
-	/// <summary>
-	/// Applies default noise settings to the mesh.
-	/// </summary>
-	public void ApplyNoise() {
-		FastNoise noise = new FastNoise(Seed);
-
-		noise.SetNoiseType(FastNoise.NoiseType.SimplexFractal);
-		noise.SetFrequency(.004f);
-		noise.SetFractalOctaves(5);
-		noise.SetFractalLacunarity(2);
-		noise.SetFractalGain(0.5f);
-
-		ApplyNoise(noise);
 	}
 
 	/// <summary>

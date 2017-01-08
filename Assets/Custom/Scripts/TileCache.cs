@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// A cache that handles individual TerrainTile instances. This class 
+/// handles the activation, deactivation, removal, and caching of 
+/// TerrainTiles.
+/// </summary>
 public class TileCache {
 	public List<TerrainTile> ActiveTiles { get; private set; }
 
@@ -80,12 +85,23 @@ public class TileCache {
 		return newPositions;
 	}
 
+	/// <summary>
+	/// Adds the passed TerrainTile to the tile cache. This 
+	/// deactivates the passed tile and will no longer be rendered 
+	/// until pulled from the cache.
+	/// </summary>
+	/// <param name="tile">Tile to cache</param>
 	public void CacheTile(TerrainTile tile) {
 		tile.Active = false;
 		CachedTiles.AddFirst(tile);
 		EnforceCacheSize();
 	}
 
+	/// <summary>
+	/// Adds the passed tile to the active tiles list. If 
+	/// the passed tile is not active, it is made active.
+	/// </summary>
+	/// <param name="tile">Tile to activate</param>
 	public void AddActiveTile(TerrainTile tile) {
 		ActiveTiles.Add(tile);
 		tile.Active = true;

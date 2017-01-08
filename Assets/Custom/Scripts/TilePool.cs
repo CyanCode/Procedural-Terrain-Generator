@@ -13,6 +13,10 @@ public class TilePool: MonoBehaviour {
 	private int queuedTiles = 0;
 	private const int CACHE_SIZE = 30;
 
+	/// <summary>
+	/// Updates tiles to update when the current queue of tiles 
+	/// has finished generating.
+	/// </summary>
 	void Update() {
 		if (queuedTiles < 1) {
 			UpdateTiles();

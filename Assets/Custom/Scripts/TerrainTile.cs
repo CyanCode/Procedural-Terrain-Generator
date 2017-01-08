@@ -5,6 +5,11 @@ using CoherentNoise;
 using CoherentNoise.Generation;
 using CoherentNoise.Generation.Combination;
 
+/// <summary>
+/// TerrainTile represents a Terrain gameobject in the scene. 
+/// This class handles the instantiation of Terrain, noise application, 
+/// position, and texture application.
+/// </summary>
 public class TerrainTile {
 	public Terrain Terrain { get; private set; }
 	public Vector2 Position { get; private set; }
@@ -16,12 +21,17 @@ public class TerrainTile {
 
 	private TerrainSettings Settings;
 	private GameObject TerrainObject;
-
+	
 	public TerrainTile(Vector2 position, TerrainSettings settings) {
 		this.Position = position;
 		this.Settings = settings;
 	}
 
+	/// <summary>
+	/// Internally creates a Terrain gameobject. This 
+	/// does not apply any noise to the Terrain and cannot be called 
+	/// off of the main thread.
+	/// </summary>
 	public void CreateTerrain() {
 		TerrainData data = new TerrainData();
 		data.heightmapResolution = Settings.HeightmapResolution;
@@ -119,6 +129,10 @@ public class TerrainTile {
 		Object.Destroy(TerrainObject);
 	}
 
+	/// <summary>
+	/// Applies the texture settings found in the TerrainSettings instance 
+	/// to the Terrain gameobject.
+	/// </summary>
 	public void ApplyTextures() {
 		// Get a reference to the terrain data
 		TerrainData terrainData = Terrain.terrainData;

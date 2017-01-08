@@ -19,7 +19,8 @@ public class TileCache {
 
 	/// <summary>
 	/// Finds the tile at the passed position in the cache and returns it. 
-	/// Once found the tile is moved to the front of the LRU Cache
+	/// Once found the tile is removed from the cache as cached tiles should 
+	/// not be active in the scene.
 	/// </summary>
 	/// <param name="position">Position to search for</param>
 	/// <returns>
@@ -34,7 +35,6 @@ public class TileCache {
 
 			if (node.Value.Position == position) { //Move Tile to front of cache
 				CachedTiles.Remove(node);
-				CachedTiles.AddFirst(node);
 
 				return node.Value;
 			}
@@ -103,8 +103,8 @@ public class TileCache {
 	/// </summary>
 	/// <param name="tile">Tile to activate</param>
 	public void AddActiveTile(TerrainTile tile) {
-		ActiveTiles.Add(tile);
 		tile.Active = true;
+		ActiveTiles.Add(tile);
 	}
 
 	/// <summary>

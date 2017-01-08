@@ -57,7 +57,6 @@ public class TerrainTile {
 			for (var xRes = 0; xRes < Settings.HeightmapResolution; xRes++) {
 				var xCoordinate = Position.x + (float)xRes / (Settings.HeightmapResolution - 1);
 				var zCoordinate = Position.y + (float)zRes / (Settings.HeightmapResolution - 1);
-			//	var height = (gen.GetValue(xCoordinate, zCoordinate, 0f) + 2f) / 2.5f;
 				var height = gen.GetValue(xCoordinate, zCoordinate, 0f);
 
 				heightmap[zRes, xRes] = height;

@@ -31,18 +31,6 @@ public class TilePool: MonoBehaviour {
 		List<Vector2> nearbyPositions = GetTilePositionsFromRadius();
 		List<Vector2> newPositions = Cache.GetNewTilePositions(nearbyPositions);
 
-		//Add new positions
-		foreach (Vector2 pos in newPositions) {
-			TerrainTile cached = Cache.GetCachedTileAtPosition(pos);
-
-			//Attempt to pull from cache, generate if not available
-			if (cached != null) {
-				Cache.AddActiveTile(cached);
-			} else {
-				AddTileAsync(pos);
-			}
-		}
-
 		//Remove old positions
 		for (int i = 0; i < Cache.ActiveTiles.Count; i++) {
 			bool found = false;
@@ -58,6 +46,18 @@ public class TilePool: MonoBehaviour {
 				Cache.CacheTile(Cache.ActiveTiles[i]);
 				Cache.ActiveTiles.RemoveAt(i);
 				i--;
+			}
+		}
+
+		//Add new positions
+		foreach (Vector2 pos in newPositions) {
+			TerrainTile cached = Cache.GetCachedTileAtPosition(pos);
+
+			//Attempt to pull from cache, generate if not available
+			if (cached != null) {
+				Cache.AddActiveTile(cached);
+			} else {
+				AddTileAsync(pos);
 			}
 		}
 	}

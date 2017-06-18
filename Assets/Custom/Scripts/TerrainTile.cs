@@ -2,7 +2,6 @@
 using System.Linq;
 using CoherentNoise.Generation.Fractal;
 using CoherentNoise;
-using CoherentNoise.Generation;
 using CoherentNoise.Generation.Combination;
 
 /// <summary>
@@ -23,8 +22,8 @@ public class TerrainTile {
 	private GameObject TerrainObject;
 	
 	public TerrainTile(Vector2 position, TerrainSettings settings) {
-		this.Position = position;
-		this.Settings = settings;
+		Position = position;
+		Settings = settings;
 	}
 
 	/// <summary>
@@ -60,6 +59,7 @@ public class TerrainTile {
 				var height = gen.GetValue(xCoordinate, zCoordinate, 0f);
 
 				heightmap[zRes, xRes] = height;
+				PlaceObjectAtPosition(new Vector3(xCoordinate, height, zCoordinate));
 			}
 		}
 
@@ -117,6 +117,30 @@ public class TerrainTile {
 		TerrainData data = Terrain.terrainData;
 		data.SetHeights(0, 0, heights);
 		Terrain.Flush();
+	}
+
+	/// <summary>
+	/// Position of the object placed on the terrain.
+	/// </summary>
+	private int ObjectPosition = 0;
+
+	/// <summary>
+	/// Chooses an object to place at the passed position by 
+	/// cycling through object possibilities and placing one if 
+	/// it can be placed.
+	/// </summary>
+	/// <param name="pos">Position to place object</param>
+	void PlaceObjectAtPosition(Vector3 pos) {
+		if (Settings.Objects.Length > 0) {
+			UnityMainThreadDispatcher.Instance().Enqueue(() => {
+				if (ObjectPosition >= Settings.Objects.Length) {
+					ObjectPosition = 0;
+				}
+
+				Settings.Objects[ObjectPosition].PlaceAtPosition(pos);
+				ObjectPosition++;
+			});
+		}
 	}
 
 	/// <summary>

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Threading;
-using System.Collections;
 
 /// <summary>
 /// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
@@ -21,6 +20,21 @@ public class TilePool: MonoBehaviour {
 		if (queuedTiles < 1) {
 			UpdateTiles();
 		}
+	}
+
+	public static List<Vector2> GetTilePositionsFromRadius(int radius, Vector3 position, int length) {
+		int xPos = Mathf.FloorToInt(position.x / length);
+		int zPos = Mathf.FloorToInt(position.z / length);
+		List<Vector2> result = new List<Vector2>(25);
+
+		for (var zCircle = -radius; zCircle <= radius; zCircle++) {
+			for (var xCircle = -radius; xCircle <= radius; xCircle++) {
+				if (xCircle * xCircle + zCircle * zCircle < radius * radius)
+					result.Add(new Vector2(xPos + xCircle, zPos + zCircle));
+			}
+		}
+
+		return result;
 	}
 
 	/// <summary>
@@ -67,18 +81,7 @@ public class TilePool: MonoBehaviour {
 	/// </summary>
 	/// <returns>Tile x & z positions to add to world</returns>
 	private List<Vector2> GetTilePositionsFromRadius() {
-		int xPos = Mathf.FloorToInt(Settings.TrackedObject.transform.position.x / Settings.Length);
-		int zPos = Mathf.FloorToInt(Settings.TrackedObject.transform.position.z / Settings.Length);
-		List<Vector2> result = new List<Vector2>(25);
-
-		for (var zCircle = -Settings.GenerationRadius; zCircle <= Settings.GenerationRadius; zCircle++) {
-			for (var xCircle = -Settings.GenerationRadius; xCircle <= Settings.GenerationRadius; xCircle++) {
-				if (xCircle * xCircle + zCircle * zCircle < Settings.GenerationRadius * Settings.GenerationRadius)
-					result.Add(new Vector2(xPos + xCircle, zPos + zCircle));
-			}
-		}
-
-		return result;
+		return GetTilePositionsFromRadius(Settings.GenerationRadius, Settings.TrackedObject.transform.position, Settings.Length);
 	}
 
 	/// <summary>

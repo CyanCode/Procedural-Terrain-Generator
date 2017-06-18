@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 [CustomEditor(typeof(TerrainSettings))]
@@ -38,6 +37,7 @@ public class TerrainSettingsEditor: Editor {
 
 				break;
 			case TerrainSettings.ToolbarOptions.Noise:
+				EditorGUILayout.Space(); 
 				if (GUILayout.Button("Open Noise Editor")) {
 					//Open editor
 				}

@@ -32,9 +32,6 @@ public class TerrainSettings: MonoBehaviour {
 
 	public TerrainObject[] Objects;
 
-	//Noise Tab
-	public EditorNoiseModule RootNoiseModule;
-
 	void Start() {
 		//Set seed for RNG
 		Random.InitState(GenerationSeed);

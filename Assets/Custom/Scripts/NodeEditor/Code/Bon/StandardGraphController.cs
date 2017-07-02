@@ -31,7 +31,6 @@ namespace Assets.Code.Bon
 
 		public void OnCreate(Graph graph)
 		{
-
 			graph.UpdateNodes();
 		}
 

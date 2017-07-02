@@ -2,9 +2,7 @@
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Socket;
 
-namespace Assets.Code.Bon.Nodes
-{
-	public abstract class AbstractNumberNode : Node, INumberSampler
+public abstract class AbstractNumberNode : Node, INumberSampler
 	{
 
 		[NonSerialized] protected OutputSocket _outSocket;
@@ -26,5 +24,12 @@ namespace Assets.Code.Bon.Nodes
 			return node.GetNumber(socket.GetConnectedSocket(), x, y, z, seed);
 		}
 
+		public static float GetInputNumber(InputSocket socket) 
+		{
+			if (socket.Type != typeof(AbstractNumberNode)) return float.NaN;
+			if (socket.IsInDirectInputMode()) return socket.GetDirectInputNumber();
+
+			AbstractNumberNode node = (AbstractNumberNode)socket.GetConnectedSocket().Parent;
+			return node.GetNumber(socket.GetConnectedSocket(), 0, 0, 0, 0);
+		}
 	}
-}

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using Assets.Code.Bon.Interface;
 using Assets.Code.Bon.Socket;
+using Assets.Code.Bon;
 
-namespace Assets.Code.Bon.Nodes
-{
-	public abstract class AbstractVector3Node : Node, IVectorSampler
+public abstract class AbstractVector3Node : Node, IVectorSampler
 	{
 		protected AbstractVector3Node(int id, Graph parent) : base(id, parent)
 		{
@@ -22,4 +21,3 @@ namespace Assets.Code.Bon.Nodes
 		public abstract List<UnityEngine.Vector3> GetVector3List(OutputSocket socket, float x, float y, float z, float sizeX, float sizeY, float sizeZ, float seed);
 
 	}
-}

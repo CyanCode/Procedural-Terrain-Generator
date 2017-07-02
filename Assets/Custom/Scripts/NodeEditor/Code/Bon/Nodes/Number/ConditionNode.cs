@@ -1,14 +1,13 @@
 ﻿using System;
 using Assets.Code.Bon.Socket;
 using UnityEngine;
+using Assets.Code.Bon;
 
 /**
 	This node avoids the evaluation of the graph branch that
 	where the condition is not true. This can be used to improves performance.
 **/
-namespace Assets.Code.Bon.Nodes.Number
-{
-	[Serializable]
+[Serializable]
 	[GraphContextMenuItem("Number", "Condition")]
 	public class ConditionNode : AbstractNumberNode
 	{
@@ -58,4 +57,3 @@ namespace Assets.Code.Bon.Nodes.Number
 			return GetInputNumber(_inputSocket02, x, y, z, seed);
 		}
 	}
-}

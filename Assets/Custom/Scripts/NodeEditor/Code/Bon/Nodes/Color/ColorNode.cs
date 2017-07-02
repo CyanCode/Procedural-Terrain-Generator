@@ -3,10 +3,9 @@ using Assets.Code.Bon.Socket;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Code.Bon;
 
-namespace Assets.Code.Bon.Nodes.Color
-{
-	[Serializable]
+[Serializable]
 	[GraphContextMenuItem("Color", "Color")]
 	public class ColorNode : AbstractColorNode
 	{
@@ -114,4 +113,3 @@ namespace Assets.Code.Bon.Nodes.Color
 			return _color;
 		}
 	}
-}

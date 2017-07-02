@@ -24,7 +24,7 @@ namespace CoherentNoise.Texturing
             {
                 for (int jj = 0; jj < height; jj++)
                 {
-                    cols[ii + jj * width] = colorFunc((float)ii / width, (float)jj / height);
+					cols[ii + jj * width] = colorFunc((float)ii / width, (float)jj / height);
                 }
             }
             var res = new Texture2D(width, height, format, false);
@@ -57,7 +57,9 @@ namespace CoherentNoise.Texturing
 		{
             return Make(width, height, (x, y) =>
                                            {
-                                               var v = noise.GetValue(x, y, 0) * 0.5f + 0.5f;
+											   var iv = noise.GetValue(x, y, 0);
+
+											   var v = iv* 0.5f + 0.5f;
                                                return new Color(v, v, v, 1);
                                            });
         }

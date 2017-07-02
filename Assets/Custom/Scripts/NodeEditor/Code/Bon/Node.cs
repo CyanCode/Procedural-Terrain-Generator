@@ -4,11 +4,9 @@ using System.Net;
 using Assets.Code.Bon.Nodes;
 using Assets.Code.Bon.Socket;
 using UnityEngine;
+using Assets.Code.Bon;
 
-namespace Assets.Code.Bon
-{
-
-	public abstract class Node : IUpdateable
+public abstract class Node : IUpdateable
 	{
  		[NonSerialized] public List<AbstractSocket> Sockets = new List<AbstractSocket>();
 		[NonSerialized] public  int Id;
@@ -337,9 +335,3 @@ namespace Assets.Code.Bon
 			_itemName = itemName;
 		}
 	}
-
-
-
-}
-
-

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Code.Bon.Nodes.Noise
-{
 	public abstract class AbstractNoiseNode : AbstractNumberNode
 	{
 		protected List<GUIThreadedTexture> _textures;
@@ -32,4 +30,3 @@ namespace Assets.Code.Bon.Nodes.Noise
 		}
 
 	}
-}

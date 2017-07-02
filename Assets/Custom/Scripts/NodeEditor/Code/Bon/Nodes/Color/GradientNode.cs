@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Assets.Code.Bon.Socket;
 using UnityEngine;
+using Assets.Code.Bon;
 
-namespace Assets.Code.Bon.Nodes.Color
-{
-	[Serializable]
+[Serializable]
 	[GraphContextMenuItem("Color", "Gradient")]
 	public class GradientNode : AbstractColorNode
 	{
@@ -137,4 +135,3 @@ namespace Assets.Code.Bon.Nodes.Color
 
 
 	}
-}

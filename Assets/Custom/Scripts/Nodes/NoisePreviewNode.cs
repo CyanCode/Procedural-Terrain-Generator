@@ -27,6 +27,7 @@ public class NoisePreviewNode: Node {
 		Sockets.Add(InputSocketGenerator);
 		EventManager.OnChangedNode += NodeUpdated;
 		EventManager.OnAddedNode += NodeUpdated;
+		EventManager.OnLinkEdge += NodeUpdated;
 	}
 
 	public override void OnGUI() {
@@ -46,10 +47,14 @@ public class NoisePreviewNode: Node {
 
 	}
 
-	public void NodeUpdated(Graph graph, Node node) {
+	private void NodeUpdated(Graph graph, Node node) {
 		if (InputSocketGenerator.CanGetResult()) {
 			TextureNeedsUpdating = true;
 		}
+	}
+
+	private void NodeUpdated(Graph graph, Edge edge) {
+		NodeUpdated(graph, (Node) null);
 	}
 
 	private Texture GetNoiseTexture() {

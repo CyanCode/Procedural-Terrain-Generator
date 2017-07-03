@@ -1,5 +1,4 @@
 using CoherentNoise.Generation;
-using CoherentNoise.Generation.Combination;
 using UnityEngine;
 
 namespace CoherentNoise

@@ -3,7 +3,6 @@ using Assets.Code.Bon.Socket;
 using CoherentNoise;
 using CoherentNoise.Texturing;
 using System;
-using System.IO;
 using UnityEngine;
 
 [Serializable]
@@ -16,7 +15,7 @@ public class NoisePreviewNode: Node {
 	[NonSerialized]
 	private bool TextureNeedsUpdating = false;
 	[NonSerialized]
-	private Texture2D Texture = null;
+	private Texture Texture = null;
 
 	public NoisePreviewNode(int id, Graph parent) : base(id, parent) {
 		LabelGenerator = new Rect(6, 100, 90, BonConfig.SocketSize);
@@ -44,7 +43,7 @@ public class NoisePreviewNode: Node {
 	}
 
 	public override void Update() {
-		
+
 	}
 
 	public void NodeUpdated(Graph graph, Node node) {
@@ -53,15 +52,9 @@ public class NoisePreviewNode: Node {
 		}
 	}
 
-	private Texture2D GetNoiseTexture() {
-		Generator generator = AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
-		Texture2D PreviewTexture = TextureMaker.MonochromeTexture(88, 88, generator) as Texture2D;
-
-		bool Debug = false;
-		if (Debug) {
-			byte[] bytes = PreviewTexture.EncodeToPNG();
-			File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", bytes);
-		}
+	private Texture GetNoiseTexture() {
+		Generator noise = AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
+		Texture PreviewTexture = TextureMaker.MonochromeTexture(100, 100, noise);
 
 		return PreviewTexture;
 	}

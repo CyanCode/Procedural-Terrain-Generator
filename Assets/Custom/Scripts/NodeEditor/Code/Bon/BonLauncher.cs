@@ -10,14 +10,8 @@ using Assets.Code.Bon;
 [ExecuteInEditMode]
 [System.Serializable]
 public class BonLauncher: MonoBehaviour {
-
-	private List<Graph> _graphs = new List<Graph>();
-
 	private StandardGraphController _controller;
-
-	public List<Graph> Graphs {
-		get { return _graphs; }
-	}
+	public Graph Graph;
 
 	/// <summary>
 	/// Loads a graph by its path, adds it to the internal list
@@ -29,7 +23,8 @@ public class BonLauncher: MonoBehaviour {
 		if (path.Equals(BonConfig.DefaultGraphName)) g = CreateDefaultGraph();
 		else g = Graph.Load(path);
 		g.Name = path;
-		Graphs.Add(g);
+		Graph = g;
+
 		CreateGraphController(g);
 		g.UpdateNodes();
 		return g;
@@ -44,18 +39,11 @@ public class BonLauncher: MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Removes a Graph from the internal list.
-	/// (Also used by the editor to close Graphs)
+	/// Saves a graph by its path.
+	/// (Also used by the editor to save Graphs)
 	/// </summary>
-	public void RemoveGraph(Graph g) {
-		Graphs.Remove(g);
-	}
-
-	/// <summary>
-	/// Returns the graph at the index
-	/// </summary>
-	public Graph GetGraph(int index) {
-		return Graphs[index];
+	public void SaveGraph(string path) {
+		Graph.Save(path, Graph);
 	}
 
 	/// <summary>
@@ -71,9 +59,7 @@ public class BonLauncher: MonoBehaviour {
 		if (_controller == null) _controller = new StandardGraphController();
 		_controller.Register();
 
-		foreach (var graph in Graphs) {
-			graph.ResetVisitCount();
-		}
+		Graph.ResetVisitCount();
 	}
 
 	/// <summary>

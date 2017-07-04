@@ -55,7 +55,7 @@ public class GraphManager {
 		EditorGUILayout.HelpBox(msg, MessageType.Info);
 		EditorGUILayout.LabelField("Selected File: " + Path.GetFileNameWithoutExtension(settings.SelectedFile));
 
-		if (GUILayout.Button("Edit Node Graph")) {
+		if (GUILayout.Button("Edit Selected Graph")) {
 			Open(settings.SelectedFile, settings);
 		}
 
@@ -94,7 +94,7 @@ public class GraphManager {
 	/// </summary>
 	/// <param name="settings">Associated terrain settings</param>
 	private static void OptionDefault(TerrainSettings settings) {
-		if (GUILayout.Button("New Node Graph")) {
+		if (GUILayout.Button("Create New Graph")) {
 			settings.SelectedFile = EditorUtility.SaveFilePanelInProject("Save Graph",
 				"TerrainGraph", "json", "Choose a location to save the graph file.");
 
@@ -110,6 +110,7 @@ public class GraphManager {
 	}
 
 	private static void CreateGraphWindow(TerrainSettings settings) {
-		EditorWindow.GetWindow<BonWindow>();
+		BonWindow window = EditorWindow.GetWindow<BonWindow>();
+		window.CreateCanvas(settings.SelectedFile);
 	}
 }

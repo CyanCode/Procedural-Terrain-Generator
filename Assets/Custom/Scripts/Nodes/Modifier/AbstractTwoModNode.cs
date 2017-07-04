@@ -54,5 +54,5 @@ public abstract class AbstractTwoModNode: AbstractGeneratorNode {
 		GUI.Label(LabelGenerator2, "Generator 2");
 	}
 
-	public override void Update() {}
+	public override void Update() { }
 }

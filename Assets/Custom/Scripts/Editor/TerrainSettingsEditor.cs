@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(TerrainSettings))]
@@ -37,9 +38,15 @@ public class TerrainSettingsEditor: Editor {
 
 				break;
 			case TerrainSettings.ToolbarOptions.Noise:
-				EditorGUILayout.Space(); 
-				if (GUILayout.Button("Open Noise Editor")) {
-					//Open editor
+				EditorGUILayout.Space();
+
+				if (Settings.SelectedFile != "") {
+					if (GraphManager.GraphFileCanBeRead(Settings.SelectedFile))
+						GraphManager.OptionGraphOpenSuccess(Settings);
+					else
+						GraphManager.OptionGraphOpenError(Settings);
+				} else {
+					GraphManager.OptionIncorrectFileSelection(Settings);
 				}
 
 				break;

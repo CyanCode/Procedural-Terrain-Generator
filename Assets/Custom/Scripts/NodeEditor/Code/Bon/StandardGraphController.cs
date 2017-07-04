@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Assets.Code.Bon
+﻿namespace Assets.Code.Bon
 {
 	public class StandardGraphController
 	{

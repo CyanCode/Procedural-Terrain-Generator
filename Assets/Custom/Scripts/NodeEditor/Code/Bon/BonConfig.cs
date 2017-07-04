@@ -12,7 +12,7 @@
 		public static int EdgeTangent = 50;
 
 		public static string DefaultGraphName = "default";
-		public static string GameObjectName = "Bon";
+		public static string GameObjectName = "Graph Manager";
 	}
 }
 

@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Assets.Code.Bon.Nodes;
-using Assets.Code.Bon.Nodes.Noise;
-using Assets.Code.Bon.Nodes.Number;
 using Assets.Code.Bon.Socket;
 using Assets.Code.Bon;
 
@@ -86,37 +83,20 @@ public class BonLauncher: MonoBehaviour {
 	public Graph CreateDefaultGraph() {
 		Graph graph = new Graph();
 
-		// Number Nodes
-		var operator01 = (NumberOperatorNode)graph.CreateNode<NumberOperatorNode>();
-		operator01.X = 200;
-		operator01.Y = 40;
-		operator01.SetMode(Operator.Add);
-		graph.AddNode(operator01);
+		//Pink Noise
+		Node pink = graph.CreateNode<PinkNoiseNode>();
+		pink.X = 100;
+		pink.Y = 100;
+		graph.AddNode(pink);
 
-		var diplay01 = (NumberDisplayNode)graph.CreateNode<NumberDisplayNode>();
-		diplay01.X = 330;
-		diplay01.Y = 80;
-		graph.AddNode(diplay01);
+		//Preview Noise
+		Node preview = graph.CreateNode<NoisePreviewNode>();
+		preview.X = 300;
+		preview.Y = 100;
+		graph.AddNode(preview);
 
-		graph.Link(
-			(InputSocket)diplay01.GetSocket(typeof(AbstractNumberNode), typeof(InputSocket), 0),
-			(OutputSocket)operator01.GetSocket(typeof(AbstractNumberNode), typeof(OutputSocket), 0));
-
-		// Map2D Nodes
-		var perlinNoise = graph.CreateNode<UnityPerlinNoiseNode>();
-		perlinNoise.X = 80;
-		perlinNoise.Y = 250;
-		graph.AddNode(perlinNoise);
-
-		var displayMap = graph.CreateNode<NoiseDisplayNode>();
-		displayMap.X = 300;
-		displayMap.Y = 280;
-		graph.AddNode(displayMap);
-
-		graph.Link(
-			(InputSocket)displayMap.GetSocket(typeof(AbstractNumberNode), typeof(InputSocket), 0),
-			(OutputSocket)perlinNoise.GetSocket(typeof(AbstractNumberNode), typeof(OutputSocket), 0));
-
+		graph.Link((InputSocket)preview.GetSocket(typeof(AbstractGeneratorNode), typeof(InputSocket), 0),
+			(OutputSocket)pink.GetSocket(typeof(AbstractGeneratorNode), typeof(OutputSocket), 0));
 
 		// == test serialization an deserialization ==
 		var serializedJSON = graph.ToJson();
@@ -125,5 +105,4 @@ public class BonLauncher: MonoBehaviour {
 
 		return deserializedGraph;
 	}
-
 }

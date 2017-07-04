@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class TerrainSettings: MonoBehaviour {
@@ -31,6 +32,10 @@ public class TerrainSettings: MonoBehaviour {
 	public MaterialInfo[] Materials;
 
 	public TerrainObject[] Objects;
+
+	//Noise Tab
+	public string SelectedFile = "";
+	public Graph LoadedGraph = null;
 
 	void Start() {
 		//Set seed for RNG

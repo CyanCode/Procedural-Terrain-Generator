@@ -38,8 +38,7 @@ public class BonWindow: EditorWindow {
 	private Dictionary<string, Type> MenuEntryToNodeType;
 
 	private Rect TmpRect = new Rect();
-
-	//[MenuItem("Window/" + Name)]
+	
 	static void OnCreateWindow() {
 		BonWindow window = GetWindow<BonWindow>();
 		// BonWindow window = CreateInstance<BonWindow>(); // to create a new window
@@ -113,15 +112,18 @@ public class BonWindow: EditorWindow {
 
 
 	private BonLauncher GetLauncher() {
-		if (GameObject.Find(BonConfig.GameObjectName) == null) {
-			new GameObject(BonConfig.GameObjectName);
-			Log.Info("Created GameObject '" + BonConfig.GameObjectName + "'");
+		if (FindObjectOfType<TerrainSettings>() == null) {
+			Debug.LogError("Cannot launch graph editor without a TerrainSettings component.");
+			return null;
 		}
-		if (GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>() == null) {
-			Log.Info("Added BonLauncher component to the GameObject '" + BonConfig.GameObjectName + "'");
-			GameObject.Find(BonConfig.GameObjectName).AddComponent<BonLauncher>();
+
+		BonLauncher launcher = null;
+		if ((launcher = FindObjectOfType<BonLauncher>()) == null) {
+			launcher = FindObjectOfType<TerrainSettings>().gameObject.AddComponent<BonLauncher>();
+			Log.Info("Added BonLauncher Component '" + BonConfig.GameObjectName + "' to TerrainSettings gameobject");
 		}
-		return GameObject.Find(BonConfig.GameObjectName).GetComponent<BonLauncher>();
+
+		return launcher;
 	}
 
 	/// <summary>Draws the UI</summary>

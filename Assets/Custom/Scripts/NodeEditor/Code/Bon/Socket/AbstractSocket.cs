@@ -16,7 +16,6 @@ namespace Assets.Code.Bon
 		protected AbstractSocket(Node parent, Type type)
 		{
 			Type = type;
-			Padding = new RectOffset(0, 0, -2, 0);
 			Parent = parent;
 			BoxRect.width = BonConfig.SocketSize;
 			BoxRect.height = BonConfig.SocketSize;
@@ -43,11 +42,12 @@ namespace Assets.Code.Bon
 
 		public void Draw()
 		{
+			Padding = new RectOffset(0, 0, -2, 0);
 			GUI.skin.box.normal.textColor = Node.GetEdgeColor(Type);
 			GUI.skin.box.padding = Padding;
 			GUI.skin.box.fontSize = 14;
 			GUI.skin.box.fontStyle = FontStyle.Bold;
-			OnDraw();
+			OnDraw(); 
 		}
 
 		public bool IsInput()

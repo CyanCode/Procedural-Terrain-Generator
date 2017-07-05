@@ -88,6 +88,14 @@ public class Graph: ISerializationCallbackReceiver {
 		return null;
 	}
 
+	/// <summary>
+	/// Returns all active nodes in the graph
+	/// </summary>
+	/// <returns>List of nodes</returns>
+	public List<Node> GetNodes() {
+		return _nodes;
+	}
+
 	/// <summary>Returns the count of Nodes in this Graph.</summary>
 	/// <returns>The count of Nodes in this Graph.</returns>
 	public int GetNodeCount() {

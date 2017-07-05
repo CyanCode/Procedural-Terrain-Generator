@@ -3,6 +3,7 @@ using Assets.Code.Bon.Socket;
 using CoherentNoise;
 using CoherentNoise.Texturing;
 using System;
+using UnityEditor;
 using UnityEngine;
 
 [Serializable]
@@ -16,12 +17,10 @@ public class EndNode: Node {
 	public EndNode(int id, Graph parent) : base(id, parent) {
 		LabelEnd = new Rect(6, 0, 100, BonConfig.SocketSize);
 		InputSocketGenerator = new InputSocket(this, typeof(AbstractGeneratorNode));
-
-		Height = 140;
-		Width = 120;
-		SocketTopOffsetInput = 100;
+		Height = 40;
 
 		Sockets.Add(InputSocketGenerator);
+		EventManager.OnAddedNode += NodeAdded;
 	}
 
 	public override void OnGUI() {
@@ -33,5 +32,24 @@ public class EndNode: Node {
 
 	public Generator GetFinalGenerator() {
 		return AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
+	}
+
+	public void NodeAdded(Graph graph, Node node) {
+		if (!(node is EndNode))
+			return;
+
+		int endNodeCount = 0;
+		foreach (Node n in graph.GetNodes()) {
+			if (n is EndNode) {
+				endNodeCount++;
+				if (endNodeCount > 1)
+					break;
+			}
+		}
+
+		if (endNodeCount > 1) { //Most recently added Node is EndNode
+			graph.RemoveNode(node);
+			EditorUtility.DisplayDialog("End Node", "There can only be one End node in the graph at a time", "Okay");
+		}
 	}
 }

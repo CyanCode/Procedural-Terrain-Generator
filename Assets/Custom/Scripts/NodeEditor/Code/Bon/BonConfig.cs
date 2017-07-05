@@ -4,7 +4,7 @@
 	{
 		public static int Version = 1;
 
-		public static int LogLevel = 1;
+		public static int LogLevel = 0;
 
 		public static int SocketSize = 15;
 		public static int SocketOffsetTop = 20;

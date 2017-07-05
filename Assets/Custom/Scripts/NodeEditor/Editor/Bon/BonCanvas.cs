@@ -1,7 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
 using UnityEditor;
 using UnityEngine;
 using Assets.Code.Bon;
@@ -41,6 +38,8 @@ namespace Assets.Editor.Bon
 		public BonCanvas(Graph graph)
 		{
 			Graph = graph;
+			FilePath = Graph.Name;
+
 			Style.normal.background = CreateBackgroundTexture();
 			Style.normal.background.wrapMode = TextureWrapMode.Repeat;
 			Style.fixedHeight = CanvasSize;

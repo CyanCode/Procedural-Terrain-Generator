@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
+[RequireComponent(typeof(BonLauncher))]
 public class TerrainSettings: MonoBehaviour {
 	[System.Serializable]
 	public class MaterialInfo {

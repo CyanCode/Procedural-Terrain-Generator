@@ -21,11 +21,11 @@ Want to test out the generator for yourself? No problem.
 5. Play the scene
 
 ##Images
-![Image of Scene](https://raw.githubusercontent.com/CyanCode/Procedural-Terrain-Generator/master/Images/scene.png)
+![Image of Scene](Images/scene.png)
 
-![Image in-game](https://raw.githubusercontent.com/CyanCode/Procedural-Terrain-Generator/master/Images/game.png)
+![Image in-game](Images/game.png)
 
-![gif of generation](https://raw.githubusercontent.com/CyanCode/Procedural-Terrain-Generator/master/Images/generation.gif)
+![gif of generation](Images/generation.gif)
 
 ##Notes
 - This generator works better with CPUs with a high core count due to the nature of the generation algorithm. More cores means more terrain can be generated at once because of the thread pool.

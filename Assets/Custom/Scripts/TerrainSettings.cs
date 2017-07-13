@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using UnityEditor;
+﻿using CoherentNoise;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(BonLauncher))]
@@ -37,6 +37,7 @@ public class TerrainSettings: MonoBehaviour {
 	//Noise Tab
 	public string SelectedFile = "";
 	public Graph LoadedGraph = null;
+	public Generator Generator;
 
 	void Start() {
 		//Set seed for RNG

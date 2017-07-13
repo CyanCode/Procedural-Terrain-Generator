@@ -89,6 +89,20 @@ public class Graph: ISerializationCallbackReceiver {
 	}
 
 	/// <summary>
+	/// Finds and returns Node of type T
+	/// </summary>
+	/// <typeparam name="T">Type to find</typeparam>
+	/// <returns>First Node of type T, null if not found</returns>
+	public T GetNode<T>() {
+		foreach (Node n in _nodes) {
+			if (n is T)
+				return (T)(object)n;
+		}
+
+		return default(T);
+	}
+
+	/// <summary>
 	/// Returns all active nodes in the graph
 	/// </summary>
 	/// <returns>List of nodes</returns>

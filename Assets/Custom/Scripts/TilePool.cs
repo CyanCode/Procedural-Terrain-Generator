@@ -98,7 +98,7 @@ public class TilePool: MonoBehaviour {
 			UnityMainThreadDispatcher.Instance().Enqueue(() => {
 				tile.CreateTerrain();
 				tile.ApplyNoise(heights);
-				tile.ApplyTextures();
+				//tile.ApplyTextures();
 				Cache.AddActiveTile(tile);
 
 				queuedTiles--;

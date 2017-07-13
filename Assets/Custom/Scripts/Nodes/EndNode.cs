@@ -25,13 +25,16 @@ public class EndNode: Node {
 
 	public override void OnGUI() {
 		GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-		GUI.Label(LabelEnd, "Final Generator");
+		GUI.Label(LabelEnd, "Last Generator");
 	}
 
 	public override void Update() { }
 
 	public Generator GetFinalGenerator() {
-		return AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
+		Generator gen = AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
+		gen.ScaleShift(0f, 1f);
+
+		return gen;
 	}
 
 	public void NodeAdded(Graph graph, Node node) {

@@ -10,17 +10,9 @@ using Assets.Code.Bon;
 public class PinkNoiseNode: AbstractFractalNoiseNode {
 	[NonSerialized]
 	private Rect LabelPersistence;
-	[NonSerialized]
-	private Rect LabelOffset;
-	[NonSerialized]
-	private Rect LabelGain;
 
 	[NonSerialized]
 	private InputSocket InputSocketPersistence;
-	[NonSerialized]
-	private InputSocket InputSocketOffset;
-	[NonSerialized]
-	private InputSocket InputSocketGain;
 
 	public PinkNoiseNode(int id, Graph parent) : base(id, parent) {
 		LabelPersistence = new Rect(6, 60, 90, BonConfig.SocketSize);

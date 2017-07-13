@@ -27,6 +27,8 @@ public abstract class AbstractGeneratorNode: Node {
 	
 	public static Generator GetInputGenerator(InputSocket socket) {
 		if (socket.Type == typeof(AbstractGeneratorNode)) {
+			if (!socket.IsConnected()) return null;
+
 			return ((AbstractGeneratorNode) socket.GetConnectedSocket().Parent).GetGenerator();
 		} else {
 			Debug.LogError("InputSocket is not of type AbstractGeneratorNode");

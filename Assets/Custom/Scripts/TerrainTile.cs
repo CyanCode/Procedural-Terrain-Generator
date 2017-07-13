@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
 using System.Linq;
-using CoherentNoise.Generation.Fractal;
-using CoherentNoise;
-using CoherentNoise.Generation.Combination;
 
 /// <summary>
 /// TerrainTile represents a Terrain gameobject in the scene. 
@@ -43,67 +40,34 @@ public class TerrainTile {
 	}
 
 	/// <summary>
-	/// Finds the heights from the passed CombinedNoise object and
+	/// Finds the heights from the created noise graph editor
 	/// returns the heights that can be applied to the terrain.
 	/// 
 	/// This method can be called asynchronously off of the main Thread.
 	/// </summary>
-	/// <param name="noise">Noise to calculate</param>
-	public float[,] GetNoiseHeights(Generator gen) {
+	/// <returns>2D array of noise values</returns>
+	public float[,] GetNoiseHeights() {
 		float[,] heightmap = new float[Settings.HeightmapResolution, Settings.HeightmapResolution];
+		float min = 1;
+		float max = -1;
 
 		for (var zRes = 0; zRes < Settings.HeightmapResolution; zRes++) {
 			for (var xRes = 0; xRes < Settings.HeightmapResolution; xRes++) {
 				var xCoordinate = Position.x + (float)xRes / (Settings.HeightmapResolution - 1);
 				var zCoordinate = Position.y + (float)zRes / (Settings.HeightmapResolution - 1);
-				var height = gen.GetValue(xCoordinate, zCoordinate, 0f);
+				var height = Settings.Generator.GetValue(xCoordinate, zCoordinate, 0f);
+
+				if (min > height) min = height;
+				if (max < height) max = height;
 
 				heightmap[zRes, xRes] = height;
-				PlaceObjectAtPosition(new Vector3(xCoordinate, height, zCoordinate));
+				//PlaceObjectAtPosition(new Vector3(xCoordinate, height, zCoordinate));
 			}
 		}
 
+		Debug.Log("Min " + min + " Max " + max);
+
 		return heightmap;
-	}
-
-	/// <summary>
-	/// Finds the heights from the default FastNoise object and
-	/// returns the heights that can be applied to the terrain.
-	/// 
-	/// This method can be called asynchronously off of the main Thread.
-	/// </summary>
-	/// <param name="noise">Noise to calculate</param>
-	public float[,] GetNoiseHeights() {
-		//Combine ridges with fractals
-		RidgeNoise ridgeNoise = new RidgeNoise(Settings.GenerationSeed);
-		ridgeNoise.ScaleShift(0f, 1f);
-		ridgeNoise.Frequency = 0.1f;
-		ridgeNoise.Gain = 0.6f;
-		ridgeNoise.Offset = 0.8f;
-
-		PinkNoise fractal = new PinkNoise(Settings.GenerationSeed);
-		fractal.ScaleShift(0f, 1f);
-		fractal.Frequency = .1f;
-		fractal.Persistence = .4f;
-
-		//Multiply combined = new Multiply(ridgeNoise, fractal);
-		Add combined = new Add(ridgeNoise, fractal);
-
-		PinkNoise pinkNoise = new PinkNoise(Settings.GenerationSeed);
-		pinkNoise.ScaleShift(0f, 1f);
-		pinkNoise.Frequency = .1f;
-		pinkNoise.OctaveCount = 8;
-		pinkNoise.Persistence = .4f;
-
-		//GradientNoise gradient = new GradientNoise(Settings.GenerationSeed);
-		PinkNoise gradient = new PinkNoise(Settings.GenerationSeed);
-		gradient.Lacunarity = 1.2f;
-		gradient.Frequency = 0.04f;
-		gradient.ScaleShift(0f, 1f);
-		gradient.Gain(0.6f);
-
-		return GetNoiseHeights(combined.Blend(pinkNoise, gradient));
-		//return GetNoiseHeights(pinkNoise);
 	}
 
 	/// <summary>

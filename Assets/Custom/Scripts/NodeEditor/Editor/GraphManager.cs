@@ -1,35 +1,41 @@
 ﻿using Assets.Code.Bon;
+using CoherentNoise;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 public class GraphManager {
-	/// <summary>
-	/// Opens a graph at the specified path
-	/// </summary>
-	/// <param name="path">Path of graph to open</param>
-	/// <param name="settings">Settings to persist created Graph instance</param>
-	public static void Open(string path, TerrainSettings settings) {
-		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
-		if (launcher == null) {
-			Debug.LogError("There is no graph launcher in the scene. Make sure to not delete graph launcher component");
-			return;
-		}
+	private TerrainSettings Settings;
 
-		settings.LoadedGraph = launcher.LoadGraph(path);
-		CreateGraphWindow(settings);
+	public GraphManager(TerrainSettings settings) {
+		Settings = settings;
 	}
 
-	public static void OpenNew(string path, TerrainSettings settings) {
+	/// <summary>
+	/// Opens a graph at the path specified in settings
+	/// </summary>
+	/// <param name="settings">Settings to persist created Graph instance</param>
+	public void Open() {
 		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
 		if (launcher == null) {
 			Debug.LogError("There is no graph launcher in the scene. Make sure to not delete graph launcher component");
 			return;
 		}
 
-		settings.LoadedGraph = launcher.LoadGraph(BonConfig.DefaultGraphName);
-		launcher.SaveGraph(settings.LoadedGraph, path);
-		CreateGraphWindow(settings);
+		Settings.LoadedGraph = launcher.LoadGraph(Settings.SelectedFile);
+		CreateGraphWindow(Settings);
+	}
+
+	public void OpenNew(string path) {
+		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
+		if (launcher == null) {
+			Debug.LogError("There is no graph launcher in the scene. Make sure to not delete graph launcher component");
+			return;
+		}
+
+		Settings.LoadedGraph = launcher.LoadGraph(BonConfig.DefaultGraphName);
+		launcher.SaveGraph(Settings.LoadedGraph, path);
+		CreateGraphWindow(Settings);
 	}
 
 	/// <summary>
@@ -37,7 +43,7 @@ public class GraphManager {
 	/// </summary>
 	/// <param name="path">Path to check</param>
 	/// <returns>true if successful, false otherwise</returns>
-	public static bool GraphFileCanBeRead(string path) {
+	public bool GraphFileCanBeRead(string path) {
 		if (path != null && path != "") {
 			return Graph.Load(path) != null;
 		}
@@ -49,68 +55,110 @@ public class GraphManager {
 	/// Displays GUI options for a successful graph deserialization. 
 	/// Allows the user to open the deserialized graph and edit it.
 	/// </summary>
-	/// <param name="settings">Associated terrain settings</param>
-	public static void OptionGraphOpenSuccess(TerrainSettings settings) {
+	/// <param name="settings">Associated terrain Settings</param>
+	public void OptionGraphOpenSuccess() {
 		string msg = "The node graph for this terrain is ready for use.";
 		EditorGUILayout.HelpBox(msg, MessageType.Info);
-		EditorGUILayout.LabelField("Selected File: " + Path.GetFileNameWithoutExtension(settings.SelectedFile));
+		EditorGUILayout.LabelField("Selected File: " + Path.GetFileNameWithoutExtension(Settings.SelectedFile));
 
 		if (GUILayout.Button("Edit Selected Graph")) {
-			Open(settings.SelectedFile, settings);
+			Open();
 		}
 
-		OptionDefault(settings);
+		OptionDefault();
 	}
 
 	/// <summary>
 	/// Displays GUI options for a failed graph deserialization. 
 	/// Allows the user to select another file.
 	/// </summary>
-	/// <param name="settings">Associated terrain settings</param>
-	public static void OptionGraphOpenError(TerrainSettings settings) {
+	/// <param name="settings">Associated terrain Settings</param>
+	public void OptionGraphOpenError() {
 		string msg = "The JSON file you selected failed to load. " +
 					"Make sure the selected file is a valid graph file";
 		EditorGUILayout.HelpBox(msg, MessageType.Error);
 
-		OptionDefault(settings);
+		OptionDefault();
 	}
 
 	/// <summary>
 	/// Displays GUI options for an incorrect file selection. 
 	/// Allows the user to select another file.
 	/// </summary>
-	/// <param name="settings">Associated terrain settings</param>
-	public static void OptionIncorrectFileSelection(TerrainSettings settings) {
+	/// <param name="settings">Associated terrain Settings</param>
+	public void OptionIncorrectFileSelection() {
 		string msg = "There is no node graph associated with this terrain. " +
 				"Either create a new graph or select an existing one from the file system.";
 		EditorGUILayout.HelpBox(msg, MessageType.Warning);
 
-		OptionDefault(settings);
+		OptionDefault();
+	}
+
+	/// <summary>
+	/// Returns whether or not the graph has an EndNode that connected to a generator
+	/// </summary>
+	/// <returns>true if found and connected, false otherwise</returns>
+	public  bool HasValidEndNode() {
+		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
+		if (launcher != null && launcher.Graph != null) {
+			EndNode endNode = launcher.Graph.GetNode<EndNode>();
+			return endNode != null && endNode.GetFinalGenerator() != null;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Gets the generator associated with the EndNode in the Graph
+	/// </summary>
+	/// <returns>The end generator if it exists</returns>
+	public Generator GetGraphGenerator() {
+		if (HasValidEndNode()) {
+			BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
+			EndNode endNode = launcher.Graph.GetNode<EndNode>();
+
+			return endNode.GetFinalGenerator();
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Displays an alert when no EndNode is found in the graph
+	/// </summary>
+	public void MessageNoEndNode() {
+		EditorGUILayout.HelpBox("A node graph exists but cannot be used for generation as there is no connected End node.", MessageType.Warning);
+		if (GUILayout.Button("Edit Selected Graph")) {
+			Open();
+		}
+
+		OptionDefault();
 	}
 
 	/// <summary>
 	/// Displays the default GUI options that appear at the bottom of 
 	/// any option.
 	/// </summary>
-	/// <param name="settings">Associated terrain settings</param>
-	private static void OptionDefault(TerrainSettings settings) {
+	/// <param name="settings">Associated terrain Settings</param>
+	private void OptionDefault() {
 		if (GUILayout.Button("Create New Graph")) {
-			settings.SelectedFile = EditorUtility.SaveFilePanelInProject("Save Graph",
+			Settings.SelectedFile = EditorUtility.SaveFilePanelInProject("Save Graph",
 				"TerrainGraph", "json", "Choose a location to save the graph file.");
 
-			if (settings.SelectedFile != "") {
-				File.WriteAllText(settings.SelectedFile, "");
-				OpenNew(settings.SelectedFile, settings);
+			if (Settings.SelectedFile != "") {
+				File.WriteAllText(Settings.SelectedFile, "");
+				OpenNew(Settings.SelectedFile);
 			}
 		}
 
 		if (GUILayout.Button("Select Existing Graph")) {
-			settings.SelectedFile = EditorUtility.OpenFilePanel("Select a JSON graph file", Application.dataPath, "json");
+			Settings.SelectedFile = EditorUtility.OpenFilePanel("Select a JSON graph file", Application.dataPath, "json");
+			Open();
 		}
 	}
 
-	private static void CreateGraphWindow(TerrainSettings settings) {
+	private void CreateGraphWindow(TerrainSettings Settings) {
 		BonWindow window = EditorWindow.GetWindow<BonWindow>();
-		window.CreateCanvas(settings.SelectedFile);
+		window.CreateCanvas(Settings.SelectedFile);
 	}
 }

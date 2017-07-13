@@ -1,5 +1,4 @@
-﻿using System.IO;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(TerrainSettings))]
@@ -8,6 +7,12 @@ public class TerrainSettingsEditor: Editor {
 		get {
 			return (TerrainSettings)target;
 		}
+	}
+	private GraphManager manager;
+
+	void OnEnable() {
+		manager = new GraphManager(Settings);
+		Settings.Generator = manager.GetGraphGenerator();
 	}
 
 	public override void OnInspectorGUI() {
@@ -19,6 +24,7 @@ public class TerrainSettingsEditor: Editor {
 			case TerrainSettings.ToolbarOptions.General:
 				//Tracked gameobject
 				EditorGUILayout.Space();
+				EditorGUILayout.LabelField("Tracked GameObject");
 				Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
 
 				//Terrain settings
@@ -41,12 +47,15 @@ public class TerrainSettingsEditor: Editor {
 				EditorGUILayout.Space();
 
 				if (Settings.SelectedFile != "") {
-					if (GraphManager.GraphFileCanBeRead(Settings.SelectedFile))
-						GraphManager.OptionGraphOpenSuccess(Settings);
+					if (manager.GraphFileCanBeRead(Settings.SelectedFile))
+						if (manager.HasValidEndNode())
+							manager.OptionGraphOpenSuccess();
+						else
+							manager.MessageNoEndNode();
 					else
-						GraphManager.OptionGraphOpenError(Settings);
+						manager.OptionGraphOpenError();
 				} else {
-					GraphManager.OptionIncorrectFileSelection(Settings);
+					manager.OptionIncorrectFileSelection();
 				}
 
 				break;

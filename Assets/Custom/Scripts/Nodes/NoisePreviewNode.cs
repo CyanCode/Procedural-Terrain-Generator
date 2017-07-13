@@ -28,6 +28,7 @@ public class NoisePreviewNode: Node {
 		EventManager.OnChangedNode += NodeUpdated;
 		EventManager.OnAddedNode += NodeUpdated;
 		EventManager.OnLinkEdge += NodeUpdated;
+		EventManager.OnFocusGraph += GraphFocused;
 	}
 
 	public override void OnGUI() {
@@ -54,6 +55,10 @@ public class NoisePreviewNode: Node {
 	}
 
 	private void NodeUpdated(Graph graph, Edge edge) {
+		NodeUpdated(graph, (Node) null);
+	}
+
+	private void GraphFocused(Graph graph) {
 		NodeUpdated(graph, (Node) null);
 	}
 

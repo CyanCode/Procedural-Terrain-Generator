@@ -32,8 +32,6 @@ public class TerrainSettings: MonoBehaviour {
 	public float Amplitude = 1f;
 	public MaterialInfo[] Materials;
 
-	public TerrainObject[] Objects;
-
 	//Noise Tab
 	public string SelectedFile = "";
 	public Graph LoadedGraph = null;

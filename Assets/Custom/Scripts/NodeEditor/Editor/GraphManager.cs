@@ -66,6 +66,19 @@ public class GraphManager {
 		}
 
 		OptionDefault();
+
+		EditorGUILayout.Space();
+		if (Application.isEditor) {
+			if (GUILayout.Button("Update Preview")) {
+				Generator gen = GetGraphGenerator();
+
+				if (gen != null) {
+					Settings.PreviewMesh = TerrainTile.GetPreviewMesh(Settings, gen);
+				}
+			}
+
+			Settings.IsWireframePreview = GUILayout.Toggle(Settings.IsWireframePreview, "Wireframe Preview");
+		}
 	}
 
 	/// <summary>
@@ -98,7 +111,7 @@ public class GraphManager {
 	/// Returns whether or not the graph has an EndNode that connected to a generator
 	/// </summary>
 	/// <returns>true if found and connected, false otherwise</returns>
-	public  bool HasValidEndNode() {
+	public bool HasValidEndNode() {
 		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
 		if (launcher != null && launcher.Graph != null) {
 			EndNode endNode = launcher.Graph.GetNode<EndNode>();

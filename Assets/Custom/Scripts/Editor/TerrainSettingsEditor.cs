@@ -24,7 +24,7 @@ public class TerrainSettingsEditor: Editor {
 			case TerrainSettings.ToolbarOptions.General:
 				//Tracked gameobject
 				EditorGUILayout.Space();
-				EditorGUILayout.LabelField("Tracked GameObject");
+				EditorGUILayout.LabelField("Tracked GameObject", EditorStyles.boldLabel);
 				Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
 
 				//Terrain settings
@@ -32,15 +32,10 @@ public class TerrainSettingsEditor: Editor {
 				EditorGUILayout.LabelField("Terrain Generation Settings", EditorStyles.boldLabel);
 				Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
 				Settings.GenerationSeed = EditorGUILayout.IntField("Seed", Settings.GenerationSeed);
-				Settings.Height = EditorGUILayout.IntField("Height", Settings.Height);
 				Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
-
-				//Heightmap / Alphamap
-				EditorGUILayout.Space();
-				EditorGUILayout.LabelField("Heightmap & Alphamap Resolution", EditorStyles.boldLabel);
-				int resolution = EditorGUILayout.IntField("Resolution", Settings.HeightmapResolution);
-				Settings.HeightmapResolution = resolution;
-				Settings.AlphamapResolution = resolution;
+				Settings.MeshResolution = EditorGUILayout.IntField("Mesh Resolution", Settings.MeshResolution);
+				Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
+				Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
 
 				break;
 			case TerrainSettings.ToolbarOptions.Noise:

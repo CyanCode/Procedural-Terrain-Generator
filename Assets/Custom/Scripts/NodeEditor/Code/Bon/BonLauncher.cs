@@ -2,6 +2,7 @@
 using UnityEngine;
 using Assets.Code.Bon.Socket;
 using Assets.Code.Bon;
+using CoherentNoise;
 
 /// <summary>
 /// A class to controll the creation of Graphs. It contains loaded Grpahs.
@@ -28,6 +29,16 @@ public class BonLauncher: MonoBehaviour {
 		CreateGraphController(g);
 		g.UpdateNodes();
 		return g;
+	}
+
+	/// <summary>
+	/// Gets the generator associated with the EndNode in the Graph
+	/// </summary>
+	/// <returns>The end generator if it exists</returns>
+	public Generator GetGraphGenerator() {
+		EndNode endNode = Graph.GetNode<EndNode>();
+
+		return endNode.GetFinalGenerator();
 	}
 
 	/// <summary>

@@ -92,7 +92,7 @@ public class TileCache {
 	/// </summary>
 	/// <param name="tile">Tile to cache</param>
 	public void CacheTile(TerrainTile tile) {
-		tile.Active = false;
+		tile.enabled = false;
 		CachedTiles.AddFirst(tile);
 		EnforceCacheSize();
 	}
@@ -103,7 +103,7 @@ public class TileCache {
 	/// </summary>
 	/// <param name="tile">Tile to activate</param>
 	public void AddActiveTile(TerrainTile tile) {
-		tile.Active = true;
+		tile.enabled = true;
 		ActiveTiles.Add(tile);
 	}
 
@@ -115,7 +115,7 @@ public class TileCache {
 		int removalAmount = CachedTiles.Count - CacheCapacity;
 
 		while (removalAmount > 0) {
-			CachedTiles.Last.Value.DestroyTerrain();
+			Object.Destroy(CachedTiles.Last.Value);
 			CachedTiles.RemoveLast();
 			removalAmount--;
 		}

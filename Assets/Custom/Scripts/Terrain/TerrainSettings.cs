@@ -26,10 +26,10 @@ public class TerrainSettings: MonoBehaviour {
 	public int GenerationRadius = 3;
 	public int GenerationSeed = 1337;
 
-	public int HeightmapResolution = 129;
-	public int AlphamapResolution = 129;
+	public int MeshResolution = 129;
 	public int Length = 500;
-	public int Height = 500;
+	public float Spread = 1f;
+	public float Amplitude = 1f;
 	public MaterialInfo[] Materials;
 
 	public TerrainObject[] Objects;
@@ -38,19 +38,36 @@ public class TerrainSettings: MonoBehaviour {
 	public string SelectedFile = "";
 	public Graph LoadedGraph = null;
 	public Generator Generator;
+	public Mesh PreviewMesh;
+	public bool IsWireframePreview = true;
 
 	void Start() {
 		//Set seed for RNG
 		Random.InitState(GenerationSeed);
+
+		BonLauncher launcher = gameObject.GetComponent<BonLauncher>();
+		if (launcher != null) {
+			Generator = launcher.GetGraphGenerator();
+		} else {
+			Debug.LogError("This gameobject has no associated graph launcher and cannot function.");
+		}
 	}
 
 	public void OnDrawGizmosSelected() {
-		List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
-		foreach (Vector2 pos in positions) {
-			Vector3 pos3d = new Vector3((pos.x * Length) + (Length / 2), Height / 2, (pos.y * Length) + (Length / 2));
+		if (ToolbarSelection == ToolbarOptions.Noise && PreviewMesh != null) {
+			Gizmos.color = Color.white;
 
-			Gizmos.color = Color.green;
-			Gizmos.DrawWireCube(pos3d, new Vector3(Length, Height, Length));
+			if (IsWireframePreview) Gizmos.DrawWireMesh(PreviewMesh, Vector3.zero);
+			else Gizmos.DrawMesh(PreviewMesh, Vector3.zero);
+		} else {
+			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
+
+			foreach (Vector2 pos in positions) {
+				Vector3 pos3d = new Vector3((pos.x * Length) + (Length / 2), 0, (pos.y * Length) + (Length / 2));
+
+				Gizmos.color = Color.white;
+				Gizmos.DrawWireCube(pos3d, new Vector3(Length, 0, Length));
+			}
 		}
 	}
 }

@@ -55,6 +55,7 @@ public class TerrainSettingsEditor: Editor {
 
 				break;
 			case TerrainSettings.ToolbarOptions.Materials:
+				TerrainPaint.DisplayGUI(Settings);
 				break;
 		}
 	}

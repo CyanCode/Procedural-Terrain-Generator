@@ -90,24 +90,12 @@ public class TilePool: MonoBehaviour {
 	/// <param name="pos">Position to add tile at</param>
 	private void AddTileAsync(Vector2 pos) {
 		TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
-		//tile.CreateMesh(pos);
-		//Vector3[] verts = tile.Terrain.vertices;
 		queuedTiles++;
 
-		ThreadPool.QueueUserWorkItem((oj) => {
-			float[] heights = tile.GetNoiseHeights(pos, Settings.Spread, Settings.Amplitude);
+		tile.CreateMesh(pos, null);
+		tile.ApplySplatmap();
+		Cache.AddActiveTile(tile);
 
-			UnityMainThreadDispatcher.Instance().Enqueue(() => {
-				tile.CreateMesh(pos, heights);
-				//tile.ApplyTextures();
-				Cache.AddActiveTile(tile);
-
-				queuedTiles--;
-			});
-		});
-	}
-
-	private void DispatchHeights(Vector3[] vertices, TerrainTile tile) {
-		
+		queuedTiles--;
 	}
 }

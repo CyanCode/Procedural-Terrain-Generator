@@ -26,11 +26,10 @@ public class TerrainSettings: MonoBehaviour {
 	public int GenerationRadius = 3;
 	public int GenerationSeed = 1337;
 
-	public int MeshResolution = 129;
+	public int MeshResolution = 128;
 	public int Length = 500;
 	public float Spread = 1f;
 	public float Amplitude = 1f;
-	public MaterialInfo[] Materials;
 
 	//Noise Tab
 	public string SelectedFile = "";
@@ -38,6 +37,9 @@ public class TerrainSettings: MonoBehaviour {
 	public Generator Generator;
 	public Mesh PreviewMesh;
 	public bool IsWireframePreview = true;
+
+	//Material Tab
+	public List<TerrainPaint.SplatSetting> SplatSettings = null;
 
 	void Start() {
 		//Set seed for RNG

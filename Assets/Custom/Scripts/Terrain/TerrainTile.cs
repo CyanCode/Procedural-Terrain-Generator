@@ -11,6 +11,7 @@ public class TerrainTile: MonoBehaviour {
 	public Vector2 Position { get; private set; }
 
 	private TerrainSettings Settings;
+	private TerrainPaint Paint;
 
 	void OnEnable() {
 		if (Settings == null) Settings = FindObjectOfType<TerrainSettings>();
@@ -34,17 +35,17 @@ public class TerrainTile: MonoBehaviour {
 	public static Mesh GetPreviewMesh(TerrainSettings settings, Generator gen) {
 		Mesh mesh = new Mesh();
 
-		int resolution = settings.MeshResolution;
-		float length = settings.Length;
+		int res = settings.MeshResolution;
+		float len = settings.Length;
 
-		Vector3[] vertices = new Vector3[resolution * resolution];
-		for (int z = 0; z < resolution; z++) {
-			float zPos = ((float)z / (resolution - 1) - .5f) * length;
+		Vector3[] vertices = new Vector3[res * res];
+		for (int z = 0; z < res; z++) {
+			float zPos = ((float)z / (res - 1) - .5f) * len;
 
-			for (int x = 0; x < resolution; x++) {
-				float xPos = ((float)x / (resolution - 1) - .5f) * length;
-				float yPos = gen.GetValue(x * settings.Spread, z * settings.Spread, 0f) * settings.Amplitude;
-				vertices[x + z * resolution] = new Vector3(xPos, yPos, zPos);
+			for (int x = 0; x < res; x++) {
+				float xPos = ((float)x / (res - 1) - .5f) * len;
+				float yPos = gen.GetValue(xPos * settings.Spread, zPos * settings.Spread, 0f) * settings.Amplitude;
+				vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 			}
 		}
 
@@ -53,24 +54,24 @@ public class TerrainTile: MonoBehaviour {
 			normales[n] = Vector3.up;
 
 		Vector2[] uvs = new Vector2[vertices.Length];
-		for (int v = 0; v < resolution; v++) {
-			for (int u = 0; u < resolution; u++) {
-				uvs[u + v * resolution] = new Vector2((float)u / (resolution - 1), (float)v / (resolution - 1));
+		for (int v = 0; v < res; v++) {
+			for (int u = 0; u < res; u++) {
+				uvs[u + v * res] = new Vector2((float)u / (res - 1), (float)v / (res - 1));
 			}
 		}
 
-		int nbFaces = (resolution - 1) * (resolution - 1);
+		int nbFaces = (res - 1) * (res - 1);
 		int[] triangles = new int[nbFaces * 6];
 		int t = 0;
 		for (int face = 0; face < nbFaces; face++) {
-			int i = face % (resolution - 1) + (face / (resolution - 1) * resolution);
+			int i = face % (res - 1) + (face / (res - 1) * res);
 
-			triangles[t++] = i + resolution;
+			triangles[t++] = i + res;
 			triangles[t++] = i + 1;
 			triangles[t++] = i;
 
-			triangles[t++] = i + resolution;
-			triangles[t++] = i + resolution + 1;
+			triangles[t++] = i + res;
+			triangles[t++] = i + res + 1;
 			triangles[t++] = i + 1;
 		}
 
@@ -96,17 +97,18 @@ public class TerrainTile: MonoBehaviour {
 		Terrain = gameObject.AddComponent<MeshFilter>().mesh;
 		
 		int res = Settings.MeshResolution;
-		int len = Settings.Length;
+		float len = Settings.Length;
 
 		Vector3[] vertices = new Vector3[res * res];
-		int heightIdx = 0;
 		for (int z = 0; z < res; z++) {
 			float zPos = ((float)z / (res - 1) - .5f) * len;
 
 			for (int x = 0; x < res; x++) {
 				float xPos = ((float)x / (res - 1) - .5f) * len; //problem with x+z*res
-				vertices[x + z * res] = new Vector3(xPos, heights[heightIdx], zPos);
-				heightIdx++;
+				float yPos = Settings.Generator.GetValue(((position.x * len) + xPos) * Settings.Spread, 
+					((position.y * len) + zPos) * Settings.Spread, 0f) * Settings.Amplitude;
+
+				vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 			}
 		}
 
@@ -140,8 +142,12 @@ public class TerrainTile: MonoBehaviour {
 		Terrain.normals = normales;
 		Terrain.uv = uvs;
 		Terrain.triangles = triangles;
+		Terrain.RecalculateNormals();
 
 		UpdatePosition(position);
+
+		MeshCollider collider = gameObject.AddComponent<MeshCollider>();
+		collider.sharedMesh = Terrain;
 	}
 
 	/// <summary>
@@ -151,20 +157,22 @@ public class TerrainTile: MonoBehaviour {
 	/// This method can be called asynchronously off of the main Thread.
 	/// </summary>
 	/// <param name="vertices">Vertices from Mesh in world space</param>
-	/// <param name="spread">Option spread to stretch or squash the terrain</param>
-	/// <param name="amplitude">Optional amplitude to multiply height values by</param>
 	/// <returns>array of height values</returns>
-	public float[] GetNoiseHeights(Vector2 position, float spread = 1f, float amplitude = 1f) {
+	public float[] GetNoiseHeights(Vector2 position) {
 		int res = Settings.MeshResolution;
 		int len = Settings.Length;
 		float[] heights = new float[res * res];
 
+		int i = 0;
 		for (int z = 0; z < res; z++) {
-			float zPos = (((float)z / (res - 1) - .5f) * len) + (position.y * Settings.Length);
+			//float zPos = (((float)z / (res - 1) - .5f) * len) + (position.y * Settings.Length);
+			float zPos = (position.y * Settings.Length) + z;
 
 			for (int x = 0; x < res; x++) {
-				float xPos = (((float)x / (res - 1) - .5f) * len) + (position.x * Settings.Length);
-				heights[x + z * Settings.MeshResolution] = Settings.Generator.GetValue(xPos * spread, zPos * spread, 0f) * amplitude;
+				float xPos = (position.x * Settings.Length) + x;
+				//float xPos = (((float)x / (res - 1) - .5f) * len) + (position.x * Settings.Length);
+				heights[i] = Settings.Generator.GetValue(x * Settings.Spread, z * Settings.Spread, 0f) * Settings.Amplitude;
+				i++;
 			}
 		}
 
@@ -187,5 +195,14 @@ public class TerrainTile: MonoBehaviour {
 		Terrain.RecalculateBounds();
 		Terrain.RecalculateNormals();
 		Terrain.RecalculateTangents();
+	}
+
+	/// <summary>
+	/// Applies a splatmap to the terrain
+	/// </summary>
+	public void ApplySplatmap() {
+		if (Paint == null) Paint = new TerrainPaint(gameObject);
+
+		Paint.CreateAlphaMap(Settings.SplatSettings);
 	}
 }

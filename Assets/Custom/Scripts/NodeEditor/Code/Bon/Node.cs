@@ -295,11 +295,7 @@ public abstract class Node : IUpdateable
 
 		public static Color GetEdgeColor(Type nodeType)
 		{
-			if (nodeType == typeof(AbstractNumberNode)) return new Color(0.32f, 0.58f, 0.86f, 1);
-			if (nodeType == typeof(AbstractColorNode)) return new Color(0.54f, 0.70f, 0.50f, 1);
-			if (nodeType == typeof(AbstractStringNode)) return new Color(0.84f, 0.45f, 0.39f, 1f);
-			if (nodeType == typeof(AbstractVector3Node)) return new Color(0.9f, 0.9f, 0.9f, 1f);
-			return Color.black;
+			return Color.black; //TODO: Make customizable
 		}
 	}
 

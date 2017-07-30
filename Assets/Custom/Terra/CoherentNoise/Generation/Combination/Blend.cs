@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Combination
+namespace Terra.CoherentNoise.Generation.Combination
 {
 	/// <summary>
 	/// This generator blends two noises together, using third as a blend weight. Note that blend weight's value is clamped to [0,1] range

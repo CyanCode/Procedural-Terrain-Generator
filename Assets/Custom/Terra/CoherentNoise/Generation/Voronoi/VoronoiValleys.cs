@@ -1,4 +1,4 @@
-namespace CoherentNoise.Generation.Voronoi
+namespace Terra.CoherentNoise.Generation.Voronoi
 {
 	/// <summary>
 	/// This generator creates a "valleys" Voronoi diargam, that returns difference between two closest distances. Resulting settings has highest value at control points and 0 away from control points.

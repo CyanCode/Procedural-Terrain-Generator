@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using CoherentNoise;
+using Terra.CoherentNoise;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -38,6 +38,7 @@ namespace Terra.Terrain {
 
 			int res = settings.MeshResolution;
 			float len = settings.Length;
+			float spread = settings.Spread * (1f / settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -45,7 +46,7 @@ namespace Terra.Terrain {
 
 				for (int x = 0; x < res; x++) {
 					float xPos = ((float)x / (res - 1) - .5f) * len;
-					float yPos = gen.GetValue(xPos * settings.Spread, zPos * settings.Spread, 0f) * settings.Amplitude;
+					float yPos = gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
 					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 				}
 			}
@@ -99,6 +100,7 @@ namespace Terra.Terrain {
 
 			int res = Settings.MeshResolution;
 			float len = Settings.Length;
+			float spread = Settings.Spread * (1f / Settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -106,8 +108,8 @@ namespace Terra.Terrain {
 
 				for (int x = 0; x < res; x++) {
 					float xPos = ((float)x / (res - 1) - .5f) * len; //problem with x+z*res
-					float yPos = Settings.Generator.GetValue(((position.x * len) + xPos) * Settings.Spread,
-						((position.y * len) + zPos) * Settings.Spread, 0f) * Settings.Amplitude;
+					float yPos = Settings.Generator.GetValue(((position.x * len) + xPos) * spread,
+						((position.y * len) + zPos) * spread, 0f) * Settings.Amplitude;
 
 					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 				}
@@ -150,54 +152,7 @@ namespace Terra.Terrain {
 			MeshCollider collider = gameObject.AddComponent<MeshCollider>();
 			collider.sharedMesh = Terrain;
 		}
-
-		/// <summary>
-		/// Finds the heights from the created noise graph editor
-		/// returns the heights that can be applied to the mesh.
-		/// 
-		/// This method can be called asynchronously off of the main Thread.
-		/// </summary>
-		/// <param name="vertices">Vertices from Mesh in world space</param>
-		/// <returns>array of height values</returns>
-		public float[] GetNoiseHeights(Vector2 position) {
-			int res = Settings.MeshResolution;
-			int len = Settings.Length;
-			float[] heights = new float[res * res];
-
-			int i = 0;
-			for (int z = 0; z < res; z++) {
-				//float zPos = (((float)z / (res - 1) - .5f) * len) + (position.y * Settings.Length);
-				float zPos = (position.y * Settings.Length) + z;
-
-				for (int x = 0; x < res; x++) {
-					float xPos = (position.x * Settings.Length) + x;
-					//float xPos = (((float)x / (res - 1) - .5f) * len) + (position.x * Settings.Length);
-					heights[i] = Settings.Generator.GetValue(x * Settings.Spread, z * Settings.Spread, 0f) * Settings.Amplitude;
-					i++;
-				}
-			}
-
-			return heights;
-		}
-
-		/// <summary>
-		/// Applies the passed heights to the mesh. This cannot 
-		/// be called off of the main thread.
-		/// </summary>
-		/// <param name="heights">Heights to apply</param>
-		public void ApplyHeights(float[] heights) {
-			Vector3[] vertices = Terrain.vertices;
-
-			for (int i = 0; i < vertices.Length; i++) {
-				vertices[i] = new Vector3(vertices[i].x, heights[i], vertices[i].z);
-			}
-
-			Terrain.vertices = vertices;
-			Terrain.RecalculateBounds();
-			Terrain.RecalculateNormals();
-			Terrain.RecalculateTangents();
-		}
-
+		
 		/// <summary>
 		/// Applies a splatmap to the terrain
 		/// </summary>

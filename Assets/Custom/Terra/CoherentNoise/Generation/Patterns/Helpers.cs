@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Patterns
+namespace Terra.CoherentNoise.Generation.Patterns
 {
 	internal class Helpers
 	{

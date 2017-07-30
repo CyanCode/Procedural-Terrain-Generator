@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Displacement
+namespace Terra.CoherentNoise.Generation.Displacement
 {
 	///<summary>
 	/// This generator scales its source by given vector.

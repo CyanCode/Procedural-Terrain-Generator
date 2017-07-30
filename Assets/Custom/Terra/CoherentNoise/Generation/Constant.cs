@@ -1,4 +1,4 @@
-namespace CoherentNoise.Generation
+namespace Terra.CoherentNoise.Generation
 {
 	///<summary>
 	/// Constant "settings". This generator returns constant value, ignoring input coordinates. Used for arithmetic operations on settings generators

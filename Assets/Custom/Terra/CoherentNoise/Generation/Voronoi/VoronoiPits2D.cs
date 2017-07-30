@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Generation.Voronoi
+namespace Terra.CoherentNoise.Generation.Voronoi
 {
 	/// <summary>
 	/// This generator creates a "pits" Voronoi diargam, that simply returns distance to closest control point. Resulting settings has value 0 at control points (forming pits) and higher values away from control points.

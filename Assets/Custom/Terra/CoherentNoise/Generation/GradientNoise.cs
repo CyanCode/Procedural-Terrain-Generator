@@ -1,7 +1,7 @@
-using CoherentNoise.Interpolation;
+using Terra.CoherentNoise.Interpolation;
 using UnityEngine;
 
-namespace CoherentNoise.Generation
+namespace Terra.CoherentNoise.Generation
 {
 	/// <summary>
 	/// Gradient settings is a smoother variant of coherent settings. Instead of assingning random values to integer points, it assigns random gradient vectros, and interpolates values

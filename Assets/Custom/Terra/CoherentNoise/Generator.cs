@@ -1,7 +1,7 @@
-using CoherentNoise.Generation;
+using Terra.CoherentNoise.Generation;
 using UnityEngine;
 
-namespace CoherentNoise
+namespace Terra.CoherentNoise
 {
 	/// <summary>
 	/// A settings generator. 

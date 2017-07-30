@@ -1,4 +1,4 @@
-namespace CoherentNoise.Generation.Combination
+namespace Terra.CoherentNoise.Generation.Combination
 {
 	/// <summary>
 	/// Generator that adds two settings values together

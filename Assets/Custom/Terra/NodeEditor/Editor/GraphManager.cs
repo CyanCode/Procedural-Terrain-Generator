@@ -1,4 +1,4 @@
-﻿using CoherentNoise;
+﻿using Terra.CoherentNoise;
 using System.IO;
 using Terra.GraphEditor;
 using Terra.Nodes;

@@ -20,7 +20,6 @@ public class BonWindow: EditorWindow {
 	public const int BottomOffset = 22;
 	public const int TopMenuHeight = 24;
 
-	private const int WindowTitleHeight = 21;
 	private const float CanvasZoomMin = 0.1f;
 	private const float CanvasZoomMax = 1.0f;
 
@@ -32,7 +31,7 @@ public class BonWindow: EditorWindow {
 	private BonCanvas CurrentCanvas;
 	private Rect CanvasRegion = new Rect();
 
-	private AbstractSocket DragSourceSocket = null;
+	private AbstractSocket DragSourceSocket;
 	private Vector2 LastMousePosition;
 
 	private GenericMenu Menu;
@@ -242,7 +241,7 @@ public class BonWindow: EditorWindow {
 			if (NextTranlationPosition.y >= 0) NextTranlationPosition.y = 0;
 
 			CurrentCanvas.Position = NextTranlationPosition;
-			Event.current.Use();
+			//Event.current.Use();
 		}
 	}
 

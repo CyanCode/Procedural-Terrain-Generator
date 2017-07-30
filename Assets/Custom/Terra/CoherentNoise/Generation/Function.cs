@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Generation
+namespace Terra.CoherentNoise.Generation
 {
 	/// <summary>
 	/// This generator creates "settings" that is actually a function of coordinates. Use it to create regular patterns that are then perturbed by settings

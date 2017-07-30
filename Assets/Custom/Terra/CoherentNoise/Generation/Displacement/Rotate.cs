@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Displacement
+namespace Terra.CoherentNoise.Generation.Displacement
 {
 	/// <summary>
 	/// This generator rotates its source around origin.

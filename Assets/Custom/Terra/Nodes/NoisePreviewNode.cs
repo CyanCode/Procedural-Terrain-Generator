@@ -1,5 +1,5 @@
-﻿using CoherentNoise;
-using CoherentNoise.Texturing;
+﻿using Terra.CoherentNoise;
+using Terra.CoherentNoise.Texturing;
 using System;
 using Terra.GraphEditor;
 using Terra.GraphEditor.Sockets;
@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Terra.Nodes {
 	[Serializable]
-	[GraphContextMenuItem("Noise", "Preview")]
+	[GraphContextMenuItem("", "Preview")]
 	public class NoisePreviewNode: Node {
 		[NonSerialized]
 		private Rect LabelGenerator;

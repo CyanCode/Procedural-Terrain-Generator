@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using CoherentNoise;
+using Terra.CoherentNoise;
 using System;
-using CoherentNoise.Generation.Fractal;
+using Terra.CoherentNoise.Generation.Fractal;
 using Terra.GraphEditor.Sockets;
 using Terra.GraphEditor;
 using Terra.GraphEditor.Nodes;

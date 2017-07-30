@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Fractal
+namespace Terra.CoherentNoise.Generation.Fractal
 {
 	///<summary>
 	/// base class for fractal settings generators. Fractal generators use a source settings, that is sampled at several frequencies. 

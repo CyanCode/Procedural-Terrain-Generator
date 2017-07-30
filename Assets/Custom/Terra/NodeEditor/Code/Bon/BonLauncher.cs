@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using CoherentNoise;
+using Terra.CoherentNoise;
 using Terra.Nodes.Generation;
 using Terra.Nodes;
 using Terra.GraphEditor.Sockets;

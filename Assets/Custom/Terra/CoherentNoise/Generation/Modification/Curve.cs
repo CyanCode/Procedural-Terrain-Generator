@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Modification
+namespace Terra.CoherentNoise.Generation.Modification
 {
 	///<summary>
 	/// This generator modifies source settings by applying a curve transorm to it. Curves can be edited using Unity editor's CurveFields, or created procedurally.

@@ -1,4 +1,4 @@
-namespace CoherentNoise
+namespace Terra.CoherentNoise
 {
 	internal class Constants
 	{

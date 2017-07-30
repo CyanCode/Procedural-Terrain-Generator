@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Fractal
+namespace Terra.CoherentNoise.Generation.Fractal
 {
 	/// <summary>
 	/// This generator adds samples with weight decreasing with frequency, like Perlin settings; however, each signal is taken as absolute value, and weighted by previous (i.e. lower-frequency) signal,

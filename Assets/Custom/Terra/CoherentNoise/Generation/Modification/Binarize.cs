@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Generation.Modification
+namespace Terra.CoherentNoise.Generation.Modification
 {
 	/// <summary>
 	/// This generator binarizes its source settings, returning only value 0 and 1. A constant treshold value is user for binarization. I.e. result will be 0 where source value is less than treshold,

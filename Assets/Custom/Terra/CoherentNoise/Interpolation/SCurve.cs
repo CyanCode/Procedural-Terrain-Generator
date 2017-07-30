@@ -1,4 +1,4 @@
-namespace CoherentNoise.Interpolation
+namespace Terra.CoherentNoise.Interpolation
 {
 	/// <summary>
 	/// Base class for all S-curves. S-curves determine the interpolation algorithm. Using different curves, quality-speed balance may be tweaked,

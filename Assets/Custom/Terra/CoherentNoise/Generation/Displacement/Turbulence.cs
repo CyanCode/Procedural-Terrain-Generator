@@ -1,7 +1,7 @@
-using CoherentNoise.Generation.Fractal;
+using Terra.CoherentNoise.Generation.Fractal;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Displacement
+namespace Terra.CoherentNoise.Generation.Displacement
 {
 	///<summary>
 	/// Turbulence is a case of Perturb generator, that uses 3 Perlin settings generators as displacement source.

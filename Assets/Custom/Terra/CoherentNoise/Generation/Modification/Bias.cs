@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Generation.Modification
+namespace Terra.CoherentNoise.Generation.Modification
 {
 	/// <summary>
 	/// Bias generator is used to "shift" mean value of source settings. Source is assumed to have values between -1 and 1; after Bias is applied,

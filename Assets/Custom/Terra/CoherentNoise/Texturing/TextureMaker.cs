@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Texturing {
+namespace Terra.CoherentNoise.Texturing {
 	/// <summary>
 	/// Use methods in this class to create Unity textures with settings generators. All textures are created using 2D settings (i.e, Z coordinate is always 0), and sample source settings in
 	/// [0,1]x[0,1] area.

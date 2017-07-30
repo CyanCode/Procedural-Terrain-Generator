@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Patterns
+namespace Terra.CoherentNoise.Generation.Patterns
 {
 	///<summary>
 	/// Generates planes parallel to YZ plane. Resulting "settings" has value -1 on YZ plane, 1 at step distance, -1 at 2*step etc. 

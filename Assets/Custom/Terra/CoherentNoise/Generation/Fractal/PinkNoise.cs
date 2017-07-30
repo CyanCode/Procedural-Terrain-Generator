@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Generation.Fractal
+namespace Terra.CoherentNoise.Generation.Fractal
 {
 	/// <summary>
 	/// Pink settings is a fractal settings that adds together weighted signals sampled at different frequencies, with weight inversely proportional to frequency. .

@@ -1,7 +1,7 @@
-using CoherentNoise.Interpolation;
+using Terra.CoherentNoise.Interpolation;
 using UnityEngine;
 
-namespace CoherentNoise.Generation
+namespace Terra.CoherentNoise.Generation
 {
 	/// <summary>
 	/// This is the same settings as <see cref="GradientNoise"/>, but it does not change in Z direction. This is more efficient if you're only interested in 2D settings anyway.

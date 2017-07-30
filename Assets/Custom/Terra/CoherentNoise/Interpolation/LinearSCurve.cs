@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Interpolation
+namespace Terra.CoherentNoise.Interpolation
 {
 	///<summary>
 	/// Linear interpolator is the fastest and has the lowest quality, only ensuring continuity of settings values, not their derivatives.

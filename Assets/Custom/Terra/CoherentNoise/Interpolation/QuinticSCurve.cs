@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Interpolation
+namespace Terra.CoherentNoise.Interpolation
 {
 	internal class QuinticSCurve: SCurve
 	{

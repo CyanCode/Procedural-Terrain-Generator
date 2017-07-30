@@ -1,5 +1,5 @@
 
-namespace CoherentNoise.Generation
+namespace Terra.CoherentNoise.Generation
 {
 	/// <summary>
 	/// This generator returns its source unchanged. However, it caches last returned value, and does not recalculate it if called several times for the same point.

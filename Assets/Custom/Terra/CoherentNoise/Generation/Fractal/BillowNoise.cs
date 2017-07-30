@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Fractal
+namespace Terra.CoherentNoise.Generation.Fractal
 {
 	/// <summary>
 	/// A variation of Perlin settings, this generator creates billowy shapes useful for cloud generation. It uses the same formula as Perlin settings, but adds 

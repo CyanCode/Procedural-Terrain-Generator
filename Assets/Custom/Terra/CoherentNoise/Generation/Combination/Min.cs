@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Combination
+namespace Terra.CoherentNoise.Generation.Combination
 {
 	/// <summary>
 	/// This generator returns minimum value of its two source generators

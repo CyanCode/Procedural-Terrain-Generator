@@ -1,7 +1,7 @@
-using CoherentNoise.Interpolation;
+using Terra.CoherentNoise.Interpolation;
 using UnityEngine;
 
-namespace CoherentNoise.Generation
+namespace Terra.CoherentNoise.Generation
 {
 	/// <summary>
 	/// Most basic coherent settings: value settings. This algorithm generates random values in integer coordinates and smoothly interpolates between them.

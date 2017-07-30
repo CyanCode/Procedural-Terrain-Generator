@@ -1,4 +1,4 @@
-﻿using CoherentNoise;
+﻿using Terra.CoherentNoise;
 using System;
 using Terra.GraphEditor;
 using Terra.GraphEditor.Sockets;

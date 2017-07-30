@@ -1,5 +1,5 @@
-﻿using CoherentNoise;
-using CoherentNoise.Generation.Combination;
+﻿using Terra.CoherentNoise;
+using Terra.CoherentNoise.Generation.Combination;
 using System;
 using Terra.GraphEditor;
 

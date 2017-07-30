@@ -1,7 +1,7 @@
-using CoherentNoise.Generation.Displacement;
+using Terra.CoherentNoise.Generation.Displacement;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Voronoi
+namespace Terra.CoherentNoise.Generation.Voronoi
 {
 	/// <summary>
 	/// Base class for Voronoi diagrams generators. Voronoi diagrams use a set of control points, that are somehow distributed, and for every point calculate distances to the closest control points.

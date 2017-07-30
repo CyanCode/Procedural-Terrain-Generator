@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Patterns
+namespace Terra.CoherentNoise.Generation.Patterns
 {
 	///<summary>
 	/// This generator does the opposite of texture generation. It takes a texture and returns its red channel as a settings value.

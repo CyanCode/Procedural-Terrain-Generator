@@ -1,6 +1,6 @@
-﻿using CoherentNoise;
+﻿using Terra.CoherentNoise;
 using System;
-using CoherentNoise.Generation.Voronoi;
+using Terra.CoherentNoise.Generation.Voronoi;
 using Terra.GraphEditor;
 
 namespace Terra.Nodes.Generation {

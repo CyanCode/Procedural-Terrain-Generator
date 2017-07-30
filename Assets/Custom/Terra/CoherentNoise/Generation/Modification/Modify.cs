@@ -1,6 +1,6 @@
 using System;
 
-namespace CoherentNoise.Generation.Modification
+namespace Terra.CoherentNoise.Generation.Modification
 {
 	/// <summary>
 	/// This generator takes a source generator and applies a function to its output.

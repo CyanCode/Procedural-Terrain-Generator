@@ -1,10 +1,10 @@
 using System;
-using CoherentNoise.Generation.Combination;
-using CoherentNoise.Generation.Displacement;
-using CoherentNoise.Generation.Modification;
+using Terra.CoherentNoise.Generation.Combination;
+using Terra.CoherentNoise.Generation.Displacement;
+using Terra.CoherentNoise.Generation.Modification;
 using UnityEngine;
 
-namespace CoherentNoise
+namespace Terra.CoherentNoise
 {
 	/// <summary>
 	/// This class defines a number of useful extension methods for <see cref="Generator"/> class, that apply common settings transformations

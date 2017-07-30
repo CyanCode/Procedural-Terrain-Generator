@@ -1,6 +1,4 @@
-using System;
-
-namespace CoherentNoise
+namespace Terra.CoherentNoise
 {
 	internal class LatticeNoise
 	{

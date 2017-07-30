@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CoherentNoise.Generation.Patterns
+namespace Terra.CoherentNoise.Generation.Patterns
 {
 	///<summary>
 	/// Generates concentric cylinders centered in (0,0,0) and parallel to Z axis. Resulting "settings" has value -1 in the center, 1 at radius, -1 at 2*radius etc. 

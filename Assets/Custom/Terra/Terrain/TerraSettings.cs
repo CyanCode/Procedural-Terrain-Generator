@@ -4,18 +4,7 @@ using Terra.GraphEditor;
 using UnityEngine;
 
 namespace Terra.Terrain {
-	[RequireComponent(typeof(BonLauncher))]
-	public class TerrainSettings: MonoBehaviour {
-		[System.Serializable]
-		public class MaterialInfo {
-			public Material Material;
-			public Vector2 TextureSize = new Vector2(2, 2);
-			[Tooltip("Height to start showing texture")]
-			public float Height;
-			[Tooltip("Angle to start showing texture (from 0 to 1. -1 to disable)")]
-			public float Angle;
-		}
-
+	public class TerraSettings: MonoBehaviour {
 		public enum ToolbarOptions {
 			General = 0,
 			Noise = 1,
@@ -23,10 +12,12 @@ namespace Terra.Terrain {
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
+		public GraphLauncher Launcher;
+
 		//General Tab
 		public GameObject TrackedObject;
 		public int GenerationRadius = 3;
-		public int GenerationSeed = 1337;
+		public static int GenerationSeed = 1337;
 
 		public int MeshResolution = 128;
 		public int Length = 500;
@@ -46,15 +37,13 @@ namespace Terra.Terrain {
 		void Start() {
 			//Set seed for RNG
 			Random.InitState(GenerationSeed);
+			Launcher = new GraphLauncher();
+			Launcher.LoadGraph(SelectedFile);
+			Launcher.Enable();
 
-			BonLauncher launcher = gameObject.GetComponent<BonLauncher>();
-			if (launcher != null) {
-				Generator = launcher.GetGraphGenerator();
-			} else {
-				Debug.LogError("This gameobject has no associated graph launcher and cannot function.");
-			}
+			Generator = Launcher.GetGraphGenerator();
 		}
-
+		
 		public void OnDrawGizmosSelected() {
 			if (ToolbarSelection == ToolbarOptions.Noise && PreviewMesh != null) {
 				Gizmos.color = Color.white;
@@ -65,7 +54,7 @@ namespace Terra.Terrain {
 				List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
 
 				foreach (Vector2 pos in positions) {
-					Vector3 pos3d = new Vector3((pos.x * Length) + (Length / 2), 0, (pos.y * Length) + (Length / 2));
+					Vector3 pos3d = new Vector3(pos.x * Length + Length / 2, 0, pos.y * Length + Length / 2);
 
 					Gizmos.color = Color.white;
 					Gizmos.DrawWireCube(pos3d, new Vector3(Length, 0, Length));

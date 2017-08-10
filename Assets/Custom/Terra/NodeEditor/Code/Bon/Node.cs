@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Terra.GraphEditor.Sockets;
 using Terra.GraphEditor.Nodes;
+using Terra.Nodes;
+using Terra.Nodes.Generation;
+using Terra.Nodes.Modifier;
 
 namespace Terra.GraphEditor {
 	public abstract class Node: IUpdateable {
@@ -124,7 +127,6 @@ namespace Terra.GraphEditor {
 			return count;
 		}
 
-		// TODO update docu
 		/// <summary> Returns the socket of the type and index.</summary>
 		/// <param name="type"> The type of the socket.</param>
 		/// <param name="direction"> The input or output direction of the socket.</param>
@@ -220,7 +222,7 @@ namespace Terra.GraphEditor {
 				}
 			}
 		}
-
+		
 		/// <summary> Calculates the offset of a socket from the top of this node </summary>
 		private int GUICalcSocketTopOffset(int socketTopIndex) {
 			return BonConfig.SocketOffsetTop + (socketTopIndex * BonConfig.SocketSize)
@@ -265,7 +267,7 @@ namespace Terra.GraphEditor {
 		}
 
 		public static Color GetEdgeColor(Type nodeType) {
-			return Color.black; //TODO: Make customizable
+			return Color.black;
 		}
 	}
 

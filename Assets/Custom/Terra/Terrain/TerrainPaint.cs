@@ -19,12 +19,13 @@ namespace Terra.Terrain {
 		}
 		[Serializable]
 		public class SplatSetting {
-			public Texture MainTexture;
-			public Texture NormalTexture;
+			public Texture Diffuse;
+			public Texture Normal;
 			public Vector2 Tiling = new Vector2(1, 1);
 			public Vector2 Offset;
 			public float Smoothness;
 			public float Metallic;
+			public float Blend;
 
 			public PlacementType PlacementType;
 
@@ -33,7 +34,6 @@ namespace Terra.Terrain {
 			public float MinRange;
 			public float MaxRange;
 
-			public float Impact = 1f;
 			public float Precision = 0.9f;
 		}
 		public enum PlacementType {
@@ -71,29 +71,39 @@ namespace Terra.Terrain {
 		/// be called from the OnGUI method
 		/// </summary>
 		/// <param name="settings">Settings instance for modifying values</param>
-		public static void DisplayGUI(TerrainSettings settings) {
+		public static void DisplayGUI(TerraSettings settings) {
 			EditorGUILayout.Space();
 
 			if (settings.SplatSettings != null) {
 				for (int i = 0; i < settings.SplatSettings.Count; i++) {
 					SplatSetting splat = settings.SplatSettings[i];
 
+					//Surround each material w/ box
+					GUIStyle boxStyle = new GUIStyle();
+					boxStyle.padding = new RectOffset(3, 3, 3, 3);
+					boxStyle.normal.background = GetWhiteTexture();
+					EditorGUILayout.BeginVertical(boxStyle);
+					
+					//Close button / name
 					EditorGUILayout.BeginHorizontal();
 					if (GUILayout.Button("X", GUILayout.Height(16), GUILayout.Width(18))) {
 						settings.SplatSettings.RemoveAt(i);
 						i--;
 						continue;
 					}
-					EditorGUILayout.LabelField((splat.PlacementType == PlacementType.Angle ? "Angled" : "Elevation") + " Texture " + (i + 1));
+					EditorGUILayout.LabelField((splat.PlacementType == PlacementType.Angle ? "Angled" : "Elevation") + " Material " + (i + 1));
 					EditorGUILayout.EndHorizontal();
 
-					splat.MainTexture = (Texture)EditorGUILayout.ObjectField("Main Texture", splat.MainTexture, typeof(Texture), true, GUILayout.Height(16));
-					splat.NormalTexture = (Texture)EditorGUILayout.ObjectField("Normal Texture", splat.NormalTexture, typeof(Texture), true, GUILayout.Height(16));
-					splat.Metallic = EditorGUILayout.Slider("Metallic", splat.Metallic, 0f, 1f);
-					splat.Smoothness = EditorGUILayout.Slider("Smoothness", splat.Smoothness, 0f, 1f);
-					splat.Tiling = EditorGUILayout.Vector2Field("Tiling", splat.Tiling);
-					splat.Offset = EditorGUILayout.Vector2Field("Offset", splat.Offset);
+					//Material settings
+					EditorGUILayout.Space();
+					if (GUILayout.Button("Edit Material")) {
+						AddTextureWindow window = new AddTextureWindow(ref splat);
+					} if (splat.Diffuse == null) {
+						EditorGUILayout.HelpBox("This splat material does not have a selected diffuse texture.", MessageType.Warning);
+					}
+					EditorGUILayout.Space();
 
+					//GUI for different types
 					splat.PlacementType = (PlacementType)EditorGUILayout.EnumPopup("Placement Type", splat.PlacementType);
 					switch (splat.PlacementType) {
 						case PlacementType.Angle:
@@ -107,8 +117,7 @@ namespace Terra.Terrain {
 							break;
 					}
 
-					splat.Impact = EditorGUILayout.FloatField("Impact", splat.Impact);
-
+					EditorGUILayout.EndVertical();
 					EditorGUILayout.Separator();
 				}
 			}
@@ -121,9 +130,9 @@ namespace Terra.Terrain {
 			}
 		}
 
-		public void CreateAlphaMap(List<SplatSetting> settings) {
-			Texture2D Tex = new Texture2D(AlphaMapResolution, AlphaMapResolution);
-			Color[] Colors = new Color[AlphaMapResolution * AlphaMapResolution];
+		public Texture2D CreateAlphaMap(List<SplatSetting> settings) {
+			Texture2D tex = new Texture2D(AlphaMapResolution, AlphaMapResolution);
+			Color[] colors = new Color[AlphaMapResolution * AlphaMapResolution];
 
 			int colorIdx = 0;
 			for (int x = 0; x < AlphaMapResolution; x++) {
@@ -132,7 +141,6 @@ namespace Terra.Terrain {
 					float height = sample.Height;
 					float angle = sample.Angle;
 					float[] weights = new float[settings.Count];
-					var blend = 10f; //TODO: Actually put in settings
 
 					for (int i = 0; i < settings.Count; i++) {
 						SplatSetting splat = settings[i];
@@ -145,7 +153,7 @@ namespace Terra.Terrain {
 							case PlacementType.ElevationRange:
 								if (height > splat.MinRange && height < splat.MaxRange) {
 									if (i > 0) { //Can blend up
-										float factor = Mathf.Clamp01((blend - (height - splat.MinRange)) / blend);
+										float factor = Mathf.Clamp01((splat.Blend - (height - splat.MinRange)) / splat.Blend);
 										weights[i - 1] = factor;
 										weights[i] = 1 - factor;
 									} else {
@@ -163,7 +171,7 @@ namespace Terra.Terrain {
 						weights[i] /= sum;
 					}
 
-					Colors[colorIdx] = new Color(l > 0 ? weights[0] : 0f,
+					colors[colorIdx] = new Color(l > 0 ? weights[0] : 0f,
 						l > 1 ? weights[1] : 0f,
 						l > 2 ? weights[2] : 0f,
 						l > 3 ? weights[3] : 0f);
@@ -171,9 +179,9 @@ namespace Terra.Terrain {
 				}
 			}
 
-			Tex.SetPixels(Colors);
-			Tex.Apply();
-			TerrainMaterial.SetTexture("_Control", Tex);
+			tex.SetPixels(colors);
+			tex.Apply();
+			TerrainMaterial.SetTexture("_Control", tex);
 
 			var len = settings.Count;
 			if (len > 0) SetMaterialForSplatIndex(0, settings[0]);
@@ -183,9 +191,11 @@ namespace Terra.Terrain {
 
 			bool test = false;
 			if (test) {
-				byte[] bytes = Tex.EncodeToPNG();
+				byte[] bytes = tex.EncodeToPNG();
 				File.WriteAllBytes(Application.dataPath + "/Splat.png", bytes);
 			}
+
+			return tex;
 		}
 
 		/// <summary>
@@ -213,18 +223,37 @@ namespace Terra.Terrain {
 		/// <param name="mat">Material to apply</param>
 		void SetMaterialForSplatIndex(int index, SplatSetting splat) {
 			//Main Texture
-			TerrainMaterial.SetTexture("_Splat" + index, splat.MainTexture);
+			TerrainMaterial.SetTexture("_Splat" + index, splat.Diffuse);
 			TerrainMaterial.SetTextureScale("_Splat" + index, splat.Tiling);
 			TerrainMaterial.SetTextureOffset("_Splat" + index, splat.Offset);
 
 			//Normal Texture
-			TerrainMaterial.SetTexture("_Normal" + index, splat.NormalTexture);
+			TerrainMaterial.SetTexture("_Normal" + index, splat.Normal);
 			TerrainMaterial.SetTextureScale("_Normal" + index, splat.Tiling);
 			TerrainMaterial.SetTextureOffset("_Normal" + index, splat.Offset);
 
 			//Metallic / Smoothness information
 			TerrainMaterial.SetFloat("_Metallic" + index, splat.Metallic);
 			TerrainMaterial.SetFloat("_Smoothness" + index, splat.Smoothness);
+		}
+
+		/// <summary>
+		/// Cached texture used by <code>GetWhiteTexture</code> method
+		/// </summary>
+		private static Texture2D WhiteTex;
+
+		/// <summary>
+		/// Gets a cached white texture that can be used for GUI
+		/// </summary>
+		/// <returns>All white Texture instance</returns>
+		private static Texture2D GetWhiteTexture() {
+			if (WhiteTex == null) {
+				WhiteTex = new Texture2D(1, 1);
+				WhiteTex.SetPixel(0, 0, new Color(230f / 255f, 230f / 255f, 230f / 255f));
+				WhiteTex.Apply();
+			}
+
+			return WhiteTex;
 		}
 	}
 }

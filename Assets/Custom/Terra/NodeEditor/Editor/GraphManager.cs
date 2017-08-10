@@ -7,9 +7,9 @@ using UnityEditor;
 using UnityEngine;
 
 public class GraphManager {
-	private TerrainSettings Settings;
+	private TerraSettings Settings;
 
-	public GraphManager(TerrainSettings settings) {
+	public GraphManager(TerraSettings settings) {
 		Settings = settings;
 	}
 
@@ -18,23 +18,12 @@ public class GraphManager {
 	/// </summary>
 	/// <param name="settings">Settings to persist created Graph instance</param>
 	public void Open() {
-		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
-		if (launcher == null) {
-			Debug.LogError("There is no graph launcher in the scene. Make sure to not delete graph launcher component");
-			return;
-		}
-
-		Settings.LoadedGraph = launcher.LoadGraph(Settings.SelectedFile);
+		Settings.LoadedGraph = Settings.Launcher.LoadGraph(Settings.SelectedFile);
 		CreateGraphWindow(Settings);
 	}
 
 	public void OpenNew(string path) {
-		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
-		if (launcher == null) {
-			Debug.LogError("There is no graph launcher in the scene. Make sure to not delete graph launcher component");
-			return;
-		}
-
+		GraphLauncher launcher = Settings.Launcher;
 		Settings.LoadedGraph = launcher.LoadGraph(BonConfig.DefaultGraphName);
 		launcher.SaveGraph(Settings.LoadedGraph, path);
 		CreateGraphWindow(Settings);
@@ -114,7 +103,7 @@ public class GraphManager {
 	/// </summary>
 	/// <returns>true if found and connected, false otherwise</returns>
 	public bool HasValidEndNode() {
-		BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
+		GraphLauncher launcher = Settings.Launcher;
 		if (launcher != null && launcher.Graph != null) {
 			EndNode endNode = launcher.Graph.GetNode<EndNode>();
 			return endNode != null && endNode.GetFinalGenerator() != null;
@@ -129,7 +118,7 @@ public class GraphManager {
 	/// <returns>The end generator if it exists</returns>
 	public Generator GetGraphGenerator() {
 		if (HasValidEndNode()) {
-			BonLauncher launcher = Object.FindObjectOfType<BonLauncher>();
+			GraphLauncher launcher = Settings.Launcher;
 			EndNode endNode = launcher.Graph.GetNode<EndNode>();
 
 			return endNode.GetFinalGenerator();
@@ -172,7 +161,7 @@ public class GraphManager {
 		}
 	}
 
-	private void CreateGraphWindow(TerrainSettings Settings) {
+	private void CreateGraphWindow(TerraSettings Settings) {
 		BonWindow window = EditorWindow.GetWindow<BonWindow>();
 		window.CreateCanvas(Settings.SelectedFile);
 	}

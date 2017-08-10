@@ -7,7 +7,7 @@ namespace Terra.Terrain {
 	/// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
 	/// </summary>
 	public class TilePool: MonoBehaviour {
-		public TerrainSettings Settings;
+		public TerraSettings Settings;
 
 		private TileCache Cache = new TileCache(CACHE_SIZE);
 		private int queuedTiles = 0;

@@ -11,13 +11,13 @@ namespace Terra.Terrain {
 		public Mesh Terrain { get; private set; }
 		public Vector2 Position { get; private set; }
 
-		private TerrainSettings Settings;
+		private TerraSettings Settings;
 		private TerrainPaint Paint;
 
 		void OnEnable() {
-			if (Settings == null) Settings = FindObjectOfType<TerrainSettings>();
+			if (Settings == null) Settings = FindObjectOfType<TerraSettings>();
 			if (Settings == null) {
-				Debug.LogError("Cannot find a TerrainSettings object in the scene");
+				Debug.LogError("Cannot find a TerraSettings object in the scene");
 			}
 		}
 
@@ -33,7 +33,7 @@ namespace Terra.Terrain {
 		/// <param name="settings">Settings to apply to the mesh</param>
 		/// <param name="gen">Generator</param>
 		/// <returns>A preview mesh</returns>
-		public static Mesh GetPreviewMesh(TerrainSettings settings, Generator gen) {
+		public static Mesh GetPreviewMesh(TerraSettings settings, Generator gen) {
 			Mesh mesh = new Mesh();
 
 			int res = settings.MeshResolution;
@@ -87,13 +87,15 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// Creates a Mesh with the length and resolution specified in 
-		/// TerrainSettings. Applies the passed heights from calculated noise 
+		/// TerraSettings. Applies the passed heights from calculated noise 
 		/// values. This cannot be called off of the main thread
 		/// </summary>
 		/// <param name="position">Position to place Mesh in the tile grid</param>
 		/// <param name="heights">Heights to apply to the mesh. This array must be equal in size 
 		/// to the length of vertices on the mesh.</param>
 		public void CreateMesh(Vector2 position, float[] heights) {
+			TerraEvent.TriggerOnMeshWillForm(gameObject);
+
 			MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
 			renderer.material = new Material(Shader.Find("Diffuse"));
 			Terrain = gameObject.AddComponent<MeshFilter>().mesh;
@@ -151,15 +153,19 @@ namespace Terra.Terrain {
 
 			MeshCollider collider = gameObject.AddComponent<MeshCollider>();
 			collider.sharedMesh = Terrain;
+
+			TerraEvent.TriggerOnMeshDidForm(gameObject, Terrain);
 		}
 		
 		/// <summary>
 		/// Applies a splatmap to the terrain
 		/// </summary>
 		public void ApplySplatmap() {
+			TerraEvent.TriggerOnSplatmapWillCalculate(gameObject);
 			if (Paint == null) Paint = new TerrainPaint(gameObject);
 
-			Paint.CreateAlphaMap(Settings.SplatSettings);
+			Texture2D map = Paint.CreateAlphaMap(Settings.SplatSettings);
+			TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, map);
 		}
 	}
 }

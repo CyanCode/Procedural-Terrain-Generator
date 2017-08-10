@@ -2,6 +2,7 @@
 using System;
 using Terra.CoherentNoise.Generation.Voronoi;
 using Terra.GraphEditor;
+using Terra.Terrain;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
@@ -10,7 +11,7 @@ namespace Terra.Nodes.Generation {
 		public VoronoiPitsNode(int id, Graph parent) : base(id, parent) { }
 
 		public override Generator GetGenerator() {
-			VoronoiPits2D noise = new VoronoiPits2D(12); //TODO: Implement static seed
+			VoronoiPits2D noise = new VoronoiPits2D(TerraSettings.GenerationSeed);
 			noise.Frequency = Frequency;
 			noise.Period = (int)Period;
 

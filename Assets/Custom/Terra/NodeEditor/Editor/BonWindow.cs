@@ -12,10 +12,10 @@ using Terra.GraphEditor;
 
 /// <summary>
 /// This class contains the logic of the editor window. It contains canvases that
-/// are containing graphs. It uses the BonLauncher to load, save and close Graphs.
+/// are containing graphs. It uses the GraphLauncher to load, save and close Graphs.
 /// </summary>
 public class BonWindow: EditorWindow {
-	private const string Name = "Noise Editor"; //TODO: Change to editor name
+	private const string Name = "Noise Editor";
 	public const int TopOffset = 30;
 	public const int BottomOffset = 22;
 	public const int TopMenuHeight = 24;
@@ -111,19 +111,14 @@ public class BonWindow: EditorWindow {
 	}
 
 
-	private BonLauncher GetLauncher() {
-		if (FindObjectOfType<TerrainSettings>() == null) {
-			Debug.LogError("Cannot launch graph editor without a TerrainSettings component.");
+	private GraphLauncher GetLauncher() {
+		TerraSettings settings = FindObjectOfType<TerraSettings>();
+		if (settings == null) {
+			Debug.LogError("Cannot launch graph editor without a TerraSettings component.");
 			return null;
 		}
 
-		BonLauncher launcher = null;
-		if ((launcher = FindObjectOfType<BonLauncher>()) == null) {
-			launcher = FindObjectOfType<TerrainSettings>().gameObject.AddComponent<BonLauncher>();
-			Log.Info("Added BonLauncher Component '" + BonConfig.GameObjectName + "' to TerrainSettings gameobject");
-		}
-
-		return launcher;
+		return settings.Launcher;
 	}
 
 	/// <summary>Draws the UI</summary>

@@ -5,6 +5,7 @@ using Terra.CoherentNoise.Generation.Fractal;
 using Terra.GraphEditor.Sockets;
 using Terra.GraphEditor;
 using Terra.GraphEditor.Nodes;
+using Terra.Terrain;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
@@ -45,7 +46,7 @@ namespace Terra.Nodes.Generation {
 		}
 
 		public override Generator GetGenerator() {
-			RidgeNoise noise = new RidgeNoise(12); //TODO: Implement static seed
+			RidgeNoise noise = new RidgeNoise(TerraSettings.GenerationSeed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;

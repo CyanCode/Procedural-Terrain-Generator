@@ -15,9 +15,9 @@ namespace Terra.Nodes {
 		[NonSerialized]
 		private InputSocket InputSocketGenerator;
 		[NonSerialized]
-		private bool TextureNeedsUpdating = false;
+		private bool TextureNeedsUpdating;
 		[NonSerialized]
-		private Texture Texture = null;
+		private Texture Texture;
 
 		public NoisePreviewNode(int id, Graph parent) : base(id, parent) {
 			LabelGenerator = new Rect(6, 100, 90, BonConfig.SocketSize);

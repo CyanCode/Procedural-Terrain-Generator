@@ -5,6 +5,7 @@ using Terra.CoherentNoise.Generation.Fractal;
 using Terra.GraphEditor;
 using Terra.GraphEditor.Sockets;
 using Terra.GraphEditor.Nodes;
+using Terra.Terrain;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
@@ -34,7 +35,7 @@ namespace Terra.Nodes.Generation {
 		}
 
 		public override Generator GetGenerator() {
-			BillowNoise noise = new BillowNoise(12); //TODO: Implement static seed
+			BillowNoise noise = new BillowNoise(TerraSettings.GenerationSeed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;

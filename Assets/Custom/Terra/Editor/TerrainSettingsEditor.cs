@@ -2,62 +2,67 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(TerrainSettings))]
-public class TerrainSettingsEditor: Editor {
-	private TerrainSettings Settings {
-		get {
-			return (TerrainSettings)target;
+namespace UnityEditor.Terra {
+	[CustomEditor(typeof(TerraSettings))]
+	public class TerrainSettingsEditor: Editor {
+		private TerraSettings Settings {
+			get {
+				return (TerraSettings)target;
+			}
 		}
-	}
-	private GraphManager manager;
+		private GraphManager manager;
 
-	void OnEnable() {
-		manager = new GraphManager(Settings);
-		Settings.Generator = manager.GetGraphGenerator();
-	}
+		void OnEnable() {
+			manager = new GraphManager(Settings);
+			Settings.Generator = manager.GetGraphGenerator();
+		}
 
-	public override void OnInspectorGUI() {
-		//Options tab
-		EditorGUILayout.Space();
-		Settings.ToolbarSelection = (TerrainSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(Settings.ToolbarSelection);
+		public override void OnInspectorGUI() {
+			//Options tab
+			EditorGUILayout.Space();
+			Settings.ToolbarSelection = (TerraSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(Settings.ToolbarSelection);
 
-		switch (Settings.ToolbarSelection) {
-			case TerrainSettings.ToolbarOptions.General:
-				//Tracked gameobject
-				EditorGUILayout.Space();
-				EditorGUILayout.LabelField("Tracked GameObject", EditorStyles.boldLabel);
-				Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
+			switch (Settings.ToolbarSelection) {
+				case TerraSettings.ToolbarOptions.General:
+					//Tracked gameobject
+					EditorGUILayout.Space();
+					EditorGUILayout.LabelField("Tracked GameObject", EditorStyles.boldLabel);
+					Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
 
-				//Terrain settings
-				EditorGUILayout.Space();
-				EditorGUILayout.LabelField("Terrain Generation Settings", EditorStyles.boldLabel);
-				Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
-				Settings.GenerationSeed = EditorGUILayout.IntField("Seed", Settings.GenerationSeed);
-				Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
-				Settings.MeshResolution = EditorGUILayout.IntField("Mesh Resolution", Settings.MeshResolution);
-				Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-				Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+					//Terrain settings
+					string[] stringResOptions = { "32", "64", "128", "256", "521" };
+					int[] resOptions = { 32, 64, 128, 256, 521 };
 
-				break;
-			case TerrainSettings.ToolbarOptions.Noise:
-				EditorGUILayout.Space();
+					EditorGUILayout.Space();
+					EditorGUILayout.LabelField("Terrain Generation Settings", EditorStyles.boldLabel);
+					Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
+					TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
+					Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
+					Settings.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.MeshResolution, stringResOptions, resOptions);
+					Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
+					Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
 
-				if (Settings.SelectedFile != "") {
-					if (manager.GraphFileCanBeRead(Settings.SelectedFile))
-						if (manager.HasValidEndNode())
-							manager.OptionGraphOpenSuccess();
+					break;
+				case TerraSettings.ToolbarOptions.Noise:
+					EditorGUILayout.Space();
+
+					if (Settings.SelectedFile != "") {
+						if (manager.GraphFileCanBeRead(Settings.SelectedFile))
+							if (manager.HasValidEndNode())
+								manager.OptionGraphOpenSuccess();
+							else
+								manager.MessageNoEndNode();
 						else
-							manager.MessageNoEndNode();
-					else
-						manager.OptionGraphOpenError();
-				} else {
-					manager.OptionIncorrectFileSelection();
-				}
+							manager.OptionGraphOpenError();
+					} else {
+						manager.OptionIncorrectFileSelection();
+					}
 
-				break;
-			case TerrainSettings.ToolbarOptions.Materials:
-				TerrainPaint.DisplayGUI(Settings);
-				break;
+					break;
+				case TerraSettings.ToolbarOptions.Materials:
+					TerrainPaint.DisplayGUI(Settings);
+					break;
+			}
 		}
 	}
 }

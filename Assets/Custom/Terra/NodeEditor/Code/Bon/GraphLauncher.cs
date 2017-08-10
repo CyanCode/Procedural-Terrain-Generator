@@ -11,7 +11,7 @@ namespace Terra.GraphEditor {
 	/// </summary>
 	[ExecuteInEditMode]
 	[System.Serializable]
-	public class BonLauncher: MonoBehaviour {
+	public class GraphLauncher {
 		private StandardGraphController _controller;
 		public Graph Graph;
 
@@ -67,7 +67,7 @@ namespace Terra.GraphEditor {
 			//if (_controller == null) _controller = new StandardGraphController();
 		}
 
-		public void OnEnable() {
+		public void Enable() {
 			if (_controller == null) _controller = new StandardGraphController();
 			_controller.Register();
 

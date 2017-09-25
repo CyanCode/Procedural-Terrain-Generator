@@ -4,7 +4,9 @@ using Terra.GraphEditor;
 using UnityEngine;
 
 namespace Terra.Terrain {
+	[System.Serializable]
 	public class TerraSettings: MonoBehaviour {
+		[System.Serializable]
 		public enum ToolbarOptions {
 			General = 0,
 			Noise = 1,

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
+using System.Collections.Generic;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -162,10 +163,11 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void ApplySplatmap() {
 			TerraEvent.TriggerOnSplatmapWillCalculate(gameObject);
-			if (Paint == null) Paint = new TerrainPaint(gameObject);
+			if (Paint == null) Paint = new TerrainPaint(gameObject, Settings.SplatSettings);
 
-			Texture2D map = Paint.CreateAlphaMap(Settings.SplatSettings);
-			TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, map);
+			List<Texture2D> maps = Paint.CreateAlphaMaps();
+			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));
+			
 		}
 	}
 }

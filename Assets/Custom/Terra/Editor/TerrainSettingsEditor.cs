@@ -1,5 +1,4 @@
 ﻿using Terra.Terrain;
-using UnityEditor;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -39,8 +38,8 @@ namespace UnityEditor.Terra {
 					TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
 					Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
 					Settings.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.MeshResolution, stringResOptions, resOptions);
-					Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-					Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+					//Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
+					//Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
 
 					break;
 				case TerraSettings.ToolbarOptions.Noise:
@@ -48,10 +47,8 @@ namespace UnityEditor.Terra {
 
 					if (Settings.SelectedFile != "") {
 						if (manager.GraphFileCanBeRead(Settings.SelectedFile))
-							if (manager.HasValidEndNode())
-								manager.OptionGraphOpenSuccess();
-							else
-								manager.MessageNoEndNode();
+							if (manager.HasValidEndNode()) manager.OptionGraphOpenSuccess();
+							else manager.MessageNoEndNode();
 						else
 							manager.OptionGraphOpenError();
 					} else {

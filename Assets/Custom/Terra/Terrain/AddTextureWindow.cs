@@ -1,16 +1,9 @@
-﻿using Terra.Terrain;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Terra.Terrain {
 	public class AddTextureWindow: EditorWindow {
 		private TerrainPaint.SplatSetting Splat;
-		private bool DiffuseSelected = false;
-
-		/// <summary>
-		/// Cached Empty Texture2D used by GetEmptyTexture() method
-		/// </summary>
-		private Texture2D Empty;
 
 		public AddTextureWindow(ref TerrainPaint.SplatSetting splat) {
 			titleContent = new GUIContent("Add Splat Material");
@@ -28,22 +21,20 @@ namespace Terra.Terrain {
 			//Diffuse Map
 			EditorGUILayout.BeginVertical();
 			EditorGUILayout.LabelField("Diffuse", GUILayout.Width(60));
-			Splat.Diffuse = (Texture2D)EditorGUILayout.ObjectField(
-				Splat.Diffuse == null ? GetEmptyTexture() : GetDiffuseTexture(),
+
+			Splat.Diffuse = (Texture2D)EditorGUILayout.ObjectField(Splat.Diffuse,
 				typeof(Texture2D), false, GUILayout.Width(80), GUILayout.Height(80));
-			if (!DiffuseSelected) Splat.Diffuse = null;
+
 			EditorGUILayout.EndVertical();
 
 			//Normal Map
 			EditorGUILayout.BeginVertical();
 			EditorGUILayout.LabelField("Normal", GUILayout.Width(60));
 
-			EditorGUI.BeginChangeCheck();
-			Splat.Normal = (Texture2D)EditorGUILayout.ObjectField(
-				Splat.Normal == null ? GetEmptyTexture() : Splat.Normal,
+			Splat.Normal = (Texture2D)EditorGUILayout.ObjectField(Splat.Normal,
 				typeof(Texture2D), false, GUILayout.Width(80), GUILayout.Height(80));
-			EditorGUILayout.EndVertical();
 
+			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();
 
 			//Tiling & Offset
@@ -71,31 +62,6 @@ namespace Terra.Terrain {
 
 			EditorGUILayout.EndVertical();
 			GUILayout.EndArea();
-		}
-
-		/// <summary>
-		/// Gets a white, empty texture that can be displayed in a GUI
-		/// </summary>
-		/// <returns>Cached empty texture</returns>
-		Texture2D GetEmptyTexture() {
-			DiffuseSelected = false;
-			if (Empty == null) {
-				Empty = new Texture2D(1, 1);
-				Empty.SetPixel(0, 0, Color.gray);
-				Empty.Apply();
-			}
-
-			return Empty;
-		}
-
-		/// <summary>
-		/// Gets the diffuse texture associated with the current splat 
-		/// material. Sets DiffuseSelected to true.
-		/// </summary>
-		/// <returns>Diffuse texture</returns>
-		Texture GetDiffuseTexture() {
-			DiffuseSelected = true;
-			return Splat.Diffuse;
 		}
 	}
 }

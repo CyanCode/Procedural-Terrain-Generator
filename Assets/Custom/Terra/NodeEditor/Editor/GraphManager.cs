@@ -59,6 +59,10 @@ public class GraphManager {
 		OptionDefault();
 
 		EditorGUILayout.Space();
+
+		Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
+		Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+
 		if (Application.isEditor) {
 			if (GUILayout.Button("Update Preview")) {
 				Generator gen = GetGraphGenerator();

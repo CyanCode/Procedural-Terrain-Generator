@@ -19,13 +19,14 @@ namespace Terra.Terrain {
 		}
 		[Serializable]
 		public class SplatSetting {
-			public Texture Diffuse;
-			public Texture Normal;
+			public Texture2D Diffuse;
+			public Texture2D Normal;
 			public Vector2 Tiling = new Vector2(1, 1);
 			public Vector2 Offset;
+
 			public float Smoothness;
 			public float Metallic;
-			public float Blend;
+			public float Blend = 5f;
 
 			public PlacementType PlacementType;
 
@@ -44,18 +45,22 @@ namespace Terra.Terrain {
 		public int AlphaMapResolution = 128; //128
 
 		GameObject TerrainObject;
+		List<SplatSetting> SplatSettings;
+
 		Material TerrainMaterial;
 		Mesh Mesh;
 		Vector3[] Vertices;
 		Vector3[] Normals;
 		int MeshResolution;
+		
 
 		/// <summary>
 		/// Create a TerrainPaint object that paints the passed gameobject
 		/// </summary>
 		/// <param name="gameobject">Gameobject to paint</param>
-		public TerrainPaint(GameObject gameobject) {
+		public TerrainPaint(GameObject gameobject, List<SplatSetting> splatSettings) {
 			TerrainObject = gameobject;
+			SplatSettings = splatSettings;
 
 			const string path = "Nature/Terrain/Standard";
 			TerrainMaterial = TerrainObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find(path));
@@ -96,11 +101,31 @@ namespace Terra.Terrain {
 
 					//Material settings
 					EditorGUILayout.Space();
-					if (GUILayout.Button("Edit Material")) {
-						AddTextureWindow window = new AddTextureWindow(ref splat);
-					} if (splat.Diffuse == null) {
+
+					if (splat.Diffuse == null) {
 						EditorGUILayout.HelpBox("This splat material does not have a selected diffuse texture.", MessageType.Warning);
+					} else {
+						EditorGUILayout.BeginHorizontal();
+						EditorGUILayout.BeginVertical();
+
+						splat.Diffuse = (Texture2D)EditorGUILayout.ObjectField(splat.Diffuse,
+							typeof(Texture2D), false, GUILayout.Width(80), GUILayout.Height(80));
+						EditorGUILayout.LabelField("Diffuse", GUILayout.Width(60));
+						EditorGUILayout.EndVertical();
+
+						if (splat.Normal != null) {
+							EditorGUILayout.BeginVertical();
+							splat.Normal = (Texture2D)EditorGUILayout.ObjectField(splat.Normal,
+								typeof(Texture2D), false, GUILayout.Width(80), GUILayout.Height(80));
+							EditorGUILayout.LabelField("Normal", GUILayout.Width(60));
+							EditorGUILayout.EndVertical();
+						}
+
+						EditorGUILayout.EndHorizontal();
+					} if (GUILayout.Button("Edit Material")) {
+						AddTextureWindow window = new AddTextureWindow(ref splat);
 					}
+
 					EditorGUILayout.Space();
 
 					//GUI for different types
@@ -130,77 +155,98 @@ namespace Terra.Terrain {
 			}
 		}
 
-		public Texture2D CreateAlphaMap(List<SplatSetting> settings) {
-			Texture2D tex = new Texture2D(AlphaMapResolution, AlphaMapResolution);
-			Color[] colors = new Color[AlphaMapResolution * AlphaMapResolution];
-
-			int colorIdx = 0;
+		public List<Texture2D> CreateAlphaMaps(bool debug = false) {
+			List<Texture2D> maps = new List<Texture2D>();
+			for (int i = 0; i < SplatSettings.Count / 4; i++)
+				maps.Add(new Texture2D(AlphaMapResolution, AlphaMapResolution));
+			
 			for (int x = 0; x < AlphaMapResolution; x++) {
 				for (int y = 0; y < AlphaMapResolution; y++) {
 					MeshSample sample = SampleAt((float)y / (float)AlphaMapResolution, (float)x / (float)AlphaMapResolution);
-					float height = sample.Height;
-					float angle = sample.Angle;
-					float[] weights = new float[settings.Count];
-
-					for (int i = 0; i < settings.Count; i++) {
-						SplatSetting splat = settings[i];
-
-						switch (splat.PlacementType) {
-							case PlacementType.Angle:
-								if (Math.Abs(angle - splat.Angle) < splat.Precision)
-									weights[i] = 0f; //TODO: Fix
-								break;
-							case PlacementType.ElevationRange:
-								if (height > splat.MinRange && height < splat.MaxRange) {
-									if (i > 0) { //Can blend up
-										float factor = Mathf.Clamp01((splat.Blend - (height - splat.MinRange)) / splat.Blend);
-										weights[i - 1] = factor;
-										weights[i] = 1 - factor;
-									} else {
-										weights[i] = 1f;
-									}
-								}
-
-								break;
-						}
-					}
-
-					var sum = weights.Sum();
-					var l = weights.Length;
-					for (int i = 0; i < l; i++) {
-						weights[i] /= sum;
-					}
-
-					colors[colorIdx] = new Color(l > 0 ? weights[0] : 0f,
-						l > 1 ? weights[1] : 0f,
-						l > 2 ? weights[2] : 0f,
-						l > 3 ? weights[3] : 0f);
-					colorIdx++;
+					AddWeightsToTextures(CalculateWeights(sample), ref maps, y, x);
 				}
 			}
 
-			tex.SetPixels(colors);
-			tex.Apply();
-			TerrainMaterial.SetTexture("_Control", tex);
+			if (debug) {
+				TerrainTile tile = TerrainObject.GetComponent<TerrainTile>();
 
-			var len = settings.Count;
-			if (len > 0) SetMaterialForSplatIndex(0, settings[0]);
-			if (len > 1) SetMaterialForSplatIndex(1, settings[1]);
-			if (len > 2) SetMaterialForSplatIndex(2, settings[2]);
-			if (len > 3) SetMaterialForSplatIndex(3, settings[3]);
+				string tileName = "Tile[" + tile.Position.x + "_" + tile.Position.y + "]";
+				string folderPath = Application.dataPath + "/SplatImages/";
+				if (!Directory.Exists(folderPath))
+					Directory.CreateDirectory(folderPath);
 
-			bool test = false;
-			if (test) {
-				byte[] bytes = tex.EncodeToPNG();
-				File.WriteAllBytes(Application.dataPath + "/Splat.png", bytes);
+				for (var i = 0; i < maps.Count; i++) {
+					byte[] bytes = maps[i].EncodeToPNG();
+					string name = "Splat" + i + "_" + tileName + ".png";
+					File.WriteAllBytes(folderPath + name, bytes);
+				}
 			}
 
-			return tex;
+			maps.ForEach(t => t.Apply());
+			ApplySplatmapsToShaders(maps);
+			
+			return maps;
+		}
+
+		void AddWeightsToTextures(float[] weights, ref List<Texture2D> textures, int x, int y) {
+			int len = weights.Length;
+
+			for (int i = 0; i < len; i += 4) {
+				float r = weights[i];
+				float g = i + 1 < len ? weights[i + 1] : 0f;
+				float b = i + 2 < len ? weights[i + 2] : 0f;
+				float a = i + 3 < len ? weights[i + 3] : 0f;
+				
+				textures[i].SetPixel(x, y, new Color(r, g, b, a));
+			}
 		}
 
 		/// <summary>
-		/// Finds the height of the passed x and z values on the mesh 
-		/// by raycasting. x and z should be normalized.
+		/// Calculates the weights that can be used to create a splatmap 
+		/// based on the passed sample and splats.
+		/// </summary>
+		/// <param name="sample">Sample to base calculation on</param>
+		/// <param name="splat">Splat setting to base calculation on</param>
+		/// <returns>Weight values in the same order of the </returns>
+		float[] CalculateWeights(MeshSample sample) {
+			float height = sample.Height;
+			float angle = sample.Angle;
+			float[] weights = new float[SplatSettings.Count];
+
+			for (int i = 0; i < SplatSettings.Count; i++) {
+				SplatSetting splat = SplatSettings[i];
+
+				switch (splat.PlacementType) {
+					case PlacementType.Angle:
+						if (Math.Abs(angle - splat.Angle) < splat.Precision)
+							weights[i] = 0f; //TODO: Fix
+						break;
+					case PlacementType.ElevationRange:
+						if (height > splat.MinRange && height < splat.MaxRange) {
+							if (i > 0) { //Can blend up
+								float factor = Mathf.Clamp01((splat.Blend - (height - splat.MinRange)) / splat.Blend);
+								weights[i - 1] = factor;
+								weights[i] = 1 - factor;
+							} else {
+								weights[i] = 1f;
+							}
+						}
+
+						break;
+				}
+			}
+
+			//Normalize weights
+			float sum = weights.Sum();
+			for (var i = 0; i < weights.Length; i++) {
+				weights[i] /= sum;
+			}
+
+			return weights;
+		}
+
+		/// <summary>
+		/// Finds the height of the passed x and z values on the mesh.
 		/// </summary>
 		/// <param name="x">Normalized x position to sample</param>
 		/// <param name="z">Normalized z position to sample</param>
@@ -213,6 +259,45 @@ namespace Terra.Terrain {
 			float angle = Normals[sampleLoc].y;
 
 			return new MeshSample(height, angle);
+		}
+
+		/// <summary>
+		/// Applies materials in individual splat settings to the mesh 
+		/// while taking into account multiple splatmap shaders. In 
+		/// the case of materials exceeding 4, an AddPass shader will be 
+		/// added to the mesh in multiples of 3.
+		/// </summary>
+		void SetMaterialsForSplats() {
+			//Insert FirstPass shader
+			const string fpLoc = "Nature/Terrain/Standard";
+			MeshRenderer mr = TerrainObject.GetComponent<MeshRenderer>();
+			Material mat = new Material(Shader.Find(fpLoc));
+			mat.SetPass(1);
+
+			for (int i = 0; i < SplatSettings.Count; i++) {
+				//Need to insert new AddPass shader
+				if (i != 0 && i % 4 == 0) {
+
+				}
+
+				SetMaterialForSplatIndex(i, SplatSettings[i]);
+			}
+		}
+
+		void ApplySplatmapsToShaders(List<Texture2D> splats) {
+			int len = SplatSettings.Count;
+
+			for (var i = 0; i < splats.Count; i++) {
+				const int off = 4; //Offset for splat textures
+				TerrainMaterial.SetTexture("_Control", splats[i]);
+				TerrainMaterial.SetTexture("_MainTex", splats[0]);
+				TerrainMaterial.SetColor("_Color", Color.black);
+				
+				if (i * off < len) SetMaterialForSplatIndex(0, SplatSettings[0]);
+				if (i * off + 1 < len) SetMaterialForSplatIndex(1, SplatSettings[1]);
+				if (i * off + 2 < len) SetMaterialForSplatIndex(2, SplatSettings[2]);
+				if (i * off + 3 < len) SetMaterialForSplatIndex(3, SplatSettings[3]);
+			}
 		}
 
 		/// <summary>

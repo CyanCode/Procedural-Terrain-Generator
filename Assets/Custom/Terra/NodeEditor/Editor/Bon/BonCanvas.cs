@@ -30,9 +30,9 @@ namespace Assets.Editor.Bon
 		private Vector2 _tmpVector01 = new Vector2();
 		private Vector2 _tmpVector02 = new Vector2();
 
-		private  Color _backgroundColor = new Color(0.18f, 0.18f, 0.18f, 1f);
-		private  Color _backgroundLineColor01 = new Color(0.14f, 0.14f, 0.14f, 1f);
-		private  Color _backgroundLineColor02 = new Color(0.10f, 0.10f, 0.10f, 1f);
+		private  Color _backgroundColor = Color.gray; //new Color(0.18f, 0.18f, 0.18f, 1f);
+		private  Color _backgroundLineColor01 = new Color(.6f, .6f, .6f, 1f); //new Color(0.14f, 0.14f, 0.14f, 1f);
+		private  Color _backgroundLineColor02 = new Color(.6f, .6f, .6f, 1f);
 
 		private GUIStyle centeredLabelStyle;
 

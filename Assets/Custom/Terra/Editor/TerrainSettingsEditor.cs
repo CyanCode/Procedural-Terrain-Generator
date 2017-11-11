@@ -2,6 +2,7 @@
 using UnityEngine;
 
 namespace UnityEditor.Terra {
+	[ExecuteInEditMode]
 	[CustomEditor(typeof(TerraSettings))]
 	public class TerrainSettingsEditor: Editor {
 		private TerraSettings Settings {

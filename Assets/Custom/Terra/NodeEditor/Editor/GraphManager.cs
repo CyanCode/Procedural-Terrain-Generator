@@ -8,9 +8,28 @@ using UnityEngine;
 
 public class GraphManager {
 	private TerraSettings Settings;
+	private BonWindow ActiveWindow;
 
 	public GraphManager(TerraSettings settings) {
 		Settings = settings;
+
+		//Register event handler
+		EventManager.OnCloseGraph += OnClose;
+	}
+
+	/// <summary>
+	/// Handler for OnClose graph delegate action. Used for saving.
+	/// </summary>
+	/// <param name="graph">Graph that will close</param>
+	public void OnClose(Graph graph) {
+		if (graph.Name == null || graph.Name == "") {
+			//Open save dialog. If there's no active BonWindow, we
+			//have no idea what this user is doing, ignore.
+			if (ActiveWindow != null) ActiveWindow.OpenSaveDialog();
+		} else {
+			Debug.Log("Graph saved to: " + graph.Name);
+			Graph.Save(graph.Name, graph);
+		}
 	}
 
 	/// <summary>
@@ -166,7 +185,7 @@ public class GraphManager {
 	}
 
 	private void CreateGraphWindow(TerraSettings Settings) {
-		BonWindow window = EditorWindow.GetWindow<BonWindow>();
-		window.CreateCanvas(Settings.SelectedFile);
+		ActiveWindow = EditorWindow.GetWindow<BonWindow>();
+		ActiveWindow.CreateCanvas(Settings.SelectedFile);
 	}
 }

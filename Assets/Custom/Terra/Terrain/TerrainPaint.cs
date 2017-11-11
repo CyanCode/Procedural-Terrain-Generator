@@ -44,7 +44,7 @@ namespace Terra.Terrain {
 			//Angle,
 		}
 
-		public int AlphaMapResolution = 128; //128
+		public int AlphaMapResolution = 128;
 
 		private GameObject TerrainObject;
 		private List<SplatSetting> SplatSettings;

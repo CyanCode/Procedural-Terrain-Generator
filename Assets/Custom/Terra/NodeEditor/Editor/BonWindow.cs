@@ -49,6 +49,10 @@ public class BonWindow: EditorWindow {
 		Init();
 	}
 
+	public void OnDestroy() {
+		EventManager.TriggerOnCloseGraph(CurrentCanvas.Graph);
+	}
+
 	public void Init() {
 		EditorApplication.playmodeStateChanged = OnPlaymodeStateChanged;
 		// create GameObject and the Component if it is not added to the scene
@@ -183,7 +187,7 @@ public class BonWindow: EditorWindow {
 		SetCurrentCanvas(canvas);
 	}
 
-	private void OpenSaveDialog() {
+	public void OpenSaveDialog() {
 		string path = CurrentCanvas.FilePath != "" ?
 			CurrentCanvas.FilePath : EditorUtility.SaveFilePanelInProject("Save Graph",
 				"TerrainGraph", "json", "Choose a location to save the graph file.");

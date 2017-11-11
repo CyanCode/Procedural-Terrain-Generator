@@ -1,23 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Terra.Terrain {
 	/// <summary>
 	/// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
 	/// </summary>
-	public class TilePool: MonoBehaviour {
+	public class TilePool {
 		public TerraSettings Settings;
 
 		private TileCache Cache = new TileCache(CACHE_SIZE);
 		private int queuedTiles = 0;
 		private const int CACHE_SIZE = 30;
 
+		public TilePool(TerraSettings settings) {
+			Settings = settings;
+		}
+
 		/// <summary>
 		/// Updates tiles to update when the current queue of tiles 
 		/// has finished generating.
 		/// </summary>
-		void Update() {
+		public void Update() {
 			if (queuedTiles < 1) {
 				UpdateTiles();
 			}
@@ -72,7 +75,7 @@ namespace Terra.Terrain {
 				if (cached != null) {
 					Cache.AddActiveTile(cached);
 				} else {
-					AddTileAsync(pos);
+					Settings.StartCoroutine(AddTileAsync(pos));
 				}
 			}
 		}
@@ -89,12 +92,15 @@ namespace Terra.Terrain {
 		/// Adds a tile at the passed position asynchronously
 		/// </summary>
 		/// <param name="pos">Position to add tile at</param>
-		private void AddTileAsync(Vector2 pos) {
+		private System.Collections.IEnumerator AddTileAsync(Vector2 pos) {
 			TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
 			queuedTiles++;
 
-			tile.CreateMesh(pos, null);
+			yield return tile.CreateMesh(pos, null, false);
 			tile.ApplySplatmap();
+			tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
+
+			yield return null;
 			Cache.AddActiveTile(tile);
 
 			queuedTiles--;

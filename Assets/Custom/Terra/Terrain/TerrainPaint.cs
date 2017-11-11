@@ -26,7 +26,7 @@ namespace Terra.Terrain {
 
 			public float Smoothness;
 			public float Metallic;
-			public float Blend = 5f;
+			public float Blend = 30f;
 
 			public PlacementType PlacementType;
 
@@ -34,26 +34,27 @@ namespace Terra.Terrain {
 
 			public float MinRange;
 			public float MaxRange;
+			public bool IsMaxHeight;
+			public bool IsMinHeight;
 
 			public float Precision = 0.9f;
 		}
 		public enum PlacementType {
-			ElevationRange,
-			Angle,
+			ElevationRange
+			//Angle,
 		}
 
 		public int AlphaMapResolution = 128; //128
 
-		GameObject TerrainObject;
-		List<SplatSetting> SplatSettings;
+		private GameObject TerrainObject;
+		private List<SplatSetting> SplatSettings;
 
-		Material TerrainMaterial;
-		Mesh Mesh;
-		Vector3[] Vertices;
-		Vector3[] Normals;
-		int MeshResolution;
+		private Material TerrainMaterial;
+		private Mesh Mesh;
+		private Vector3[] Vertices;
+		private Vector3[] Normals;
+		private int MeshResolution;
 		
-
 		/// <summary>
 		/// Create a TerrainPaint object that paints the passed gameobject
 		/// </summary>
@@ -96,7 +97,8 @@ namespace Terra.Terrain {
 						i--;
 						continue;
 					}
-					EditorGUILayout.LabelField((splat.PlacementType == PlacementType.Angle ? "Angled" : "Elevation") + " Material " + (i + 1));
+					//EditorGUILayout.LabelField((splat.PlacementType == PlacementType.Angle ? "Angled" : "Elevation") + " Material " + (i + 1));
+					EditorGUILayout.LabelField("Elevation Material " + (i + 1));
 					EditorGUILayout.EndHorizontal();
 
 					//Material settings
@@ -128,15 +130,31 @@ namespace Terra.Terrain {
 
 					EditorGUILayout.Space();
 
+					//Blend factor
+					splat.Blend = EditorGUILayout.FloatField("Blend Amount", splat.Blend);
+
 					//GUI for different types
 					splat.PlacementType = (PlacementType)EditorGUILayout.EnumPopup("Placement Type", splat.PlacementType);
 					switch (splat.PlacementType) {
-						case PlacementType.Angle:
-							splat.Angle = EditorGUILayout.IntSlider("Angle", splat.Angle, 0, 90);
-							break;
+						//case PlacementType.Angle:
+						//	splat.Angle = EditorGUILayout.IntSlider("Angle", splat.Angle, 0, 90);
+						//	break;
 						case PlacementType.ElevationRange:
-							splat.MaxRange = EditorGUILayout.FloatField("Max Height", splat.MaxRange);
-							splat.MinRange = EditorGUILayout.FloatField("Min Height", splat.MinRange);
+							if (!splat.IsMaxHeight)
+								splat.MaxRange = EditorGUILayout.FloatField("Max Height", splat.MaxRange);
+							if (!splat.IsMinHeight)
+								splat.MinRange = EditorGUILayout.FloatField("Min Height", splat.MinRange);
+
+							//Checkboxes for infinity & -infinity heights
+							EditorGUI.BeginChangeCheck();
+							if (splat.IsMaxHeight || !settings.IsMaxHeightSelected) splat.IsMaxHeight = EditorGUILayout.Toggle("Is Highest Material", splat.IsMaxHeight);
+							if (EditorGUI.EndChangeCheck())
+								settings.IsMaxHeightSelected = splat.IsMaxHeight;
+
+							EditorGUI.BeginChangeCheck();
+							if (splat.IsMinHeight || !settings.IsMinHeightSelected) splat.IsMinHeight = EditorGUILayout.Toggle("Is Lowest Material", splat.IsMinHeight);
+							if (EditorGUI.EndChangeCheck())
+								settings.IsMinHeightSelected = splat.IsMinHeight; 
 
 							if (splat.MinRange > splat.MaxRange) splat.MinRange = splat.MaxRange;
 							break;
@@ -157,12 +175,12 @@ namespace Terra.Terrain {
 
 		public List<Texture2D> CreateAlphaMaps(bool debug = false) {
 			List<Texture2D> maps = new List<Texture2D>();
-			for (int i = 0; i < SplatSettings.Count / 4; i++)
+			for (int i = 0; i < Mathf.CeilToInt(SplatSettings.Count / 4f); i++)
 				maps.Add(new Texture2D(AlphaMapResolution, AlphaMapResolution));
 			
 			for (int x = 0; x < AlphaMapResolution; x++) {
 				for (int y = 0; y < AlphaMapResolution; y++) {
-					MeshSample sample = SampleAt((float)y / (float)AlphaMapResolution, (float)x / (float)AlphaMapResolution);
+					MeshSample sample = SampleAt(y / (float)AlphaMapResolution, x / (float)AlphaMapResolution);
 					AddWeightsToTextures(CalculateWeights(sample), ref maps, y, x);
 				}
 			}
@@ -197,7 +215,7 @@ namespace Terra.Terrain {
 				float b = i + 2 < len ? weights[i + 2] : 0f;
 				float a = i + 3 < len ? weights[i + 3] : 0f;
 				
-				textures[i].SetPixel(x, y, new Color(r, g, b, a));
+				textures[i / 4].SetPixel(x, y, new Color(r, g, b, a));
 			}
 		}
 
@@ -216,15 +234,18 @@ namespace Terra.Terrain {
 			for (int i = 0; i < SplatSettings.Count; i++) {
 				SplatSetting splat = SplatSettings[i];
 
+				float min = splat.IsMinHeight ? float.MinValue : splat.MinRange;
+				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxRange;
+
 				switch (splat.PlacementType) {
-					case PlacementType.Angle:
-						if (Math.Abs(angle - splat.Angle) < splat.Precision)
-							weights[i] = 0f; //TODO: Fix
-						break;
+					//case PlacementType.Angle:
+					//	if (Math.Abs(angle - splat.Angle) < splat.Precision)
+					//		weights[i] = 0f; //TODO: Fix
+					//	break;
 					case PlacementType.ElevationRange:
-						if (height > splat.MinRange && height < splat.MaxRange) {
+						if (height > min && height < max) {
 							if (i > 0) { //Can blend up
-								float factor = Mathf.Clamp01((splat.Blend - (height - splat.MinRange)) / splat.Blend);
+								float factor = Mathf.Clamp01((splat.Blend - (height - min)) / splat.Blend);
 								weights[i - 1] = factor;
 								weights[i] = 1 - factor;
 							} else {
@@ -277,26 +298,38 @@ namespace Terra.Terrain {
 			for (int i = 0; i < SplatSettings.Count; i++) {
 				//Need to insert new AddPass shader
 				if (i != 0 && i % 4 == 0) {
-
+					string name = mat.GetPassName(2);
+					mat.SetPass((i / 4) + 1);
 				}
 
-				SetMaterialForSplatIndex(i, SplatSettings[i]);
+				//SetMaterialForSplatIndex(i, SplatSettings[i]);
 			}
 		}
 
 		void ApplySplatmapsToShaders(List<Texture2D> splats) {
 			int len = SplatSettings.Count;
+			MeshRenderer mr = TerrainObject.GetComponent<MeshRenderer>();
+			Material toSet = TerrainMaterial;
 
 			for (var i = 0; i < splats.Count; i++) {
 				const int off = 4; //Offset for splat textures
-				TerrainMaterial.SetTexture("_Control", splats[i]);
-				TerrainMaterial.SetTexture("_MainTex", splats[0]);
-				TerrainMaterial.SetColor("_Color", Color.black);
+
+				if (i != 0) { //Insert new Material/AddPass shader
+					const string fpLoc = "Hidden/TerrainEngine/Splatmap/Standard-AddPass";
+					Material mat = new Material(Shader.Find(fpLoc));
+					toSet = mat;
+					
+					mr.sharedMaterials = mr.sharedMaterials.Concat(new Material[] { toSet }).ToArray();
+				}
+
+				toSet.SetTexture("_Control", splats[i]);
+				toSet.SetTexture("_MainTex", splats[0]);
+				toSet.SetColor("_Color", Color.black);
 				
-				if (i * off < len) SetMaterialForSplatIndex(0, SplatSettings[0]);
-				if (i * off + 1 < len) SetMaterialForSplatIndex(1, SplatSettings[1]);
-				if (i * off + 2 < len) SetMaterialForSplatIndex(2, SplatSettings[2]);
-				if (i * off + 3 < len) SetMaterialForSplatIndex(3, SplatSettings[3]);
+				if (i * off < len) SetMaterialForSplatIndex(0, SplatSettings[i * off], toSet);
+				if (i * off + 1 < len) SetMaterialForSplatIndex(1, SplatSettings[i * off + 1], toSet);
+				if (i * off + 2 < len) SetMaterialForSplatIndex(2, SplatSettings[i * off + 2], toSet);
+				if (i * off + 3 < len) SetMaterialForSplatIndex(3, SplatSettings[i * off + 3], toSet);
 			}
 		}
 
@@ -305,21 +338,23 @@ namespace Terra.Terrain {
 		/// information provided in the passed material.
 		/// </summary>
 		/// <param name="index">Splat index to apply material to (0 - 3)</param>
+		/// <param name="splat"></param>
+		/// <param name="toSet"></param>
 		/// <param name="mat">Material to apply</param>
-		void SetMaterialForSplatIndex(int index, SplatSetting splat) {
+		void SetMaterialForSplatIndex(int index, SplatSetting splat, Material toSet) {
 			//Main Texture
-			TerrainMaterial.SetTexture("_Splat" + index, splat.Diffuse);
-			TerrainMaterial.SetTextureScale("_Splat" + index, splat.Tiling);
-			TerrainMaterial.SetTextureOffset("_Splat" + index, splat.Offset);
+			toSet.SetTexture("_Splat" + index, splat.Diffuse);
+			toSet.SetTextureScale("_Splat" + index, splat.Tiling);
+			toSet.SetTextureOffset("_Splat" + index, splat.Offset);
 
 			//Normal Texture
-			TerrainMaterial.SetTexture("_Normal" + index, splat.Normal);
-			TerrainMaterial.SetTextureScale("_Normal" + index, splat.Tiling);
-			TerrainMaterial.SetTextureOffset("_Normal" + index, splat.Offset);
+			toSet.SetTexture("_Normal" + index, splat.Normal);
+			toSet.SetTextureScale("_Normal" + index, splat.Tiling);
+			toSet.SetTextureOffset("_Normal" + index, splat.Offset);
 
 			//Metallic / Smoothness information
-			TerrainMaterial.SetFloat("_Metallic" + index, splat.Metallic);
-			TerrainMaterial.SetFloat("_Smoothness" + index, splat.Smoothness);
+			toSet.SetFloat("_Metallic" + index, splat.Metallic);
+			toSet.SetFloat("_Smoothness" + index, splat.Smoothness);
 		}
 
 		/// <summary>

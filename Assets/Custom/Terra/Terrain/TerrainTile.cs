@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -39,7 +40,7 @@ namespace Terra.Terrain {
 
 			int res = settings.MeshResolution;
 			float len = settings.Length;
-			float spread = settings.Spread * (1f / settings.MeshResolution);
+			float spread = 1f / (settings.Spread *  settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -94,16 +95,17 @@ namespace Terra.Terrain {
 		/// <param name="position">Position to place Mesh in the tile grid</param>
 		/// <param name="heights">Heights to apply to the mesh. This array must be equal in size 
 		/// to the length of vertices on the mesh.</param>
-		public void CreateMesh(Vector2 position, float[] heights) {
+		public IEnumerator CreateMesh(Vector2 position, float[] heights, bool renderOnCreation = true) {
 			TerraEvent.TriggerOnMeshWillForm(gameObject);
 
 			MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
 			renderer.material = new Material(Shader.Find("Diffuse"));
+			renderer.enabled = renderOnCreation;
 			Terrain = gameObject.AddComponent<MeshFilter>().mesh;
 
 			int res = Settings.MeshResolution;
 			float len = Settings.Length;
-			float spread = Settings.Spread * (1f / Settings.MeshResolution);
+			float spread = 1f / (Settings.Spread * Settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -150,8 +152,10 @@ namespace Terra.Terrain {
 			Terrain.triangles = triangles;
 			Terrain.RecalculateNormals();
 
+			yield return null;
 			UpdatePosition(position);
 
+			yield return null;
 			MeshCollider collider = gameObject.AddComponent<MeshCollider>();
 			collider.sharedMesh = Terrain;
 

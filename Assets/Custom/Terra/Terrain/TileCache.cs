@@ -93,7 +93,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="tile">Tile to cache</param>
 		public void CacheTile(TerrainTile tile) {
-			tile.enabled = false;
+			tile.gameObject.SetActive(false);
 			CachedTiles.AddFirst(tile);
 			EnforceCacheSize();
 		}
@@ -104,7 +104,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="tile">Tile to activate</param>
 		public void AddActiveTile(TerrainTile tile) {
-			tile.enabled = true;
+			tile.gameObject.SetActive(true);
 			ActiveTiles.Add(tile);
 		}
 

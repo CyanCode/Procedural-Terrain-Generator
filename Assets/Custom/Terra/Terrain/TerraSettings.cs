@@ -35,6 +35,10 @@ namespace Terra.Terrain {
 
 		//Material Tab
 		public List<TerrainPaint.SplatSetting> SplatSettings = null;
+		public bool IsMaxHeightSelected = false;
+		public bool IsMinHeightSelected = false;
+
+		private TilePool Pool;
 
 		void Start() {
 			//Set seed for RNG
@@ -44,6 +48,13 @@ namespace Terra.Terrain {
 			Launcher.Enable();
 
 			Generator = Launcher.GetGraphGenerator();
+
+			//Create Tile Pool
+			Pool = new TilePool(this);
+		}
+
+		void Update() {
+			if (Pool != null) Pool.Update();
 		}
 		
 		public void OnDrawGizmosSelected() {

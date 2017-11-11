@@ -200,7 +200,7 @@ public class BonWindow: EditorWindow {
 			"[No File Opened]" : Path.GetFileNameWithoutExtension(CurrentCanvas.FilePath);
 
 		GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-		GUI.Label(FileNameLabelRect, "Opened File: " + name); //TODO: SHow open file
+		GUI.Label(FileNameLabelRect, "Opened File: " + name);
 	}
 
 

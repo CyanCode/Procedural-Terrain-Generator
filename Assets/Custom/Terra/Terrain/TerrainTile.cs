@@ -13,6 +13,9 @@ namespace Terra.Terrain {
 		public Mesh Terrain { get; private set; }
 		public Vector2 Position { get; private set; }
 
+		[HideInInspector]
+		public bool IsColliderDirty = false;
+
 		private TerraSettings Settings;
 		private TerrainPaint Paint;
 
@@ -90,7 +93,11 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Creates a Mesh with the length and resolution specified in 
 		/// TerraSettings. Applies the passed heights from calculated noise 
-		/// values. This cannot be called off of the main thread
+		/// values. 
+		/// <list type="bullet">
+		/// <item><description>Cannot be called off of the main thread</description></item>
+		/// <item><description>Does not generate a MeshCollider, call <code>GenerateCollider</code> instead.</description></item>
+		/// </list>
 		/// </summary>
 		/// <param name="position">Position to place Mesh in the tile grid</param>
 		/// <param name="heights">Heights to apply to the mesh. This array must be equal in size 
@@ -154,12 +161,19 @@ namespace Terra.Terrain {
 
 			yield return null;
 			UpdatePosition(position);
+		}
+		
+		/// <summary>
+		/// Generates and applies new MeshCollider for the tile if no collider 
+		/// exists currently or <code>IsColliderDirty</code> is true.
+		/// </summary>
+		public void GenerateCollider() {
+			if (gameObject.GetComponent<MeshCollider>() == null || IsColliderDirty) {
+				MeshCollider collider = gameObject.AddComponent<MeshCollider>();
+				collider.sharedMesh = Terrain;
 
-			yield return null;
-			MeshCollider collider = gameObject.AddComponent<MeshCollider>();
-			collider.sharedMesh = Terrain;
-
-			TerraEvent.TriggerOnMeshDidForm(gameObject, Terrain);
+				TerraEvent.TriggerOnMeshDidForm(gameObject, Terrain);
+			}
 		}
 		
 		/// <summary>

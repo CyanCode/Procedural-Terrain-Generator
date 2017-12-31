@@ -27,7 +27,6 @@ public class GraphManager {
 			//have no idea what this user is doing, ignore.
 			if (ActiveWindow != null) ActiveWindow.OpenSaveDialog();
 		} else {
-			Debug.Log("Graph saved to: " + graph.Name);
 			Graph.Save(graph.Name, graph);
 		}
 	}

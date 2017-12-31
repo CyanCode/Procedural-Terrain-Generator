@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -22,8 +23,10 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void Update() {
 			if (queuedTiles < 1) {
-				UpdateTiles();
+				Settings.StartCoroutine(UpdateTiles());
 			}
+
+			Settings.StartCoroutine(UpdateColliders(0.5f));
 		}
 
 		public static List<Vector2> GetTilePositionsFromRadius(int radius, Vector3 position, int length) {
@@ -42,10 +45,36 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Finds all <b>enabled</b> TerrainTile instances that intersect 
+		/// the passed square parameters
+		/// </summary>
+		/// <param name="trackedPos"><code>TrackedObject</code> position</param>
+		/// <param name="extent">Extent of collision square, most likely <code>ColliderGenerationExtent</code></param>
+		/// <returns>Found, overlapping, TerrainTile instances</returns>
+		public List<TerrainTile> GetTilesInExtent(Vector3 trackedPos, float extent) {
+			//TODO Remove params
+			List<TerrainTile> tiles = new List<TerrainTile>(Cache.ActiveTiles.Count);
+
+			foreach (TerrainTile t in Cache.ActiveTiles) {
+				MeshRenderer renderer = t.GetComponent<MeshRenderer>();
+
+				if (renderer != null) {
+					Vector3 tilePos = new Vector3(trackedPos.x, renderer.bounds.center.y, trackedPos.z);
+					Bounds trackedBounds = new Bounds(tilePos, new Vector3(extent, renderer.bounds.max.y, extent));
+
+					if (renderer.bounds.Intersects(trackedBounds))
+						tiles.Add(t);
+				}
+			}
+			
+			return tiles;
+		}
+
+		/// <summary>
 		/// Updates tiles that are surrounding the tracked GameObject 
 		/// asynchronously
 		/// </summary>
-		public void UpdateTiles() {
+		public IEnumerator UpdateTiles() {
 			List<Vector2> nearbyPositions = GetTilePositionsFromRadius();
 			List<Vector2> newPositions = Cache.GetNewTilePositions(nearbyPositions);
 
@@ -75,9 +104,26 @@ namespace Terra.Terrain {
 				if (cached != null) {
 					Cache.AddActiveTile(cached);
 				} else {
-					Settings.StartCoroutine(AddTileAsync(pos));
+					yield return AddTileAsync(pos);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Updates colliders that match the Settings specified collider 
+		/// generation extent.
+		/// </summary>
+		/// <param name="delay">Delay in seconds before checking colliders again</param>
+		/// <returns>IEnumerator for use in a Coroutine</returns>
+		private IEnumerator UpdateColliders(float delay) {
+			List<TerrainTile> tiles = GetTilesInExtent(Settings.TrackedObject.transform.position, Settings.ColliderGenerationExtent);
+
+			foreach (TerrainTile t in tiles) {
+				t.GenerateCollider();
+				yield return null;
+			}
+
+			yield return new WaitForSeconds(delay);
 		}
 
 		/// <summary>
@@ -92,7 +138,7 @@ namespace Terra.Terrain {
 		/// Adds a tile at the passed position asynchronously
 		/// </summary>
 		/// <param name="pos">Position to add tile at</param>
-		private System.Collections.IEnumerator AddTileAsync(Vector2 pos) {
+		private IEnumerator AddTileAsync(Vector2 pos) {
 			TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
 			queuedTiles++;
 

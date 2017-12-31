@@ -30,18 +30,17 @@ namespace UnityEditor.Terra {
 					Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
 
 					//Terrain settings
-					string[] stringResOptions = { "32", "64", "128", "256", "521" };
-					int[] resOptions = { 32, 64, 128, 256, 521 };
+					string[] stringResOptions = { "32", "64", "128" };
+					int[] resOptions = { 32, 64, 128 };
 
 					EditorGUILayout.Space();
 					EditorGUILayout.LabelField("Terrain Generation Settings", EditorStyles.boldLabel);
 					Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
+					Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
 					TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
 					Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
 					Settings.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.MeshResolution, stringResOptions, resOptions);
-					//Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-					//Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
-
+					
 					break;
 				case TerraSettings.ToolbarOptions.Noise:
 					EditorGUILayout.Space();

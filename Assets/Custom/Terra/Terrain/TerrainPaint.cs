@@ -156,7 +156,7 @@ namespace Terra.Terrain {
 							if (EditorGUI.EndChangeCheck())
 								settings.IsMinHeightSelected = splat.IsMinHeight; 
 
-							if (splat.MinRange > splat.MaxRange) splat.MinRange = splat.MaxRange;
+							//if (splat.MinRange > splat.MaxRange) splat.MinRange = splat.MaxRange;
 							break;
 					}
 

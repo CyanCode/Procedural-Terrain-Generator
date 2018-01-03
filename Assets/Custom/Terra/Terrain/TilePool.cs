@@ -143,7 +143,7 @@ namespace Terra.Terrain {
 			queuedTiles++;
 
 			yield return tile.CreateMesh(pos, null, false);
-			tile.ApplySplatmap();
+			if (Settings.UseCustomMaterial) tile.ApplyCustomMaterial(); else tile.ApplySplatmap();
 			tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
 
 			yield return null;

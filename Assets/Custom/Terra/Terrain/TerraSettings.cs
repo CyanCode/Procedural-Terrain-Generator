@@ -37,6 +37,8 @@ namespace Terra.Terrain {
 		public List<TerrainPaint.SplatSetting> SplatSettings = null;
 		public bool IsMaxHeightSelected = false;
 		public bool IsMinHeightSelected = false;
+		public bool UseCustomMaterial = false;
+		public Material CustomMaterial = null;
 
 		private TilePool Pool;
 

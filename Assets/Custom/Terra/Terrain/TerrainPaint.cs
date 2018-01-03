@@ -19,6 +19,7 @@ namespace Terra.Terrain {
 		}
 		[Serializable]
 		public class SplatSetting {
+			//Using Textures
 			public Texture2D Diffuse;
 			public Texture2D Normal;
 			public Vector2 Tiling = new Vector2(1, 1);
@@ -38,6 +39,10 @@ namespace Terra.Terrain {
 			public bool IsMinHeight;
 
 			public float Precision = 0.9f;
+
+			//Custom Material
+			public bool IsUsingCustomMaterial;
+			public Material CustomMaterial;
 		}
 		public enum PlacementType {
 			ElevationRange
@@ -49,6 +54,7 @@ namespace Terra.Terrain {
 		private GameObject TerrainObject;
 		private List<SplatSetting> SplatSettings;
 
+		//Terrain/Mesh
 		private Material TerrainMaterial;
 		private Mesh Mesh;
 		private Vector3[] Vertices;
@@ -80,6 +86,15 @@ namespace Terra.Terrain {
 		public static void DisplayGUI(TerraSettings settings) {
 			EditorGUILayout.Space();
 
+			//Use custom material instead
+			settings.UseCustomMaterial = EditorGUILayout.Toggle("Custom Material", settings.UseCustomMaterial);
+
+			if (settings.UseCustomMaterial) {
+				settings.CustomMaterial = (Material)EditorGUILayout.ObjectField("material", settings.CustomMaterial, typeof(Material), false);
+				return;
+			}
+
+			//Use textures
 			if (settings.SplatSettings != null) {
 				for (int i = 0; i < settings.SplatSettings.Count; i++) {
 					SplatSetting splat = settings.SplatSettings[i];
@@ -125,7 +140,7 @@ namespace Terra.Terrain {
 
 						EditorGUILayout.EndHorizontal();
 					} if (GUILayout.Button("Edit Material")) {
-						AddTextureWindow window = new AddTextureWindow(ref splat);
+						new AddTextureWindow(ref splat);
 					}
 
 					EditorGUILayout.Space();
@@ -205,7 +220,7 @@ namespace Terra.Terrain {
 			
 			return maps;
 		}
-
+		
 		void AddWeightsToTextures(float[] weights, ref List<Texture2D> textures, int x, int y) {
 			int len = weights.Length;
 
@@ -228,7 +243,7 @@ namespace Terra.Terrain {
 		/// <returns>Weight values in the same order of the </returns>
 		float[] CalculateWeights(MeshSample sample) {
 			float height = sample.Height;
-			float angle = sample.Angle;
+			//float angle = sample.Angle;
 			float[] weights = new float[SplatSettings.Count];
 
 			for (int i = 0; i < SplatSettings.Count; i++) {
@@ -280,30 +295,6 @@ namespace Terra.Terrain {
 			float angle = Normals[sampleLoc].y;
 
 			return new MeshSample(height, angle);
-		}
-
-		/// <summary>
-		/// Applies materials in individual splat settings to the mesh 
-		/// while taking into account multiple splatmap shaders. In 
-		/// the case of materials exceeding 4, an AddPass shader will be 
-		/// added to the mesh in multiples of 3.
-		/// </summary>
-		void SetMaterialsForSplats() {
-			//Insert FirstPass shader
-			const string fpLoc = "Nature/Terrain/Standard";
-			MeshRenderer mr = TerrainObject.GetComponent<MeshRenderer>();
-			Material mat = new Material(Shader.Find(fpLoc));
-			mat.SetPass(1);
-
-			for (int i = 0; i < SplatSettings.Count; i++) {
-				//Need to insert new AddPass shader
-				if (i != 0 && i % 4 == 0) {
-					string name = mat.GetPassName(2);
-					mat.SetPass((i / 4) + 1);
-				}
-
-				//SetMaterialForSplatIndex(i, SplatSettings[i]);
-			}
 		}
 
 		void ApplySplatmapsToShaders(List<Texture2D> splats) {

@@ -185,7 +185,17 @@ namespace Terra.Terrain {
 
 			List<Texture2D> maps = Paint.CreateAlphaMaps();
 			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));
-			
+		}
+
+		/// <summary>
+		/// Applies the custom material specified in TerraSettings to the associated TerrainObject.
+		/// </summary>
+		/// <param name="mat">Custom material to apply</param>
+		public void ApplyCustomMaterial() {
+			TerraEvent.TriggerOnCustomMaterialWillApply(gameObject);
+			MeshRenderer mr = GetComponent<MeshRenderer>();
+			mr.sharedMaterial = Settings.CustomMaterial;
+			TerraEvent.TriggerOnCustomMaterialDidApply(gameObject);
 		}
 	}
 }

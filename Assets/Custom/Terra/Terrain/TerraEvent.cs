@@ -13,6 +13,9 @@ namespace Terra.Terrain {
 		public static event Action OnSplatmapWillCalculate;
 		public static event SplatAction OnSplatmapDidCalculate;
 
+		public static event Action OnCustomMaterialWillApply;
+		public static event Action OnCustomMaterialDidApply;
+
 		public static void TriggerOnMeshWillForm(GameObject go) {
 			if (OnMeshWillForm != null) OnMeshWillForm(go);
 		}
@@ -27,6 +30,14 @@ namespace Terra.Terrain {
 
 		public static void TriggerOnSplatmapDidCalculate(GameObject go, Texture2D splat) {
 			if (OnSplatmapDidCalculate != null) OnSplatmapDidCalculate(go, splat);
+		}
+
+		public static void TriggerOnCustomMaterialWillApply(GameObject go) {
+			if (OnCustomMaterialWillApply != null) OnCustomMaterialWillApply(go);
+		}
+
+		public static void TriggerOnCustomMaterialDidApply(GameObject go) {
+			if (OnCustomMaterialDidApply != null) OnCustomMaterialDidApply(go);
 		}
 	}
 }

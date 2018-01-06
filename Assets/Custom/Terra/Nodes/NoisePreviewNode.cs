@@ -64,11 +64,20 @@ namespace Terra.Nodes {
 			NodeUpdated(graph, (Node)null);
 		}
 
+		/// <summary>
+		/// Generates a noise texture for the currently attached InputSocket
+		/// </summary>
+		/// <returns>If an error occured while retrieving the generator, 
+		/// null is returned. Otherwise the Texture is returned.</returns>
 		private Texture GetNoiseTexture() {
 			Generator noise = AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
-			Texture PreviewTexture = TextureMaker.MonochromeTexture(100, 100, noise);
 
-			return PreviewTexture;
+			if (noise == null) {
+				return null;
+			} else {
+				Texture PreviewTexture = TextureMaker.MonochromeTexture(100, 100, noise);
+				return PreviewTexture;
+			}
 		}
 	}
 }

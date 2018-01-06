@@ -142,8 +142,13 @@ namespace Terra.Terrain {
 			TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
 			queuedTiles++;
 
-			yield return tile.CreateMesh(pos, null, false);
-			if (Settings.UseCustomMaterial) tile.ApplyCustomMaterial(); else tile.ApplySplatmap();
+			tile.CreateMesh(pos, false);
+			yield return null;
+
+			if (Settings.UseCustomMaterial) 
+				tile.ApplyCustomMaterial(); 
+			else 
+				tile.ApplySplatmap();
 			tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
 
 			yield return null;

@@ -23,6 +23,8 @@ namespace Terra.Terrain {
 		public static int GenerationSeed = 1337;
 		public int MeshResolution = 128;
 		public int Length = 500;
+		public bool UseRandomSeed = false;
+		public bool GenAllColliders = false;
 
 		//Noise Tab
 		public string SelectedFile = "";
@@ -40,7 +42,11 @@ namespace Terra.Terrain {
 		public bool UseCustomMaterial = false;
 		public Material CustomMaterial = null;
 
-		private TilePool Pool;
+		/// <summary>
+		/// TilePool instance attached to this TerraSettings instance. This is instantiated
+		/// in <code>Start</code>.
+		/// </summary>
+		public TilePool Pool;
 
 		void Start() {
 			//Set default tracked object
@@ -50,7 +56,11 @@ namespace Terra.Terrain {
 			}
 
 			//Set seed for RNG
-			Random.InitState(GenerationSeed);
+			if (!UseRandomSeed)
+				Random.InitState(GenerationSeed);
+			else
+				GenerationSeed = new System.Random().Next(0, System.Int32.MaxValue);
+
 			Launcher = new GraphLauncher();
 			Launcher.LoadGraph(SelectedFile);
 			Launcher.Enable();
@@ -80,7 +90,7 @@ namespace Terra.Terrain {
 
 				//Mesh radius squares
 				foreach (Vector2 pos in positions) {
-					Vector3 pos3d = new Vector3(pos.x * Length + Length / 2, 0, pos.y * Length + Length / 2);
+					Vector3 pos3d = new Vector3(pos.x * Length, 0, pos.y * Length);
 
 					Gizmos.color = Color.white;
 					Gizmos.DrawWireCube(pos3d, new Vector3(Length, 0, Length));

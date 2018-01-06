@@ -5,9 +5,9 @@ using System.Collections;
 
 namespace Terra.Terrain {
 	/// <summary>
-	/// TerrainTile represents a Terrain gameobject in the scene. 
-	/// This class handles the instantiation of Terrain, noise application, 
-	/// position, and texture application.
+	///	TerrainTile represents a Terrain gameobject in the scene. 
+	///	This class handles the instantiation of Terrain, noise application, 
+	///	position, and texture application.
 	/// </summary>
 	public class TerrainTile: MonoBehaviour {
 		public Mesh Terrain { get; private set; }
@@ -43,7 +43,7 @@ namespace Terra.Terrain {
 
 			int res = settings.MeshResolution;
 			float len = settings.Length;
-			float spread = 1f / (settings.Spread *  settings.MeshResolution);
+			float spread = 1f / (settings.Spread * settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -100,9 +100,7 @@ namespace Terra.Terrain {
 		/// </list>
 		/// </summary>
 		/// <param name="position">Position to place Mesh in the tile grid</param>
-		/// <param name="heights">Heights to apply to the mesh. This array must be equal in size 
-		/// to the length of vertices on the mesh.</param>
-		public IEnumerator CreateMesh(Vector2 position, float[] heights, bool renderOnCreation = true) {
+		public void CreateMesh(Vector2 position, bool renderOnCreation = true) {
 			TerraEvent.TriggerOnMeshWillForm(gameObject);
 
 			MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
@@ -158,11 +156,10 @@ namespace Terra.Terrain {
 			Terrain.uv = uvs;
 			Terrain.triangles = triangles;
 			Terrain.RecalculateNormals();
-
-			yield return null;
+			
 			UpdatePosition(position);
 		}
-		
+
 		/// <summary>
 		/// Generates and applies new MeshCollider for the tile if no collider 
 		/// exists currently or <code>IsColliderDirty</code> is true.
@@ -175,13 +172,14 @@ namespace Terra.Terrain {
 				TerraEvent.TriggerOnMeshDidForm(gameObject, Terrain);
 			}
 		}
-		
+
 		/// <summary>
 		/// Applies a splatmap to the terrain
 		/// </summary>
 		public void ApplySplatmap() {
 			TerraEvent.TriggerOnSplatmapWillCalculate(gameObject);
-			if (Paint == null) Paint = new TerrainPaint(gameObject, Settings.SplatSettings);
+			if (Paint == null) 
+				Paint = new TerrainPaint(gameObject, Settings.SplatSettings);
 
 			List<Texture2D> maps = Paint.CreateAlphaMaps();
 			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));

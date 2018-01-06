@@ -6,7 +6,7 @@ using Terra.Terrain;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
-	[GraphContextMenuItem("Noise/Voroni", "Pits")]
+	[GraphContextMenuItem("Noise/Voronoi", "Pits")]
 	public class VoronoiPitsNode: AbstractVoronoiNoiseNode {
 		public VoronoiPitsNode(int id, Graph parent) : base(id, parent) { }
 

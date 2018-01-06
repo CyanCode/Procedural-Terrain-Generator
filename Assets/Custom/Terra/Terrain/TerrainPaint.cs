@@ -39,10 +39,6 @@ namespace Terra.Terrain {
 			public bool IsMinHeight;
 
 			public float Precision = 0.9f;
-
-			//Custom Material
-			public bool IsUsingCustomMaterial;
-			public Material CustomMaterial;
 		}
 		public enum PlacementType {
 			ElevationRange
@@ -267,6 +263,7 @@ namespace Terra.Terrain {
 								weights[i] = 1f;
 							}
 						}
+						
 
 						break;
 				}

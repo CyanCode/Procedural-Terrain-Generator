@@ -36,11 +36,15 @@ namespace UnityEditor.Terra {
 					EditorGUILayout.Space();
 					EditorGUILayout.LabelField("Terrain Generation Settings", EditorStyles.boldLabel);
 					Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
-					Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
-					TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
+					if (!Settings.GenAllColliders) 
+						Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
+					if (!Settings.UseRandomSeed)
+						TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
 					Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
 					Settings.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.MeshResolution, stringResOptions, resOptions);
-					
+					Settings.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", Settings.UseRandomSeed);
+					Settings.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.GenAllColliders);
+
 					break;
 				case TerraSettings.ToolbarOptions.Noise:
 					EditorGUILayout.Space();

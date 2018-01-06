@@ -25,7 +25,8 @@ namespace Terra.Nodes.Modifier {
 
 		public override Generator GetGenerator() {
 			Generator BlendGenerator = GetInputGenerator(InputSocketMaskGenerator);
-			return new Blend(Generator1, Generator2, BlendGenerator);
+			return BlendGenerator == null || Generator1 == null || Generator2 == null ?
+				null : new Blend(Generator1, Generator2, BlendGenerator);
 		}
 
 		public override void OnGUI() {

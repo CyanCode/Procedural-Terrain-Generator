@@ -19,7 +19,6 @@ namespace Terra.Terrain {
 		}
 		[Serializable]
 		public class SplatSetting {
-			//Using Textures
 			public Texture2D Diffuse;
 			public Texture2D Normal;
 			public Vector2 Tiling = new Vector2(1, 1);
@@ -37,8 +36,6 @@ namespace Terra.Terrain {
 			public float MaxRange;
 			public bool IsMaxHeight;
 			public bool IsMinHeight;
-
-			public float Precision = 0.9f;
 		}
 		public enum PlacementType {
 			ElevationRange
@@ -58,7 +55,9 @@ namespace Terra.Terrain {
 		private int MeshResolution;
 		
 		/// <summary>
-		/// Create a TerrainPaint object that paints the passed gameobject
+		/// Create a TerrainPaint object that paints the passed gameobject. For this to 
+		/// work, the passed gameobject must have the following components:
+		/// MeshFilter, MeshRenderer, and TerrainTile
 		/// </summary>
 		/// <param name="gameobject">Gameobject to paint</param>
 		public TerrainPaint(GameObject gameobject, List<SplatSetting> splatSettings) {
@@ -184,7 +183,15 @@ namespace Terra.Terrain {
 			}
 		}
 
-		public List<Texture2D> CreateAlphaMaps(bool debug = false) {
+		/// <summary>
+		/// Creates splatmaps which are (by default) applied to terrain splat shaders.
+		/// </summary>
+		/// <param name="applySplats">When true, the generated splat is automatically applied to the terrain. 
+		/// Otherwise, it can be applied by calling ApplySplatmapsToShader</param>
+		/// <param name="debug">When true, the generated alpha maps are saved to the disk. 
+		/// They're located at [Your project's root dir]/SplatImages/</param>
+		/// <returns>Created alphamap textures</returns>
+		public List<Texture2D> GenerateSplatmaps(bool applySplats = true, bool debug = false) {
 			List<Texture2D> maps = new List<Texture2D>();
 			for (int i = 0; i < Mathf.CeilToInt(SplatSettings.Count / 4f); i++)
 				maps.Add(new Texture2D(AlphaMapResolution, AlphaMapResolution));
@@ -212,22 +219,9 @@ namespace Terra.Terrain {
 			}
 
 			maps.ForEach(t => t.Apply());
-			ApplySplatmapsToShaders(maps);
+			if (applySplats) ApplySplatmapsToShaders(maps);
 			
 			return maps;
-		}
-		
-		void AddWeightsToTextures(float[] weights, ref List<Texture2D> textures, int x, int y) {
-			int len = weights.Length;
-
-			for (int i = 0; i < len; i += 4) {
-				float r = weights[i];
-				float g = i + 1 < len ? weights[i + 1] : 0f;
-				float b = i + 2 < len ? weights[i + 2] : 0f;
-				float a = i + 3 < len ? weights[i + 3] : 0f;
-				
-				textures[i / 4].SetPixel(x, y, new Color(r, g, b, a));
-			}
 		}
 
 		/// <summary>
@@ -263,7 +257,7 @@ namespace Terra.Terrain {
 								weights[i] = 1f;
 							}
 						}
-						
+
 
 						break;
 				}
@@ -276,6 +270,19 @@ namespace Terra.Terrain {
 			}
 
 			return weights;
+		}
+
+		void AddWeightsToTextures(float[] weights, ref List<Texture2D> textures, int x, int y) {
+			int len = weights.Length;
+
+			for (int i = 0; i < len; i += 4) {
+				float r = weights[i];
+				float g = i + 1 < len ? weights[i + 1] : 0f;
+				float b = i + 2 < len ? weights[i + 2] : 0f;
+				float a = i + 3 < len ? weights[i + 3] : 0f;
+				
+				textures[i / 4].SetPixel(x, y, new Color(r, g, b, a));
+			}
 		}
 
 		/// <summary>
@@ -294,7 +301,14 @@ namespace Terra.Terrain {
 			return new MeshSample(height, angle);
 		}
 
-		void ApplySplatmapsToShaders(List<Texture2D> splats) {
+		/// <summary>
+		/// Applies the passed splat textures to the terrain. Because only 4 alphamaps can be 
+		/// applied at one time, multiple splat textures must be passed at one time if the amount 
+		/// of supplied textures is > 4. The GenerateSplatmaps function takes care of this for you and 
+		/// its result can be passed as the splats parameter.
+		/// </summary>
+		/// <param name="splats">Splatmap textures to apply to the shaders and MeshRenderer</param>
+		public void ApplySplatmapsToShaders(List<Texture2D> splats) {
 			int len = SplatSettings.Count;
 			MeshRenderer mr = TerrainObject.GetComponent<MeshRenderer>();
 			Material toSet = TerrainMaterial;

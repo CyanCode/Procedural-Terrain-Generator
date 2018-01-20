@@ -13,11 +13,11 @@ namespace Terra.Terrain {
 			Materials = 2
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
-
 		public GraphLauncher Launcher;
 
 		//General Tab
 		public GameObject TrackedObject;
+		public bool GenerateOnStart = true;
 		public int GenerationRadius = 3;
 		public float ColliderGenerationExtent = 50f;
 		public static int GenerationSeed = 1337;
@@ -44,9 +44,13 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated
-		/// in <code>Start</code>.
+		/// in <code>Awake</code>.
 		/// </summary>
 		public TilePool Pool;
+
+		void Awake() {
+			Pool = new TilePool(this);
+		}
 
 		void Start() {
 			//Set default tracked object
@@ -66,16 +70,14 @@ namespace Terra.Terrain {
 			Launcher.Enable();
 
 			Generator = Launcher.GetGraphGenerator();
-
-			//Create Tile Pool
-			Pool = new TilePool(this);
 		}
 
 		void Update() {
-			if (Pool != null) Pool.Update();
+			if (Pool != null && GenerateOnStart) 
+				Pool.Update();
 		}
 		
-		public void OnDrawGizmosSelected() {
+		void OnDrawGizmosSelected() {
 			/**
 			 * On noise tab selected: display preview mesh in scene
 			 * On general tab selected: display mesh radius squares and collider radius

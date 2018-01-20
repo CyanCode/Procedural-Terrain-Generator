@@ -35,6 +35,7 @@ namespace UnityEditor.Terra {
 
 					EditorGUILayout.Space();
 					EditorGUILayout.LabelField("Terrain Generation Settings", EditorStyles.boldLabel);
+					Settings.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", Settings.GenerateOnStart);
 					Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
 					if (!Settings.GenAllColliders) 
 						Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);

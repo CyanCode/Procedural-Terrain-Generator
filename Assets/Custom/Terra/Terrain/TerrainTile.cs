@@ -26,10 +26,28 @@ namespace Terra.Terrain {
 			}
 		}
 
+		/// <summary>
+		/// Updates this TerrainTiles position by taking a Vector2 where 
+		/// the x and y values are integers on a grid. Internally the x and y values 
+		/// are multiplied by the Length of the mesh specified in TerraSettings
+		/// </summary>
+		/// <param name="position">Position to set the TerrainTile to (ie [1,0])</param>
 		public void UpdatePosition(Vector2 position) {
 			Position = position;
 			int len = Settings.Length;
 			transform.position = new Vector3(position.x * len, 0f, position.y * len);
+		}
+
+		/// <summary>
+		/// Creates a gameobject with an attached TerrainTile component and 
+		/// places it in the scene. This is a convienence method and is not required 
+		/// for correct tile creation.
+		/// </summary>
+		/// <param name="name">Name of the created gameobject</param>
+		/// <returns>The attached TerrainTile component</returns>
+		public static TerrainTile CreateTileGameobject(string name) {
+			GameObject go = new GameObject(name);
+			return go.AddComponent<TerrainTile>();
 		}
 
 		/// <summary>
@@ -97,9 +115,12 @@ namespace Terra.Terrain {
 		/// <list type="bullet">
 		/// <item><description>Cannot be called off of the main thread</description></item>
 		/// <item><description>Does not generate a MeshCollider, call <code>GenerateCollider</code> instead.</description></item>
+		/// <item><description>Creates and attaches a MeshRenderer</description></item>
 		/// </list>
 		/// </summary>
 		/// <param name="position">Position to place Mesh in the tile grid</param>
+		/// <param name="renderOnCreation">If true, the attached MeshRenderer will be enabled after the mesh has been formed. 
+		/// Otherwise, the attached MeshRenderer will be disabled by default.</param>
 		public void CreateMesh(Vector2 position, bool renderOnCreation = true) {
 			TerraEvent.TriggerOnMeshWillForm(gameObject);
 
@@ -174,15 +195,20 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Applies a splatmap to the terrain
+		/// Applies the SplatSettings specified in TerraSettings to this 
+		/// TerrainTile. A TerrainPaint instance is created if it didn't exist 
+		/// already, and is returned.
 		/// </summary>
-		public void ApplySplatmap() {
+		/// <returns>TerrainTile instance</returns>
+		public TerrainPaint ApplySplatmap() {
 			TerraEvent.TriggerOnSplatmapWillCalculate(gameObject);
 			if (Paint == null) 
 				Paint = new TerrainPaint(gameObject, Settings.SplatSettings);
 
-			List<Texture2D> maps = Paint.CreateAlphaMaps();
+			List<Texture2D> maps = Paint.GenerateSplatmaps();
 			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));
+
+			return Paint;
 		}
 
 		/// <summary>
@@ -194,6 +220,16 @@ namespace Terra.Terrain {
 			MeshRenderer mr = GetComponent<MeshRenderer>();
 			mr.sharedMaterial = Settings.CustomMaterial;
 			TerraEvent.TriggerOnCustomMaterialDidApply(gameObject);
+		}
+
+		/// <summary>
+		/// Applies the passed Material to this TerrainTile by setting the 
+		/// material assigned to the MeshRenderer component.
+		/// </summary>
+		/// <param name="mat">Material to apply</param>
+		public void ApplyMaterial(Material mat) {
+			MeshRenderer mr = GetComponent<MeshRenderer>();
+			mr.sharedMaterial = mat;
 		}
 	}
 }

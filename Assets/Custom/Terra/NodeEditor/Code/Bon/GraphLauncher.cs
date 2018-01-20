@@ -22,8 +22,10 @@ namespace Terra.GraphEditor {
 		/// </summary>
 		public Graph LoadGraph(string path) {
 			Graph g;
-			if (path.Equals(BonConfig.DefaultGraphName)) g = CreateDefaultGraph();
-			else g = Graph.Load(path);
+			if (path.Equals(BonConfig.DefaultGraphName)) 
+				g = CreateDefaultGraph();
+			else 
+				g = Graph.Load(path);
 			g.Name = path;
 			Graph = g;
 

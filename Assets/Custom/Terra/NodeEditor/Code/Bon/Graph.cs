@@ -364,7 +364,8 @@ namespace Terra.GraphEditor {
 				}
 				return deserializedGraph;
 			} else {
-				Debug.Log("Could not Open the file: " + fileName);
+				fileName = fileName == "" ? "[No File Selected]" : fileName;
+				Debug.LogWarning("Could not open the graph file: '" + fileName + "'. Make sure the noise tab has a selected graph file.");
 				return null;
 			}
 		}

@@ -1,0 +1,699 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class NodeEditor
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class NodeEditor
+   ">
+    <meta name="generator" content="docfx 2.30.0.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor">
+  
+  
+  <h1 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor" class="text-break">Class NodeEditor
+  </h1>
+  <div class="markdown level0 summary"><p>Central class of NodeEditor providing the GUI to draw the Node Editor Canvas, bundling all other parts of the Framework
+Only Calculation is yet to be split from this</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">NodeEditor</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.html">JBooth.MegaSplat.NodeEditorFramework</a></h6>
+  <h6><strong>Assembly</strong>: Assembly-CSharp-Editor.dll</h6>
+  <h5 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static class NodeEditor</code></pre>
+  </div>
+  <h3 id="fields">Fields
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ClientRepaints.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ClientRepaints%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L24">View Source</a>
+  </span>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ClientRepaints" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ClientRepaints">ClientRepaints</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Action ClientRepaints</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_curEditorState.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.curEditorState%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L19">View Source</a>
+  </span>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_curEditorState" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.curEditorState">curEditorState</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static NodeEditorState curEditorState</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorState.html">NodeEditorState</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_curNodeCanvas.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.curNodeCanvas%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L18">View Source</a>
+  </span>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_curNodeCanvas" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.curNodeCanvas">curNodeCanvas</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static NodeCanvas curNodeCanvas</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvas.html">NodeCanvas</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_InitiationError.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.InitiationError%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L31">View Source</a>
+  </span>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_InitiationError" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.InitiationError">InitiationError</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool InitiationError</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_workList.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.workList%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L293">View Source</a>
+  </span>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_workList" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.workList">workList</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static List&lt;Node&gt; workList</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.List</span>&lt;<a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.Node.html">Node</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_checkInit_System_Boolean_.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.checkInit(System.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L36">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_checkInit_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.checkInit*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_checkInit_System_Boolean_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.checkInit(System.Boolean)">checkInit(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Initiates the Node Editor if it wasn&apos;t yet</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void checkInit(bool GUIFunction)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">GUIFunction</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_DrawCanvas_JBooth_MegaSplat_NodeEditorFramework_NodeCanvas_JBooth_MegaSplat_NodeEditorFramework_NodeEditorState_.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.DrawCanvas(JBooth.MegaSplat.NodeEditorFramework.NodeCanvas%2CJBooth.MegaSplat.NodeEditorFramework.NodeEditorState)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L118">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_DrawCanvas_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.DrawCanvas*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_DrawCanvas_JBooth_MegaSplat_NodeEditorFramework_NodeCanvas_JBooth_MegaSplat_NodeEditorFramework_NodeEditorState_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.DrawCanvas(JBooth.MegaSplat.NodeEditorFramework.NodeCanvas,JBooth.MegaSplat.NodeEditorFramework.NodeEditorState)">DrawCanvas(NodeCanvas, NodeEditorState)</h4>
+  <div class="markdown level1 summary"><p>Draws the Node Canvas on the screen in the rect specified by editorState</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void DrawCanvas(NodeCanvas nodeCanvas, NodeEditorState editorState)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvas.html">NodeCanvas</a></td>
+        <td><span class="parametername">nodeCanvas</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorState.html">NodeEditorState</a></td>
+        <td><span class="parametername">editorState</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_JBooth_MegaSplat_NodeEditorFramework_NodeEditorState_UnityEngine_Vector2_JBooth_MegaSplat_NodeEditorFramework_NodeKnob__.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition(JBooth.MegaSplat.NodeEditorFramework.NodeEditorState%2CUnityEngine.Vector2%2CJBooth.MegaSplat.NodeEditorFramework.NodeKnob%40)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L250">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_JBooth_MegaSplat_NodeEditorFramework_NodeEditorState_UnityEngine_Vector2_JBooth_MegaSplat_NodeEditorFramework_NodeKnob__" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition(JBooth.MegaSplat.NodeEditorFramework.NodeEditorState,UnityEngine.Vector2,JBooth.MegaSplat.NodeEditorFramework.NodeKnob@)">NodeAtPosition(NodeEditorState, Vector2, out NodeKnob)</h4>
+  <div class="markdown level1 summary"><p>Returns the node at the specified canvas-space position in the specified editor and returns a possible focused knob aswell</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Node NodeAtPosition(NodeEditorState editorState, Vector2 canvasPos, out NodeKnob focusedKnob)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorState.html">NodeEditorState</a></td>
+        <td><span class="parametername">editorState</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td><span class="parametername">canvasPos</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeKnob.html">NodeKnob</a></td>
+        <td><span class="parametername">focusedKnob</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.Node.html">Node</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_UnityEngine_Vector2_.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition(UnityEngine.Vector2)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L233">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_UnityEngine_Vector2_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition(UnityEngine.Vector2)">NodeAtPosition(Vector2)</h4>
+  <div class="markdown level1 summary"><p>Returns the node at the specified canvas-space position in the current editor</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Node NodeAtPosition(Vector2 canvasPos)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td><span class="parametername">canvasPos</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.Node.html">Node</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_UnityEngine_Vector2_JBooth_MegaSplat_NodeEditorFramework_NodeKnob__.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition(UnityEngine.Vector2%2CJBooth.MegaSplat.NodeEditorFramework.NodeKnob%40)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L242">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_NodeAtPosition_UnityEngine_Vector2_JBooth_MegaSplat_NodeEditorFramework_NodeKnob__" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.NodeAtPosition(UnityEngine.Vector2,JBooth.MegaSplat.NodeEditorFramework.NodeKnob@)">NodeAtPosition(Vector2, out NodeKnob)</h4>
+  <div class="markdown level1 summary"><p>Returns the node at the specified canvas-space position in the current editor and returns a possible focused knob aswell</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Node NodeAtPosition(Vector2 canvasPos, out NodeKnob focusedKnob)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td><span class="parametername">canvasPos</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeKnob.html">NodeKnob</a></td>
+        <td><span class="parametername">focusedKnob</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.Node.html">Node</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ReInit_System_Boolean_.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ReInit(System.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L50">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ReInit_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ReInit*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ReInit_System_Boolean_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ReInit(System.Boolean)">ReInit(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Re-Inits the NodeCanvas regardless of whetehr it was initiated before</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void ReInit(bool GUIFunction)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">GUIFunction</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_RepaintClients.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.RepaintClients%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L25">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_RepaintClients_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.RepaintClients*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_RepaintClients" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.RepaintClients">RepaintClients()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void RepaintClients()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ScreenToCanvasSpace_JBooth_MegaSplat_NodeEditorFramework_NodeEditorState_UnityEngine_Vector2_.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ScreenToCanvasSpace(JBooth.MegaSplat.NodeEditorFramework.NodeEditorState%2CUnityEngine.Vector2)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L283">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ScreenToCanvasSpace_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ScreenToCanvasSpace*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ScreenToCanvasSpace_JBooth_MegaSplat_NodeEditorFramework_NodeEditorState_UnityEngine_Vector2_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ScreenToCanvasSpace(JBooth.MegaSplat.NodeEditorFramework.NodeEditorState,UnityEngine.Vector2)">ScreenToCanvasSpace(NodeEditorState, Vector2)</h4>
+  <div class="markdown level1 summary"><p>Transforms screen space elements in the specified editor into canvas space (Level of Nodes, ...) </p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Vector2 ScreenToCanvasSpace(NodeEditorState editorState, Vector2 screenPos)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorState.html">NodeEditorState</a></td>
+        <td><span class="parametername">editorState</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td><span class="parametername">screenPos</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ScreenToCanvasSpace_UnityEngine_Vector2_.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ScreenToCanvasSpace(UnityEngine.Vector2)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L276">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ScreenToCanvasSpace_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ScreenToCanvasSpace*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_ScreenToCanvasSpace_UnityEngine_Vector2_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.ScreenToCanvasSpace(UnityEngine.Vector2)">ScreenToCanvasSpace(Vector2)</h4>
+  <div class="markdown level1 summary"><p>Transforms screen space elements in the current editor into canvas space (Level of Nodes, ...) </p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Vector2 ScreenToCanvasSpace(Vector2 screenPos)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td><span class="parametername">screenPos</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor_Update.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor.Update%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L23">View Source</a>
+  </span>
+  <a id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_Update_" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.Update*"></a>
+  <h4 id="JBooth_MegaSplat_NodeEditorFramework_NodeEditor_Update" data-uid="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.Update">Update()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void Update()</code></pre>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_MegaSplat_NodeEditorFramework_NodeEditor.md&amp;value=---%0Auid%3A%20JBooth.MegaSplat.NodeEditorFramework.NodeEditor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/Scripts/Editor/TextureGraph/Framework/NodeEditor.cs/#L15" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

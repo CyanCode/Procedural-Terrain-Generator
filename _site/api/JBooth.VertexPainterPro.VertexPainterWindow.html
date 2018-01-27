@@ -1,0 +1,1798 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class VertexPainterWindow
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class VertexPainterWindow
+   ">
+    <meta name="generator" content="docfx 2.30.0.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="JBooth.VertexPainterPro.VertexPainterWindow">
+  
+  
+  <h1 id="JBooth_VertexPainterPro_VertexPainterWindow" data-uid="JBooth.VertexPainterPro.VertexPainterWindow" class="text-break">Class VertexPainterWindow
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">UnityEngine.Object</span></div>
+    <div class="level2"><span class="xref">UnityEngine.ScriptableObject</span></div>
+    <div class="level3"><span class="xref">UnityEditor.EditorWindow</span></div>
+    <div class="level4"><span class="xref">VertexPainterWindow</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow(System.Type, System.Boolean, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow(System.Type, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow(System.Type, System.Boolean, System.String, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect(System.Type, UnityEngine.Rect, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect(System.Type, UnityEngine.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect(System.Type, UnityEngine.Rect, System.Boolean, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.BeginWindows()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.EndWindows()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.ShowNotification(UnityEngine.GUIContent)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.RemoveNotification()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.ShowTab()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.Focus()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.ShowUtility()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.ShowPopup()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.ShowAsDropDown(UnityEngine.Rect, UnityEngine.Vector2)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.Show()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.Show(System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.ShowAuxWindow()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.Boolean, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.String, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.Boolean, System.String, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.Type[])</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.String, System.Type[])</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindow&lt;T&gt;(System.String, System.Boolean, System.Type[])</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.FocusWindowIfItsOpen(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.FocusWindowIfItsOpen&lt;T&gt;()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect&lt;T&gt;(UnityEngine.Rect)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect&lt;T&gt;(UnityEngine.Rect, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect&lt;T&gt;(UnityEngine.Rect, System.Boolean, System.String)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.GetWindowWithRect&lt;T&gt;(UnityEngine.Rect, System.Boolean, System.String, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.Close()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.Repaint()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.SendEvent(UnityEngine.Event)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.wantsMouseMove</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.wantsMouseEnterLeaveWindow</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.autoRepaintOnSceneChange</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.maximized</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.focusedWindow</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.mouseOverWindow</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.minSize</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.maxSize</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.title</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.titleContent</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.depthBufferBits</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.antiAlias</span>
+    </div>
+    <div>
+      <span class="xref">UnityEditor.EditorWindow.position</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.ScriptableObject.SetDirty()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.ScriptableObject.CreateInstance(System.String)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.ScriptableObject.CreateInstance(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.ScriptableObject.CreateInstance&lt;T&gt;()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Destroy(UnityEngine.Object, System.Single)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Destroy(UnityEngine.Object)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.DestroyImmediate(UnityEngine.Object, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.DestroyImmediate(UnityEngine.Object)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindObjectsOfType(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.DontDestroyOnLoad(UnityEngine.Object)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.DestroyObject(UnityEngine.Object, System.Single)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.DestroyObject(UnityEngine.Object)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindSceneObjectsOfType(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindObjectsOfTypeIncludingAssets(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindObjectsOfTypeAll(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.GetInstanceID()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate(UnityEngine.Object, UnityEngine.Vector3, UnityEngine.Quaternion)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate(UnityEngine.Object, UnityEngine.Vector3, UnityEngine.Quaternion, UnityEngine.Transform)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate(UnityEngine.Object)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate(UnityEngine.Object, UnityEngine.Transform)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate(UnityEngine.Object, UnityEngine.Transform, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate&lt;T&gt;(T)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate&lt;T&gt;(T, UnityEngine.Vector3, UnityEngine.Quaternion)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate&lt;T&gt;(T, UnityEngine.Vector3, UnityEngine.Quaternion, UnityEngine.Transform)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate&lt;T&gt;(T, UnityEngine.Transform)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.Instantiate&lt;T&gt;(T, UnityEngine.Transform, System.Boolean)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindObjectsOfType&lt;T&gt;()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindObjectOfType&lt;T&gt;()</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.FindObjectOfType(System.Type)</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.name</span>
+    </div>
+    <div>
+      <span class="xref">UnityEngine.Object.hideFlags</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="JBooth.VertexPainterPro.html">JBooth.VertexPainterPro</a></h6>
+  <h6><strong>Assembly</strong>: Assembly-CSharp-Editor.dll</h6>
+  <h5 id="JBooth_VertexPainterPro_VertexPainterWindow_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class VertexPainterWindow : EditorWindow</code></pre>
+  </div>
+  <h3 id="fields">Fields
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushColor.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushColor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1219">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushColor" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushColor">brushColor</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Color brushColor</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Color</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushColorMode.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushColorMode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1228">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushColorMode" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushColorMode">brushColorMode</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.BrushColorMode brushColorMode</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.BrushColorMode.html">VertexPainterWindow.BrushColorMode</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushFalloff.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushFalloff%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1218">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushFalloff" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushFalloff">brushFalloff</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public float brushFalloff</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushFlow.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushFlow%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1217">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushFlow" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushFlow">brushFlow</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public float brushFlow</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushMode.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushMode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1224">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushMode" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushMode">brushMode</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.BrushTarget brushMode</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.BrushTarget.html">VertexPainterWindow.BrushTarget</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushSize.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1216">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushSize" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushSize">brushSize</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public float brushSize</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushValue.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushValue%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1220">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushValue" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushValue">brushValue</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int brushValue</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_brushVisualization.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.brushVisualization%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1250">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_brushVisualization" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.brushVisualization">brushVisualization</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.BrushVisualization brushVisualization</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.BrushVisualization.html">VertexPainterWindow.BrushVisualization</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_customBrush.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.customBrush%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1243">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_customBrush" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.customBrush">customBrush</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterCustomBrush customBrush</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterCustomBrush.html">VertexPainterCustomBrush</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_enabled.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.enabled%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1214">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_enabled" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.enabled">enabled</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool enabled</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_floatBrushValue.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.floatBrushValue%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1221">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_floatBrushValue" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.floatBrushValue">floatBrushValue</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public float floatBrushValue</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_flowBrushType.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.flowBrushType%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1231">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_flowBrushType" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.flowBrushType">flowBrushType</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.FlowBrushType flowBrushType</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.FlowBrushType.html">VertexPainterWindow.FlowBrushType</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_flowRemap01.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.flowRemap01%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1233">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_flowRemap01" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.flowRemap01">flowRemap01</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool flowRemap01</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_flowTarget.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.flowTarget%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1230">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_flowTarget" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.flowTarget">flowTarget</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.FlowTarget flowTarget</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.FlowTarget.html">VertexPainterWindow.FlowTarget</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_flowTargetNames.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.flowTargetNames%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1082">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_flowTargetNames" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.flowTargetNames">flowTargetNames</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string[] flowTargetNames</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_flowVisualization.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.flowVisualization%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1232">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_flowVisualization" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.flowVisualization">flowVisualization</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.FlowVisualization flowVisualization</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.FlowVisualization.html">VertexPainterWindow.FlowVisualization</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_jobEdits.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.jobEdits%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1253">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_jobEdits" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.jobEdits">jobEdits</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool[] jobEdits</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_jobs.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.jobs%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1251">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_jobs" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.jobs">jobs</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PaintJob[] jobs</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_oldpos.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.oldpos%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1215">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_oldpos" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.oldpos">oldpos</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Vector3 oldpos</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector3</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_OnBeginStroke.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.OnBeginStroke%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L11">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_OnBeginStroke" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.OnBeginStroke">OnBeginStroke</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;PaintJob[]&gt; OnBeginStroke</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a>[]&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_OnEndStroke.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.OnEndStroke%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L13">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_OnEndStroke" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.OnEndStroke">OnEndStroke</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action OnEndStroke</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_OnStokeModified.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.OnStokeModified%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L12">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_OnStokeModified" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.OnStokeModified">OnStokeModified</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Action&lt;PaintJob, bool&gt; OnStokeModified</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a>, <span class="xref">System.Boolean</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_pull.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.pull%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1234">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_pull" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.pull">pull</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool pull</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_showNormals.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.showNormals%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1240">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_showNormals" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.showNormals">showNormals</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool showNormals</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_showTangents.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.showTangents%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1241">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_showTangents" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.showTangents">showTangents</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool showTangents</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_showVertexColor.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.showVertexColor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1239">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_showVertexColor" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.showVertexColor">showVertexColor</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Color showVertexColor</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Color</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_showVertexPoints.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.showVertexPoints%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1237">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_showVertexPoints" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.showVertexPoints">showVertexPoints</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool showVertexPoints</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_showVertexShader.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.showVertexShader%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1236">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_showVertexShader" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.showVertexShader">showVertexShader</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool showVertexShader</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_showVertexSize.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.showVertexSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1238">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_showVertexSize" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.showVertexSize">showVertexSize</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public float showVertexSize</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Single</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_uvVisualizationRange.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.uvVisualizationRange%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1222">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_uvVisualizationRange" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.uvVisualizationRange">uvVisualizationRange</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Vector2 uvVisualizationRange</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">UnityEngine.Vector2</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_vertexContraint.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.vertexContraint%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1235">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_vertexContraint" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.vertexContraint">vertexContraint</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.VertexContraint vertexContraint</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.VertexContraint.html">VertexPainterWindow.VertexContraint</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_vertexMode.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.vertexMode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1229">View Source</a>
+  </span>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_vertexMode" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.vertexMode">vertexMode</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.VertexMode vertexMode</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.VertexMode.html">VertexPainterWindow.VertexMode</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_DrawRollup_System_String_System_Boolean_System_Boolean_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.DrawRollup(System.String%2CSystem.Boolean%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_GUI.cs/#L89">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_DrawRollup_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.DrawRollup*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_DrawRollup_System_String_System_Boolean_System_Boolean_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.DrawRollup(System.String,System.Boolean,System.Boolean)">DrawRollup(String, Boolean, Boolean)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool DrawRollup(string text, bool defaultState = true, bool inset = false)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">text</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">defaultState</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">inset</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_FillMesh_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.FillMesh(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1405">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_FillMesh_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.FillMesh*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_FillMesh_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.FillMesh(JBooth.VertexPainterPro.PaintJob)">FillMesh(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void FillMesh(PaintJob job)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">job</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_GetBrushValue.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.GetBrushValue%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1029">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_GetBrushValue_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.GetBrushValue*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_GetBrushValue" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.GetBrushValue">GetBrushValue()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public object GetBrushValue()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Object</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_GetLerper.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.GetLerper%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L558">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_GetLerper_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.GetLerper*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_GetLerper" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.GetLerper">GetLerper()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.Lerper GetLerper()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.Lerper.html">VertexPainterWindow.Lerper</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_GetMultiplier.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.GetMultiplier%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L743">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_GetMultiplier_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.GetMultiplier*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_GetMultiplier" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.GetMultiplier">GetMultiplier()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public VertexPainterWindow.Multiplier GetMultiplier()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.VertexPainterWindow.Multiplier.html">VertexPainterWindow.Multiplier</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitColors_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitColors(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1446">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitColors_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitColors*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitColors_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitColors(JBooth.VertexPainterPro.PaintJob)">InitColors(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitColors(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitNormalTangent_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitNormalTangent(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1550">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitNormalTangent_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitNormalTangent*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitNormalTangent_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitNormalTangent(JBooth.VertexPainterPro.PaintJob)">InitNormalTangent(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitNormalTangent(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitPositions_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitPositions(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1535">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitPositions_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitPositions*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitPositions_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitPositions(JBooth.VertexPainterPro.PaintJob)">InitPositions(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitPositions(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitUV0_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitUV0(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1463">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV0_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV0*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV0_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV0(JBooth.VertexPainterPro.PaintJob)">InitUV0(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitUV0(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitUV1_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitUV1(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1481">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV1_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV1*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV1_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV1(JBooth.VertexPainterPro.PaintJob)">InitUV1(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitUV1(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitUV2_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitUV2(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1499">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV2_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV2*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV2_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV2(JBooth.VertexPainterPro.PaintJob)">InitUV2(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitUV2(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_InitUV3_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.InitUV3(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1517">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV3_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV3*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_InitUV3_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.InitUV3(JBooth.VertexPainterPro.PaintJob)">InitUV3(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void InitUV3(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_PrepBrushMode_JBooth_VertexPainterPro_PaintJob_.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.PrepBrushMode(JBooth.VertexPainterPro.PaintJob)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1570">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_PrepBrushMode_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.PrepBrushMode*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_PrepBrushMode_JBooth_VertexPainterPro_PaintJob_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.PrepBrushMode(JBooth.VertexPainterPro.PaintJob)">PrepBrushMode(PaintJob)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void PrepBrushMode(PaintJob j)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="JBooth.VertexPainterPro.PaintJob.html">PaintJob</a></td>
+        <td><span class="parametername">j</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_RevertMat.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.RevertMat%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L1255">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_RevertMat_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.RevertMat*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_RevertMat" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.RevertMat">RevertMat()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void RevertMat()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow_ShowWindow.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow.ShowWindow%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow.cs/#L45">View Source</a>
+  </span>
+  <a id="JBooth_VertexPainterPro_VertexPainterWindow_ShowWindow_" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.ShowWindow*"></a>
+  <h4 id="JBooth_VertexPainterPro_VertexPainterWindow_ShowWindow" data-uid="JBooth.VertexPainterPro.VertexPainterWindow.ShowWindow">ShowWindow()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[MenuItem(&quot;Window/Vertex Painter Pro&quot;)]
+public static void ShowWindow()</code></pre>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=JBooth_VertexPainterPro_VertexPainterWindow.md&amp;value=---%0Auid%3A%20JBooth.VertexPainterPro.VertexPainterWindow%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/MegaSplat/VertexPaint/Editor/VertexPainterWindow_Painting.cs/#L8" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

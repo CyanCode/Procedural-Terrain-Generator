@@ -1,0 +1,444 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class AbstractTwoModNode
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class AbstractTwoModNode
+   ">
+    <meta name="generator" content="docfx 2.30.0.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode">
+  
+  
+  <h1 id="Terra_Nodes_Modifier_AbstractTwoModNode" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode" class="text-break">Class AbstractTwoModNode
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></div>
+    <div class="level2"><a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html">AbstractGeneratorNode</a></div>
+    <div class="level3"><span class="xref">AbstractTwoModNode</span></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.AddNode.html">AddNode</a></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.DivideNode.html">DivideNode</a></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.MaskNode.html">MaskNode</a></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.MaxNode.html">MaxNode</a></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.MinNode.html">MinNode</a></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.MultiplyNode.html">MultiplyNode</a></div>
+      <div class="level4"><a class="xref" href="Terra.Nodes.Modifier.SubtractNode.html">SubtractNode</a></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><a class="xref" href="Terra.GraphEditor.Nodes.IUpdateable.html">IUpdateable</a></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html#Terra_Nodes_Generation_AbstractGeneratorNode_OutSocket">AbstractGeneratorNode.OutSocket</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html#Terra_Nodes_Generation_AbstractGeneratorNode_PreviewTexture">AbstractGeneratorNode.PreviewTexture</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html#Terra_Nodes_Generation_AbstractGeneratorNode_TextureNeedsUpdating">AbstractGeneratorNode.TextureNeedsUpdating</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html#Terra_Nodes_Generation_AbstractGeneratorNode_Generator">AbstractGeneratorNode.Generator</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html#Terra_Nodes_Generation_AbstractGeneratorNode_GetGenerator">AbstractGeneratorNode.GetGenerator()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.Nodes.Generation.AbstractGeneratorNode.html#Terra_Nodes_Generation_AbstractGeneratorNode_GetInputGenerator_Terra_GraphEditor_Sockets_InputSocket_">AbstractGeneratorNode.GetInputGenerator(InputSocket)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Sockets">Node.Sockets</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Id">Node.Id</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Name">Node.Name</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_WindowRect">Node.WindowRect</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_VisitCount">Node.VisitCount</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_ContentRect">Node.ContentRect</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_LastFocusedNodeId">Node.LastFocusedNodeId</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Resizable">Node.Resizable</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_ResizeArea">Node.ResizeArea</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_SocketTopOffsetInput">Node.SocketTopOffsetInput</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_SocketTopOffsetOutput">Node.SocketTopOffsetOutput</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Collapsed">Node.Collapsed</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Height">Node.Height</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetId">Node.GetId()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_OnSerialization_Terra_GraphEditor_SerializableNode_">Node.OnSerialization(SerializableNode)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_OnDeserialization_Terra_GraphEditor_SerializableNode_">Node.OnDeserialization(SerializableNode)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_X">Node.X</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Y">Node.Y</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Width">Node.Width</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_HasFocus">Node.HasFocus()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_OnFocus">Node.OnFocus()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Collapse">Node.Collapse()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Expand">Node.Expand()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Intersects_UnityEngine_Vector2_">Node.Intersects(Vector2)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_ContainsSocket_Terra_GraphEditor_Sockets_AbstractSocket_">Node.ContainsSocket(AbstractSocket)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetInputSocketCount">Node.GetInputSocketCount()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetSocket_System_Type_System_Type_System_Int32_">Node.GetSocket(Type, Type, Int32)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_ProjectToNode_UnityEngine_Vector2_">Node.ProjectToNode(Vector2)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_SearchSocketAt_UnityEngine_Vector2_">Node.SearchSocketAt(Vector2)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_TriggerChangeEvent">Node.TriggerChangeEvent()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_AllInputSocketsConnected">Node.AllInputSocketsConnected()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetConnectedInputCount">Node.GetConnectedInputCount()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GUIDrawSockets">Node.GUIDrawSockets()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GUIDrawEdges">Node.GUIDrawEdges()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GUIAlignSockets">Node.GUIAlignSockets()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetNodeName_System_Type_">Node.GetNodeName(Type)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetNodePath_System_Type_">Node.GetNodePath(Type)</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_ToSerializedNode">Node.ToSerializedNode()</a>
+    </div>
+    <div>
+      <a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_GetEdgeColor_System_Type_">Node.GetEdgeColor(Type)</a>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Terra.Nodes.Modifier.html">Terra.Nodes.Modifier</a></h6>
+  <h6><strong>Assembly</strong>: Assembly-CSharp.dll</h6>
+  <h5 id="Terra_Nodes_Modifier_AbstractTwoModNode_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public abstract class AbstractTwoModNode : AbstractGeneratorNode, IUpdateable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_Nodes_Modifier_AbstractTwoModNode__ctor_System_Int32_Terra_GraphEditor_Graph_.md&amp;value=---%0Auid%3A%20Terra.Nodes.Modifier.AbstractTwoModNode.%23ctor(System.Int32%2CTerra.GraphEditor.Graph)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/Nodes/Modifier/AbstractTwoModNode.cs/#L31">View Source</a>
+  </span>
+  <a id="Terra_Nodes_Modifier_AbstractTwoModNode__ctor_" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.#ctor*"></a>
+  <h4 id="Terra_Nodes_Modifier_AbstractTwoModNode__ctor_System_Int32_Terra_GraphEditor_Graph_" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.#ctor(System.Int32,Terra.GraphEditor.Graph)">AbstractTwoModNode(Int32, Graph)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public AbstractTwoModNode(int id, Graph parent)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">id</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Graph.html">Graph</a></td>
+        <td><span class="parametername">parent</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_Nodes_Modifier_AbstractTwoModNode_Generator1.md&amp;value=---%0Auid%3A%20Terra.Nodes.Modifier.AbstractTwoModNode.Generator1%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/Nodes/Modifier/AbstractTwoModNode.cs/#L10">View Source</a>
+  </span>
+  <a id="Terra_Nodes_Modifier_AbstractTwoModNode_Generator1_" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.Generator1*"></a>
+  <h4 id="Terra_Nodes_Modifier_AbstractTwoModNode_Generator1" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.Generator1">Generator1</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Generator Generator1 { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.CoherentNoise.Generator.html">Generator</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_Nodes_Modifier_AbstractTwoModNode_Generator2.md&amp;value=---%0Auid%3A%20Terra.Nodes.Modifier.AbstractTwoModNode.Generator2%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/Nodes/Modifier/AbstractTwoModNode.cs/#L15">View Source</a>
+  </span>
+  <a id="Terra_Nodes_Modifier_AbstractTwoModNode_Generator2_" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.Generator2*"></a>
+  <h4 id="Terra_Nodes_Modifier_AbstractTwoModNode_Generator2" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.Generator2">Generator2</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Generator Generator2 { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.CoherentNoise.Generator.html">Generator</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_Nodes_Modifier_AbstractTwoModNode_OnGUI.md&amp;value=---%0Auid%3A%20Terra.Nodes.Modifier.AbstractTwoModNode.OnGUI%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/Nodes/Modifier/AbstractTwoModNode.cs/#L52">View Source</a>
+  </span>
+  <a id="Terra_Nodes_Modifier_AbstractTwoModNode_OnGUI_" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.OnGUI*"></a>
+  <h4 id="Terra_Nodes_Modifier_AbstractTwoModNode_OnGUI" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.OnGUI">OnGUI()</h4>
+  <div class="markdown level1 summary"><p>Creates GUI elements that all two modifier noise nodes share:</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override void OnGUI()</code></pre>
+  </div>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_OnGUI">Node.OnGUI()</a></div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_Nodes_Modifier_AbstractTwoModNode_Update.md&amp;value=---%0Auid%3A%20Terra.Nodes.Modifier.AbstractTwoModNode.Update%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/Nodes/Modifier/AbstractTwoModNode.cs/#L59">View Source</a>
+  </span>
+  <a id="Terra_Nodes_Modifier_AbstractTwoModNode_Update_" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.Update*"></a>
+  <h4 id="Terra_Nodes_Modifier_AbstractTwoModNode_Update" data-uid="Terra.Nodes.Modifier.AbstractTwoModNode.Update">Update()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override void Update()</code></pre>
+  </div>
+  <h5 class="overrides">Overrides</h5>
+  <div><a class="xref" href="Terra.GraphEditor.Node.html#Terra_GraphEditor_Node_Update">Node.Update()</a></div>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <a class="xref" href="Terra.GraphEditor.Nodes.IUpdateable.html">IUpdateable</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_Nodes_Modifier_AbstractTwoModNode.md&amp;value=---%0Auid%3A%20Terra.Nodes.Modifier.AbstractTwoModNode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/Nodes/Modifier/AbstractTwoModNode.cs/#L9" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

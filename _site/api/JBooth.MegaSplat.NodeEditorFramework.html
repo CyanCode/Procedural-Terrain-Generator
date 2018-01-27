@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Namespace JBooth.MegaSplat.NodeEditorFramework
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Namespace JBooth.MegaSplat.NodeEditorFramework
+   ">
+    <meta name="generator" content="docfx 2.30.0.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="JBooth.MegaSplat.NodeEditorFramework">
+  
+  <h1 id="JBooth_MegaSplat_NodeEditorFramework" data-uid="JBooth.MegaSplat.NodeEditorFramework" class="text-break">Namespace JBooth.MegaSplat.NodeEditorFramework
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+    <h3 id="classes">Classes
+  </h3>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ConnectionTypes.html">ConnectionTypes</a></h4>
+      <section><p>Handles fetching and storing of all ConnecionTypes</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ContextEntryAttribute.html">ContextEntryAttribute</a></h4>
+      <section><p>The ContextAttribute is used to register context entries in the NodeEditor.
+This function will be called when the user clicked at the item at path
+Type defines the type of context menu to appear in, like the right-click on a Node or the Canvas.
+Method Signature must be [ Return: Void; Params: NodeEditorInputInfo ]</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ContextFillerAttribute.html">ContextFillerAttribute</a></h4>
+      <section><p>The ContextFillerAttribute is used to register context entries in the NodeEditor.
+This function will be called to fill the context GenericMenu in any way it likes to.
+Type defines the type of context menu to appear in, like the right-click on a Node or the Canvas.
+Method Signature must be [ Return: Void; Params: NodeEditorInputInfo, GenericMenu ]</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.EditorLoadingControl.html">EditorLoadingControl</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.EvalData.html">EvalData</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.EventHandlerAttribute.html">EventHandlerAttribute</a></h4>
+      <section><p>The EventHandlerAttribute is used to handle arbitrary events for the Node Editor.
+&apos;priority&apos; can additionally be specified. A priority over or equals hundred will be called AFTER the GUI
+Method Signature must be [ Return: Void; Params: NodeEditorInputInfo, EventType ]</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.FloatType.html">FloatType</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.GenericMenu.html">GenericMenu</a></h4>
+      <section><p>Generic Menu which mimics UnityEditor.GenericMenu class pretty much exactly. Wrapper for the generic PopupMenu.</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.GUIScaleUtility.html">GUIScaleUtility</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.HotkeyAttribute.html">HotkeyAttribute</a></h4>
+      <section><p>The HotkeyAttribute is used to provide hotkeys for the Node Editor.
+&apos;priority&apos; can additionally be specified. A priority over or equals hundred will be called AFTER the GUI
+Method Signature must be [ Return: Void; Params: NodeEditorInputInfo ]</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.IntType.html">IntType</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.MegaSplatTextureGraphWindow.html">MegaSplatTextureGraphWindow</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.Node.html">Node</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeAbs.html">NodeAbs</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeAdd.html">NodeAdd</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeAttribute.html">NodeAttribute</a></h4>
+      <section><p>The NodeAttribute is used to specify editor specific data for a node type, later stored using a NodeData</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeBandPassFilter.html">NodeBandPassFilter</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvas.html">NodeCanvas</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvasManager.html">NodeCanvasManager</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvasSceneSave.html">NodeCanvasSceneSave</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvasTypeAttribute.html">NodeCanvasTypeAttribute</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCavity.html">NodeCavity</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeClamp01.html">NodeClamp01</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeComment.html">NodeComment</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeDivide.html">NodeDivide</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditor.html">NodeEditor</a></h4>
+      <section><p>Central class of NodeEditor providing the GUI to draw the Node Editor Canvas, bundling all other parts of the Framework
+Only Calculation is yet to be split from this</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorCallbackReceiver.html">NodeEditorCallbackReceiver</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorCallbacks.html">NodeEditorCallbacks</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorGUI.html">NodeEditorGUI</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorInputControls.html">NodeEditorInputControls</a></h4>
+      <section><p>Collection of default Node Editor controls for the NodeEditorInputSystem</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorInputInfo.html">NodeEditorInputInfo</a></h4>
+      <section><p>Class that representates an input to handle containing all avaible data</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorInputSystem.html">NodeEditorInputSystem</a></h4>
+      <section><p>The NodeEditor Input System handles dynamic input controls. 
+Use the four attributes on functions to make the system recognize them  as event handlers
+Default Controls can be found in NodeEditorInputControls</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorSaveManager.html">NodeEditorSaveManager</a></h4>
+      <section><p>Manager handling all save and load operations on NodeCanvases and NodeEditorStates of the Node Editor, both as assets and in the scene</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorState.html">NodeEditorState</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeEditorUserCache.html">NodeEditorUserCache</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeHeight.html">NodeHeight</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeInput.html">NodeInput</a></h4>
+      <section><p>NodeInput accepts one connection to a NodeOutput by default</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeKnob.html">NodeKnob</a></h4>
+      <section><p>Abstract knob on the side of an node that handles positioning drawing with a texture and even labeling and positioning calls</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeLerp.html">NodeLerp</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMax.html">NodeMax</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMegaSplatOutput.html">NodeMegaSplatOutput</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMegaSplatOutput.Job.html">NodeMegaSplatOutput.Job</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMin.html">NodeMin</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMultiBand2.html">NodeMultiBand2</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMultiBand2.Band.html">NodeMultiBand2.Band</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeMultiply.html">NodeMultiply</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeNoise3D.html">NodeNoise3D</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeNormalAngle.html">NodeNormalAngle</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeOneMinus.html">NodeOneMinus</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeOutput.html">NodeOutput</a></h4>
+      <section><p>Node output accepts multiple connections to NodeInputs by default</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodePassFilter.html">NodePassFilter</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodePow.html">NodePow</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeRemapCurve.html">NodeRemapCurve</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeSelector2.html">NodeSelector2</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeSelector3.html">NodeSelector3</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeSelector4.html">NodeSelector4</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeSubtract.html">NodeSubtract</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeTextureCluster.html">NodeTextureCluster</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeTextureIndex.html">NodeTextureIndex</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeTextureMask.html">NodeTextureMask</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeTypes.html">NodeTypes</a></h4>
+      <section><p>Handles fetching and storing of all NodeDeclarations</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeValue.html">NodeValue</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.OverlayGUI.html">OverlayGUI</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.PopupMenu.html">PopupMenu</a></h4>
+      <section><p>A Generic Popupmenu. Used by GenericMenu, Popup (future), etc.</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.PopupMenu.MenuItem.html">PopupMenu.MenuItem</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ResourceManager.html">ResourceManager</a></h4>
+      <section><p>Provides methods for loading resources both at runtime and in the editor; 
+Though, to load at runtime, they have to be in a resources folder</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ResourceManager.MemoryTexture.html">ResourceManager.MemoryTexture</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.RTEditorGUI.html">RTEditorGUI</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.TypeData.html">TypeData</a></h4>
+      <section></section>
+    <h3 id="structs">Structs
+  </h3>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeCanvasTypeData.html">NodeCanvasTypeData</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeData.html">NodeData</a></h4>
+      <section><p>The NodeData contains the additional, editor specific data of a node type</p>
+</section>
+    <h3 id="interfaces">Interfaces
+  </h3>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.IConnectionTypeDeclaration.html">IConnectionTypeDeclaration</a></h4>
+      <section></section>
+    <h3 id="enums">Enums
+  </h3>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ConnectionDrawMethod.html">ConnectionDrawMethod</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.ContextType.html">ContextType</a></h4>
+      <section><p>The type of a context menu. Defines on what occasion the context menu should show in the NodeEditor</p>
+</section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeNoise3D.Space.html">NodeNoise3D.Space</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeNormalAngle.Space.html">NodeNormalAngle.Space</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.NodeSide.html">NodeSide</a></h4>
+      <section><p>Defines a side on a Node</p>
+</section>
+    <h3 id="delegates">Delegates
+  </h3>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.PopupMenu.MenuFunction.html">PopupMenu.MenuFunction</a></h4>
+      <section></section>
+      <h4><a class="xref" href="JBooth.MegaSplat.NodeEditorFramework.PopupMenu.MenuFunctionData.html">PopupMenu.MenuFunctionData</a></h4>
+      <section></section>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

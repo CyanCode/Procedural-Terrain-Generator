@@ -1,0 +1,1464 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class Graph
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class Graph
+   ">
+    <meta name="generator" content="docfx 2.30.0.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Terra.GraphEditor.Graph">
+  
+  
+  <h1 id="Terra_GraphEditor_Graph" data-uid="Terra.GraphEditor.Graph" class="text-break">Class Graph
+  </h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">Graph</span></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">UnityEngine.ISerializationCallbackReceiver</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Terra.GraphEditor.html">Terra.GraphEditor</a></h6>
+  <h6><strong>Assembly</strong>: Assembly-CSharp.dll</h6>
+  <h5 id="Terra_GraphEditor_Graph_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Serializable]
+public class Graph : ISerializationCallbackReceiver</code></pre>
+  </div>
+  <h3 id="fields">Fields
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_AllowCicles.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.AllowCicles%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L29">View Source</a>
+  </span>
+  <h4 id="Terra_GraphEditor_Graph_AllowCicles" data-uid="Terra.GraphEditor.Graph.AllowCicles">AllowCicles</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[HideInInspector]
+[SerializeField]
+public bool AllowCicles</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_Name.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.Name%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L12">View Source</a>
+  </span>
+  <h4 id="Terra_GraphEditor_Graph_Name" data-uid="Terra.GraphEditor.Graph.Name">Name</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[SerializeField]
+public string Name</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_TriggerEvents.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.TriggerEvents%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L34">View Source</a>
+  </span>
+  <h4 id="Terra_GraphEditor_Graph_TriggerEvents" data-uid="Terra.GraphEditor.Graph.TriggerEvents">TriggerEvents</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[NonSerialized]
+public bool TriggerEvents</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_Version.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.Version%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L23">View Source</a>
+  </span>
+  <h4 id="Terra_GraphEditor_Graph_Version" data-uid="Terra.GraphEditor.Graph.Version">Version</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[SerializeField]
+public int Version</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_AddNode_Terra_GraphEditor_Node_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.AddNode(Terra.GraphEditor.Node)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L131">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_AddNode_" data-uid="Terra.GraphEditor.Graph.AddNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_AddNode_Terra_GraphEditor_Node_" data-uid="Terra.GraphEditor.Graph.AddNode(Terra.GraphEditor.Node)">AddNode(Node)</h4>
+  <div class="markdown level1 summary"><p>Adds a node to the Graph. Does not add Nodes with an id that is already taken.
+Triggers a &apos;AddedNode&apos; event. </p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool AddNode(Node node)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><span class="parametername">node</span></td>
+        <td><p>The Node to add.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the node was added.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_AreConected_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.AreConected(Terra.GraphEditor.Sockets.InputSocket%2CTerra.GraphEditor.Sockets.OutputSocket)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L159">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_AreConected_" data-uid="Terra.GraphEditor.Graph.AreConected*"></a>
+  <h4 id="Terra_GraphEditor_Graph_AreConected_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_" data-uid="Terra.GraphEditor.Graph.AreConected(Terra.GraphEditor.Sockets.InputSocket,Terra.GraphEditor.Sockets.OutputSocket)">AreConected(InputSocket, OutputSocket)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool AreConected(InputSocket inputSocket, OutputSocket outputSocket)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.InputSocket.html">InputSocket</a></td>
+        <td><span class="parametername">inputSocket</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.OutputSocket.html">OutputSocket</a></td>
+        <td><span class="parametername">outputSocket</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_CanBeLinked_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.CanBeLinked(Terra.GraphEditor.Sockets.InputSocket%2CTerra.GraphEditor.Sockets.OutputSocket)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L327">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_CanBeLinked_" data-uid="Terra.GraphEditor.Graph.CanBeLinked*"></a>
+  <h4 id="Terra_GraphEditor_Graph_CanBeLinked_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_" data-uid="Terra.GraphEditor.Graph.CanBeLinked(Terra.GraphEditor.Sockets.InputSocket,Terra.GraphEditor.Sockets.OutputSocket)">CanBeLinked(InputSocket, OutputSocket)</h4>
+  <div class="markdown level1 summary"><p>Returns true if the sockets can be linked.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool CanBeLinked(InputSocket inSocket, OutputSocket outSocket)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.InputSocket.html">InputSocket</a></td>
+        <td><span class="parametername">inSocket</span></td>
+        <td><p>The input socket</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.OutputSocket.html">OutputSocket</a></td>
+        <td><span class="parametername">outSocket</span></td>
+        <td><p>The output socket</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the sockets can be linked.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_CreateNode_System_Type_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.CreateNode(System.Type)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L62">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_CreateNode_" data-uid="Terra.GraphEditor.Graph.CreateNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_CreateNode_System_Type_" data-uid="Terra.GraphEditor.Graph.CreateNode(System.Type)">CreateNode(Type)</h4>
+  <div class="markdown level1 summary"><p>Creates a Node of the given type. Type must inherit from Node.
+Does not add the Node to the Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Node CreateNode(Type type)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Type</span></td>
+        <td><span class="parametername">type</span></td>
+        <td><p>The Type of the Node to create.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><p>The created Node of the given Type.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_CreateNode_System_Type_System_Int32_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.CreateNode(System.Type%2CSystem.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L71">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_CreateNode_" data-uid="Terra.GraphEditor.Graph.CreateNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_CreateNode_System_Type_System_Int32_" data-uid="Terra.GraphEditor.Graph.CreateNode(System.Type,System.Int32)">CreateNode(Type, Int32)</h4>
+  <div class="markdown level1 summary"><p>Creates a Node of the given type with the assigned id. Type must inherit from Node.
+Does not add the Node to the Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Node CreateNode(Type type, int id)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Type</span></td>
+        <td><span class="parametername">type</span></td>
+        <td><p>The Type of the Node to create.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">id</span></td>
+        <td><p>The id of the Node to create.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><p>The created Node of the given Type with the assigned id.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_CreateNode__1.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.CreateNode%60%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L47">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_CreateNode_" data-uid="Terra.GraphEditor.Graph.CreateNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_CreateNode__1" data-uid="Terra.GraphEditor.Graph.CreateNode``1">CreateNode&lt;T&gt;()</h4>
+  <div class="markdown level1 summary"><p>Creates a Node of the given type. Type must inherit from Node.
+Does not add the Node to the Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Node CreateNode&lt;T&gt;()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><p>The created Node of the given Type.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_CreateNode__1_System_Int32_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.CreateNode%60%601(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L54">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_CreateNode_" data-uid="Terra.GraphEditor.Graph.CreateNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_CreateNode__1_System_Int32_" data-uid="Terra.GraphEditor.Graph.CreateNode``1(System.Int32)">CreateNode&lt;T&gt;(Int32)</h4>
+  <div class="markdown level1 summary"><p>Creates a Node of the given type with the assigned id. Type must inherit from Node.
+Does not add the Node to the Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Node CreateNode&lt;T&gt;(int id)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">id</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><p>The created Node of the given Type with the assigned id.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_ForceUpdateNodes.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.ForceUpdateNodes%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L381">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_ForceUpdateNodes_" data-uid="Terra.GraphEditor.Graph.ForceUpdateNodes*"></a>
+  <h4 id="Terra_GraphEditor_Graph_ForceUpdateNodes" data-uid="Terra.GraphEditor.Graph.ForceUpdateNodes">ForceUpdateNodes()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ForceUpdateNodes()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_FromJson_System_String_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.FromJson(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L341">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_FromJson_" data-uid="Terra.GraphEditor.Graph.FromJson*"></a>
+  <h4 id="Terra_GraphEditor_Graph_FromJson_System_String_" data-uid="Terra.GraphEditor.Graph.FromJson(System.String)">FromJson(String)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Graph FromJson(string json)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">json</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Graph.html">Graph</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_GetNode_System_Int32_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.GetNode(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L85">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_GetNode_" data-uid="Terra.GraphEditor.Graph.GetNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_GetNode_System_Int32_" data-uid="Terra.GraphEditor.Graph.GetNode(System.Int32)">GetNode(Int32)</h4>
+  <div class="markdown level1 summary"><p>Returns the Node with the assigned id or null.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Node GetNode(int nodeId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">nodeId</span></td>
+        <td><p>The id of the Node to get.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><p>The Node with the assigned id or null.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_GetNode__1.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.GetNode%60%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L96">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_GetNode_" data-uid="Terra.GraphEditor.Graph.GetNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_GetNode__1" data-uid="Terra.GraphEditor.Graph.GetNode``1">GetNode&lt;T&gt;()</h4>
+  <div class="markdown level1 summary"><p>Finds and returns Node of type T</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public T GetNode&lt;T&gt;()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">T</span></td>
+        <td><p>First Node of type T, null if not found</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td><p>Type to find</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_GetNodeAt_System_Int32_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.GetNodeAt(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L122">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_GetNodeAt_" data-uid="Terra.GraphEditor.Graph.GetNodeAt*"></a>
+  <h4 id="Terra_GraphEditor_Graph_GetNodeAt_System_Int32_" data-uid="Terra.GraphEditor.Graph.GetNodeAt(System.Int32)">GetNodeAt(Int32)</h4>
+  <div class="markdown level1 summary"><p>Returns the Node at the assigned index.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Node GetNodeAt(int index)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">index</span></td>
+        <td><p>The index of the Node to get.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><p>The Node at the assigned index.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_GetNodeCount.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.GetNodeCount%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L115">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_GetNodeCount_" data-uid="Terra.GraphEditor.Graph.GetNodeCount*"></a>
+  <h4 id="Terra_GraphEditor_Graph_GetNodeCount" data-uid="Terra.GraphEditor.Graph.GetNodeCount">GetNodeCount()</h4>
+  <div class="markdown level1 summary"><p>Returns the count of Nodes in this Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int GetNodeCount()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><p>The count of Nodes in this Graph.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_GetNodes.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.GetNodes%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L109">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_GetNodes_" data-uid="Terra.GraphEditor.Graph.GetNodes*"></a>
+  <h4 id="Terra_GraphEditor_Graph_GetNodes" data-uid="Terra.GraphEditor.Graph.GetNodes">GetNodes()</h4>
+  <div class="markdown level1 summary"><p>Returns all active nodes in the graph</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;Node&gt; GetNodes()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.List</span>&lt;<a class="xref" href="Terra.GraphEditor.Node.html">Node</a>&gt;</td>
+        <td><p>List of nodes</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_HasCycle.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.HasCycle%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L258">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_HasCycle_" data-uid="Terra.GraphEditor.Graph.HasCycle*"></a>
+  <h4 id="Terra_GraphEditor_Graph_HasCycle" data-uid="Terra.GraphEditor.Graph.HasCycle">HasCycle()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool HasCycle()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_Link_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.Link(Terra.GraphEditor.Sockets.InputSocket%2CTerra.GraphEditor.Sockets.OutputSocket)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L210">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_Link_" data-uid="Terra.GraphEditor.Graph.Link*"></a>
+  <h4 id="Terra_GraphEditor_Graph_Link_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_" data-uid="Terra.GraphEditor.Graph.Link(Terra.GraphEditor.Sockets.InputSocket,Terra.GraphEditor.Sockets.OutputSocket)">Link(InputSocket, OutputSocket)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Link(InputSocket inputSocket, OutputSocket outputSocket)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.InputSocket.html">InputSocket</a></td>
+        <td><span class="parametername">inputSocket</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.OutputSocket.html">OutputSocket</a></td>
+        <td><span class="parametername">outputSocket</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_Load_System_String_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.Load(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L355">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_Load_" data-uid="Terra.GraphEditor.Graph.Load*"></a>
+  <h4 id="Terra_GraphEditor_Graph_Load_System_String_" data-uid="Terra.GraphEditor.Graph.Load(System.String)">Load(String)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Graph Load(string fileName)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">fileName</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Graph.html">Graph</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_LogCircleError.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.LogCircleError%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L331">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_LogCircleError_" data-uid="Terra.GraphEditor.Graph.LogCircleError*"></a>
+  <h4 id="Terra_GraphEditor_Graph_LogCircleError" data-uid="Terra.GraphEditor.Graph.LogCircleError">LogCircleError()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void LogCircleError()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_ObtainUniqueNodeId.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.ObtainUniqueNodeId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L38">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_ObtainUniqueNodeId_" data-uid="Terra.GraphEditor.Graph.ObtainUniqueNodeId*"></a>
+  <h4 id="Terra_GraphEditor_Graph_ObtainUniqueNodeId" data-uid="Terra.GraphEditor.Graph.ObtainUniqueNodeId">ObtainUniqueNodeId()</h4>
+  <div class="markdown level1 summary"><p>Returns an id for a Node that is unique for this Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ObtainUniqueNodeId()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><p>An id for a Node that is unique for this Graph.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_OnAfterDeserialize.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.OnAfterDeserialize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L409">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_OnAfterDeserialize_" data-uid="Terra.GraphEditor.Graph.OnAfterDeserialize*"></a>
+  <h4 id="Terra_GraphEditor_Graph_OnAfterDeserialize" data-uid="Terra.GraphEditor.Graph.OnAfterDeserialize">OnAfterDeserialize()</h4>
+  <div class="markdown level1 summary"><p>Unity serialization callback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void OnAfterDeserialize()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_OnBeforeSerialize.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.OnBeforeSerialize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L387">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_OnBeforeSerialize_" data-uid="Terra.GraphEditor.Graph.OnBeforeSerialize*"></a>
+  <h4 id="Terra_GraphEditor_Graph_OnBeforeSerialize" data-uid="Terra.GraphEditor.Graph.OnBeforeSerialize">OnBeforeSerialize()</h4>
+  <div class="markdown level1 summary"><p>Unity serialization callback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void OnBeforeSerialize()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_RemoveNode_System_Int32_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.RemoveNode(System.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L155">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_RemoveNode_" data-uid="Terra.GraphEditor.Graph.RemoveNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_RemoveNode_System_Int32_" data-uid="Terra.GraphEditor.Graph.RemoveNode(System.Int32)">RemoveNode(Int32)</h4>
+  <div class="markdown level1 summary"><p>Removes the Node with the assigned id from this Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool RemoveNode(int id)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">id</span></td>
+        <td><p>The id of the Node to remove.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the Node was removed.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_RemoveNode_Terra_GraphEditor_Node_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.RemoveNode(Terra.GraphEditor.Node)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L142">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_RemoveNode_" data-uid="Terra.GraphEditor.Graph.RemoveNode*"></a>
+  <h4 id="Terra_GraphEditor_Graph_RemoveNode_Terra_GraphEditor_Node_" data-uid="Terra.GraphEditor.Graph.RemoveNode(Terra.GraphEditor.Node)">RemoveNode(Node)</h4>
+  <div class="markdown level1 summary"><p>Removes the assigned Node from this Graph.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool RemoveNode(Node node)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><span class="parametername">node</span></td>
+        <td><p>The Node to remove.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the Node was removed.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_ResetVisitCount.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.ResetVisitCount%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L247">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_ResetVisitCount_" data-uid="Terra.GraphEditor.Graph.ResetVisitCount*"></a>
+  <h4 id="Terra_GraphEditor_Graph_ResetVisitCount" data-uid="Terra.GraphEditor.Graph.ResetVisitCount">ResetVisitCount()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ResetVisitCount()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_Save_System_String_Terra_GraphEditor_Graph_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.Save(System.String%2CTerra.GraphEditor.Graph)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L348">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_Save_" data-uid="Terra.GraphEditor.Graph.Save*"></a>
+  <h4 id="Terra_GraphEditor_Graph_Save_System_String_Terra_GraphEditor_Graph_" data-uid="Terra.GraphEditor.Graph.Save(System.String,Terra.GraphEditor.Graph)">Save(String, Graph)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool Save(string fileName, Graph graph)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">fileName</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Graph.html">Graph</a></td>
+        <td><span class="parametername">graph</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_ToJson.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.ToJson%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L337">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_ToJson_" data-uid="Terra.GraphEditor.Graph.ToJson*"></a>
+  <h4 id="Terra_GraphEditor_Graph_ToJson" data-uid="Terra.GraphEditor.Graph.ToJson">ToJson()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ToJson()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_UnLink_Terra_GraphEditor_Sockets_AbstractSocket_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.UnLink(Terra.GraphEditor.Sockets.AbstractSocket)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L191">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_UnLink_" data-uid="Terra.GraphEditor.Graph.UnLink*"></a>
+  <h4 id="Terra_GraphEditor_Graph_UnLink_Terra_GraphEditor_Sockets_AbstractSocket_" data-uid="Terra.GraphEditor.Graph.UnLink(Terra.GraphEditor.Sockets.AbstractSocket)">UnLink(AbstractSocket)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UnLink(AbstractSocket socket)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.AbstractSocket.html">AbstractSocket</a></td>
+        <td><span class="parametername">socket</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_UnLink_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.UnLink(Terra.GraphEditor.Sockets.InputSocket%2CTerra.GraphEditor.Sockets.OutputSocket)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L165">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_UnLink_" data-uid="Terra.GraphEditor.Graph.UnLink*"></a>
+  <h4 id="Terra_GraphEditor_Graph_UnLink_Terra_GraphEditor_Sockets_InputSocket_Terra_GraphEditor_Sockets_OutputSocket_" data-uid="Terra.GraphEditor.Graph.UnLink(Terra.GraphEditor.Sockets.InputSocket,Terra.GraphEditor.Sockets.OutputSocket)">UnLink(InputSocket, OutputSocket)</h4>
+  <div class="markdown level1 summary"><p>Unlinkes the assigned sockets. Triggeres &apos;Unlink&apos; events.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UnLink(InputSocket inputSocket, OutputSocket outputSocket)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.InputSocket.html">InputSocket</a></td>
+        <td><span class="parametername">inputSocket</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Sockets.OutputSocket.html">OutputSocket</a></td>
+        <td><span class="parametername">outputSocket</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_UpdateDependingNodes_Terra_GraphEditor_Node_.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.UpdateDependingNodes(Terra.GraphEditor.Node)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L295">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_UpdateDependingNodes_" data-uid="Terra.GraphEditor.Graph.UpdateDependingNodes*"></a>
+  <h4 id="Terra_GraphEditor_Graph_UpdateDependingNodes_Terra_GraphEditor_Node_" data-uid="Terra.GraphEditor.Graph.UpdateDependingNodes(Terra.GraphEditor.Node)">UpdateDependingNodes(Node)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UpdateDependingNodes(Node node)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Terra.GraphEditor.Node.html">Node</a></td>
+        <td><span class="parametername">node</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph_UpdateNodes.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph.UpdateNodes%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L372">View Source</a>
+  </span>
+  <a id="Terra_GraphEditor_Graph_UpdateNodes_" data-uid="Terra.GraphEditor.Graph.UpdateNodes*"></a>
+  <h4 id="Terra_GraphEditor_Graph_UpdateNodes" data-uid="Terra.GraphEditor.Graph.UpdateNodes">UpdateNodes()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UpdateNodes()</code></pre>
+  </div>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">UnityEngine.ISerializationCallbackReceiver</span>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/new/master/apiSpec/new?filename=Terra_GraphEditor_Graph.md&amp;value=---%0Auid%3A%20Terra.GraphEditor.Graph%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/Assets/Custom/Terra/NodeEditor/Code/Bon/Graph.cs/#L8" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

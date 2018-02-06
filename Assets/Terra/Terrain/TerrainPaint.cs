@@ -30,7 +30,8 @@ namespace Terra.Terrain {
 
 			public PlacementType PlacementType;
 
-			public int Angle;
+			public float AngleMin;
+			public float AngleMax;
 
 			public float MinRange;
 			public float MaxRange;
@@ -38,8 +39,8 @@ namespace Terra.Terrain {
 			public bool IsMinHeight;
 		}
 		public enum PlacementType {
-			ElevationRange
-			//Angle,
+			ElevationRange,
+			Angle
 		}
 
 		public int AlphaMapResolution = 128;
@@ -146,9 +147,11 @@ namespace Terra.Terrain {
 					//GUI for different types
 					splat.PlacementType = (PlacementType)EditorGUILayout.EnumPopup("Placement Type", splat.PlacementType);
 					switch (splat.PlacementType) {
-						//case PlacementType.Angle:
-						//	splat.Angle = EditorGUILayout.IntSlider("Angle", splat.Angle, 0, 90);
-						//	break;
+						case PlacementType.Angle:
+							EditorGUILayout.LabelField("Min Angle", splat.AngleMin.ToString("0") + " deg");
+							EditorGUILayout.LabelField("Max Angle", splat.AngleMax.ToString("0") + " deg");
+							EditorGUILayout.MinMaxSlider(ref splat.AngleMin, ref splat.AngleMax, 0f, 90f);
+							break;
 						case PlacementType.ElevationRange:
 							if (!splat.IsMaxHeight)
 								splat.MaxRange = EditorGUILayout.FloatField("Max Height", splat.MaxRange);
@@ -233,20 +236,29 @@ namespace Terra.Terrain {
 		/// <returns>Weight values in the same order of the </returns>
 		float[] CalculateWeights(MeshSample sample) {
 			float height = sample.Height;
-			//float angle = sample.Angle;
+			float angle = sample.Angle;
 			float[] weights = new float[SplatSettings.Count];
 
+			var orderMap = new Dictionary<PlacementType, int>() {
+				{ PlacementType.ElevationRange, 0 },
+				{ PlacementType.Angle, 1 }
+			};
+			List<SplatSetting> ordered = SplatSettings.OrderBy(s => orderMap[s.PlacementType]).ToList();
+
 			for (int i = 0; i < SplatSettings.Count; i++) {
-				SplatSetting splat = SplatSettings[i];
+				SplatSetting splat = ordered[i];
 
 				float min = splat.IsMinHeight ? float.MinValue : splat.MinRange;
 				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxRange;
 
 				switch (splat.PlacementType) {
-					//case PlacementType.Angle:
-					//	if (Math.Abs(angle - splat.Angle) < splat.Precision)
-					//		weights[i] = 0f; //TODO: Fix
-					//	break;
+					case PlacementType.Angle:
+						if (angle > splat.AngleMin && angle < splat.AngleMax) {
+							float factor = Mathf.Clamp01(((angle - splat.AngleMin) ) / splat.Blend);
+							weights[i] = factor;
+						}
+
+						break;
 					case PlacementType.ElevationRange:
 						if (height > min && height < max) {
 							if (i > 0) { //Can blend up
@@ -257,7 +269,6 @@ namespace Terra.Terrain {
 								weights[i] = 1f;
 							}
 						}
-
 
 						break;
 				}
@@ -286,17 +297,17 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Finds the height of the passed x and z values on the mesh.
+		/// Finds the height and angle of the passed x and z values on the mesh.
 		/// </summary>
 		/// <param name="x">Normalized x position to sample</param>
 		/// <param name="z">Normalized z position to sample</param>
-		/// <returns>Height if found, float.Nan otherwise</returns>
+		/// <returns>MeshSample instance with calculated height and angle (0 to 90)</returns>
 		MeshSample SampleAt(float x, float z) {
 			float res = MeshResolution;
 			int sampleLoc = Mathf.RoundToInt(Mathf.Clamp(x * res, 0f, res - 1)) +
 				Mathf.RoundToInt(Mathf.Clamp(z * res, 0f, res - 1)) * MeshResolution;
 			float height = Vertices[sampleLoc].y;
-			float angle = Normals[sampleLoc].y;
+			float angle = Vector3.Angle(Normals[sampleLoc], Vector3.up);
 
 			return new MeshSample(height, angle);
 		}

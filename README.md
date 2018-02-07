@@ -1,31 +1,25 @@
 ## Overview
-This is a procedural terrain generator implemented in C# with the Unity 3D Game Engine. Terrain is generated around the player using a FBM (Fractal Brownian Motion) algorithm.
+---
+This is a procedural terrain generator for the Unity 3D engine. It features a node generator construction  system, material splatting, and a programmable generation pipeline API.
 
-## Features
-- Terrain splatmapping based on height and steepness of terrain
-- Tiles are generated using a ThreadPool
-- Generation around a specified gameobject
-- Caching and retrieval of tiles surrounding the tracked gameobject
-- Changeable generation seed / radius and terrain resolution / height
+<a href="https://drive.google.com/open?id=12-6kPdBn5LssFr5xOF1vJnG4od9EWgj0">Documentation</a>
 
-##Usage
-Want to test out the generator for yourself? No problem. 
-
-1. Clone or download the repository and drop the scripts into your project
-2. Create a gameobject in your scene that contains the following scripts:
-	- TilePool
-	- TerrainSettings
-	- UnityMainThreadDispatcher
-3. Link the TerrainSettings component to the TilePool component
-4. Add a tracked object to your scene. This can be a first person controller, an AI object, or simply a cube.
-5. Play the scene
+##Key Features:
+- A node/graph editor for easy--- programming-free generation
+- Uses a Mesh rather than Unity Terrain for lower level customization and optimization
+- Heightmap-free generation
+- Node graphs are saved in a json file and can be shared/imported across different computers
+- Fully programmable generation pipeline API
+- A material editor that stamps textures based on height and angle
+- An event system that reports different stages of execution allowing insertion of custom code
+- A chunk-based infinite terrain system that caches previously visited chunks 
+- Compatibility with procedural material shaders (such as MegaSplat’s) 
+- In-editor terrain previewing 
+- Deferred collider generation for chunks that are outside a set radius 
 
 ##Images
-![Image of Scene](Images/scene.png)
+![Image of node editor](https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/AssetStore/sc-5.png?raw=true)
 
-![Image in-game](Images/game.png)
+![Image of editor previewing](https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/AssetStore/sc-2.png?raw=true)
 
-![gif of generation](Images/generation.gif)
-
-##Notes
-- This generator works better with CPUs with a high core count due to the nature of the generation algorithm. More cores means more terrain can be generated at once because of the thread pool.
+![image of resulting terrain](https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/AssetStore/sc-3.png?raw=true)

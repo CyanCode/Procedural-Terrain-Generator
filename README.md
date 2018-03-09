@@ -4,7 +4,7 @@ This is a procedural terrain generator for the Unity 3D engine. It features a no
 
 <a href="https://drive.google.com/open?id=12-6kPdBn5LssFr5xOF1vJnG4od9EWgj0">Documentation</a>
 
-##Key Features:
+## Key Features:
 - A node/graph editor for easy--- programming-free generation
 - Uses a Mesh rather than Unity Terrain for lower level customization and optimization
 - Heightmap-free generation
@@ -17,7 +17,7 @@ This is a procedural terrain generator for the Unity 3D engine. It features a no
 - In-editor terrain previewing 
 - Deferred collider generation for chunks that are outside a set radius 
 
-##Images
+## Images
 ![Image of node editor](https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/AssetStore/sc-5.png?raw=true)
 
 ![Image of editor previewing](https://github.com/CyanCode/Procedural-Terrain-Generator/blob/master/AssetStore/sc-2.png?raw=true)

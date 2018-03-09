@@ -1,4 +1,5 @@
-﻿using Terra.Terrain;
+﻿using System.Collections.Generic;
+using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -21,6 +22,7 @@ namespace UnityEditor.Terra {
 		public void Toolbar() {
 			EditorGUILayout.Space();  
  
+			//Set toolbar images
 			if (ToolbarImages == null) {
 				ToolbarImages = new Texture[] {
 					(Texture)Resources.Load("terra_gui_general"),
@@ -29,8 +31,7 @@ namespace UnityEditor.Terra {
 					(Texture)Resources.Load("terra_gui_object")
 				};
 			}
-
-			Debug.Log("Loaded text" + ToolbarImages[0]);
+			
 			Settings.ToolbarSelection = (TerraSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(Settings.ToolbarSelection, ToolbarImages);
 		}
 
@@ -168,6 +169,12 @@ namespace UnityEditor.Terra {
 					EditorGUILayout.Separator();
 				}
 
+				if (GUILayout.Button("Add Material")) {
+					if (Settings.SplatSettings == null)
+						Settings.SplatSettings = new List<TerrainPaint.SplatSetting>();
+
+					Settings.SplatSettings.Add(new TerrainPaint.SplatSetting());
+				}
 			}
 		}
 

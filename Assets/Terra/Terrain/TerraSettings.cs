@@ -10,7 +10,8 @@ namespace Terra.Terrain {
 		public enum ToolbarOptions {
 			General = 0,
 			Noise = 1,
-			Materials = 2
+			Materials = 2,
+			ObjectPlacement = 3
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 		public GraphLauncher Launcher;

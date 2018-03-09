@@ -103,6 +103,26 @@ public class EditorGUIExtension {
 	}
 
 	/// <summary>
+	/// Creates a toolbar that is filled in from an Enum. Useful for setting tool modes.
+	/// Toolbar displays images rather than text.
+	/// </summary>
+	public static Enum EnumToolbar(Enum selected, Texture[] images) {
+		Array values = Enum.GetValues(selected.GetType());
+
+		int selected_index = 0;
+		while (selected_index < values.Length) {
+			if (selected.ToString() == values.GetValue(selected_index).ToString()) {
+				break;
+			}
+
+			selected_index++;
+		}
+
+		selected_index = GUILayout.Toolbar(selected_index, images, GUILayout.Height(30));
+		return (Enum)values.GetValue(selected_index);
+	}
+
+	/// <summary>
 	/// Creates a button that can be toggled. Looks nice than GUI.toggle
 	/// </summary>
 	/// <returns>

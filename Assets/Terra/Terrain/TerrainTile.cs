@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
 using System.Collections.Generic;
-using System;
-using System.Threading;
+using System.Collections;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -11,20 +10,14 @@ namespace Terra.Terrain {
 	///	position, and texture application.
 	/// </summary>
 	public class TerrainTile: MonoBehaviour {
-		[HideInInspector] 
-		public bool IsColliderDirty = false;
-		public Mesh Terrain;
+		public Mesh Terrain { get; private set; }
 		public Vector2 Position { get; private set; }
+
+		[HideInInspector]
+		public bool IsColliderDirty = false;
 
 		private TerraSettings Settings;
 		private TerrainPaint Paint;
-
-		public struct MeshData {
-			public Vector3[] vertices;
-			public Vector3[] normals;
-			public Vector2[] uvs;
-			public int[] triangles;
-		}
 
 		void OnEnable() {
 			if (Settings == null) Settings = FindObjectOfType<TerraSettings>();
@@ -49,7 +42,7 @@ namespace Terra.Terrain {
 		/// Creates a preview mesh from the passed generator and terrain settings.
 		/// </summary>
 		/// <param name="settings">Settings to apply to the mesh</param>
-		/// <param name="gen">Optional generator to pull values from</param>
+		/// <param name="gen">Generator</param>
 		/// <returns>A preview mesh</returns>
 		public static Mesh GetPreviewMesh(TerraSettings settings, Generator gen) {
 			Mesh mesh = new Mesh();
@@ -64,8 +57,7 @@ namespace Terra.Terrain {
 
 				for (int x = 0; x < res; x++) {
 					float xPos = ((float)x / (res - 1) - .5f) * len;
-					float yPos = gen == null ? 0 : PollGenerator(xPos, zPos, settings, gen);
-
+					float yPos = gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
 					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 				}
 			}
@@ -105,20 +97,6 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Polls the passed Generator for a value at the passed x / y position. 
-		/// Applies spread and amplitude to computation.
-		/// </summary>
-		/// <param name="xPos">X position to get value at</param>
-		/// <param name="zPos">Z position to get value at</param>
-		/// <param name="settings">Settings instance for amplitude and spread</param>
-		/// <param name="gen">Generator to get value from</param>
-		/// <returns></returns>
-		public static float PollGenerator(float xPos, float zPos, TerraSettings settings, Generator gen) {
-			float spread = 1f / (settings.Spread * settings.MeshResolution);
-			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
-		}
-
-		/// <summary>
 		/// Updates this TerrainTiles position by taking a Vector2 where 
 		/// the x and y values are integers on a grid. Internally the x and y values 
 		/// are multiplied by the Length of the mesh specified in TerraSettings
@@ -150,7 +128,6 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Creates a Mesh with the length and resolution specified in 
 		/// TerraSettings. Applies heights found in the passed Generator param.
-		/// To generate a mesh off of the main thread, use <see cref="CreateRawMesh(Vector2, Generator)"/>
 		/// <list type="bullet">
 		/// <item><description>Cannot be called off of the main thread</description></item>
 		/// <item><description>Does not generate a MeshCollider, call <code>GenerateCollider</code> instead.</description></item>
@@ -169,11 +146,54 @@ namespace Terra.Terrain {
 			renderer.enabled = renderOnCreation;
 			Terrain = gameObject.AddComponent<MeshFilter>().mesh;
 
-			MeshData md = CreateRawMesh(position, generator);
-			Terrain.vertices = md.vertices;
-			Terrain.triangles = md.triangles;
-			Terrain.uv = md.uvs;
-			Terrain.normals = md.normals;
+			int res = Settings.MeshResolution;
+			float len = Settings.Length;
+			float spread = 1f / (Settings.Spread * Settings.MeshResolution);
+
+			Vector3[] vertices = new Vector3[res * res];
+			for (int z = 0; z < res; z++) {
+				float zPos = ((float)z / (res - 1) - .5f) * len;
+
+				for (int x = 0; x < res; x++) {
+					float xPos = ((float)x / (res - 1) - .5f) * len; //problem with x+z*res
+					float yPos = generator.GetValue(((position.x * len) + xPos) * spread,
+						((position.y * len) + zPos) * spread, 0f) * Settings.Amplitude;
+
+					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
+				}
+			}
+
+			Vector3[] normales = new Vector3[vertices.Length];
+			for (int n = 0; n < normales.Length; n++)
+				normales[n] = Vector3.up;
+
+			Vector2[] uvs = new Vector2[vertices.Length];
+			for (int v = 0; v < res; v++) {
+				for (int u = 0; u < res; u++) {
+					uvs[u + v * res] = new Vector2((float)u / (res - 1), (float)v / (res - 1));
+				}
+			}
+
+			int nbFaces = (res - 1) * (res - 1);
+			int[] triangles = new int[nbFaces * 6];
+			int t = 0;
+			for (int face = 0; face < nbFaces; face++) {
+				int i = face % (res - 1) + (face / (res - 1) * res);
+
+				triangles[t++] = i + res;
+				triangles[t++] = i + 1;
+				triangles[t++] = i;
+
+				triangles[t++] = i + res;
+				triangles[t++] = i + res + 1;
+				triangles[t++] = i + 1;
+			}
+
+			Terrain.vertices = vertices;
+			Terrain.normals = normales;
+			Terrain.uv = uvs;
+			Terrain.triangles = triangles;
+			Terrain.RecalculateNormals();
 
 			UpdatePosition(position);
 		}
@@ -227,183 +247,6 @@ namespace Terra.Terrain {
 		public void ApplyMaterial(Material mat) {
 			MeshRenderer mr = GetComponent<MeshRenderer>();
 			mr.sharedMaterial = mat;
-		}
-
-		/// <summary>
-		/// Creates a "raw" mesh from the passed generator and settings specified 
-		/// in <c>TerraSettings</c>. This method can be executed off the main thread.
-		/// 
-		/// Because of Unity's incompatibility with multithreading, a <c>MeshData</c> 
-		/// struct is returned with contents of the generated Mesh, instead of using the 
-		/// <c>Mesh</c> class.
-		/// </summary>
-		/// <param name="position">Position in tile grid, used for polling generator</param>
-		/// <param name="gen">Generator to apply</param>
-		/// <returns>triangles, vertices, normals, and UVs of the generated mesh</returns>
-		public MeshData CreateRawMesh(Vector2 position, Generator gen) {
-			int res = Settings.MeshResolution;
-			float len = Settings.Length;
-			float spread = 1f / (Settings.Spread * Settings.MeshResolution);
-
-			Vector3[] vertices = new Vector3[res * res];
-			for (int z = 0; z < res; z++) {
-				float zPos = ((float)z / (res - 1) - .5f) * len;
-
-				for (int x = 0; x < res; x++) {
-					float xPos = ((float)x / (res - 1) - .5f) * len;
-					float yPos = gen.GetValue(((position.x * len) + xPos) * spread,
-						((position.y * len) + zPos) * spread, 0f) * Settings.Amplitude;
-
-					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
-				}
-			}
-
-			Vector2[] uvs = new Vector2[vertices.Length];
-			for (int v = 0; v < res; v++) {
-				for (int u = 0; u < res; u++) {
-					uvs[u + v * res] = new Vector2((float)u / (res - 1), (float)v / (res - 1));
-				}
-			}
-
-			int nbFaces = (res - 1) * (res - 1);
-			int[] triangles = new int[nbFaces * 6];
-			int t = 0;
-			for (int face = 0; face < nbFaces; face++) {
-				int i = face % (res - 1) + (face / (res - 1) * res);
-
-				triangles[t++] = i + res;
-				triangles[t++] = i + 1;
-				triangles[t++] = i;
-
-				triangles[t++] = i + res;
-				triangles[t++] = i + res + 1;
-				triangles[t++] = i + 1;
-			}
-
-			Vector3[] normals = new Vector3[vertices.Length];
-			CalculateNormalsManaged(vertices, normals, triangles);
-
-			MeshData mesh = new MeshData();
-			mesh.triangles = triangles;
-			mesh.vertices = vertices;
-			mesh.normals = normals;
-			mesh.uvs = uvs;
-
-			CreateRawMeshAsync(position, gen, (c) => {  });
-
-			return mesh;
-		}
-
-		//TODO: Deprecate
-		/// <summary>
-		/// Creates a "raw" mesh from the passed generator and settings specified 
-		/// in <c>TerraSettings</c>. The contents of this method are executed off 
-		/// of the main thread. The callback event handler is called when the mesh
-		/// has finished generating.
-		/// 
-		/// Because of Unity's incompatibility with multithreading, a <c>MeshData</c> 
-		/// struct is returned with contents of the generated Mesh instead of using the 
-		/// <c>Mesh</c> class.
-		/// 
-		/// The created <c>MeshData</c> can be accessed through the <c>callback</c> parameter 
-		/// ex. <code>CreateRawMeshAsync(position, gen, (m) => { m.vertices });</code>
-		/// </summary>
-		/// <param name="position">Position in tile grid, used for polling generator</param>
-		/// <param name="gen">Generator to apply</param>
-		/// <param name="callback">Registered callback after computation has finished.</param>
-		/// <returns>The created thread</returns>
-		public Thread CreateRawMeshAsync(Vector2 position, Generator gen, Action<MeshData> callback) {
-			ThreadStart starter = () => {
-				callback(CreateRawMesh(position, gen));
-			};
-			Thread t = new Thread(starter);
-			t.Start();
-
-			return t;
-		}
-
-		//TODO: Deprecate
-		/// <summary>
-		/// Creates a "raw" mesh from the passed generator and settings specified
-		/// in <c>TerraSettings</c>. The contents of this method are executed off 
-		/// of the main thread. The callback event handler is called when the mesh
-		/// has finished generating.
-		/// 
-		/// Because of Unity's incompatibility with multithreading, a <c>MeshData</c> 
-		/// struct is returned with contents of the generated Mesh instead of using the 
-		/// <c>Mesh</c> class.
-		/// 
-		/// The created <c>MeshData</c> can be accessed through the <c>callback</c> parameter 
-		/// ex. <code>CreateRawMeshAsync(position, gen, (m) => { m.vertices });</code>
-		/// </summary>
-		/// <param name="position">Position in tile grid, used for polling generator</param>
-		/// <param name="gen">Generator to apply</param>
-		/// <param name="callback">Registered callback after computation has finished. Executed on main thread.</param>
-		/// <returns>The created thread</returns>
-		public Thread CreateRawMeshAsync(Vector2 position, Action<MeshData> callback) {
-			ThreadStart starter = () => {
-				MTDispatch.Instance().Enqueue(() => {
-					callback(CreateRawMesh(position, Settings.Generator));
-				});				
-			};
-			Thread t = new Thread(starter);
-			t.Start();
-
-			return t;
-		}
-
-		/// <summary>
-		/// Renders the passed MeshData as a Mesh in the scene 
-		/// by creating a MeshRenderer and MeshFilter.
-		/// </summary>
-		/// <param name="data">Mesh information to apply</param>
-		public void RenderRawMeshData(MeshData data) {
-			MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
-			renderer.material = new Material(Shader.Find("Diffuse"));
-			Terrain = gameObject.AddComponent<MeshFilter>().mesh;
-			
-			Terrain.vertices = data.vertices;
-			Terrain.triangles = data.triangles;
-			Terrain.uv = data.uvs;
-			Terrain.normals = data.normals;
-		}
-
-		/// <summary>
-		/// Calculates normals for the passed vertices and triangles in a method 
-		/// similar to Unity's Mesh.RecalculateNormals method.
-		/// </summary>
-		/// <seealso cref="https://forum.unity.com/threads/procedural-mesh-and-normals-closed-solved.354900/"/>
-		/// <param name="verts">vertices of mesh</param>
-		/// <param name="normals">normals array to fill</param>
-		/// <param name="tris">triangles from mesh</param>
-		static void CalculateNormalsManaged(Vector3[] verts, Vector3[] normals, int[] tris) {
-			for (int i = 0; i < tris.Length; i += 3) {
-				int tri0 = tris[i];
-				int tri1 = tris[i + 1];
-				int tri2 = tris[i + 2];
-
-				Vector3 vert0 = verts[tri0];
-				Vector3 vert1 = verts[tri1];
-				Vector3 vert2 = verts[tri2];
-				Vector3 normal = new Vector3() {
-					x = vert0.y * vert1.z - vert0.y * vert2.z - vert1.y * vert0.z + vert1.y * vert2.z + vert2.y * vert0.z - vert2.y * vert1.z,
-					y = -vert0.x * vert1.z + vert0.x * vert2.z + vert1.x * vert0.z - vert1.x * vert2.z - vert2.x * vert0.z + vert2.x * vert1.z,
-					z = vert0.x * vert1.y - vert0.x * vert2.y - vert1.x * vert0.y + vert1.x * vert2.y + vert2.x * vert0.y - vert2.x * vert1.y
-				};
-
-				normals[tri0] += normal;
-				normals[tri1] += normal;
-				normals[tri2] += normal;
-			}
-
-			for (int i = 0; i < normals.Length; i++) {
-				Vector3 norm = normals[i];
-				float invlength = 1.0f / (float)System.Math.Sqrt(norm.x * norm.x + norm.y * norm.y + norm.z * norm.z);
-
-				normals[i].x = norm.x * invlength;
-				normals[i].y = norm.y * invlength;
-				normals[i].z = norm.z * invlength;
-			}
 		}
 	}
 }

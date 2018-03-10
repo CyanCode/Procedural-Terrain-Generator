@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System.Threading;
+using Terra.CoherentNoise;
 
 namespace Terra.Terrain {
 	/// <summary>
 	/// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
+	/// using a thread pool.
 	/// </summary>
 	public class TilePool {
 		public TerraSettings Settings;
@@ -12,6 +15,11 @@ namespace Terra.Terrain {
 		private TileCache Cache = new TileCache(CACHE_SIZE);
 		private int queuedTiles = 0;
 		private const int CACHE_SIZE = 30;
+		private const float ADD_TILE_DELAY = 0.5f;
+		private struct ThreadData {
+			public TerrainTile tile;
+			public Generator gen;
+		}
 
 		public TilePool(TerraSettings settings) {
 			Settings = settings;
@@ -27,6 +35,28 @@ namespace Terra.Terrain {
 			}
 
 			Settings.StartCoroutine(UpdateColliders(0.5f));
+		}
+
+		/// <summary>
+		/// Pauses the background threading in this thread pool
+		/// </summary>
+		public void Pause() {
+			//ThreadPool.
+		}
+
+		/// <summary>
+		/// Resumes background threading in this thread pool
+		/// </summary>
+		public void Resume() {
+
+		}
+
+		/// <summary>
+		/// Kills all background threads in this thread pool. 
+		/// This is called automatically when play mode is exited.
+		/// </summary>
+		public void Kill() {
+
 		}
 
 		public static List<Vector2> GetTilePositionsFromRadius(int radius, Vector3 position, int length) {
@@ -138,23 +168,49 @@ namespace Terra.Terrain {
 		/// Adds a tile at the passed position asynchronously
 		/// </summary>
 		/// <param name="pos">Position to add tile at</param>
-		private IEnumerator AddTileAsync(Vector2 pos) {
+		public IEnumerator AddTileAsync(Vector2 pos) {
 			TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
 			queuedTiles++;
 
-			tile.CreateMesh(pos, false);
-			yield return null;
+			yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
+			ThreadData data = new ThreadData();
+			data.tile = tile;
+			data.gen = Settings.Generator;
 
-			if (Settings.UseCustomMaterial) 
-				tile.ApplyCustomMaterial(); 
-			else 
-				tile.ApplySplatmap();
-			tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
+			ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
+				if (d is ThreadData) {
+					ThreadData tData = (ThreadData)d;
+					TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
 
-			yield return null;
-			Cache.AddActiveTile(tile);
+					MTDispatch.Instance().Enqueue(() => { //Main Thread
+						if (Settings.UseCustomMaterial)
+							tile.ApplyCustomMaterial();
+						else
+							tile.ApplySplatmap();
 
-			queuedTiles--;
+						Cache.AddActiveTile(tile);
+						queuedTiles--;
+					});
+				}
+			}), data);
+
+
+			///////
+			//TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
+			//queuedTiles++;
+			//yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
+
+			//tile.CreateRawMeshAsync(pos, (m) => {
+			//	tile.RenderRawMeshData(m);
+				
+			//	if (Settings.UseCustomMaterial)
+			//		tile.ApplyCustomMaterial();
+			//	else
+			//		tile.ApplySplatmap();
+
+			//	Cache.AddActiveTile(tile);
+			//	queuedTiles--;
+			//});
 		}
 	}
 }

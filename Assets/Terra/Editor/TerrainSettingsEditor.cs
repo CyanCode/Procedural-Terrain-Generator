@@ -19,15 +19,15 @@ namespace UnityEditor.Terra {
 			Settings.Generator = manager.GetGraphGenerator();
 			gui = new TerraGUI(Settings);
 
-			if (Preview == null)
-				Preview = new TerrainPreview(Settings);
-			if (Settings.DisplayPreview)
-				Preview.SetVisible(true);
+			//if (Preview == null)
+			//	Preview = new TerrainPreview(Settings);
+			//if (Settings.DisplayPreview)
+			//	Preview.SetVisible(true);
 		}
 
 		void OnDisable() {
-			if (Preview != null && Settings.DisplayPreview)
-				Preview.SetVisible(false);
+			//if (Preview != null && Settings.DisplayPreview)
+			//	Preview.SetVisible(false);
 		}
 
 		public override void OnInspectorGUI() {

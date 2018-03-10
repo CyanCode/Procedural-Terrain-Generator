@@ -55,6 +55,11 @@ namespace Terra.Terrain {
 		}
 
 		void Start() {
+			//Create main thread dispatcher
+			GameObject go = new GameObject("Main Thread Dispatch");
+			go.AddComponent<MTDispatch>();
+			go.transform.parent = transform;
+
 			if (GenerateOnStart) {
 				//Set default tracked object
 				if (TrackedObject == null) {

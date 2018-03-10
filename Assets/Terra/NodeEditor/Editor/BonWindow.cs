@@ -139,7 +139,7 @@ public class BonWindow: EditorWindow {
 
 		if (GetLauncher() == null) return;
 		if (CurrentCanvas != null) {
-			float infoPanelY = Screen.height - TopOffset - 6;
+			float infoPanelY = Screen.height - TopOffset - 10;
 			TmpRect.Set(5, infoPanelY, 70, 20);
 			GUI.Label(TmpRect, "zoom: " + Math.Round(CurrentCanvas.Zoom, 1));
 			TmpRect.Set(60, infoPanelY, 70, 20);

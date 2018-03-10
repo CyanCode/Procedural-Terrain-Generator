@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
 using System.Collections.Generic;
-using System.Collections;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -10,7 +9,7 @@ namespace Terra.Terrain {
 	///	position, and texture application.
 	/// </summary>
 	public class TerrainTile: MonoBehaviour {
-		public Mesh Terrain { get; private set; }
+		public Mesh Terrain;
 		public Vector2 Position { get; private set; }
 
 		[HideInInspector]
@@ -42,7 +41,7 @@ namespace Terra.Terrain {
 		/// Creates a preview mesh from the passed generator and terrain settings.
 		/// </summary>
 		/// <param name="settings">Settings to apply to the mesh</param>
-		/// <param name="gen">Generator</param>
+		/// <param name="gen">Optional generator to pull values from</param>
 		/// <returns>A preview mesh</returns>
 		public static Mesh GetPreviewMesh(TerraSettings settings, Generator gen) {
 			Mesh mesh = new Mesh();
@@ -57,7 +56,8 @@ namespace Terra.Terrain {
 
 				for (int x = 0; x < res; x++) {
 					float xPos = ((float)x / (res - 1) - .5f) * len;
-					float yPos = gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
+					float yPos = gen == null ? 0 : PollGenerator(xPos, zPos, settings, gen);
+
 					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 				}
 			}
@@ -94,6 +94,20 @@ namespace Terra.Terrain {
 			mesh.triangles = triangles;
 
 			return mesh;
+		}
+
+		/// <summary>
+		/// Polls the passed Generator for a value at the passed x / y position. 
+		/// Applies spread and amplitude to computation.
+		/// </summary>
+		/// <param name="xPos">X position to get value at</param>
+		/// <param name="zPos">Z position to get value at</param>
+		/// <param name="settings">Settings instance for amplitude and spread</param>
+		/// <param name="gen">Generator to get value from</param>
+		/// <returns></returns>
+		public static float PollGenerator(float xPos, float zPos, TerraSettings settings, Generator gen) {
+			float spread = 1f / (settings.Spread * settings.MeshResolution);
+			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
 		}
 
 		/// <summary>

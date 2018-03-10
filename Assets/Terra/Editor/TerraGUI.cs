@@ -65,6 +65,9 @@ namespace UnityEditor.Terra {
 			Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
 			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
 			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+
+			EditorGUILayout.Space();
+			Settings.DisplayPreview = EditorGUILayout.Toggle("Display Preview", Settings.DisplayPreview);
 		}
 
 		/// <summary>

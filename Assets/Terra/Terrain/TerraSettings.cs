@@ -26,6 +26,7 @@ namespace Terra.Terrain {
 		public int Length = 500;
 		public bool UseRandomSeed = false;
 		public bool GenAllColliders = false;
+		public bool DisplayPreview = false;
 
 		//Noise Tab
 		public string SelectedFile = "";

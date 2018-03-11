@@ -183,34 +183,19 @@ namespace Terra.Terrain {
 					TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
 
 					MTDispatch.Instance().Enqueue(() => { //Main Thread
+						tData.tile.RenderRawMeshData(md);
+
 						if (Settings.UseCustomMaterial)
 							tile.ApplyCustomMaterial();
 						else
 							tile.ApplySplatmap();
 
+						tile.UpdatePosition(pos);
 						Cache.AddActiveTile(tile);
 						queuedTiles--;
 					});
 				}
 			}), data);
-
-
-			///////
-			//TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
-			//queuedTiles++;
-			//yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
-
-			//tile.CreateRawMeshAsync(pos, (m) => {
-			//	tile.RenderRawMeshData(m);
-				
-			//	if (Settings.UseCustomMaterial)
-			//		tile.ApplyCustomMaterial();
-			//	else
-			//		tile.ApplySplatmap();
-
-			//	Cache.AddActiveTile(tile);
-			//	queuedTiles--;
-			//});
 		}
 	}
 }

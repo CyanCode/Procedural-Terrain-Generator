@@ -289,7 +289,7 @@ namespace Terra.Terrain {
 			mesh.normals = normals;
 			mesh.uvs = uvs;
 
-			CreateRawMeshAsync(position, gen, (c) => {  });
+			//CreateRawMeshAsync(position, gen, (c) => {  });
 
 			return mesh;
 		}

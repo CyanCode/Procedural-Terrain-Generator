@@ -39,6 +39,10 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void TriggerMaterialsUpdate() {
 			if (Settings.DisplayPreview) {
+				//Remove old splats
+				Splats = null;
+				Paint = null;
+
 				if (Settings.GetComponent<MeshRenderer>() != null) {
 					Object.DestroyImmediate(Settings.GetComponent<MeshRenderer>());
 				}
@@ -94,7 +98,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		private void AddComponents() {
 			AddMeshComponent();
-			AddMaterialComponent();
+			TriggerMaterialsUpdate();
 		}
 
 		private void AddMaterialComponent() {
@@ -121,7 +125,9 @@ namespace Terra.Terrain {
 				//Optionally hide renderer & material in inspector
 				if (HideInInspector) {
 					rend.hideFlags = HideFlags.HideInInspector;
-					rend.sharedMaterial.hideFlags = HideFlags.HideInInspector;
+
+					if (rend.sharedMaterial != null)
+						rend.sharedMaterial.hideFlags = HideFlags.HideInInspector;
 				}
 			}
 		}

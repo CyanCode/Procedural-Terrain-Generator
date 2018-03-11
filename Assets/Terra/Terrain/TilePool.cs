@@ -151,29 +151,45 @@ namespace Terra.Terrain {
 			queuedTiles++;
 
 			yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
-			ThreadData data = new ThreadData();
-			data.tile = tile;
-			data.gen = Settings.Generator;
 
-			ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
-				if (d is ThreadData) {
-					ThreadData tData = (ThreadData)d;
-					TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
+			if (Settings.UseMultithreading) {
+				ThreadData data = new ThreadData();
+				data.tile = tile;
+				data.gen = Settings.Generator;
 
-					MTDispatch.Instance().Enqueue(() => { //Main Thread
-						tData.tile.RenderRawMeshData(md);
+				ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
+					if (d is ThreadData) {
+						ThreadData tData = (ThreadData)d;
+						TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
 
-						if (Settings.UseCustomMaterial)
-							tile.ApplyCustomMaterial();
-						else
-							tile.ApplySplatmap();
+						MTDispatch.Instance().Enqueue(() => { //Main Thread
+							tData.tile.RenderRawMeshData(md);
 
-						tile.UpdatePosition(pos);
-						Cache.AddActiveTile(tile);
-						queuedTiles--;
-					});
-				}
-			}), data);
+							if (Settings.UseCustomMaterial)
+								tile.ApplyCustomMaterial();
+							else
+								tile.ApplySplatmap();
+
+							tile.UpdatePosition(pos);
+							Cache.AddActiveTile(tile);
+							queuedTiles--;
+						});
+					}
+				}), data);
+			} else {
+				tile.CreateMesh(pos, false);
+				yield return null;
+
+				if (Settings.UseCustomMaterial)
+					tile.ApplyCustomMaterial();
+				else
+					tile.ApplySplatmap();
+				tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
+
+				Cache.AddActiveTile(tile);
+
+				queuedTiles--;
+			}
 		}
 	}
 }

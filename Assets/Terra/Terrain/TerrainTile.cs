@@ -52,54 +52,13 @@ namespace Terra.Terrain {
 		/// <param name="gen">Optional generator to pull values from</param>
 		/// <returns>A preview mesh</returns>
 		public static Mesh GetPreviewMesh(TerraSettings settings, Generator gen) {
+			MeshData md = CreateRawMesh(settings, new Vector2(0, 0), gen);
+
 			Mesh mesh = new Mesh();
-
-			int res = settings.MeshResolution;
-			float len = settings.Length;
-			float spread = 1f / (settings.Spread * settings.MeshResolution);
-
-			Vector3[] vertices = new Vector3[res * res];
-			for (int z = 0; z < res; z++) {
-				float zPos = ((float)z / (res - 1) - .5f) * len;
-
-				for (int x = 0; x < res; x++) {
-					float xPos = ((float)x / (res - 1) - .5f) * len;
-					float yPos = gen == null ? 0 : PollGenerator(xPos, zPos, settings, gen);
-
-					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
-				}
-			}
-
-			Vector3[] normales = new Vector3[vertices.Length];
-			for (int n = 0; n < normales.Length; n++)
-				normales[n] = Vector3.up;
-
-			Vector2[] uvs = new Vector2[vertices.Length];
-			for (int v = 0; v < res; v++) {
-				for (int u = 0; u < res; u++) {
-					uvs[u + v * res] = new Vector2((float)u / (res - 1), (float)v / (res - 1));
-				}
-			}
-
-			int nbFaces = (res - 1) * (res - 1);
-			int[] triangles = new int[nbFaces * 6];
-			int t = 0;
-			for (int face = 0; face < nbFaces; face++) {
-				int i = face % (res - 1) + (face / (res - 1) * res);
-
-				triangles[t++] = i + res;
-				triangles[t++] = i + 1;
-				triangles[t++] = i;
-
-				triangles[t++] = i + res;
-				triangles[t++] = i + res + 1;
-				triangles[t++] = i + 1;
-			}
-
-			mesh.vertices = vertices;
-			mesh.normals = normales;
-			mesh.uv = uvs;
-			mesh.triangles = triangles;
+			mesh.vertices = md.vertices;
+			mesh.normals = md.normals;
+			mesh.uv = md.uvs;
+			mesh.triangles = md.triangles;
 
 			return mesh;
 		}
@@ -241,9 +200,25 @@ namespace Terra.Terrain {
 		/// <param name="gen">Generator to apply</param>
 		/// <returns>triangles, vertices, normals, and UVs of the generated mesh</returns>
 		public MeshData CreateRawMesh(Vector2 position, Generator gen) {
-			int res = Settings.MeshResolution;
-			float len = Settings.Length;
-			float spread = 1f / (Settings.Spread * Settings.MeshResolution);
+			return CreateRawMesh(Settings, position, gen);
+		}
+
+		/// <summary>
+		/// Static version of <see cref="CreateRawMesh(Vector2, Generator)"/>
+		/// Creates a "raw" mesh from the passed generator and settings specified 
+		/// in <c>TerraSettings</c>. This method can be executed off the main thread.
+		/// 
+		/// Because of Unity's incompatibility with multithreading, a <c>MeshData</c> 
+		/// struct is returned with contents of the generated Mesh, instead of using the 
+		/// <c>Mesh</c> class.
+		/// </summary>
+		/// <param name="position">Position in tile grid, used for polling generator</param>
+		/// <param name="gen">Generator to apply</param>
+		/// <returns>triangles, vertices, normals, and UVs of the generated mesh</returns>
+		public static MeshData CreateRawMesh(TerraSettings settings, Vector2 position, Generator gen) {
+			int res = settings.MeshResolution;
+			float len = settings.Length;
+			float spread = 1f / (settings.Spread * settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -252,7 +227,7 @@ namespace Terra.Terrain {
 				for (int x = 0; x < res; x++) {
 					float xPos = ((float)x / (res - 1) - .5f) * len;
 					float yPos = gen.GetValue(((position.x * len) + xPos) * spread,
-						((position.y * len) + zPos) * spread, 0f) * Settings.Amplitude;
+						((position.y * len) + zPos) * spread, 0f) * settings.Amplitude;
 
 					vertices[x + z * res] = new Vector3(xPos, yPos, zPos);
 				}
@@ -289,66 +264,7 @@ namespace Terra.Terrain {
 			mesh.normals = normals;
 			mesh.uvs = uvs;
 
-			//CreateRawMeshAsync(position, gen, (c) => {  });
-
 			return mesh;
-		}
-
-		/// <summary>
-		/// Creates a "raw" mesh from the passed generator and settings specified 
-		/// in <c>TerraSettings</c>. The contents of this method are executed off 
-		/// of the main thread. The callback event handler is called when the mesh
-		/// has finished generating.
-		/// 
-		/// Because of Unity's incompatibility with multithreading, a <c>MeshData</c> 
-		/// struct is returned with contents of the generated Mesh instead of using the 
-		/// <c>Mesh</c> class.
-		/// 
-		/// The created <c>MeshData</c> can be accessed through the <c>callback</c> parameter 
-		/// ex. <code>CreateRawMeshAsync(position, gen, (m) => { m.vertices });</code>
-		/// </summary>
-		/// <param name="position">Position in tile grid, used for polling generator</param>
-		/// <param name="gen">Generator to apply</param>
-		/// <param name="callback">Registered callback after computation has finished.</param>
-		/// <returns>The created thread</returns>
-		public Thread CreateRawMeshAsync(Vector2 position, Generator gen, Action<MeshData> callback) {
-			ThreadStart starter = () => {
-				callback(CreateRawMesh(position, gen));
-			};
-			Thread t = new Thread(starter);
-			t.Start();
-
-			return t;
-		}
-
-		//TODO: Deprecate
-		/// <summary>
-		/// Creates a "raw" mesh from the passed generator and settings specified
-		/// in <c>TerraSettings</c>. The contents of this method are executed off 
-		/// of the main thread. The callback event handler is called when the mesh
-		/// has finished generating.
-		/// 
-		/// Because of Unity's incompatibility with multithreading, a <c>MeshData</c> 
-		/// struct is returned with contents of the generated Mesh instead of using the 
-		/// <c>Mesh</c> class.
-		/// 
-		/// The created <c>MeshData</c> can be accessed through the <c>callback</c> parameter 
-		/// ex. <code>CreateRawMeshAsync(position, gen, (m) => { m.vertices });</code>
-		/// </summary>
-		/// <param name="position">Position in tile grid, used for polling generator</param>
-		/// <param name="gen">Generator to apply</param>
-		/// <param name="callback">Registered callback after computation has finished. Executed on main thread.</param>
-		/// <returns>The created thread</returns>
-		public Thread CreateRawMeshAsync(Vector2 position, Action<MeshData> callback) {
-			ThreadStart starter = () => {
-				MTDispatch.Instance().Enqueue(() => {
-					callback(CreateRawMesh(position, Settings.Generator));
-				});				
-			};
-			Thread t = new Thread(starter);
-			t.Start();
-
-			return t;
 		}
 
 		/// <summary>

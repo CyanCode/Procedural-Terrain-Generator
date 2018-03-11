@@ -81,16 +81,16 @@ public class GraphManager {
 		Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
 		Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
 
-		if (Application.isEditor) {
+		EditorGUILayout.Space();
+		if (Application.isEditor && Settings.DisplayPreview) {
 			if (GUILayout.Button("Update Preview")) {
 				Generator gen = GetGraphGenerator();
 
 				if (gen != null) {
-					Settings.PreviewMesh = TerrainTile.GetPreviewMesh(Settings, gen);
+					//Settings.PreviewMesh = TerrainTile.GetPreviewMesh(Settings, gen);
+					Settings.Preview.TriggerPreviewUpdate();
 				}
 			}
-
-			Settings.IsWireframePreview = GUILayout.Toggle(Settings.IsWireframePreview, "Wireframe Preview");
 		}
 	}
 

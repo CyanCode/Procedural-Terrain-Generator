@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using Terra.GraphEditor;
 using UnityEngine;
+using UnityEditor;
 
 namespace Terra.Terrain {
 	[System.Serializable]
+	[ExecuteInEditMode]
 	public class TerraSettings: MonoBehaviour {
 		[System.Serializable]
 		public enum ToolbarOptions {
@@ -50,12 +52,19 @@ namespace Terra.Terrain {
 		/// </summary>
 		public TilePool Pool;
 
+		/// <summary>
+		/// TerrainPreview instance attached to this TerraSettings instance. Instantiated in 
+		/// <code>Start</code> and handles previewing of the generated terrain.
+		/// </summary>
+		public TerrainPreview Preview;
+
 		void Awake() {
 			Pool = new TilePool(this);
+			Preview = new TerrainPreview(this);
 		}
 
 		void Start() {
-			if (GenerateOnStart) {
+			if (EditorApplication.isPlaying && GenerateOnStart) {
 				//Set default tracked object
 				if (TrackedObject == null) {
 					TrackedObject = new GameObject("Default Tracked Position");
@@ -74,11 +83,17 @@ namespace Terra.Terrain {
 
 				Generator = Launcher.GetGraphGenerator();
 			}
+			
+			if (!EditorApplication.isPlaying && DisplayPreview) {
+				Preview.TriggerPreviewUpdate(); //TODO: Change to true
+			}
 		}
 
 		void Update() {
-			if (Pool != null && GenerateOnStart) 
+			if (EditorApplication.isPlaying && Pool != null && GenerateOnStart) 
 				Pool.Update();
+			if (!EditorApplication.isPlaying && Preview == null)
+				Preview = new TerrainPreview(this);
 		}
 		
 		void OnDrawGizmosSelected() {

@@ -28,8 +28,8 @@ namespace UnityEditor.Terra {
 				ToolbarImages = new Texture[] {
 					(Texture)Resources.Load("terra_gui_general"),
 					(Texture)Resources.Load("terra_gui_noise"),
-					(Texture)Resources.Load("terra_gui_material"),
-					(Texture)Resources.Load("terra_gui_object")
+					(Texture)Resources.Load("terra_gui_material")
+					//(Texture)Resources.Load("terra_gui_object") //TODO: Put back
 				};
 			}
 			
@@ -80,6 +80,7 @@ namespace UnityEditor.Terra {
 					Settings.Preview.RemoveComponents();
 				}
 			}
+			Settings.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.UseMultithreading);
 		}
 
 		/// <summary>
@@ -189,6 +190,10 @@ namespace UnityEditor.Terra {
 						Settings.SplatSettings = new List<TerrainPaint.SplatSetting>();
 
 					Settings.SplatSettings.Add(new TerrainPaint.SplatSetting());
+				}
+				
+				if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
+					Settings.Preview.TriggerMaterialsUpdate();
 				}
 			}
 		}

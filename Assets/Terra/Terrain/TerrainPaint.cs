@@ -97,7 +97,9 @@ namespace Terra.Terrain {
 			if (debug) {
 				TerrainTile tile = TerrainObject.GetComponent<TerrainTile>();
 
-				string tileName = "Tile[" + tile.Position.x + "_" + tile.Position.y + "]";
+				string tileName = tile != null ?
+					"Tile[" + tile.Position.x + "_" + tile.Position.y + "]" :
+					"Tile[0_0]";
 				string folderPath = Application.dataPath + "/SplatImages/";
 				if (!Directory.Exists(folderPath))
 					Directory.CreateDirectory(folderPath);

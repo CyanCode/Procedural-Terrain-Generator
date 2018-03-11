@@ -13,7 +13,7 @@ namespace Terra.Terrain {
 			General = 0,
 			Noise = 1,
 			Materials = 2,
-			ObjectPlacement = 3
+			//ObjectPlacement = 3
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 		public GraphLauncher Launcher;
@@ -29,13 +29,12 @@ namespace Terra.Terrain {
 		public bool UseRandomSeed = false;
 		public bool GenAllColliders = false;
 		public bool DisplayPreview = false;
+		public bool UseMultithreading = true;
 
 		//Noise Tab
 		public string SelectedFile = "";
 		public Graph LoadedGraph = null;
 		public Generator Generator;
-		public Mesh PreviewMesh;
-		public bool IsWireframePreview = true;
 		public float Spread = 100f;
 		public float Amplitude = 50f;
 
@@ -64,6 +63,20 @@ namespace Terra.Terrain {
 		}
 
 		void Start() {
+			//Create MT Dispatch if not already there
+			if (FindObjectOfType<MTDispatch>() == null) {
+				GameObject mtd = new GameObject("Main Thread Dispatch");
+				mtd.AddComponent<MTDispatch>();
+				mtd.transform.parent = transform;
+			}
+			
+			//Cleanup preview from edit mode
+			if (EditorApplication.isPlayingOrWillChangePlaymode) {
+				if (GetComponent<MeshRenderer>() != null) Destroy(GetComponent<MeshRenderer>());
+				if (GetComponent<MeshFilter>() != null) Destroy(GetComponent<MeshFilter>());
+			}
+
+			//Setup object tracking and generator reading
 			if (EditorApplication.isPlaying && GenerateOnStart) {
 				//Set default tracked object
 				if (TrackedObject == null) {
@@ -84,8 +97,9 @@ namespace Terra.Terrain {
 				Generator = Launcher.GetGraphGenerator();
 			}
 			
-			if (!EditorApplication.isPlaying && DisplayPreview) {
-				Preview.TriggerPreviewUpdate(); //TODO: Change to true
+			//Handle previewing
+			if (!EditorApplication.isPlaying && DisplayPreview && Generator != null) {
+				Preview.TriggerPreviewUpdate();
 			}
 		}
 
@@ -97,34 +111,24 @@ namespace Terra.Terrain {
 		}
 		
 		void OnDrawGizmosSelected() {
-			/**
-			 * On noise tab selected: display preview mesh in scene
-			 * On general tab selected: display mesh radius squares and collider radius
-			 */
-			if (ToolbarSelection == ToolbarOptions.Noise && PreviewMesh != null) {
+			//On general tab selected: display mesh radius squares and collider radius
+			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
+
+			//Mesh radius squares
+			foreach (Vector2 pos in positions) {
+				Vector3 pos3d = new Vector3(pos.x * Length, 0, pos.y * Length);
+
 				Gizmos.color = Color.white;
+				Gizmos.DrawWireCube(pos3d, new Vector3(Length, 0, Length));
+			}
 
-				if (IsWireframePreview) Gizmos.DrawWireMesh(PreviewMesh, Vector3.zero);
-				else Gizmos.DrawMesh(PreviewMesh, Vector3.zero);
-			} else {
-				List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
+			//Generation radius
+			if (TrackedObject != null) {
+				var pos = TrackedObject.transform.position;
+				Vector3 extPos = new Vector3(pos.x, 0, pos.z);
 
-				//Mesh radius squares
-				foreach (Vector2 pos in positions) {
-					Vector3 pos3d = new Vector3(pos.x * Length, 0, pos.y * Length);
-
-					Gizmos.color = Color.white;
-					Gizmos.DrawWireCube(pos3d, new Vector3(Length, 0, Length));
-				}
-
-				//Generation radius
-				if (TrackedObject != null) {
-					var pos = TrackedObject.transform.position;
-					Vector3 extPos = new Vector3(pos.x, 0, pos.z);
-
-					Gizmos.color = Color.blue;
-					Gizmos.DrawWireCube(extPos, new Vector3(ColliderGenerationExtent, 0, ColliderGenerationExtent));
-				}
+				Gizmos.color = Color.blue;
+				Gizmos.DrawWireCube(extPos, new Vector3(ColliderGenerationExtent, 0, ColliderGenerationExtent));
 			}
 		}
 	}

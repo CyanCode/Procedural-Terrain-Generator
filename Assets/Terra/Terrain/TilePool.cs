@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Terra.CoherentNoise;
+using System.Threading;
 
 namespace Terra.Terrain {
 	/// <summary>

@@ -9,6 +9,7 @@ namespace UnityEditor.Terra {
 	/// </summary>
 	public class TerraGUI {
 		private TerraSettings Settings;
+		private TerrainSettingsEditor SettingsEditor;
 		private Texture[] ToolbarImages;
 
 		public TerraGUI(TerraSettings settings) {
@@ -52,12 +53,9 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
 			Settings.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", Settings.GenerateOnStart);
 			Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
-			if (!Settings.GenAllColliders)
-				Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
 			if (!Settings.UseRandomSeed)
 				TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
 			Settings.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", Settings.UseRandomSeed);
-			Settings.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.GenAllColliders);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
@@ -67,7 +65,21 @@ namespace UnityEditor.Terra {
 			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
 
 			EditorGUILayout.Space();
+			EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);
+			if (!Settings.GenAllColliders)
+				Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
+			Settings.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.GenAllColliders);
+
+			EditorGUILayout.Space();
+			EditorGUI.BeginChangeCheck();
 			Settings.DisplayPreview = EditorGUILayout.Toggle("Display Preview", Settings.DisplayPreview);
+			if (EditorGUI.EndChangeCheck()) {
+				if (Settings.DisplayPreview) {
+					Settings.Preview.TriggerPreviewUpdate();
+				} else {
+					Settings.Preview.RemoveComponents();
+				}
+			}
 		}
 
 		/// <summary>

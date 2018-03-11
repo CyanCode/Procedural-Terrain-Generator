@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
 using System.Collections.Generic;
-using System.Collections;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -10,11 +9,10 @@ namespace Terra.Terrain {
 	///	position, and texture application.
 	/// </summary>
 	public class TerrainTile: MonoBehaviour {
-		public Mesh Terrain { get; private set; }
-		public Vector2 Position { get; private set; }
-
 		[HideInInspector]
 		public bool IsColliderDirty = false;
+		public Mesh Terrain { get; private set; }
+		public Vector2 Position { get; private set; }
 
 		private TerraSettings Settings;
 		private TerrainPaint Paint;

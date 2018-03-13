@@ -14,8 +14,10 @@ namespace Terra.Terrain {
 
 		private TileCache Cache = new TileCache(CACHE_SIZE);
 		private int queuedTiles = 0;
+		private Object pollLock = new Object();
 		private const int CACHE_SIZE = 30;
 		private const float ADD_TILE_DELAY = 0.5f;
+		
 		private struct ThreadData {
 			public TerrainTile tile;
 			public Generator gen;
@@ -150,33 +152,36 @@ namespace Terra.Terrain {
 			TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
 			queuedTiles++;
 
-			yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
-
 			if (Settings.UseMultithreading) {
 				ThreadData data = new ThreadData();
 				data.tile = tile;
 				data.gen = Settings.Generator;
 
 				ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
-					if (d is ThreadData) {
-						ThreadData tData = (ThreadData)d;
-						TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
+					//GetValue is not thread safe and must be locked
+					lock (pollLock) {
+						if (d is ThreadData) {
+							ThreadData tData = (ThreadData)d;
+							TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
 
-						MTDispatch.Instance().Enqueue(() => { //Main Thread
-							tData.tile.RenderRawMeshData(md);
+							MTDispatch.Instance().Enqueue(() => { //Main Thread
+								tData.tile.RenderRawMeshData(md);
 
-							if (Settings.UseCustomMaterial)
-								tile.ApplyCustomMaterial();
-							else
-								tile.ApplySplatmap();
+								if (Settings.UseCustomMaterial)
+									tile.ApplyCustomMaterial();
+								else
+									tile.ApplySplatmap();
 
-							tile.UpdatePosition(pos);
-							Cache.AddActiveTile(tile);
-							queuedTiles--;
-						});
+								tile.UpdatePosition(pos);
+								Cache.AddActiveTile(tile);
+								queuedTiles--;
+							});
+						}
 					}
 				}), data);
 			} else {
+				yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
+
 				tile.CreateMesh(pos, false);
 				yield return null;
 

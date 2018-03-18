@@ -28,8 +28,8 @@ namespace UnityEditor.Terra {
 				ToolbarImages = new Texture[] {
 					(Texture)Resources.Load("terra_gui_general"),
 					(Texture)Resources.Load("terra_gui_noise"),
-					(Texture)Resources.Load("terra_gui_material")
-					//(Texture)Resources.Load("terra_gui_object") //TODO: Put back
+					(Texture)Resources.Load("terra_gui_material"),
+					(Texture)Resources.Load("terra_gui_object")
 				};
 			}
 			
@@ -213,6 +213,158 @@ namespace UnityEditor.Terra {
 					manager.OptionGraphOpenError();
 			} else {
 				manager.OptionIncorrectFileSelection();
+			}
+		}
+
+		/// <summary>
+		/// Displays GUI elements for the "Object Placement" tab
+		/// </summary>
+		public void ObjectPlacement() {
+			ObjectPlacer placer = Settings.Placer;
+
+			//Display each type
+			for (int i = 0; i < placer.ObjectsToPlace.Count; i++) {
+				EditorGUILayout.Space();
+
+				//Surround each material w/ box
+				GUIStyle boxStyle = new GUIStyle();
+				boxStyle.padding = new RectOffset(3, 3, 3, 3);
+				boxStyle.normal.background = GetWhiteTexture();
+				EditorGUILayout.BeginVertical(boxStyle);
+
+				ObjectPlacementType type = placer.ObjectsToPlace[i];
+
+				//Close button / name
+				if (GUILayout.Button("X", GUILayout.Height(16), GUILayout.Width(18))) {
+					placer.ObjectsToPlace.RemoveAt(i);
+					i--;
+					continue;
+				}
+
+				//General
+				type.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", type.Prefab, typeof(GameObject), false);
+				type.Density = EditorGUILayout.FloatField("Object Density", type.Density);
+
+				//Height
+				type.ConstrainHeight = EditorGUILayout.Toggle("Constrain Height", type.ConstrainHeight);
+				if (type.ConstrainHeight) {
+					EditorGUI.indentLevel = 1;
+
+					type.MaxHeight = EditorGUILayout.DelayedFloatField("Max Height", type.MaxHeight);
+					type.MinHeight = EditorGUILayout.DelayedFloatField("Min Height", type.MinHeight);
+
+					EditorGUILayout.BeginHorizontal();
+					type.HeightProbCurve = EditorGUILayout.CurveField("Probability", type.HeightProbCurve, Color.green, new Rect(0, 0, 1, 1));
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "This is the height probability curve. The X axis represents the " +
+											"min to max height and the Y axis represents the probability an " +
+											"object will spawn. By default, the curve is set to a 100% probability " +
+											"meaning all objects will spawn.";
+						EditorUtility.DisplayDialog("Help - Height Probability", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					EditorGUI.indentLevel = 0;
+				}
+
+				//Angle
+				type.ConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", type.ConstrainAngle);
+				if (type.ConstrainAngle) {
+					EditorGUI.indentLevel = 1;
+
+					type.MaxAngle = EditorGUILayout.DelayedFloatField("Max Angle", type.MaxAngle);
+					type.MinAngle = EditorGUILayout.DelayedFloatField("Min Angle", type.MinAngle);
+					EditorGUILayout.BeginHorizontal();
+					type.AngleProbCurve = EditorGUILayout.CurveField("Probability", type.AngleProbCurve, Color.green, new Rect(0, 0, 180, 1));
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "This is the angle probability curve. The X axis represents " +
+											"0 to 180 degrees and the Y axis represents the probability an " +
+											"object will spawn. By default, the curve is set to a 100% probability " +
+											"meaning all objects will spawn.";
+						EditorUtility.DisplayDialog("Help - Angle Probability", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					EditorGUI.indentLevel = 0;
+				}
+
+				//Translate
+				EditorGUI.indentLevel = 1;
+				Settings.ShowTranslateFoldout = EditorGUILayout.Foldout(Settings.ShowTranslateFoldout, "Translate");
+				if (Settings.ShowTranslateFoldout) {
+					type.TranslationAmount = EditorGUILayout.Vector3Field("Translate", type.TranslationAmount);
+
+					EditorGUILayout.BeginHorizontal();
+					type.IsRandomTranslate = EditorGUILayout.Toggle("Random", type.IsRandomTranslate);
+					if (GUILayout.Button("?", GUILayout.Width(25))) { 
+						const string msg = "Optionally randomly translate the placed object. " +
+											"Max and min extents for the random number generator can " +
+											"be set.";
+						EditorUtility.DisplayDialog("Help - Random Translate", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					if (type.IsRandomTranslate) {
+						EditorGUI.indentLevel = 2;
+						type.RandomTranslateExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomTranslateExtents.Max);
+						type.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomTranslateExtents.Min);
+						EditorGUI.indentLevel = 1;
+					}
+				}
+
+				//Rotate
+				Settings.ShowRotateFoldout = EditorGUILayout.Foldout(Settings.ShowRotateFoldout, "Rotate");
+				if (Settings.ShowRotateFoldout) {
+					type.RotationAmount = EditorGUILayout.Vector3Field("Rotation", type.RotationAmount);
+
+					EditorGUILayout.BeginHorizontal();
+					type.IsRandomRotation = EditorGUILayout.Toggle("Random", type.IsRandomRotation);
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "Optionally randomly rotate the placed object. " +
+											"Max and min extents for the random number generator can " +
+											"be set.";
+						EditorUtility.DisplayDialog("Help - Random Rotate", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					if (type.IsRandomRotation) {
+						EditorGUI.indentLevel = 2;
+						type.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomRotationExtents.Max);
+						type.RandomRotationExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomRotationExtents.Min);
+						EditorGUI.indentLevel = 1;
+					}
+				}
+
+				//Scale
+				Settings.ShowScaleFoldout = EditorGUILayout.Foldout(Settings.ShowScaleFoldout, "Scale");
+				if (Settings.ShowScaleFoldout) {
+					type.ScaleAmount = EditorGUILayout.Vector3Field("Scale", type.ScaleAmount);
+
+					EditorGUILayout.BeginHorizontal();
+					type.IsRandomScale = EditorGUILayout.Toggle("Random", type.IsRandomScale);
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "Optionally randomly scale the placed object. " +
+											"Max and min extents for the random number generator can " +
+											"be set.";
+						EditorUtility.DisplayDialog("Help - Random Scale", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					if (type.IsRandomScale) {
+						EditorGUI.indentLevel = 2;
+						type.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomScaleExtents.Max);
+						type.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomScaleExtents.Min);
+						EditorGUI.indentLevel = 1;
+					}
+				}
+
+				EditorGUILayout.EndVertical();
+			}
+
+			//Add new button
+			EditorGUILayout.Space();
+			if (GUILayout.Button("Add New")) {
+				placer.ObjectsToPlace.Add(new ObjectPlacementType(TerraSettings.GenerationSeed));
 			}
 		}
 

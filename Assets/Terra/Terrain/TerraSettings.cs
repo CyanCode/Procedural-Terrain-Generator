@@ -13,7 +13,7 @@ namespace Terra.Terrain {
 			General = 0,
 			Noise = 1,
 			Materials = 2,
-			//ObjectPlacement = 3
+			ObjectPlacement = 3
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 		public GraphLauncher Launcher;
@@ -44,6 +44,12 @@ namespace Terra.Terrain {
 		public bool IsMinHeightSelected = false;
 		public bool UseCustomMaterial = false;
 		public Material CustomMaterial = null;
+
+		//Object Placement Tab
+		public ObjectPlacer Placer = new ObjectPlacer();
+		public bool ShowTranslateFoldout = false;
+		public bool ShowRotateFoldout = false;
+		public bool ShowScaleFoldout = false;
 
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated

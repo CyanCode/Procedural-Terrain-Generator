@@ -36,6 +36,10 @@ namespace UnityEditor.Terra {
 					gui.Material();
 
 					break;
+				case TerraSettings.ToolbarOptions.ObjectPlacement:
+					gui.ObjectPlacement();
+
+					break;
 			}
 		}
 	}

@@ -8,7 +8,6 @@ namespace Terra.Terrain {
 
 		TerrainPaint Paint;
 		List<Texture2D> Splats;
-		Mesh PrevMesh;
 		bool HideInInspector;
 		
 		/// <summary>
@@ -52,6 +51,15 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Updates only the procedural object placement. 
+		/// </summary>
+		public void TriggerObjectPlacementUpdate() {
+			if (Settings.DisplayPreview) {
+				
+			}
+		}
+
+		/// <summary>
 		/// Removes components associated with this preview, 
 		/// does not remove cached data
 		/// </summary>
@@ -63,6 +71,14 @@ namespace Terra.Terrain {
 			if (Settings.GetComponent<MeshFilter>() != null) {
 				Object.DestroyImmediate(Settings.GetComponent<MeshFilter>());
 			}
+		}
+
+		/// <summary>
+		/// Checks to see if this gameobject has an attached mesh
+		/// </summary>
+		/// <returns>true if has MeshFilter component</returns>
+		public bool HasMesh() {
+			return Settings.GetComponent<MeshFilter>() != null;
 		}
 
 		/// <summary>
@@ -139,8 +155,7 @@ namespace Terra.Terrain {
 					filter.hideFlags = HideFlags.HideInInspector;
 
 				//Get cached or generated mesh
-				filter.mesh = PrevMesh = PrevMesh == null ?
-					CreateMesh() : PrevMesh;
+				filter.mesh = CreateMesh();
 			}
 		}
 	}

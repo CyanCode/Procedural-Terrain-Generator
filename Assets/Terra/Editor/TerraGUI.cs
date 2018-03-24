@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Terra.Terrain;
+using Terra.Terrain.Util;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -21,8 +22,8 @@ namespace UnityEditor.Terra {
 		/// the file system
 		/// </summary>
 		public void Toolbar() {
-			EditorGUILayout.Space();  
- 
+			EditorGUILayout.Space();
+
 			//Set toolbar images
 			if (ToolbarImages == null) {
 				ToolbarImages = new Texture[] {
@@ -32,7 +33,7 @@ namespace UnityEditor.Terra {
 					(Texture)Resources.Load("terra_gui_object")
 				};
 			}
-			
+
 			Settings.ToolbarSelection = (TerraSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(Settings.ToolbarSelection, ToolbarImages);
 		}
 
@@ -191,7 +192,7 @@ namespace UnityEditor.Terra {
 
 					Settings.SplatSettings.Add(new TerrainPaint.SplatSetting());
 				}
-				
+
 				if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
 					Settings.Preview.TriggerMaterialsUpdate();
 				}
@@ -220,10 +221,10 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Object Placement" tab
 		/// </summary>
 		public void ObjectPlacement() {
-			ObjectPlacer placer = Settings.Placer;
+			const int MAX_GRID_SIZE_WARNING = 15;
 
 			//Display each type
-			for (int i = 0; i < placer.ObjectsToPlace.Count; i++) {
+			for (int i = 0; i < Settings.ObjectPlacementSettings.Count; i++) {
 				EditorGUILayout.Space();
 
 				//Surround each material w/ box
@@ -232,18 +233,30 @@ namespace UnityEditor.Terra {
 				boxStyle.normal.background = GetWhiteTexture();
 				EditorGUILayout.BeginVertical(boxStyle);
 
-				ObjectPlacementType type = placer.ObjectsToPlace[i];
+				ObjectPlacementType type = Settings.ObjectPlacementSettings[i];
 
 				//Close button / name
 				if (GUILayout.Button("X", GUILayout.Height(16), GUILayout.Width(18))) {
-					placer.ObjectsToPlace.RemoveAt(i);
+					Settings.ObjectPlacementSettings.RemoveAt(i);
 					i--;
 					continue;
 				}
 
+				//Possible grid size warning
+				if (type.GridSize > MAX_GRID_SIZE_WARNING) {
+					const string warning = "Warning: Setting the \"Sample Grid Size\" component " +
+											"too high may spawn too many objects. The suggested value " +
+											"is less than or around 15.";
+					EditorGUILayout.HelpBox(warning, MessageType.Warning);
+				}
+
 				//General
 				type.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", type.Prefab, typeof(GameObject), false);
+				type.AllowsIntersection = EditorGUILayout.Toggle("Can Intersect", type.AllowsIntersection);
 				type.Density = EditorGUILayout.FloatField("Object Density", type.Density);
+				type.MaxObjects = EditorGUILayout.IntField("Max Objects", type.MaxObjects);
+				type.GridSize = EditorGUILayout.IntField("Sample Grid Size", type.GridSize);
+				if (type.MaxObjects < 1) type.MaxObjects = 1;
 
 				//Height
 				type.ConstrainHeight = EditorGUILayout.Toggle("Constrain Height", type.ConstrainHeight);
@@ -252,6 +265,7 @@ namespace UnityEditor.Terra {
 
 					type.MaxHeight = EditorGUILayout.DelayedFloatField("Max Height", type.MaxHeight);
 					type.MinHeight = EditorGUILayout.DelayedFloatField("Min Height", type.MinHeight);
+					FitMinMax(ref type.MinHeight, ref type.MaxHeight);
 
 					EditorGUILayout.BeginHorizontal();
 					type.HeightProbCurve = EditorGUILayout.CurveField("Probability", type.HeightProbCurve, Color.green, new Rect(0, 0, 1, 1));
@@ -274,6 +288,8 @@ namespace UnityEditor.Terra {
 
 					type.MaxAngle = EditorGUILayout.DelayedFloatField("Max Angle", type.MaxAngle);
 					type.MinAngle = EditorGUILayout.DelayedFloatField("Min Angle", type.MinAngle);
+					FitMinMax(ref type.MinAngle, ref type.MaxAngle);
+
 					EditorGUILayout.BeginHorizontal();
 					type.AngleProbCurve = EditorGUILayout.CurveField("Probability", type.AngleProbCurve, Color.green, new Rect(0, 0, 180, 1));
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
@@ -296,7 +312,7 @@ namespace UnityEditor.Terra {
 
 					EditorGUILayout.BeginHorizontal();
 					type.IsRandomTranslate = EditorGUILayout.Toggle("Random", type.IsRandomTranslate);
-					if (GUILayout.Button("?", GUILayout.Width(25))) { 
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "Optionally randomly translate the placed object. " +
 											"Max and min extents for the random number generator can " +
 											"be set.";
@@ -308,6 +324,8 @@ namespace UnityEditor.Terra {
 						EditorGUI.indentLevel = 2;
 						type.RandomTranslateExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomTranslateExtents.Max);
 						type.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomTranslateExtents.Min);
+
+						FitMinMax(ref type.RandomTranslateExtents.Min, ref type.RandomTranslateExtents.Max);
 						EditorGUI.indentLevel = 1;
 					}
 				}
@@ -331,6 +349,8 @@ namespace UnityEditor.Terra {
 						EditorGUI.indentLevel = 2;
 						type.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomRotationExtents.Max);
 						type.RandomRotationExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomRotationExtents.Min);
+
+						FitMinMax(ref type.RandomRotationExtents.Min, ref type.RandomRotationExtents.Max);
 						EditorGUI.indentLevel = 1;
 					}
 				}
@@ -354,6 +374,8 @@ namespace UnityEditor.Terra {
 						EditorGUI.indentLevel = 2;
 						type.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomScaleExtents.Max);
 						type.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomScaleExtents.Min);
+
+						FitMinMax(ref type.RandomScaleExtents.Min, ref type.RandomScaleExtents.Max);
 						EditorGUI.indentLevel = 1;
 					}
 				}
@@ -363,8 +385,47 @@ namespace UnityEditor.Terra {
 
 			//Add new button
 			EditorGUILayout.Space();
-			if (GUILayout.Button("Add New")) {
-				placer.ObjectsToPlace.Add(new ObjectPlacementType(TerraSettings.GenerationSeed));
+			if (GUILayout.Button("Add Object")) {
+				if (Settings.ObjectPlacementSettings == null) {
+					Settings.ObjectPlacementSettings = new List<ObjectPlacementType>();
+				}
+
+				Settings.ObjectPlacementSettings.Add(new ObjectPlacementType(TerraSettings.GenerationSeed));
+			}
+
+			//Update preview
+			if (Settings.DisplayPreview && Settings.Preview.HasMesh() && GUILayout.Button("Update Preview")) {
+				Settings.Preview.TriggerObjectPlacementUpdate();
+			}
+		}
+
+		/// <summary>
+		/// Fits the min and max values so that the min is never 
+		/// greater than the max. 
+		/// 
+		/// If min > max
+		///   min = max
+		/// </summary>
+		/// <param name="min">Minimum value</param>
+		/// <param name="max">Maximum value</param>
+		public static void FitMinMax(ref float min, ref float max) {
+			min = min > max ? max : min;
+		}
+
+		/// <summary>
+		/// Fits the min and max values so that the min Vector3's 
+		/// components never exceed the max's.
+		/// 
+		/// If min > max
+		///   min = max
+		/// </summary>
+		/// <param name="min">Minimum vector</param>
+		/// <param name="max">Maximum vector</param>
+		public static void FitMinMax(ref Vector3 min, ref Vector3 max) {
+			if (min.x > max.x || min.y > max.y || min.z > max.z) {
+				min = new Vector3(min.x > max.x ? max.x : min.x,
+					min.y > max.y ? max.y : min.y,
+					min.z > max.z ? max.z : min.z);
 			}
 		}
 

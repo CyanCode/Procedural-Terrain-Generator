@@ -1,29 +1,14 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-[Serializable]
+[System.Serializable]
 public class ObjectPlacementType {
 	private System.Random Rand;
 
 	#region GeneralParams
 	/// <summary>
-	/// In the event of a random translation, should certain 
-	/// axis be constrained? In other words, should certain axis
-	/// not translate?
+	/// Extents for a random transformation.
 	/// </summary>
-	[Serializable]
-	public struct TransformConstraint {
-		bool X;
-		bool Y;
-		bool Z;
-
-		public TransformConstraint(bool x, bool y, bool z) {
-			X = x;
-			Y = y;
-			Z = z;
-		}
-	}
-
+	[System.Serializable]
 	public struct RandomTransformExtent {
 		/// <summary>
 		/// The defined maximum transformation distance.
@@ -45,7 +30,7 @@ public class ObjectPlacementType {
 	/// Max amount of objects of this type to place 
 	/// in the scene
 	/// </summary>
-	public int MaxObjects;
+	public int MaxObjects = 500;
 
 	/// <summary>
 	/// Are other objects allowed to intersect with this?
@@ -59,16 +44,17 @@ public class ObjectPlacementType {
 	public float Density = 1f;
 
 	/// <summary>
-	/// In the event that no height or angle curves are specfied, 
-	/// PlacementProbability is used to determine whether 
-	/// or not to place the object if it falls within the required 
-	/// height and angle threshhold.
+	/// How big should the "grid" be that is used to poll 
+	/// the Poisson disc sampler?
+	/// <note type="note">Setting this value too high can have
+	/// unintended consequences. It is suggested that this value 
+	/// does not exceed 15 unless you are sure you want more samples.</note>
 	/// </summary>
-	public float PlacementProbability = 0.5f;
+	public int GridSize = 10;
 	#endregion
 
 	#region PlacementParams
-	[Serializable]
+	[System.Serializable]
 	public enum EvaluateOptions {
 		/// <summary>
 		/// If the height evaluation passes, the object can 
@@ -163,12 +149,6 @@ public class ObjectPlacementType {
 	/// can randomly rotate in euler values.
 	/// </summary>
 	public RandomTransformExtent RandomRotationExtents;
-
-	/// <summary>
-	/// In the event of a random rotation, what axis should be
-	/// constrained, if any?
-	/// </summary>
-	public TransformConstraint RotationConstraint = new TransformConstraint(false, true, false);
 	#endregion
 
 	#region TranslateParams
@@ -190,12 +170,6 @@ public class ObjectPlacementType {
 	/// can randomly translate.
 	/// </summary>
 	public RandomTransformExtent RandomTranslateExtents;
-
-	/// <summary>
-	/// In the event of a random scale, what axis should be 
-	/// constrained if any?
-	/// </summary>
-	public TransformConstraint TranslationConstraint = new TransformConstraint(false, true, false);
 	#endregion
 
 	#region ScaleParams
@@ -217,12 +191,6 @@ public class ObjectPlacementType {
 	/// can randomly scale.
 	/// </summary>
 	public RandomTransformExtent RandomScaleExtents;
-
-	/// <summary>
-	/// In the event of a random scale, what axis should be 
-	/// constrained if any?
-	/// </summary>
-	public TransformConstraint ScaleConstraint = new TransformConstraint(true, true, true);
 	#endregion
 
 	/// <param name="seed">Optional seed value to use in the random number generator</param>
@@ -241,39 +209,27 @@ public class ObjectPlacementType {
 	/// <param name="angle">Angle to evaluate at (0 to 180 degrees)</param>
 	/// <returns></returns>
 	public bool ShouldPlaceAt(float height, float angle) {
-		//Does this height and angle fall within our constraints?
-		if (!FitsEvaluationConstraints(height, angle))
-			return false;
+
 
 		return false; //TODO implement
 	}
 
 	/// <summary>
-	/// Whether or not the passed height and angle passes the 
-	/// EvaluateOption.
+	/// Whether or not the passed height fits within the 
+	/// specified max and min.
 	/// </summary>
-	/// <param name="height">Height to evaluate at</param>
-	/// <param name="angle">Angle to evaluate at</param>
-	/// <returns></returns>
-	public bool FitsEvaluationConstraints(float height, float angle) {
-		switch (EvaluateOption) {
-			case EvaluateOptions.HeightFirst:
-				if ((height > MaxHeight || height < MinHeight) && ConstrainHeight)
-					return false;
-				break;
-			case EvaluateOptions.AngleFirst:
-				if ((angle > MaxAngle || angle < MinAngle) && ConstrainAngle)
-					return false;
-				break;
-			case EvaluateOptions.Both:
-				if ((height > MaxHeight || height < MinHeight) && ConstrainHeight)
-					return false;
-				if ((angle > MaxAngle || angle < MinAngle) && ConstrainAngle)
-					return false;
-				break;
-		}
+	/// <param name="height">height to check</param>
+	public bool IsInHeightExtents(float height) {
+		return height < MaxHeight && height > MinHeight;
+	}
 
-		return true;
+	/// <summary>
+	/// Whether or not the passed angle fits within the 
+	/// specified max and min.
+	/// </summary>
+	/// <param name="angle">angle to check</param>
+	public bool IsInAngleExtents(float angle) {
+		return angle < MaxAngle && angle > MinAngle;
 	}
 
 	/// <summary>
@@ -289,15 +245,15 @@ public class ObjectPlacementType {
 	/// <param name="height">Height to sample</param>
 	/// <returns></returns>
 	public bool EvaluateHeight(float height) {
-		float probability;
-
+		float probability = 1f;
+		//TODO reimplement
 		if (ConstrainHeight) {
 			float totalHeight = MaxHeight - MinHeight;
 			float sampleAt = height / totalHeight;
 
 			probability = HeightProbCurve.Evaluate(sampleAt);
 		} else {
-			probability = PlacementProbability;
+			//probability = PlacementProbability;
 		}
 
 		float chance = ((float)Rand.Next(0, 100)) / 100;

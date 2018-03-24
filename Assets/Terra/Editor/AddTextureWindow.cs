@@ -1,7 +1,7 @@
-﻿using UnityEditor;
+﻿using Terra.Terrain;
 using UnityEngine;
 
-namespace Terra.Terrain {
+namespace UnityEditor.Terra {
 	public class AddTextureWindow: EditorWindow {
 		private TerrainPaint.SplatSetting Splat;
 

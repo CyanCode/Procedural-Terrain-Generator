@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Terra.GraphEditor;
 using UnityEngine;
 using UnityEditor;
+using Terra.Terrain.Util;
 
 namespace Terra.Terrain {
 	[System.Serializable]
@@ -46,7 +47,7 @@ namespace Terra.Terrain {
 		public Material CustomMaterial = null;
 
 		//Object Placement Tab
-		public ObjectPlacer Placer = new ObjectPlacer();
+		public List<ObjectPlacementType> ObjectPlacementSettings = null;
 		public bool ShowTranslateFoldout = false;
 		public bool ShowRotateFoldout = false;
 		public bool ShowScaleFoldout = false;
@@ -59,13 +60,21 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// TerrainPreview instance attached to this TerraSettings instance. Instantiated in 
-		/// <code>Start</code> and handles previewing of the generated terrain.
+		/// <code>Awake</code> and handles previewing of the generated terrain.
 		/// </summary>
 		public TerrainPreview Preview;
+
+		/// <summary>
+		/// ObjectPlacer instance attached to this TerraSettings instance. This is instantiated
+		/// in <code>Awake</code>.
+		/// </summary>
+		public ObjectPlacer Placer;
+
 
 		void Awake() {
 			Pool = new TilePool(this);
 			Preview = new TerrainPreview(this);
+			Placer = new ObjectPlacer(this);
 		}
 
 		void Start() {

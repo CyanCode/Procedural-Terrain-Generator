@@ -33,13 +33,15 @@ namespace Terra.Terrain {
 		public bool UseMultithreading = true;
 
 		//Noise Tab
-		public string SelectedFile = "";
-		public Graph LoadedGraph = null;
-		public Generator Generator;
+		public string SelectedNoiseFile = "";
+		public Graph LoadedNoiseGraph = null;
+		public Generator NoiseGenerator;
 		public float Spread = 100f;
 		public float Amplitude = 50f;
 
 		//Material Tab
+		public string SelectedMaterialFile = "";
+		public Graph LoadedMaterialGraph = null;
 		public List<TerrainPaint.SplatSetting> SplatSettings = null;
 		public bool IsMaxHeightSelected = false;
 		public bool IsMinHeightSelected = false;
@@ -106,14 +108,14 @@ namespace Terra.Terrain {
 					GenerationSeed = new System.Random().Next(0, System.Int32.MaxValue);
 
 				Launcher = new GraphLauncher();
-				Launcher.LoadGraph(SelectedFile);
-				Launcher.Enable();
+				Graph ngraph = Launcher.LoadGraph(SelectedNoiseFile, Graph.GraphType.Noise);
+				NoiseGenerator = Launcher.GetEndNode(ngraph);
 
-				Generator = Launcher.GetGraphGenerator();
+				Graph mgraph = Launcher.LoadGraph(SelectedMaterialFile, Graph.GraphType.Material);
 			}
 			
 			//Handle previewing
-			if (!EditorApplication.isPlaying && DisplayPreview && Generator != null) {
+			if (!EditorApplication.isPlaying && DisplayPreview && NoiseGenerator != null) {
 				Preview.TriggerPreviewUpdate();
 			}
 		}

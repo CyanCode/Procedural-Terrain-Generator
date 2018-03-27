@@ -6,185 +6,102 @@ using Terra.Terrain;
 using UnityEditor;
 using UnityEngine;
 
-public class GraphManager {
-	private TerraSettings Settings;
-	private BonWindow ActiveWindow;
+namespace Assets.Terra.NodeEditor.Editor {
+	public abstract class GraphManager {
+		protected TerraSettings Settings;
+		protected BonWindow ActiveWindow;
+		protected Graph.GraphType GType;
 
-	public GraphManager(TerraSettings settings) {
-		Settings = settings;
+		public GraphManager(TerraSettings settings, Graph.GraphType graphType) {
+			Settings = settings;
+			GType = graphType;
 
-		//Register event handler
-		EventManager.OnCloseGraph += OnClose;
-	}
-
-	/// <summary>
-	/// Handler for OnClose graph delegate action. Used for saving.
-	/// </summary>
-	/// <param name="graph">Graph that will close</param>
-	public void OnClose(Graph graph) {
-		if (graph.Name == null || graph.Name == "") {
-			//Open save dialog. If there's no active BonWindow, we
-			//have no idea what this user is doing, ignore.
-			if (ActiveWindow != null) ActiveWindow.OpenSaveDialog();
-		} else {
-			Graph.Save(graph.Name, graph);
-		}
-	}
-
-	/// <summary>
-	/// Opens a graph at the path specified in settings
-	/// </summary>
-	/// <param name="settings">Settings to persist created Graph instance</param>
-	public void Open() {
-		Settings.LoadedGraph = Settings.Launcher.LoadGraph(Settings.SelectedFile);
-		CreateGraphWindow(Settings);
-	}
-
-	public void OpenNew(string path) {
-		GraphLauncher launcher = Settings.Launcher;
-		Settings.LoadedGraph = launcher.LoadGraph(BonConfig.DefaultGraphName);
-		launcher.SaveGraph(Settings.LoadedGraph, path);
-		CreateGraphWindow(Settings);
-	}
-
-	/// <summary>
-	/// Checks whether file at path can be deserialized into a Graph
-	/// </summary>
-	/// <param name="path">Path to check</param>
-	/// <returns>true if successful, false otherwise</returns>
-	public bool GraphFileCanBeRead(string path) {
-		if (path != null && path != "") {
-			return Graph.Load(path) != null;
+			//Register event handler
+			EventManager.OnCloseGraph += OnClose;
 		}
 
-		return false;
-	}
-
-	/// <summary>
-	/// Displays GUI options for a successful graph deserialization. 
-	/// Allows the user to open the deserialized graph and edit it.
-	/// </summary>
-	/// <param name="settings">Associated terrain Settings</param>
-	public void OptionGraphOpenSuccess() {
-		string msg = "The node graph for this terrain is ready for use.";
-		EditorGUILayout.HelpBox(msg, MessageType.Info);
-		EditorGUILayout.LabelField("Selected File: " + Path.GetFileNameWithoutExtension(Settings.SelectedFile));
-
-		if (GUILayout.Button("Edit Selected Graph")) {
-			Open();
+		/// <summary>
+		/// Handler for OnClose graph delegate action. Used for saving.
+		/// </summary>
+		/// <param name="graph">Graph that will close</param>
+		public void OnClose(Graph graph) {
+			if (graph.Path == null || graph.Path == "") {
+				//Open save dialog. If there's no active BonWindow, we
+				//have no idea what this user is doing, ignore.
+				if (ActiveWindow != null)
+					ActiveWindow.OpenSaveDialog();
+			} else {
+				Settings.Launcher.SaveGraph(graph, graph.Path);
+			}
 		}
 
-		OptionDefault();
+		/// <summary>
+		/// Opens a graph at the path specified in settings
+		/// </summary>
+		/// <param name="settings">Settings to persist created Graph instance</param>
+		public void Open() {
+			Settings.LoadedNoiseGraph = Settings.Launcher.LoadGraph(Settings.SelectedNoiseFile, GType);
+			CreateGraphWindow(Settings);
+		}
 
-		EditorGUILayout.Space();
+		/// <summary>
+		/// Displays GUI options for a failed graph deserialization. 
+		/// Allows the user to select another file.
+		/// </summary>
+		/// <param name="settings">Associated terrain Settings</param>
+		public void OptionGraphOpenError() {
+			string msg = "The JSON file you selected failed to load. " +
+						"Make sure the selected file is a valid graph file";
+			EditorGUILayout.HelpBox(msg, MessageType.Error);
 
-		Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-		Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+			OptionDefault();
+		}
 
-		EditorGUILayout.Space();
-		if (Application.isEditor && Settings.DisplayPreview) {
-			if (GUILayout.Button("Update Preview")) {
-				Generator gen = GetGraphGenerator();
+		/// <summary>
+		/// Displays GUI options for an incorrect file selection. 
+		/// Allows the user to select another file.
+		/// </summary>
+		/// <param name="settings">Associated terrain Settings</param>
+		public void OptionIncorrectFileSelection() {
+			string msg = "There is no node graph associated with this terrain. " +
+					"Either create a new graph or select an existing one from the file system.";
+			EditorGUILayout.HelpBox(msg, MessageType.Warning);
 
-				if (gen != null) {
-					//Settings.PreviewMesh = TerrainTile.GetPreviewMesh(Settings, gen);
-					Settings.Preview.TriggerPreviewUpdate();
+			OptionDefault();
+		}
+
+		/// <summary>
+		/// Displays GUI options for a successful graph deserialization. 
+		/// Allows the user to open the deserialized graph and edit it.
+		/// </summary>
+		/// <param name="settings">Associated terrain Settings</param>
+		public abstract void OptionGraphOpenSuccess();
+
+		/// <summary>
+		/// Displays the default GUI options that appear at the bottom of 
+		/// any option.
+		/// </summary>
+		/// <param name="settings">Associated terrain Settings</param>
+		protected void OptionDefault() {
+			if (GUILayout.Button("Create New Graph")) {
+				Settings.SelectedNoiseFile = EditorUtility.SaveFilePanelInProject("Save Graph",
+					"TerrainGraph", "json", "Choose a location to save the graph file.");
+
+				if (Settings.SelectedNoiseFile != "") {
+					File.WriteAllText(Settings.SelectedNoiseFile, "");
+					OpenNew(Settings.SelectedNoiseFile);
 				}
 			}
-		}
-	}
 
-	/// <summary>
-	/// Displays GUI options for a failed graph deserialization. 
-	/// Allows the user to select another file.
-	/// </summary>
-	/// <param name="settings">Associated terrain Settings</param>
-	public void OptionGraphOpenError() {
-		string msg = "The JSON file you selected failed to load. " +
-					"Make sure the selected file is a valid graph file";
-		EditorGUILayout.HelpBox(msg, MessageType.Error);
-
-		OptionDefault();
-	}
-
-	/// <summary>
-	/// Displays GUI options for an incorrect file selection. 
-	/// Allows the user to select another file.
-	/// </summary>
-	/// <param name="settings">Associated terrain Settings</param>
-	public void OptionIncorrectFileSelection() {
-		string msg = "There is no node graph associated with this terrain. " +
-				"Either create a new graph or select an existing one from the file system.";
-		EditorGUILayout.HelpBox(msg, MessageType.Warning);
-
-		OptionDefault();
-	}
-
-	/// <summary>
-	/// Returns whether or not the graph has an EndNode that connected to a generator
-	/// </summary>
-	/// <returns>true if found and connected, false otherwise</returns>
-	public bool HasValidEndNode() {
-		GraphLauncher launcher = Settings.Launcher;
-		if (launcher != null && launcher.Graph != null) {
-			EndNode endNode = launcher.Graph.GetNode<EndNode>();
-			return endNode != null && endNode.GetFinalGenerator() != null;
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Gets the generator associated with the EndNode in the Graph
-	/// </summary>
-	/// <returns>The end generator if it exists</returns>
-	public Generator GetGraphGenerator() {
-		if (HasValidEndNode()) {
-			GraphLauncher launcher = Settings.Launcher;
-			EndNode endNode = launcher.Graph.GetNode<EndNode>();
-
-			return endNode.GetFinalGenerator();
-		}
-
-		return null;
-	}
-
-	/// <summary>
-	/// Displays an alert when no EndNode is found in the graph
-	/// </summary>
-	public void MessageNoEndNode() {
-		EditorGUILayout.HelpBox("A node graph exists but cannot be used for generation as there is no connected End node.", MessageType.Warning);
-		if (GUILayout.Button("Edit Selected Graph")) {
-			Open();
-		}
-
-		OptionDefault();
-	}
-
-	/// <summary>
-	/// Displays the default GUI options that appear at the bottom of 
-	/// any option.
-	/// </summary>
-	/// <param name="settings">Associated terrain Settings</param>
-	private void OptionDefault() {
-		if (GUILayout.Button("Create New Graph")) {
-			Settings.SelectedFile = EditorUtility.SaveFilePanelInProject("Save Graph",
-				"TerrainGraph", "json", "Choose a location to save the graph file.");
-
-			if (Settings.SelectedFile != "") {
-				File.WriteAllText(Settings.SelectedFile, "");
-				OpenNew(Settings.SelectedFile);
+			if (GUILayout.Button("Select Existing Graph")) {
+				Settings.SelectedNoiseFile = EditorUtility.OpenFilePanel("Select a JSON graph file", Application.dataPath, "json");
+				Open();
 			}
 		}
 
-		if (GUILayout.Button("Select Existing Graph")) {
-			Settings.SelectedFile = EditorUtility.OpenFilePanel("Select a JSON graph file", Application.dataPath, "json");
-			Open();
+		protected void CreateGraphWindow(TerraSettings Settings) {
+			ActiveWindow = BonWindow.Init(GType);
+			ActiveWindow.CreateCanvas(Settings.SelectedNoiseFile, GType);
 		}
-	}
-
-	private void CreateGraphWindow(TerraSettings Settings) {
-		ActiveWindow = EditorWindow.GetWindow<BonWindow>();
-		ActiveWindow.CreateCanvas(Settings.SelectedFile);
 	}
 }

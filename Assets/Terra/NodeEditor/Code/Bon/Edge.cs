@@ -6,6 +6,8 @@ using UnityEngine;
 namespace Terra.GraphEditor {
 	public class Edge
 	{
+		public static Color HandleColor = Color.black;
+
 		public InputSocket Input;
 		public OutputSocket Output;
 
@@ -49,11 +51,11 @@ namespace Terra.GraphEditor {
 		{
 			Handles.DrawBezier(
 				position01, position02,
-				tangent01, tangent02, Color.black, null, 6);
+				tangent01, tangent02, HandleColor, null, 6);
 
 			Handles.DrawBezier(
 				position01, position02,
-				tangent01, tangent02, Node.GetEdgeColor(type), null, 3);
+				tangent01, tangent02, HandleColor, null, 3);
 		}
 
 		public static Vector2 GetEdgePosition(AbstractSocket socket, Vector2 position)

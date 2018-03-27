@@ -39,7 +39,7 @@ namespace Assets.Editor.Bon
 		public BonCanvas(Graph graph)
 		{
 			Graph = graph;
-			FilePath = Graph.Name;
+			FilePath = Graph.Path;
 
 			Style.normal.background = CreateBackgroundTexture();
 			Style.normal.background.wrapMode = TextureWrapMode.Repeat;
@@ -237,6 +237,20 @@ namespace Assets.Editor.Bon
 			windowPosition.x -= (this.DrawArea.x);
 			windowPosition.y -= (this.DrawArea.y);
 			return windowPosition;
+		}
+
+		/// <summary>
+		/// Styles this canvas according to the passed graph type
+		/// </summary>
+		/// <param name="graphType">Graph type to style to</param>
+		public void SetDisplayToGraphType(Graph.GraphType graphType) {
+			switch (graphType) {
+				case Graph.GraphType.Noise:
+					Edge.HandleColor = Color.green;
+					break;
+				default:
+					break; //TODO implement others
+			}
 		}
 	}
 }

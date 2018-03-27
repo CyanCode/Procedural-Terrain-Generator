@@ -86,7 +86,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>Filled Mesh</returns>
 		private Mesh CreateMesh() {
-			return TerrainTile.GetPreviewMesh(Settings, Settings.Generator);
+			return TerrainTile.GetPreviewMesh(Settings, Settings.NoiseGenerator);
 		}
 
 		/// <summary>

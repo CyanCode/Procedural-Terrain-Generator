@@ -7,11 +7,33 @@ using UnityEngine;
 namespace Terra.GraphEditor {
 	[Serializable]
 	public class Graph: ISerializationCallbackReceiver {
+		public bool TriggerEvents = true;
+
+		[Serializable]
+		public enum GraphType {
+			Noise, Material, Object
+		}
 
 		[SerializeField]
-		public string Name;
+		public int Version = BonConfig.Version;
+		[SerializeField]
+		public GraphType GType { get; private set; }
 
-		private List<Node> _nodes = new List<Node>();
+		/// <summary>
+		/// Path of this graph instance if it is saved in 
+		/// a JSON file.
+		/// </summary>
+		[SerializeField]
+		public string Path;
+
+		/// <summary>
+		/// Optionally allow cyclic graph nodes.
+		/// <note type="note">WARNING: Enabling this might cause unexpected 
+		/// behaviors in Unity if the recursion has no end condition.</note>
+		/// </summary>
+		[HideInInspector]
+		[SerializeField]
+		public bool AllowCicles = false;
 
 		[HideInInspector]
 		[SerializeField]
@@ -19,19 +41,14 @@ namespace Terra.GraphEditor {
 		[HideInInspector]
 		[SerializeField]
 		private List<SerializableNode> _serializedNodes = new List<SerializableNode>();
-		[SerializeField]
-		public int Version = BonConfig.Version;
 
-		// be warned to allow circles.. if you parse the graph you can end up in
-		// an endless recursion this can crash unity.
-		[HideInInspector]
-		[SerializeField]
-		public bool AllowCicles = false;
-
+		private List<Node> _nodes = new List<Node>();
 		private bool _invalidating;
+		private bool _needsUpdate = true;
 
-		private bool _needsUpdate = true;[NonSerialized]
-		public bool TriggerEvents = true;
+		public Graph(GraphType type) {
+			GType = type;
+		}
 
 		/// <summary>Returns an id for a Node that is unique for this Graph.</summary>
 		/// <returns> An id for a Node that is unique for this Graph.</returns>
@@ -333,7 +350,6 @@ namespace Terra.GraphEditor {
 		}
 
 		// === SERIALIZATION ===
-
 		public string ToJson() {
 			return JsonUtility.ToJson(this);
 		}
@@ -343,31 +359,6 @@ namespace Terra.GraphEditor {
 			//listener.OnCreate(g);
 			EventManager.TriggerOnCreateGraph(g);
 			return g;
-		}
-
-		public static bool Save(string fileName, Graph graph) {
-			var file = File.CreateText(fileName);
-			file.Write((string)graph.ToJson());
-			file.Close();
-			return true;
-		}
-
-		public static Graph Load(string fileName) {
-			if (File.Exists(fileName)) {
-				var file = File.OpenText(fileName);
-				var json = file.ReadToEnd();
-				file.Close();
-				Graph deserializedGraph = FromJson(json);
-				if (deserializedGraph.Version != BonConfig.Version) {
-					Debug.LogWarning("You loading a graph with a different version number: " + deserializedGraph.Version +
-						" the current version is " + BonConfig.Version);
-				}
-				return deserializedGraph;
-			} else {
-				fileName = fileName == "" ? "[No File Selected]" : fileName;
-				Debug.LogWarning("Could not open the graph file: '" + fileName + "'. Make sure the noise tab has a selected graph file.");
-				return null;
-			}
 		}
 
 		public void UpdateNodes() {
@@ -386,12 +377,14 @@ namespace Terra.GraphEditor {
 
 		/// <summary>Unity serialization callback.</summary>
 		public void OnBeforeSerialize() {
-			if (_nodes.Count == 0) return; // nothing to serialize
+			if (_nodes == null || _nodes.Count == 0) 
+				return; // nothing to serialize
 			bool wasTriggering = TriggerEvents;
 			TriggerEvents = false;
 
 			_serializedEdges.Clear();
 			_serializedNodes.Clear();
+
 			// serialize data
 			foreach (var node in _nodes) {
 				_serializedNodes.Add(node.ToSerializedNode());
@@ -403,6 +396,8 @@ namespace Terra.GraphEditor {
 					}
 				}
 			}
+
+
 			TriggerEvents = wasTriggering;
 		}
 
@@ -411,6 +406,9 @@ namespace Terra.GraphEditor {
 			if (_serializedNodes.Count == 0) return;    // Nothing to deserialize.
 			bool wasTriggering = TriggerEvents;
 			TriggerEvents = false;
+
+			if (_nodes == null)
+				_nodes = new List<Node>();
 
 			_nodes.Clear(); // clear original data.
 

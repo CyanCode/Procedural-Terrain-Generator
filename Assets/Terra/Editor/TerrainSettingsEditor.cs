@@ -1,4 +1,6 @@
-﻿using Terra.Terrain;
+﻿using Assets.Terra.NodeEditor.Editor;
+using Terra.GraphEditor;
+using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -10,12 +12,14 @@ namespace UnityEditor.Terra {
 				return (TerraSettings)target;
 			}
 		}
-		private GraphManager manager;
+		private NoiseGraphManager noiseManager;
+		private MaterialGraphManager materialManager;
 		private TerraGUI gui;
 
 		void OnEnable() {
-			manager = new GraphManager(Settings);
-			Settings.Generator = manager.GetGraphGenerator();
+			noiseManager = new NoiseGraphManager(Settings);
+			materialManager = new MaterialGraphManager(Settings);
+			Settings.NoiseGenerator = noiseManager.GetGraphGenerator();
 			gui = new TerraGUI(Settings);
 		}
 
@@ -29,11 +33,11 @@ namespace UnityEditor.Terra {
 
 					break;
 				case TerraSettings.ToolbarOptions.Noise:
-					gui.Noise(manager);
+					gui.Noise(noiseManager);
 
 					break;
 				case TerraSettings.ToolbarOptions.Materials:
-					gui.Material();
+					gui.Material(materialManager);
 
 					break;
 				case TerraSettings.ToolbarOptions.ObjectPlacement:

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Terra.NodeEditor.Editor;
+using System.Collections.Generic;
 using Terra.Terrain;
 using Terra.Terrain.Util;
 using UnityEngine;
@@ -87,8 +88,19 @@ namespace UnityEditor.Terra {
 		/// <summary>
 		/// Displays GUI elements for the "Materials" tab
 		/// </summary>
-		public void Material() {
+		public void Material(MaterialGraphManager manager) {
 			EditorGUILayout.Space();
+
+			//Material editor
+			if (Settings.SelectedMaterialFile != "") {
+				//if (manager.GraphFileCanBeRead(Settings.SelectedNoiseFile))
+				//	//if (manager.HasValidEndNode()) manager.OptionGraphOpenSuccess();
+				//	//else manager.MessageNoEndNode();
+				//else
+				//	manager.OptionGraphOpenError();
+			} else {
+				manager.OptionIncorrectFileSelection();
+			}
 
 			//Use custom material instead
 			Settings.UseCustomMaterial = EditorGUILayout.Toggle("Custom Material", Settings.UseCustomMaterial);
@@ -203,11 +215,11 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Noise" tab
 		/// </summary>
 		/// <param name="manager">GraphManager instance for opening / closing graph</param>
-		public void Noise(GraphManager manager) {
+		public void Noise(NoiseGraphManager manager) {
 			EditorGUILayout.Space();
 
-			if (Settings.SelectedFile != "") {
-				if (manager.GraphFileCanBeRead(Settings.SelectedFile))
+			if (Settings.SelectedNoiseFile != "") {
+				if (manager.GraphFileCanBeRead(Settings.SelectedNoiseFile))
 					if (manager.HasValidEndNode()) manager.OptionGraphOpenSuccess();
 					else manager.MessageNoEndNode();
 				else

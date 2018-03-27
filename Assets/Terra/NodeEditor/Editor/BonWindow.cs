@@ -13,9 +13,10 @@ using Terra.GraphEditor;
 /// <summary>
 /// This class contains the logic of the editor window. It contains canvases that
 /// are containing graphs. It uses the GraphLauncher to load, save and close Graphs.
+/// Use <c>Init</c> to create a new Window.
 /// </summary>
 public class BonWindow: EditorWindow {
-	private const string Name = "Noise Editor";
+	private string Name = "Node Editor";
 	public const int TopOffset = 30;
 	public const int BottomOffset = 22;
 	public const int TopMenuHeight = 24;
@@ -38,39 +39,33 @@ public class BonWindow: EditorWindow {
 	private Dictionary<string, Type> MenuEntryToNodeType;
 
 	private Rect TmpRect = new Rect();
-	
-	static void OnCreateWindow() {
-		BonWindow window = GetWindow<BonWindow>();
-		// BonWindow window = CreateInstance<BonWindow>(); // to create a new window
-		window.Show();
-	}
-
-	public void OnEnable() {
-		Init();
-	}
 
 	public void OnDestroy() {
 		EventManager.TriggerOnCloseGraph(CurrentCanvas.Graph);
 	}
 
-	public void Init() {
-		EditorApplication.playmodeStateChanged = OnPlaymodeStateChanged;
-		// create GameObject and the Component if it is not added to the scene
+	/// <summary>
+	/// Initializes a new BonWindow with the passed GraphType
+	/// </summary>
+	/// <returns>The created BonWindow</returns>
+	public static BonWindow Init(Graph.GraphType gType) {
+		BonWindow window = GetWindow<BonWindow>();
+		EditorApplication.playmodeStateChanged = window.OnPlaymodeStateChanged;
 
-		titleContent = new GUIContent(Name);
-		wantsMouseMove = true;
+		window.titleContent = new GUIContent(window.Name);
+		window.wantsMouseMove = true;
 		EventManager.TriggerOnWindowOpen();
-		MenuEntryToNodeType = CreateMenuEntries();
-		Menu = CreateGenericMenu();
+		window.MenuEntryToNodeType = window.CreateMenuEntries();
+		window.Menu = window.CreateGenericMenu();
+		window.CurrentCanvas = null;
+		
+		window.LoadCanvas(window.GetLauncher().GetGraphOfType(gType));
+		window.UpdateGraphs();
+		window.Repaint();
 
-		CurrentCanvas = null;
+		window.SetDisplayToGraphType(gType);
 
-		//if (GetLauncher().Graphs.Count > 0) LoadCanvas(GetLauncher().Graph);
-		//else LoadCanvas(GetLauncher().LoadGraph(BonConfig.DefaultGraphName));
-
-		LoadCanvas(GetLauncher().Graph);
-		UpdateGraphs();
-		Repaint();
+		return window;
 	}
 
 	private void OnPlaymodeStateChanged() {
@@ -79,7 +74,7 @@ public class BonWindow: EditorWindow {
 	}
 
 	private void UpdateGraphs() {
-		GetLauncher().Graph.ForceUpdateNodes();
+		GetLauncher().Graphs.ForEach(g => g.ForceUpdateNodes());
 	}
 
 	private void LoadCanvas(List<Graph> graphs) {
@@ -179,10 +174,10 @@ public class BonWindow: EditorWindow {
 		}
 	}
 
-	public void CreateCanvas(string path) {
+	public void CreateCanvas(string path, Graph.GraphType graphType) {
 		BonCanvas canvas;
-		if (path != null) canvas = new BonCanvas(GetLauncher().LoadGraph(path));
-		else canvas = new BonCanvas(GetLauncher().LoadGraph(BonConfig.DefaultGraphName));
+		if (path != null) canvas = new BonCanvas(GetLauncher().LoadGraph(path, graphType));
+		else canvas = new BonCanvas(GetLauncher().LoadGraph(BonConfig.DefaultGraphName, graphType));
 		canvas.FilePath = path;
 		SetCurrentCanvas(canvas);
 	}
@@ -195,6 +190,22 @@ public class BonWindow: EditorWindow {
 		GetLauncher().SaveGraph(CurrentCanvas.Graph, path);
 		CurrentCanvas.FilePath = path;
 		EditorUtility.DisplayDialog("Graph Saved", "Graph has been successfully saved to: " + path, "Close");
+	}
+
+	private void SetDisplayToGraphType(Graph.GraphType graphType) {
+		switch (graphType) {
+			case Graph.GraphType.Noise:
+				Name = "Noise Graph";
+				break;
+			case Graph.GraphType.Material:
+				Name = "Material Graph";
+				break;
+			case Graph.GraphType.Object:
+				Name = "Object Graph";
+				break;
+		}
+
+		CurrentCanvas.SetDisplayToGraphType(graphType);
 	}
 
 	private void HandleMenuButtons() {

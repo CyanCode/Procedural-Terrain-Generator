@@ -6,32 +6,18 @@ using Terra.GraphEditor;
 using Terra.GraphEditor.Sockets;
 using Terra.GraphEditor.Nodes;
 using Terra.Terrain;
+using UnityEditor;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
 	[GraphContextMenuItem("Noise", "Billow")]
 	public class BillowNoiseNode: AbstractFractalNoiseNode {
-		[NonSerialized]
-		private Rect LabelPersistence;
-		[NonSerialized]
-		private Rect LabelOffset;
-		[NonSerialized]
-		private Rect LabelGain;
+		float Persistence = 1f;
 
-		[NonSerialized]
-		private InputSocket InputSocketPersistence;
-		[NonSerialized]
-		private InputSocket InputSocketOffset;
-		[NonSerialized]
-		private InputSocket InputSocketGain;
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
 
-		public BillowNoiseNode(int id, Graph parent) : base(id, parent) {
-			LabelPersistence = new Rect(6, 60, 90, BonConfig.SocketSize);
-			InputSocketPersistence = new InputSocket(this, typeof(AbstractNumberNode));
-			InputSocketPersistence.SetDirectInputNumber(1f, false);
-			Sockets.Add(InputSocketPersistence);
-
-			Height = 100;
+			Persistence = EditorGUILayout.FloatField("Persistence", Persistence);
 		}
 
 		public override Generator GetGenerator() {
@@ -39,15 +25,9 @@ namespace Terra.Nodes.Generation {
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;
-			noise.Persistence = AbstractNumberNode.GetInputNumber(InputSocketPersistence);
-
+			noise.Persistence = Persistence;
+			
 			return noise;
-		}
-
-		public override void OnGUI() {
-			base.OnGUI();
-
-			GUI.Label(LabelPersistence, "Persistence");
 		}
 	}
 }

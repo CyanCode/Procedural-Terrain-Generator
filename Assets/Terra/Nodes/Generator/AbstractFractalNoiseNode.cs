@@ -1,76 +1,21 @@
-﻿using System;
-using Terra.GraphEditor;
-using Terra.GraphEditor.Nodes;
-using Terra.GraphEditor.Sockets;
-using UnityEngine;
+﻿using UnityEditor;
 
 namespace Terra.Nodes.Generation {
 	public abstract class AbstractFractalNoiseNode: AbstractGeneratorNode {
-		public float Frequency {
-			get {
-				return AbstractNumberNode.GetInputNumber(InputSocketFrequency);
-			}
-		}
-		public float Lacunarity {
-			get {
-				return AbstractNumberNode.GetInputNumber(InputSocketLacunarity);
-			}
-		}
-		public int OctaveCount {
-			get {
-				return (int)AbstractNumberNode.GetInputNumber(InputSocketOctaveCount);
-			}
+		public float Frequency = 1f;
+		public float Lacunarity = 2.17f;
+		public int OctaveCount = 6;
+
+		public override void Init() {
+			base.Init();
 		}
 
-		[NonSerialized]
-		private Rect LabelFrequency;
-		[NonSerialized]
-		private Rect LabelLacunarity;
-		[NonSerialized]
-		private Rect LabelOctaveCount;
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
 
-		[NonSerialized]
-		private InputSocket InputSocketFrequency;
-		[NonSerialized]
-		private InputSocket InputSocketLacunarity;
-		[NonSerialized]
-		private InputSocket InputSocketOctaveCount;
-
-		public AbstractFractalNoiseNode(int id, Graph parent) : base(id, parent) {
-			LabelFrequency = new Rect(6, 0, 90, BonConfig.SocketSize);
-			LabelLacunarity = new Rect(6, 20, 90, BonConfig.SocketSize);
-			LabelOctaveCount = new Rect(6, 40, 90, BonConfig.SocketSize);
-
-			InputSocketFrequency = new InputSocket(this, typeof(AbstractNumberNode));
-			InputSocketLacunarity = new InputSocket(this, typeof(AbstractNumberNode));
-			InputSocketOctaveCount = new InputSocket(this, typeof(AbstractNumberNode));
-
-			InputSocketFrequency.SetDirectInputNumber(1, false);
-			InputSocketLacunarity.SetDirectInputNumber(2.17f, false);
-			InputSocketOctaveCount.SetDirectInputNumber(6, false);
-
-			Sockets.Add(InputSocketFrequency);
-			Sockets.Add(InputSocketLacunarity);
-			Sockets.Add(InputSocketOctaveCount);
+			Frequency = EditorGUILayout.FloatField("Frequency", Frequency);
+			Lacunarity = EditorGUILayout.FloatField("Lacunarity", Lacunarity);
+			OctaveCount = EditorGUILayout.IntField("Octave Count", OctaveCount);
 		}
-
-		/// <summary>
-		/// Creates GUI elements that all fractal noise nodes share:
-		/// <list type="">
-		/// <item>Frequency</item>
-		/// <item>Lacunarity</item>
-		/// <item>Octave Count</item>
-		/// The last label ends at y position 40. 60 Should be used for the next element.
-		/// </list>
-		/// </summary>
-		public override void OnGUI() {
-			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-
-			GUI.Label(LabelFrequency, "Frequency");
-			GUI.Label(LabelLacunarity, "Lacunarity");
-			GUI.Label(LabelOctaveCount, "Octave Count");
-		}
-
-		public override void Update() { }
 	}
 }

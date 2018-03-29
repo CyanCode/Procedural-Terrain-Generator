@@ -6,6 +6,7 @@ using UnityEditor;
 using UNEB.Utility;
 using System.Reflection;
 using System.Linq;
+using Assets.Terra.UNEB.Utility;
 
 namespace UNEB
 {
@@ -120,12 +121,10 @@ namespace UNEB
             Type derivedType = typeof(Node);
             Assembly assembly = Assembly.GetAssembly(derivedType);
 
-            List<Type> nodeTypes = assembly
-                .GetTypes()
-                .Where(t =>
-                    t != derivedType &&
-                    derivedType.IsAssignableFrom(t)
-                    ).ToList();
+			List<Type> nodeTypes = assembly
+				.GetTypes()
+				.Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(Node)))
+				.ToList();
 
             //Populate canvasContext with entries for all node types
             var canvasContext = new Pair<string, Action>[nodeTypes.Count];
@@ -139,7 +138,7 @@ namespace UNEB
                     _manager.RunUndoableAction<CreateNodeAction>();
                 };
 
-                string name = ObjectNames.NicifyVariableName(nodeType.Name);
+				string name = GraphContextMenuItem.GetItemMenuName(nodeType);
                 canvasContext[i] = ContextItem(name, createNode);
             }
 

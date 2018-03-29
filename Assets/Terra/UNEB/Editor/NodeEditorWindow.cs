@@ -6,6 +6,7 @@ using UnityEditor.Callbacks;
 
 using NodeEditorFramework.Utilities;
 using UNEB.Utility;
+using Terra.Nodes.Generation;
 
 namespace UNEB
 {
@@ -216,7 +217,7 @@ namespace UNEB
                 for (int x = 0; x < 10; x++) {
                     for (int y = 0; y < 10; y++) {
 
-                        var node = SaveManager.CreateNode<BasicNode>(graph);
+                        var node = SaveManager.CreateNode<PinkNoiseNode>(graph);
 
                         float xpos = x * Node.kDefaultSize.x * 1.5f;
                         float ypos = y * Node.kDefaultSize.y * 1.5f;

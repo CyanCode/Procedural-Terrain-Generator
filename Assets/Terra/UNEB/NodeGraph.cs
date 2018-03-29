@@ -26,6 +26,7 @@ namespace UNEB
         public void Add(Node n)
         {
             nodes.Add(n);
+			NodeGraphEvent.TriggerOnAddedNode(this, n);
         }
 
         /// <summary>
@@ -35,6 +36,7 @@ namespace UNEB
         public void Remove(Node node)
         {
             nodes.Remove(node);
+			NodeGraphEvent.TriggerOnNodeRemoved(this, node);
         }
 
         /// <summary>
@@ -54,4 +56,23 @@ namespace UNEB
         /// </summary>
         public virtual void OnSave() { }
     }
+
+	/// <summary>
+	/// Contains events that can be assigned as delegates 
+	/// for responding to nodes being added and removed.
+	/// </summary>
+	public static class NodeGraphEvent {
+		public delegate void NodeAction(NodeGraph graph, Node node);
+
+		public static event NodeAction OnAddedNode;
+		public static event NodeAction OnNodeRemoved;
+
+		public static void TriggerOnAddedNode(NodeGraph graph, Node node) {
+			if (OnAddedNode != null) OnAddedNode(graph, node);
+		}
+
+		public static void TriggerOnNodeRemoved(NodeGraph graph, Node node) {
+			if (OnNodeRemoved != null) OnNodeRemoved(graph, node);
+		}
+	}
 }

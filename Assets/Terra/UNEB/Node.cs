@@ -290,7 +290,7 @@ namespace UNEB
                     _headerStyle = new GUIStyle();
 
                     _headerStyle.stretchWidth = true;
-                    _headerStyle.alignment = TextAnchor.MiddleLeft;
+                    _headerStyle.alignment = TextAnchor.MiddleCenter;
                     _headerStyle.padding.left = 5;
                     _headerStyle.normal.textColor = Color.white * 0.9f;
                     _headerStyle.fixedHeight = kHeaderHeight;

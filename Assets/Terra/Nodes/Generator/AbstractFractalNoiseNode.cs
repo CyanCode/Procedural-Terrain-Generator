@@ -8,6 +8,8 @@ namespace Terra.Nodes.Generation {
 
 		public override void Init() {
 			base.Init();
+
+			bodyRect.height += 50;
 		}
 
 		public override void OnBodyGUI() {

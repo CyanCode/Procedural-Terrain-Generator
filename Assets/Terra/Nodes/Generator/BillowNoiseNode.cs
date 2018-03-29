@@ -1,18 +1,21 @@
-﻿using UnityEngine;
-using Terra.CoherentNoise;
+﻿using Terra.CoherentNoise;
 using System;
 using Terra.CoherentNoise.Generation.Fractal;
-using Terra.GraphEditor;
-using Terra.GraphEditor.Sockets;
-using Terra.GraphEditor.Nodes;
 using Terra.Terrain;
 using UnityEditor;
+using Assets.Terra.UNEB.Utility;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
 	[GraphContextMenuItem("Noise", "Billow")]
 	public class BillowNoiseNode: AbstractFractalNoiseNode {
 		float Persistence = 1f;
+
+		public override void Init() {
+			base.Init();
+
+			bodyRect.height += 10;
+		}
 
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
@@ -28,6 +31,10 @@ namespace Terra.Nodes.Generation {
 			noise.Persistence = Persistence;
 			
 			return noise;
+		}
+
+		public override string GetName() {
+			return "Billow Noise";
 		}
 	}
 }

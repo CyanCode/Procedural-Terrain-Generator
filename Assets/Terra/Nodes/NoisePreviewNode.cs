@@ -1,67 +1,56 @@
-﻿using Terra.CoherentNoise;
-using Terra.CoherentNoise.Texturing;
+﻿using Terra.CoherentNoise.Texturing;
 using System;
-using Terra.GraphEditor;
-using Terra.GraphEditor.Sockets;
 using Terra.Nodes.Generation;
 using UnityEngine;
+using UNEB;
+using Assets.Terra.UNEB.Utility;
 
 namespace Terra.Nodes {
 	[Serializable]
 	[GraphContextMenuItem("", "Preview")]
 	public class NoisePreviewNode: Node {
-		[NonSerialized]
-		private Rect LabelGenerator;
-		[NonSerialized]
-		private InputSocket InputSocketGenerator;
-		[NonSerialized]
-		private bool TextureNeedsUpdating;
-		[NonSerialized]
+		public bool TextureNeedsUpdating;
+		
 		private Texture Texture;
+		private NodeInput InputGenerator;
 
-		public NoisePreviewNode(int id, Graph parent) : base(id, parent) {
-			LabelGenerator = new Rect(6, 100, 90, BonConfig.SocketSize);
-			InputSocketGenerator = new InputSocket(this, typeof(AbstractGeneratorNode));
-
-			Height = 140;
-			SocketTopOffsetInput = 100;
-
-			Sockets.Add(InputSocketGenerator);
-			EventManager.OnChangedNode += NodeUpdated;
-			EventManager.OnAddedNode += NodeUpdated;
-			EventManager.OnLinkEdge += NodeUpdated;
-			EventManager.OnFocusGraph += GraphFocused;
+		private float startHeight = 0f;
+		private float heightExpanded {
+			get {
+				return startHeight + 82f;
+			}
+		}
+		private float heightContracted {
+			get {
+				return startHeight;
+			}
 		}
 
-		public override void OnGUI() {
+		public override void Init() {
+			base.Init();
+
+			InputGenerator = AddInput("Generator");
+			FitKnobs();
+
+			name = "Preview";
+			startHeight = bodyRect.height;
+			bodyRect.width -= 38f;
+		}
+
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
+
 			if (TextureNeedsUpdating) {
 				Texture = GetNoiseTexture();
 				TextureNeedsUpdating = false;
 			}
 
-			if (Texture != null)
-				GUI.DrawTexture(new Rect(6, 0, 88, 88), Texture);
-
-			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-			GUI.Label(LabelGenerator, "Generator");
-		}
-
-		public override void Update() {
-
-		}
-
-		private void NodeUpdated(Graph graph, Node node) {
-			if (InputSocketGenerator.CanGetResult()) {
-				TextureNeedsUpdating = true;
+			if (Texture != null) {
+				GUI.DrawTexture(new Rect(6, kHeaderHeight + 6, 90, 90), Texture);
+				bodyRect.height = heightExpanded;
+			} else {
+				bodyRect.height = heightContracted;
 			}
-		}
-
-		private void NodeUpdated(Graph graph, Edge edge) {
-			NodeUpdated(graph, (Node)null);
-		}
-
-		private void GraphFocused(Graph graph) {
-			NodeUpdated(graph, (Node)null);
 		}
 
 		/// <summary>
@@ -70,12 +59,15 @@ namespace Terra.Nodes {
 		/// <returns>If an error occured while retrieving the generator, 
 		/// null is returned. Otherwise the Texture is returned.</returns>
 		private Texture GetNoiseTexture() {
-			Generator noise = AbstractGeneratorNode.GetInputGenerator(InputSocketGenerator);
+			if (!InputGenerator.HasOutputConnected()) {
+				return null;
+			}
 
-			if (noise == null) {
+			AbstractGeneratorNode genNode = (AbstractGeneratorNode) InputGenerator.GetOutput(0).ParentNode;
+			if (genNode == null || genNode.GetGenerator() == null) {
 				return null;
 			} else {
-				Texture PreviewTexture = TextureMaker.MonochromeTexture(100, 100, noise);
+				Texture PreviewTexture = TextureMaker.MonochromeTexture(100, 100, genNode.GetGenerator());
 				return PreviewTexture;
 			}
 		}

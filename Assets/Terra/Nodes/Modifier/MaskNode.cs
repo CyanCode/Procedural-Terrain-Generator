@@ -1,37 +1,33 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
 using System;
-using Terra.GraphEditor;
-using Terra.GraphEditor.Sockets;
 using Terra.Nodes.Generation;
-using UnityEngine;
+using UNEB;
+using Assets.Terra.UNEB.Utility;
 
 namespace Terra.Nodes.Modifier {
 	[Serializable]
 	[GraphContextMenuItem("Modifier", "Mask")]
 	public class MaskNode: AbstractTwoModNode {
-		[NonSerialized]
-		private Rect LabelMaskGenerator;
-		[NonSerialized]
-		private InputSocket InputSocketMaskGenerator;
+		private NodeInput InputMaskGenerator;	
 
-		public MaskNode(int id, Graph parent) : base(id, parent) {
-			LabelMaskGenerator = new Rect(6, 40, 90, BonConfig.SocketSize);
-			InputSocketMaskGenerator = new InputSocket(this, typeof(AbstractGeneratorNode));
-			Sockets.Add(InputSocketMaskGenerator);
+		public override void Init() {
+			base.Init();
 
-			Height = 80;
+			InputMaskGenerator = AddInput("Mask");
+			FitKnobs();
+
+			bodyRect.height += 5f;
 		}
 
 		public override Generator GetGenerator() {
-			Generator BlendGenerator = GetInputGenerator(InputSocketMaskGenerator);
+			Generator BlendGenerator = InputMaskGenerator.GetValue<AbstractGeneratorNode>().GetGenerator();
 			return BlendGenerator == null || Generator1 == null || Generator2 == null ?
 				null : new Blend(Generator1, Generator2, BlendGenerator);
 		}
 
-		public override void OnGUI() {
-			base.OnGUI();
-			GUI.Label(LabelMaskGenerator, "Mask");
+		public override string GetName() {
+			return "Mask";
 		}
 	}
 }

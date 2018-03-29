@@ -1,29 +1,20 @@
-﻿using UnityEngine;
-using Terra.CoherentNoise;
+﻿using Terra.CoherentNoise;
 using System;
 using Terra.CoherentNoise.Generation.Fractal;
-using Terra.GraphEditor;
-using Terra.GraphEditor.Sockets;
-using Terra.GraphEditor.Nodes;
 using Terra.Terrain;
+using UnityEditor;
+using Assets.Terra.UNEB.Utility;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
 	[GraphContextMenuItem("Noise", "Pink")]
 	public class PinkNoiseNode: AbstractFractalNoiseNode {
-		[NonSerialized]
-		private Rect LabelPersistence;
+		float Persistence = 1f;
 
-		[NonSerialized]
-		private InputSocket InputSocketPersistence;
+		public override void Init() {
+			base.Init();
 
-		public PinkNoiseNode(int id, Graph parent) : base(id, parent) {
-			LabelPersistence = new Rect(6, 60, 90, BonConfig.SocketSize);
-			InputSocketPersistence = new InputSocket(this, typeof(AbstractNumberNode));
-			InputSocketPersistence.SetDirectInputNumber(1f, false);
-			Sockets.Add(InputSocketPersistence);
-
-			Height = 100;
+			bodyRect.height += 10;
 		}
 
 		public override Generator GetGenerator() {
@@ -31,15 +22,19 @@ namespace Terra.Nodes.Generation {
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;
-			noise.Persistence = AbstractNumberNode.GetInputNumber(InputSocketPersistence);
+			noise.Persistence = Persistence;
 
 			return noise;
 		}
 
-		public override void OnGUI() {
-			base.OnGUI();
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
 
-			GUI.Label(LabelPersistence, "Persistence");
+			Persistence = EditorGUILayout.FloatField("Persistence", Persistence);
+		}
+
+		public override string GetName() {
+			return "Pink Noise";
 		}
 	}
 }

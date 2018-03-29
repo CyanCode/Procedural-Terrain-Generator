@@ -1,69 +1,47 @@
-﻿using UnityEngine;
-using Terra.CoherentNoise;
+﻿using Terra.CoherentNoise;
 using System;
 using Terra.CoherentNoise.Generation.Fractal;
-using Terra.GraphEditor.Sockets;
-using Terra.GraphEditor;
-using Terra.GraphEditor.Nodes;
 using Terra.Terrain;
+using UnityEditor;
+using Assets.Terra.UNEB.Utility;
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
 	[GraphContextMenuItem("Noise", "Ridge")]
 	public class RidgeNoiseNode: AbstractFractalNoiseNode {
-		[NonSerialized]
-		private Rect LabelExponent;
-		[NonSerialized]
-		private Rect LabelOffset;
-		[NonSerialized]
-		private Rect LabelGain;
+		float Exponent = 1f;
+		float Offset = 1f;
+		float Gain = 2f;
 
-		[NonSerialized]
-		private InputSocket InputSocketExponent;
-		[NonSerialized]
-		private InputSocket InputSocketOffset;
-		[NonSerialized]
-		private InputSocket InputSocketGain;
+		public override void Init() {
+			base.Init();
 
-		public RidgeNoiseNode(int id, Graph parent) : base(id, parent) {
-			LabelExponent = new Rect(6, 60, 90, BonConfig.SocketSize);
-			LabelOffset = new Rect(6, 80, 90, BonConfig.SocketSize);
-			LabelGain = new Rect(6, 100, 90, BonConfig.SocketSize);
-
-			InputSocketExponent = new InputSocket(this, typeof(AbstractNumberNode));
-			InputSocketOffset = new InputSocket(this, typeof(AbstractNumberNode));
-			InputSocketGain = new InputSocket(this, typeof(AbstractNumberNode));
-
-			InputSocketExponent.SetDirectInputNumber(1f, false);
-			InputSocketOffset.SetDirectInputNumber(1f, false);
-			InputSocketGain.SetDirectInputNumber(2f, false);
-
-			Sockets.Add(InputSocketExponent);
-			Sockets.Add(InputSocketOffset);
-			Sockets.Add(InputSocketGain);
-
-			Height = 140;
+			bodyRect.height += 50;
 		}
-
+		
 		public override Generator GetGenerator() {
 			RidgeNoise noise = new RidgeNoise(TerraSettings.GenerationSeed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;
 
-			noise.Exponent = AbstractNumberNode.GetInputNumber(InputSocketExponent);
-			noise.Offset = AbstractNumberNode.GetInputNumber(InputSocketOffset);
-			noise.Gain = AbstractNumberNode.GetInputNumber(InputSocketGain);
+			noise.Exponent = Exponent;
+			noise.Offset = Offset;
+			noise.Gain = Gain;
 
 			return noise;
 		}
 
-		public override void OnGUI() {
-			base.OnGUI();
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
 
-			GUI.Label(LabelExponent, "Exponent");
-			GUI.Label(LabelOffset, "Offset");
-			GUI.Label(LabelGain, "Gain");
+			Exponent = EditorGUILayout.FloatField("Exponent", Exponent);
+			Offset = EditorGUILayout.FloatField("Offset", Offset);
+			Gain = EditorGUILayout.FloatField("Gain", Gain);
+		}
+
+		public override string GetName() {
+			return "Ridge Noise";
 		}
 	}
 }

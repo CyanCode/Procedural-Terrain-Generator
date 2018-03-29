@@ -11,10 +11,33 @@ namespace Terra.Nodes.Generation {
 			AddOutput("Output");
 			FitKnobs();
 
+			name = GetName();
 			bodyRect.height += 20f;
 		}
 
+		public override void OnNewInputConnection(NodeInput addedInput) {
+			base.OnNewInputConnection(addedInput);
+
+			NoisePreviewNode preview = (NoisePreviewNode) addedInput.ParentNode;
+			if (preview != null) {
+				preview.TextureNeedsUpdating = true;
+			}
+		}
+
+		/// <summary>
+		/// Get the generator associated with this node. Is 
+		/// Used to compute the final generator passed to the end 
+		/// node and preview nodes.
+		/// </summary>
+		/// <returns>Generator</returns>
 		public abstract Generator GetGenerator();
+
+		/// <summary>
+		/// Get the name of this node. Will be displayed in the header 
+		/// section of the node in the graph editor.
+		/// </summary>
+		/// <returns>Name</returns>
+		public abstract string GetName();
 
 		//[NonSerialized]
 		//protected OutputSocket OutSocket;

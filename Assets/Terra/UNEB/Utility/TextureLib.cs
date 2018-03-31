@@ -1,10 +1,11 @@
 ﻿
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace UNEB.Utility
 {
@@ -31,6 +32,7 @@ namespace UNEB.Utility
 
         public static void LoadTexture(string name, TexType type = TexType.PNG)
         {
+			#if UNITY_EDITOR
             string ext = GetTexTypeExtension(type);
             string filename = name.Ext(ext);
             string path = GetTextureFolderPath().Dir(filename);
@@ -44,6 +46,7 @@ namespace UNEB.Utility
             else {
                 Debug.LogError("The texture: " + path + " could not be found.");
             }
+			#endif
         }
 
         public static string GetTexTypeExtension(TexType type)
@@ -111,8 +114,7 @@ namespace UNEB.Utility
         {
             int pixCount = tex.width * tex.height;
 
-            var tintedTex = new Texture2D(tex.width, tex.height);
-            tintedTex.alphaIsTransparency = true;
+            var tintedTex = new Texture2D(tex.width, tex.height, TextureFormat.Alpha8, true);
 
             var newPixels = new Color[pixCount];
             var pixels = tex.GetPixels();

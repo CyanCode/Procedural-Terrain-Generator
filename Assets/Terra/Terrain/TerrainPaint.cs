@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Linq;
 using System;
-using UnityEditor;
 using System.Collections.Generic;
 
 namespace Terra.Terrain {

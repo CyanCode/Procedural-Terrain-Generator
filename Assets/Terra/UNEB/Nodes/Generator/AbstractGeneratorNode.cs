@@ -31,13 +31,6 @@ namespace Terra.Nodes.Generation {
 		/// <returns>Generator</returns>
 		public abstract Generator GetGenerator();
 
-		/// <summary>
-		/// Get the name of this node. Will be displayed in the header 
-		/// section of the node in the graph editor.
-		/// </summary>
-		/// <returns>Name</returns>
-		public abstract string GetName();
-
 		//[NonSerialized]
 		//protected OutputSocket OutSocket;
 		//[NonSerialized]

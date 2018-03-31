@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Terra.Nodes.Generation {
 	public abstract class AbstractFractalNoiseNode: AbstractGeneratorNode {
@@ -12,6 +14,7 @@ namespace Terra.Nodes.Generation {
 			bodyRect.height += 50;
 		}
 
+		#if UNITY_EDITOR
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
@@ -19,5 +22,6 @@ namespace Terra.Nodes.Generation {
 			Lacunarity = EditorGUILayout.FloatField("Lacunarity", Lacunarity);
 			OctaveCount = EditorGUILayout.IntField("Octave Count", OctaveCount);
 		}
+		#endif
 	}
 }

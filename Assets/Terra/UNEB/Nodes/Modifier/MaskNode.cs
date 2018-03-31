@@ -4,11 +4,13 @@ using System;
 using Terra.Nodes.Generation;
 using UNEB;
 using Assets.Terra.UNEB.Utility;
+using UnityEngine;
 
 namespace Terra.Nodes.Modifier {
 	[Serializable]
 	[GraphContextMenuItem("Modifier", "Mask")]
 	public class MaskNode: AbstractTwoModNode {
+		[SerializeField]
 		private NodeInput InputMaskGenerator;	
 
 		public override void Init() {
@@ -21,11 +23,12 @@ namespace Terra.Nodes.Modifier {
 		}
 
 		public override Generator GetGenerator() {
-			if (InputMaskGenerator == null || !InputMaskGenerator.HasOutputConnected()) {
+			if (InputMaskGenerator == null || !InputMaskGenerator.HasOutputConnected() || 
+				!(InputMaskGenerator.GetOutput(0).ParentNode is AbstractGeneratorNode)) {
 				return null;
 			}
 
-			Generator BlendGenerator = (InputMaskGenerator.GetOutput(0).GetValue<AbstractGeneratorNode>()).GetGenerator();
+			Generator BlendGenerator = (InputMaskGenerator.GetOutput(0).ParentNode as AbstractGeneratorNode).GetGenerator();
 			return BlendGenerator == null || Generator1 == null || Generator2 == null ?
 				null : new Blend(Generator1, Generator2, BlendGenerator);
 		}
@@ -35,3 +38,4 @@ namespace Terra.Nodes.Modifier {
 		}
 	}
 }
+ 

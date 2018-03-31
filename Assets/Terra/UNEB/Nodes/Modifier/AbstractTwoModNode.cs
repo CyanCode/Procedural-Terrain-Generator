@@ -1,31 +1,34 @@
 ﻿using Terra.CoherentNoise;
 using Terra.Nodes.Generation;
 using UNEB;
+using UnityEngine;
 
 namespace Terra.Nodes.Modifier {
 	public abstract class AbstractTwoModNode: AbstractGeneratorNode {
 		public Generator Generator1 {
 			get {
-				if (!(InputGen1.ParentNode is AbstractGeneratorNode)) {
+				if (InputGen1 == null || !InputGen1.HasOutputConnected() ||
+				!(InputGen1.GetOutput(0).ParentNode is AbstractGeneratorNode)) {
 					return null;
 				}
 
-				Generator g = (InputGen1.ParentNode as AbstractGeneratorNode).GetGenerator();
-				return g == null ? null : g;
+				return (InputGen1.GetOutput(0).ParentNode as AbstractGeneratorNode).GetGenerator();
 			}
 		}
 		public Generator Generator2 {
 			get {
-				if (!(InputGen2.ParentNode is AbstractGeneratorNode)) {
+				if (InputGen2 == null || !InputGen2.HasOutputConnected() ||
+				!(InputGen2.GetOutput(0).ParentNode is AbstractGeneratorNode)) {
 					return null;
 				}
 
-				Generator g = (InputGen2.ParentNode as AbstractGeneratorNode).GetGenerator();
-				return g == null ? null : g;
+				return (InputGen2.GetOutput(0).ParentNode as AbstractGeneratorNode).GetGenerator();
 			}
 		}
 
+		[SerializeField]
 		private NodeInput InputGen1;
+		[SerializeField]
 		private NodeInput InputGen2;
 
 		public override void Init() {

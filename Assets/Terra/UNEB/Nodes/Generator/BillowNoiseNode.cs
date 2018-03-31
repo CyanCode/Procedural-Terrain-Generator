@@ -2,8 +2,11 @@
 using System;
 using Terra.CoherentNoise.Generation.Fractal;
 using Terra.Terrain;
-using UnityEditor;
 using Assets.Terra.UNEB.Utility;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
@@ -15,12 +18,6 @@ namespace Terra.Nodes.Generation {
 			base.Init();
 
 			bodyRect.height += 10;
-		}
-
-		public override void OnBodyGUI() {
-			base.OnBodyGUI();
-
-			Persistence = EditorGUILayout.FloatField("Persistence", Persistence);
 		}
 
 		public override Generator GetGenerator() {
@@ -36,5 +33,13 @@ namespace Terra.Nodes.Generation {
 		public override string GetName() {
 			return "Billow Noise";
 		}
+
+#if UNITY_EDITOR
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
+
+			Persistence = EditorGUILayout.FloatField("Persistence", Persistence);
+		}
+		#endif
 	}
 }

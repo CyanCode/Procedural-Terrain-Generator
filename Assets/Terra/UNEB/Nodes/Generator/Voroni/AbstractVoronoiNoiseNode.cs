@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Terra.Nodes.Generation {
 	public abstract class AbstractVoronoiNoiseNode: AbstractGeneratorNode {
@@ -11,11 +13,13 @@ namespace Terra.Nodes.Generation {
 			bodyRect.height += 30f;
 		}
 
+#if UNITY_EDITOR
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
 			Frequency = EditorGUILayout.FloatField("Frequency", Frequency);
 			Period = EditorGUILayout.FloatField("Period", Period);
 		}
+#endif
 	}
 }

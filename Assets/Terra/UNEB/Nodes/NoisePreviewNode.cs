@@ -12,6 +12,7 @@ namespace Terra.Nodes {
 		public bool TextureNeedsUpdating;
 		
 		private Texture Texture;
+		[SerializeField]
 		private NodeInput InputGenerator;
 
 		private float startHeight = 0f;
@@ -26,6 +27,10 @@ namespace Terra.Nodes {
 			}
 		}
 
+		public override string GetName() {
+			return "Preview";
+		}
+
 		public override void Init() {
 			base.Init();
 
@@ -35,6 +40,8 @@ namespace Terra.Nodes {
 			name = "Preview";
 			startHeight = bodyRect.height;
 			bodyRect.width -= 38f;
+
+			NodeGraphEvent.OnNodeChanged += OnGraphUpdate;
 		}
 
 		public override void OnBodyGUI() {
@@ -51,6 +58,10 @@ namespace Terra.Nodes {
 			} else {
 				bodyRect.height = heightContracted;
 			}
+		}
+
+		private void OnGraphUpdate(Node n) {
+			TextureNeedsUpdating = true;
 		}
 
 		/// <summary>

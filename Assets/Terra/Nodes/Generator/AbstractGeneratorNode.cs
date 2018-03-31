@@ -8,7 +8,7 @@ namespace Terra.Nodes.Generation {
 		public override void Init() {
 			base.Init();
 
-			AddOutput("Output");
+			AddOutput("Output", true);
 			FitKnobs();
 
 			name = GetName();
@@ -17,10 +17,9 @@ namespace Terra.Nodes.Generation {
 
 		public override void OnNewInputConnection(NodeInput addedInput) {
 			base.OnNewInputConnection(addedInput);
-
-			NoisePreviewNode preview = (NoisePreviewNode) addedInput.ParentNode;
-			if (preview != null) {
-				preview.TextureNeedsUpdating = true;
+			
+			if (addedInput.ParentNode != null && addedInput.ParentNode is NoisePreviewNode) {
+				((NoisePreviewNode) addedInput.ParentNode).TextureNeedsUpdating = true;
 			}
 		}
 

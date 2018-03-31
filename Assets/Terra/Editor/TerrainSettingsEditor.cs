@@ -1,4 +1,5 @@
-﻿using Terra.Terrain;
+﻿using Assets.Terra.Nodes;
+using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -15,7 +16,7 @@ namespace UnityEditor.Terra {
 
 		void OnEnable() {
 			manager = new GraphManager(Settings);
-			Settings.Generator = manager.GetGraphGenerator();
+			//Settings.Generator = manager.GetGraphGenerator();
 			gui = new TerraGUI(Settings);
 		}
 

@@ -22,7 +22,7 @@ namespace UNEB
         /// Add a node to the graph.
         /// It is recommended that the save manager adds the nodes.
         /// </summary>
-        /// <param name="n"></param>
+        /// <param name="n">node to add</param>
         public void Add(Node n)
         {
             nodes.Add(n);
@@ -32,7 +32,7 @@ namespace UNEB
         /// <summary>
         /// Removes a node from the graph but it is not destroyed.
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="node">node to remove</param>
         public void Remove(Node node)
         {
             nodes.Remove(node);

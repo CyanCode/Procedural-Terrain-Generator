@@ -6,14 +6,22 @@ namespace Terra.Nodes.Modifier {
 	public abstract class AbstractTwoModNode: AbstractGeneratorNode {
 		public Generator Generator1 {
 			get {
-				AbstractGeneratorNode g = InputGen1.GetValue<AbstractGeneratorNode>();
-				return g == null ? null : g.GetGenerator();
+				if (!(InputGen1.ParentNode is AbstractGeneratorNode)) {
+					return null;
+				}
+
+				Generator g = (InputGen1.ParentNode as AbstractGeneratorNode).GetGenerator();
+				return g == null ? null : g;
 			}
 		}
 		public Generator Generator2 {
 			get {
-				AbstractGeneratorNode g = InputGen2.GetValue<AbstractGeneratorNode>();
-				return g == null ? null : g.GetGenerator();
+				if (!(InputGen2.ParentNode is AbstractGeneratorNode)) {
+					return null;
+				}
+
+				Generator g = (InputGen2.ParentNode as AbstractGeneratorNode).GetGenerator();
+				return g == null ? null : g;
 			}
 		}
 

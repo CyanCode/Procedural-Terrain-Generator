@@ -1,8 +1,9 @@
 ﻿using Terra.CoherentNoise;
 using System.Collections.Generic;
-using Terra.GraphEditor;
 using UnityEngine;
 using UnityEditor;
+using UNEB;
+using Assets.Terra.Nodes;
 
 namespace Terra.Terrain {
 	[System.Serializable]
@@ -16,7 +17,6 @@ namespace Terra.Terrain {
 			//ObjectPlacement = 3
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
-		public GraphLauncher Launcher;
 
 		//General Tab
 		public GameObject TrackedObject;
@@ -33,7 +33,7 @@ namespace Terra.Terrain {
 
 		//Noise Tab
 		public string SelectedFile = "";
-		public Graph LoadedGraph = null;
+		public NodeGraph LoadedGraph = null;
 		public Generator Generator;
 		public float Spread = 100f;
 		public float Amplitude = 50f;
@@ -53,7 +53,7 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// TerrainPreview instance attached to this TerraSettings instance. Instantiated in 
-		/// <code>Start</code> and handles previewing of the generated terrain.
+		/// <code>Awake</code> and handles previewing of the generated terrain.
 		/// </summary>
 		public TerrainPreview Preview;
 
@@ -90,11 +90,12 @@ namespace Terra.Terrain {
 				else
 					GenerationSeed = new System.Random().Next(0, System.Int32.MaxValue);
 
-				Launcher = new GraphLauncher();
-				Launcher.LoadGraph(SelectedFile);
-				Launcher.Enable();
 
-				Generator = Launcher.GetGraphGenerator();
+				//Launcher = new GraphLauncher();
+				//Launcher.LoadGraph(SelectedFile);
+				//Launcher.Enable();
+
+				//Generator = Launcher.GetGraphGenerator();
 			}
 			
 			//Handle previewing

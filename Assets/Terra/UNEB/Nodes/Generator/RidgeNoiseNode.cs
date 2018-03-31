@@ -2,8 +2,11 @@
 using System;
 using Terra.CoherentNoise.Generation.Fractal;
 using Terra.Terrain;
-using UnityEditor;
 using Assets.Terra.UNEB.Utility;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Terra.Nodes.Generation {
 	[Serializable]
@@ -32,6 +35,11 @@ namespace Terra.Nodes.Generation {
 			return noise;
 		}
 
+		public override string GetName() {
+			return "Ridge Noise";
+		}
+
+#if UNITY_EDITOR
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
@@ -39,9 +47,6 @@ namespace Terra.Nodes.Generation {
 			Offset = EditorGUILayout.FloatField("Offset", Offset);
 			Gain = EditorGUILayout.FloatField("Gain", Gain);
 		}
-
-		public override string GetName() {
-			return "Ridge Noise";
-		}
+#endif
 	}
 }

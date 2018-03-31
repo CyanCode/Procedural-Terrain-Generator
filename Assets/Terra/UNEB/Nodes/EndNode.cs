@@ -1,14 +1,19 @@
 ﻿using Terra.CoherentNoise;
 using System;
 using Terra.Nodes.Generation;
-using UnityEditor;
 using Assets.Terra.UNEB.Utility;
 using UNEB;
+using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Terra.Nodes {
 	[Serializable]
 	[GraphContextMenuItem("Noise", "End")]
 	public class EndNode: Node {
+		[SerializeField]
 		private NodeInput InputGenerator;
 
 		public override void Init() {
@@ -17,7 +22,9 @@ namespace Terra.Nodes {
 			InputGenerator = AddInput("Generator");
 			FitKnobs();
 
+			#if UNITY_EDITOR
 			NodeGraphEvent.OnAddedNode += NodeAdded;
+			#endif
 		}
 
 		/// <summary>
@@ -34,6 +41,11 @@ namespace Terra.Nodes {
 			return null;
 		}
 
+		public override string GetName() {
+			return "End";
+		}
+
+#if UNITY_EDITOR
 		public void NodeAdded(NodeGraph graph, Node node) {
 			if (!(node is EndNode))
 				return;
@@ -52,5 +64,6 @@ namespace Terra.Nodes {
 				EditorUtility.DisplayDialog("End Node", "There can only be one End node in the graph at a time", "Okay");
 			}
 		}
+#endif
 	}
 }

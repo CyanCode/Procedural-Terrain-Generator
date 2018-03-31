@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Terra.GraphEditor;
 using UnityEngine;
-using UnityEditor;
 
 namespace Terra.Terrain {
 	[System.Serializable]
@@ -69,15 +68,19 @@ namespace Terra.Terrain {
 				mtd.AddComponent<MTDispatch>();
 				mtd.transform.parent = transform;
 			}
-			
-			//Cleanup preview from edit mode
-			if (EditorApplication.isPlayingOrWillChangePlaymode) {
-				if (GetComponent<MeshRenderer>() != null) Destroy(GetComponent<MeshRenderer>());
-				if (GetComponent<MeshFilter>() != null) Destroy(GetComponent<MeshFilter>());
-			}
 
+#if UNITY_EDITOR
+			//Cleanup preview from edit mode
+			if (GetComponent<MeshRenderer>() != null) Destroy(GetComponent<MeshRenderer>());
+			if (GetComponent<MeshFilter>() != null) Destroy(GetComponent<MeshFilter>());
+
+			//Handle previewing
+			if (DisplayPreview && Generator != null) {
+				Preview.TriggerPreviewUpdate();
+			}
+#else
 			//Setup object tracking and generator reading
-			if (EditorApplication.isPlaying && GenerateOnStart) {
+			if (GenerateOnStart) {
 				//Set default tracked object
 				if (TrackedObject == null) {
 					TrackedObject = new GameObject("Default Tracked Position");
@@ -96,20 +99,23 @@ namespace Terra.Terrain {
 
 				Generator = Launcher.GetGraphGenerator();
 			}
-			
-			//Handle previewing
-			if (!EditorApplication.isPlaying && DisplayPreview && Generator != null) {
-				Preview.TriggerPreviewUpdate();
-			}
+#endif
+
+
 		}
 
 		void Update() {
-			if (EditorApplication.isPlaying && Pool != null && GenerateOnStart) 
+#if UNITY_EDITOR
+			if (Pool != null && GenerateOnStart) {
 				Pool.Update();
-			if (!EditorApplication.isPlaying && Preview == null)
+			}
+#else
+			if (Preview == null) {
 				Preview = new TerrainPreview(this);
+			}
+#endif
 		}
-		
+
 		void OnDrawGizmosSelected() {
 			//On general tab selected: display mesh radius squares and collider radius
 			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);

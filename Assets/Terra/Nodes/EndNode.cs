@@ -3,8 +3,11 @@ using System;
 using Terra.GraphEditor;
 using Terra.GraphEditor.Sockets;
 using Terra.Nodes.Generation;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Terra.Nodes {
 	[Serializable]
@@ -38,6 +41,7 @@ namespace Terra.Nodes {
 			return gen;
 		}
 
+		#if UNITY_EDITOR
 		public void NodeAdded(Graph graph, Node node) {
 			if (!(node is EndNode))
 				return;
@@ -56,5 +60,6 @@ namespace Terra.Nodes {
 				EditorUtility.DisplayDialog("End Node", "There can only be one End node in the graph at a time", "Okay");
 			}
 		}
+		#endif
 	}
 }

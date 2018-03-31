@@ -1,13 +1,10 @@
 ﻿using Terra.CoherentNoise;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-using UNEB;
 using Assets.Terra.Nodes;
 
 namespace Terra.Terrain {
-	[System.Serializable]
-	[ExecuteInEditMode]
+	[System.Serializable, ExecuteInEditMode]
 	public class TerraSettings: MonoBehaviour {
 		[System.Serializable]
 		public enum ToolbarOptions {
@@ -32,9 +29,6 @@ namespace Terra.Terrain {
 		public bool UseMultithreading = true;
 
 		//Noise Tab
-		public string SelectedFile = "";
-		public NodeGraph LoadedGraph = null;
-		public Generator Generator;
 		public float Spread = 100f;
 		public float Amplitude = 50f;
 
@@ -44,6 +38,9 @@ namespace Terra.Terrain {
 		public bool IsMinHeightSelected = false;
 		public bool UseCustomMaterial = false;
 		public Material CustomMaterial = null;
+
+		//Editor mode specific
+		public GraphManager Manager;
 
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated
@@ -63,54 +60,32 @@ namespace Terra.Terrain {
 		}
 
 		void Start() {
-			//Create MT Dispatch if not already there
-			if (FindObjectOfType<MTDispatch>() == null) {
-				GameObject mtd = new GameObject("Main Thread Dispatch");
-				mtd.AddComponent<MTDispatch>();
-				mtd.transform.parent = transform;
-			}
-			
-			//Cleanup preview from edit mode
-			if (EditorApplication.isPlayingOrWillChangePlaymode) {
-				if (GetComponent<MeshRenderer>() != null) Destroy(GetComponent<MeshRenderer>());
-				if (GetComponent<MeshFilter>() != null) Destroy(GetComponent<MeshFilter>());
-			}
+			CreateMTD();
 
-			//Setup object tracking and generator reading
-			if (EditorApplication.isPlaying && GenerateOnStart) {
-				//Set default tracked object
-				if (TrackedObject == null) {
-					TrackedObject = new GameObject("Default Tracked Position");
-					TrackedObject.transform.position = Vector3.zero;
+#if UNITY_EDITOR
+			if (!Application.isPlaying && Application.isEditor) {
+				//Handle Previewing
+				if (DisplayPreview && Manager.GetEndGenerator() != null && Preview != null) {
+					Preview.TriggerPreviewUpdate();
 				}
-
-				//Set seed for RNG
-				if (!UseRandomSeed)
-					Random.InitState(GenerationSeed);
-				else
-					GenerationSeed = new System.Random().Next(0, System.Int32.MaxValue);
-
-
-				//Launcher = new GraphLauncher();
-				//Launcher.LoadGraph(SelectedFile);
-				//Launcher.Enable();
-
-				//Generator = Launcher.GetGraphGenerator();
 			}
-			
-			//Handle previewing
-			if (!EditorApplication.isPlaying && DisplayPreview && Generator != null) {
-				Preview.TriggerPreviewUpdate();
+#endif
+			if (GenerateOnStart) {
+				Generate();
 			}
 		}
 
 		void Update() {
-			if (EditorApplication.isPlaying && Pool != null && GenerateOnStart) 
-				Pool.Update();
-			if (!EditorApplication.isPlaying && Preview == null)
+#if UNITY_EDITOR
+			if (Application.isEditor && !Application.isPlaying && Preview == null) {
 				Preview = new TerrainPreview(this);
+			}
+#endif
+			if (Application.isPlaying && Pool != null && GenerateOnStart) {
+				Pool.Update();
+			}
 		}
-		
+
 		void OnDrawGizmosSelected() {
 			//On general tab selected: display mesh radius squares and collider radius
 			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
@@ -131,6 +106,44 @@ namespace Terra.Terrain {
 				Gizmos.color = Color.blue;
 				Gizmos.DrawWireCube(extPos, new Vector3(ColliderGenerationExtent, 0, ColliderGenerationExtent));
 			}
+		}
+
+		void CreateMTD() {
+			//Create MT Dispatch if not already there
+			if (FindObjectOfType<MTDispatch>() == null) {
+				GameObject mtd = new GameObject("Main Thread Dispatch");
+				mtd.AddComponent<MTDispatch>();
+				mtd.transform.parent = transform;
+			}
+		}
+
+		/// <summary>
+		/// Starts the generation process 
+		/// </summary>
+		public void Generate() {
+			CreateMTD();
+
+			if (Application.isPlaying) {
+				//Cleanup preview from edit mode
+				if (GetComponent<MeshRenderer>() != null) Destroy(GetComponent<MeshRenderer>());
+				if (GetComponent<MeshFilter>() != null) Destroy(GetComponent<MeshFilter>());
+
+				//Setup object tracking and generator reading
+				//Set default tracked object
+				if (TrackedObject == null) {
+					TrackedObject = new GameObject("Default Tracked Position");
+					TrackedObject.transform.position = Vector3.zero;
+				}
+
+				//Set seed for RNG
+				if (!UseRandomSeed)
+					Random.InitState(GenerationSeed);
+				else
+					GenerationSeed = new System.Random().Next(0, System.Int32.MaxValue);
+			}
+
+			//Allows for update to continue
+			GenerateOnStart = true;
 		}
 	}
 }

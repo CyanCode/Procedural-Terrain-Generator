@@ -8,7 +8,6 @@ namespace Terra.Terrain {
 
 		TerrainPaint Paint;
 		List<Texture2D> Splats;
-		Mesh PrevMesh;
 		bool HideInInspector;
 		
 		/// <summary>
@@ -70,7 +69,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>Filled Mesh</returns>
 		private Mesh CreateMesh() {
-			return TerrainTile.GetPreviewMesh(Settings, Settings.Generator);
+			return TerrainTile.GetPreviewMesh(Settings, Settings.Manager.GetEndGenerator());
 		}
 
 		/// <summary>
@@ -138,9 +137,8 @@ namespace Terra.Terrain {
 				if (HideInInspector)
 					filter.hideFlags = HideFlags.HideInInspector;
 
-				//Get cached or generated mesh
-				filter.mesh = PrevMesh = PrevMesh == null ?
-					CreateMesh() : PrevMesh;
+				//Generate mesh
+				filter.sharedMesh = CreateMesh();
 			}
 		}
 	}

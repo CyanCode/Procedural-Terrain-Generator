@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace UNEB
 {
+	[Serializable]
     public class NodeOutput : NodeConnection
     {
         [SerializeField]

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +7,7 @@ namespace UNEB
     /// <summary>
     /// Represents a graph of nodes.
     /// </summary>
+	[Serializable]
     public class NodeGraph : ScriptableObject
     {
         /// <summary>
@@ -62,10 +62,13 @@ namespace UNEB
 	/// for responding to nodes being added and removed.
 	/// </summary>
 	public static class NodeGraphEvent {
-		public delegate void NodeAction(NodeGraph graph, Node node);
+		public delegate void NodeGraphAction(NodeGraph graph, Node node);
+		public delegate void NodeAction(Node node);
 
-		public static event NodeAction OnAddedNode;
-		public static event NodeAction OnNodeRemoved;
+		public static event NodeGraphAction OnAddedNode;
+		public static event NodeGraphAction OnNodeRemoved;
+
+		public static event NodeAction OnNodeChanged;
 
 		public static void TriggerOnAddedNode(NodeGraph graph, Node node) {
 			if (OnAddedNode != null) OnAddedNode(graph, node);
@@ -73,6 +76,10 @@ namespace UNEB
 
 		public static void TriggerOnNodeRemoved(NodeGraph graph, Node node) {
 			if (OnNodeRemoved != null) OnNodeRemoved(graph, node);
+		}
+
+		public static void TriggerOnNodeChanged(Node node) {
+			if (OnNodeChanged != null) OnNodeChanged(node);
 		}
 	}
 }

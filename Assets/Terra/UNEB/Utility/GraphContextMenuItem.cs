@@ -1,5 +1,8 @@
 ﻿using System;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace Assets.Terra.UNEB.Utility {
 
@@ -22,7 +25,11 @@ namespace Assets.Terra.UNEB.Utility {
 		public static string GetNodeName(Type nodeType) {
 			object[] attrs = nodeType.GetCustomAttributes(typeof(GraphContextMenuItem), true);
 			if (attrs.Length == 0) {
+#if UNITY_EDITOR
 				return ObjectNames.NicifyVariableName(nodeType.Name);
+#else
+				return nodeType.Name;
+#endif
 			}
 
 			GraphContextMenuItem attr = (GraphContextMenuItem)attrs[0];

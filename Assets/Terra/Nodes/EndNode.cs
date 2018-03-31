@@ -25,12 +25,13 @@ namespace Terra.Nodes {
 		/// node's input
 		/// </summary>
 		public Generator GetFinalGenerator() {
-			AbstractGeneratorNode genNode = (AbstractGeneratorNode) InputGenerator.ParentNode;
-			if (genNode == null) {
-				return null;
+			if (InputGenerator != null && InputGenerator.HasOutputConnected() && 
+				InputGenerator.GetOutput(0).ParentNode is AbstractGeneratorNode) {
+				AbstractGeneratorNode agn = InputGenerator.GetOutput(0).ParentNode as AbstractGeneratorNode;
+				return agn.GetGenerator();
 			}
 
-			return genNode.GetGenerator();
+			return null;
 		}
 
 		public void NodeAdded(NodeGraph graph, Node node) {

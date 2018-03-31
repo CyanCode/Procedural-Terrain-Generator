@@ -59,7 +59,7 @@ namespace Terra.Nodes {
 		/// <returns>If an error occured while retrieving the generator, 
 		/// null is returned. Otherwise the Texture is returned.</returns>
 		private Texture GetNoiseTexture() {
-			if (!InputGenerator.HasOutputConnected()) {
+			if (InputGenerator == null || !InputGenerator.HasOutputConnected()) {
 				return null;
 			}
 

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Terra.Nodes;
+using System.Collections.Generic;
 using Terra.Terrain;
+using UNEB;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -202,17 +204,60 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Noise" tab
 		/// </summary>
 		/// <param name="manager">GraphManager instance for opening / closing graph</param>
+		//public void Noise(GraphManager manager) {
+		//	EditorGUILayout.Space();
+
+		//	if (Settings.SelectedFile != "") {
+		//		if (manager.GraphFileCanBeRead(Settings.SelectedFile))
+		//			if (manager.HasValidEndNode()) manager.OptionGraphOpenSuccess();
+		//			else manager.MessageNoEndNode();
+		//		else
+		//			manager.OptionGraphOpenError();
+		//	} else {
+		//		manager.OptionIncorrectFileSelection();
+		//	}
+		//}
+
 		public void Noise(GraphManager manager) {
+			EditorGUILayout.Space();	
+
+			//Check if graph is loaded and assign generator
+			//from end node
+			if (Settings.LoadedGraph == null) {
+				const string msg = "A node graph asset file must be attached to 'Graph' before " +
+					"terrain can be generated.";
+				EditorGUILayout.HelpBox(msg, MessageType.Warning);
+			} else  {
+				Settings.Generator = manager.GetEndGenerator();
+			}
+			
+			//Display message if the generator failed to load
+			//OR display message about a successful load
+			if (Settings.Generator == null) {
+				const string msg = "The attached node graph either does not have a supplied End node " +
+					"or the End node is missing its input.";
+				EditorGUILayout.HelpBox(msg, MessageType.Warning);
+			} else {
+				const string msg = "Hooray! The attached node graph is ready for use.";
+				EditorGUILayout.HelpBox(msg, MessageType.Info);
+			}
+
+			EditorGUILayout.Space();
+			Settings.LoadedGraph = (NodeGraph) EditorGUILayout.ObjectField("Graph", Settings.LoadedGraph, typeof(NodeGraph), false);
+
 			EditorGUILayout.Space();
 
-			if (Settings.SelectedFile != "") {
-				if (manager.GraphFileCanBeRead(Settings.SelectedFile))
-					if (manager.HasValidEndNode()) manager.OptionGraphOpenSuccess();
-					else manager.MessageNoEndNode();
-				else
-					manager.OptionGraphOpenError();
-			} else {
-				manager.OptionIncorrectFileSelection();
+			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
+			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+
+			EditorGUILayout.Space();
+			if (Application.isEditor && Settings.DisplayPreview) {
+				if (GUILayout.Button("Update Preview")) {
+					if (Settings.Generator != null) {
+						//Settings.PreviewMesh = TerrainTile.GetPreviewMesh(Settings, gen);
+						Settings.Preview.TriggerPreviewUpdate();
+					}
+				}
 			}
 		}
 

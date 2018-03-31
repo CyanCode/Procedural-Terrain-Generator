@@ -21,7 +21,11 @@ namespace Terra.Nodes.Modifier {
 		}
 
 		public override Generator GetGenerator() {
-			Generator BlendGenerator = InputMaskGenerator.GetValue<AbstractGeneratorNode>().GetGenerator();
+			if (InputMaskGenerator == null || !InputMaskGenerator.HasOutputConnected()) {
+				return null;
+			}
+
+			Generator BlendGenerator = (InputMaskGenerator.GetOutput(0).GetValue<AbstractGeneratorNode>()).GetGenerator();
 			return BlendGenerator == null || Generator1 == null || Generator2 == null ?
 				null : new Blend(Generator1, Generator2, BlendGenerator);
 		}

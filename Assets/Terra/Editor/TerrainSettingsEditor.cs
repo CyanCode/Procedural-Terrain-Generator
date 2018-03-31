@@ -1,27 +1,31 @@
 ﻿using Assets.Terra.Nodes;
+using System;
 using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
-	[ExecuteInEditMode]
-	[CustomEditor(typeof(TerraSettings))]
+	[ExecuteInEditMode, CustomEditor(typeof(TerraSettings)), Serializable]
 	public class TerrainSettingsEditor: Editor {
 		internal TerraSettings Settings {
 			get {
 				return (TerraSettings)target;
 			}
 		}
-		private GraphManager manager;
+
 		private TerraGUI gui;
 
 		void OnEnable() {
-			manager = new GraphManager(Settings);
-			//Settings.Generator = manager.GetGraphGenerator();
-			gui = new TerraGUI(Settings);
+			if (Settings.Manager == null) {
+				Settings.Manager = new GraphManager();
+			}
+
+			if (gui == null) {
+				gui = new TerraGUI(Settings);
+			}
 		}
 
 		public override void OnInspectorGUI() {
-			//Options tab
+			//Options toolbar
 			gui.Toolbar();
 
 			switch (Settings.ToolbarSelection) {
@@ -30,7 +34,7 @@ namespace UnityEditor.Terra {
 
 					break;
 				case TerraSettings.ToolbarOptions.Noise:
-					gui.Noise(manager);
+					gui.Noise();
 
 					break;
 				case TerraSettings.ToolbarOptions.Materials:

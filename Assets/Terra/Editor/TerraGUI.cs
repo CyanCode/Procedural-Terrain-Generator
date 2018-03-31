@@ -11,7 +11,6 @@ namespace UnityEditor.Terra {
 	/// </summary>
 	public class TerraGUI {
 		private TerraSettings Settings;
-		private TerrainSettingsEditor SettingsEditor;
 		private Texture[] ToolbarImages;
 
 		public TerraGUI(TerraSettings settings) {
@@ -146,7 +145,7 @@ namespace UnityEditor.Terra {
 						EditorGUILayout.EndHorizontal();
 					}
 					if (GUILayout.Button("Edit Material")) {
-						new AddTextureWindow(ref splat);
+						AddTextureWindow.Init(ref splat);
 					}
 
 					EditorGUILayout.Space();
@@ -203,48 +202,33 @@ namespace UnityEditor.Terra {
 		/// <summary>
 		/// Displays GUI elements for the "Noise" tab
 		/// </summary>
-		/// <param name="manager">GraphManager instance for opening / closing graph</param>
-		//public void Noise(GraphManager manager) {
-		//	EditorGUILayout.Space();
+		public void Noise() {
+			GraphManager manager = Settings.Manager;
+			manager.Update();
 
-		//	if (Settings.SelectedFile != "") {
-		//		if (manager.GraphFileCanBeRead(Settings.SelectedFile))
-		//			if (manager.HasValidEndNode()) manager.OptionGraphOpenSuccess();
-		//			else manager.MessageNoEndNode();
-		//		else
-		//			manager.OptionGraphOpenError();
-		//	} else {
-		//		manager.OptionIncorrectFileSelection();
-		//	}
-		//}
-
-		public void Noise(GraphManager manager) {
 			EditorGUILayout.Space();	
 
 			//Check if graph is loaded and assign generator
 			//from end node
-			if (Settings.LoadedGraph == null) {
+			if (manager.Graph == null) {
 				const string msg = "A node graph asset file must be attached to 'Graph' before " +
 					"terrain can be generated.";
 				EditorGUILayout.HelpBox(msg, MessageType.Warning);
-			} else  {
-				Settings.Generator = manager.GetEndGenerator();
 			}
 			
 			//Display message if the generator failed to load
 			//OR display message about a successful load
-			if (Settings.Generator == null) {
+			if (manager.Graph != null && Settings.Manager.GetEndGenerator() == null) {
 				const string msg = "The attached node graph either does not have a supplied End node " +
 					"or the End node is missing its input.";
 				EditorGUILayout.HelpBox(msg, MessageType.Warning);
-			} else {
+			} else if (Settings.Manager.GetEndGenerator() != null) {
 				const string msg = "Hooray! The attached node graph is ready for use.";
 				EditorGUILayout.HelpBox(msg, MessageType.Info);
 			}
 
 			EditorGUILayout.Space();
-			Settings.LoadedGraph = (NodeGraph) EditorGUILayout.ObjectField("Graph", Settings.LoadedGraph, typeof(NodeGraph), false);
-
+			manager.Graph = (NodeGraph) EditorGUILayout.ObjectField("Graph", manager.Graph, typeof(NodeGraph), false);
 			EditorGUILayout.Space();
 
 			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
@@ -253,10 +237,7 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 			if (Application.isEditor && Settings.DisplayPreview) {
 				if (GUILayout.Button("Update Preview")) {
-					if (Settings.Generator != null) {
-						//Settings.PreviewMesh = TerrainTile.GetPreviewMesh(Settings, gen);
-						Settings.Preview.TriggerPreviewUpdate();
-					}
+					Settings.Preview.TriggerPreviewUpdate();
 				}
 			}
 		}
@@ -264,7 +245,7 @@ namespace UnityEditor.Terra {
 		/// <summary>
 		/// Cached texture used by <code>GetWhiteTexture</code> method
 		/// </summary>
-		private static Texture2D WhiteTex;
+		protected static Texture2D WhiteTex;
 
 		/// <summary>
 		/// Gets a cached white texture that can be used for GUI

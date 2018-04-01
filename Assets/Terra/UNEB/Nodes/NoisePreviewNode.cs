@@ -9,8 +9,9 @@ namespace Terra.Nodes {
 	[Serializable]
 	[GraphContextMenuItem("", "Preview")]
 	public class NoisePreviewNode: Node {
-		public bool TextureNeedsUpdating;
+		public bool TextureNeedsUpdating = true;
 		
+		[SerializeField]
 		private Texture Texture;
 		[SerializeField]
 		private NodeInput InputGenerator;
@@ -40,8 +41,6 @@ namespace Terra.Nodes {
 			name = "Preview";
 			startHeight = bodyRect.height;
 			bodyRect.width -= 38f;
-
-			NodeGraphEvent.OnNodeChanged += OnGraphUpdate;
 		}
 
 		public override void OnBodyGUI() {
@@ -58,6 +57,9 @@ namespace Terra.Nodes {
 			} else {
 				bodyRect.height = heightContracted;
 			}
+
+			NodeGraphEvent.OnNodeChanged -= OnGraphUpdate;
+			NodeGraphEvent.OnNodeChanged += OnGraphUpdate;
 		}
 
 		private void OnGraphUpdate(Node n) {

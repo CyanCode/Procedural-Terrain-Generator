@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
-using Terra.Terrain;
 using UnityEngine;
+
+#if UNITY_EDITOR
+
+#endif
 
 namespace Terra.Terrain {
 	public class TerrainPreview {
@@ -51,6 +54,37 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Updates only the procedural object placement. 
+		/// </summary>
+		public void TriggerObjectPlacementUpdate() {
+			if (Settings.DisplayPreview && HasMesh()) {
+				List<Vector2> objs = Settings.Placer.GetPoissonGrid(1);
+
+				Bounds meshBounds = Settings.GetComponent<MeshFilter>().sharedMesh.bounds;
+				float maxY = meshBounds.max.y;
+				float minY = meshBounds.min.y;
+				float length = meshBounds.size.x;
+
+				//Only draw Gizmos in editor mode
+				foreach (Vector2 pos in objs) {
+					//Get 3D Y location on Mesh via Raycasting
+					float x = (length / 2)
+
+					UnityEditor.EditorUtility.InstantiatePrefab()
+				}
+			}
+		}
+
+		/// <summary>
+		/// Checks to see if this gameobject has an attached mesh
+		/// </summary>
+		/// <returns>true if has MeshFilter component</returns>
+		public bool HasMesh() {
+			return Settings.GetComponent<MeshFilter>() != null && 
+			Settings.GetComponent<MeshFilter>().sharedMesh != null;
+		}
+
+		/// <summary>
 		/// Removes components associated with this preview, 
 		/// does not remove cached data
 		/// </summary>
@@ -98,6 +132,7 @@ namespace Terra.Terrain {
 		private void AddComponents() {
 			AddMeshComponent();
 			TriggerMaterialsUpdate();
+			TriggerObjectPlacementUpdate();
 		}
 
 		private void AddMaterialComponent() {

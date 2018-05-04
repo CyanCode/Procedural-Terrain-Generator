@@ -64,6 +64,7 @@ namespace UnityEditor.Terra {
 			Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
 			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
 			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+			Settings.UseFlatShading = EditorGUILayout.Toggle("Flat Shaded", Settings.UseFlatShading);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);

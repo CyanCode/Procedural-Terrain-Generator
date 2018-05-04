@@ -23,6 +23,7 @@ namespace Terra.Terrain {
 		public static int GenerationSeed = 1337;
 		public int MeshResolution = 128;
 		public int Length = 500;
+		public bool UseFlatShading = false;
 		public bool UseRandomSeed = false;
 		public bool GenAllColliders = false;
 		public bool DisplayPreview = false;
@@ -56,7 +57,7 @@ namespace Terra.Terrain {
 
 		void Awake() {
 			Pool = new TilePool(this);
-			Preview = new TerrainPreview(this);
+			Preview = new TerrainPreview(this, false);
 		}
 
 		void Start() {
@@ -78,7 +79,7 @@ namespace Terra.Terrain {
 		void Update() {
 #if UNITY_EDITOR
 			if (Application.isEditor && !Application.isPlaying && Preview == null) {
-				Preview = new TerrainPreview(this);
+				Preview = new TerrainPreview(this, false);
 			}
 #endif
 			if (Application.isPlaying && Pool != null && GenerateOnStart) {

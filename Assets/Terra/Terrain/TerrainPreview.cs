@@ -83,7 +83,7 @@ namespace Terra.Terrain {
 				if (Paint == null)
 					Paint = new TerrainPaint(Settings.gameObject, Settings.SplatSettings);
 
-				List<Texture2D> splats = Paint.GenerateSplatmaps(false);
+				List<Texture2D> splats = Paint.GenerateSplatmaps(Settings.UseFlatShading, false);
 				return splats.Count > 0 ? splats : null;
 			}
 
@@ -106,12 +106,12 @@ namespace Terra.Terrain {
 
 				//Get cached or generated splatmaps
 				if (Splats != null && Splats.Count > 0) {
-					Paint.ApplySplatmapsToShaders(Splats);
+					Paint.ApplySplatmapsToShaders(Splats, Settings.UseFlatShading);
 				} else if (Settings.SplatSettings != null) {
 					Splats = CreateSplats();
 
 					if (Splats != null) {
-						Paint.ApplySplatmapsToShaders(Splats);
+						Paint.ApplySplatmapsToShaders(Splats, Settings.UseFlatShading);
 					}
 				}
 

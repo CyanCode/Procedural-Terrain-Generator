@@ -161,7 +161,7 @@ namespace Terra.Terrain {
 			if (Paint == null)
 				Paint = new TerrainPaint(gameObject, Settings.SplatSettings);
 
-			List<Texture2D> maps = Paint.GenerateSplatmaps();
+			List<Texture2D> maps = Paint.GenerateSplatmaps(Settings.UseFlatShading);
 			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));
 
 			return Paint;
@@ -233,13 +233,6 @@ namespace Terra.Terrain {
 				}
 			}
 
-			Vector2[] uvs = new Vector2[vertices.Length];
-			for (int v = 0; v < res; v++) {
-				for (int u = 0; u < res; u++) {
-					uvs[u + v * res] = new Vector2((float)u / (res - 1), (float)v / (res - 1));
-				}
-			}
-
 			int nbFaces = (res - 1) * (res - 1);
 			int[] triangles = new int[nbFaces * 6];
 			int t = 0;
@@ -253,6 +246,34 @@ namespace Terra.Terrain {
 				triangles[t++] = i + res;
 				triangles[t++] = i + res + 1;
 				triangles[t++] = i + 1;
+			}
+
+			if (settings.UseFlatShading) {
+				/**
+				 * Creating a flat shaded mesh requires removing 
+				 * all shared vertices from the mesh.
+				 */
+
+				Vector3[] oldVerts = new Vector3[res * res];
+				vertices.CopyTo(oldVerts, 0);
+				vertices = new Vector3[triangles.Length];
+			
+				for (int i = 0; i < triangles.Length; i++) {
+					vertices[i] = oldVerts[triangles[i]];
+					triangles[i] = i;
+				}
+			}
+
+			//Print first 10 verts
+			for (int i = 0; i < 10; i++) {
+				Debug.Log(vertices[i]);
+			}
+
+			Vector2[] uvs = new Vector2[vertices.Length];
+			for (int v = 0; v < res; v++) {
+				for (int u = 0; u < res; u++) {
+					uvs[u + v * res] = new Vector2((float)u / (res - 1), (float)v / (res - 1));
+				}
 			}
 
 			Vector3[] normals = new Vector3[vertices.Length];

@@ -279,8 +279,8 @@ namespace UnityEditor.Terra {
 				if (type.ConstrainHeight) {
 					EditorGUI.indentLevel = 1;
 					
-					type.MinHeight = EditorGUILayout.DelayedFloatField("Min Height", type.MinHeight);
-					type.MaxHeight = EditorGUILayout.DelayedFloatField("Max Height", type.MaxHeight);
+					type.MinHeight = EditorGUILayout.FloatField("Min Height", type.MinHeight);
+					type.MaxHeight = EditorGUILayout.FloatField("Max Height", type.MaxHeight);
 
 					FitMinMax(ref type.MinHeight, ref type.MaxHeight);
 
@@ -303,8 +303,8 @@ namespace UnityEditor.Terra {
 				if (type.ConstrainAngle) {
 					EditorGUI.indentLevel = 1;
 
-					type.MinAngle = EditorGUILayout.DelayedFloatField("Min Angle", type.MinAngle);
-					type.MaxAngle = EditorGUILayout.DelayedFloatField("Max Angle", type.MaxAngle);
+					type.MinAngle = EditorGUILayout.FloatField("Min Angle", type.MinAngle);
+					type.MaxAngle = EditorGUILayout.FloatField("Max Angle", type.MaxAngle);
 					
 					FitMinMax(ref type.MinAngle, ref type.MaxAngle);
 
@@ -324,8 +324,8 @@ namespace UnityEditor.Terra {
 
 				//Translate
 				EditorGUI.indentLevel = 1;
-				Settings.ShowTranslateFoldout = EditorGUILayout.Foldout(Settings.ShowTranslateFoldout, "Translate");
-				if (Settings.ShowTranslateFoldout) {
+				type.ShowTranslateFoldout = EditorGUILayout.Foldout(type.ShowTranslateFoldout, "Translate");
+				if (type.ShowTranslateFoldout) {
 					type.TranslationAmount = EditorGUILayout.Vector3Field("Translate", type.TranslationAmount);
 
 					EditorGUILayout.BeginHorizontal();
@@ -350,8 +350,8 @@ namespace UnityEditor.Terra {
 				}
 
 				//Rotate
-				Settings.ShowRotateFoldout = EditorGUILayout.Foldout(Settings.ShowRotateFoldout, "Rotate");
-				if (Settings.ShowRotateFoldout) {
+				type.ShowRotateFoldout = EditorGUILayout.Foldout(type.ShowRotateFoldout, "Rotate");
+				if (type.ShowRotateFoldout) {
 					type.RotationAmount = EditorGUILayout.Vector3Field("Rotation", type.RotationAmount);
 
 					EditorGUILayout.BeginHorizontal();
@@ -376,8 +376,8 @@ namespace UnityEditor.Terra {
 				}
 
 				//Scale
-				Settings.ShowScaleFoldout = EditorGUILayout.Foldout(Settings.ShowScaleFoldout, "Scale");
-				if (Settings.ShowScaleFoldout) {
+				type.ShowScaleFoldout = EditorGUILayout.Foldout(type.ShowScaleFoldout, "Scale");
+				if (type.ShowScaleFoldout) {
 					type.ScaleAmount = EditorGUILayout.Vector3Field("Scale", type.ScaleAmount);
 
 					EditorGUILayout.BeginHorizontal();
@@ -408,6 +408,7 @@ namespace UnityEditor.Terra {
 					}
 				}
 
+				EditorGUI.indentLevel = 0;
 				EditorGUILayout.EndVertical();
 			}
 

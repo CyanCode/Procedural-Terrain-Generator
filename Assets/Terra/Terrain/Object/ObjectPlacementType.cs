@@ -24,6 +24,10 @@ public class ObjectPlacementType {
 		public Vector3 Min;
 	}
 
+	public bool ShowTranslateFoldout = false;
+	public bool ShowRotateFoldout = false;
+	public bool ShowScaleFoldout = false;
+
 	/// <summary>
 	/// Prefab to procedurally place in the scene
 	/// </summary>

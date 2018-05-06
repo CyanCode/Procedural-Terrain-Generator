@@ -41,9 +41,6 @@ namespace Terra.Terrain {
 
 		//Object Placement Tab
 		public List<ObjectPlacementType> ObjectPlacementSettings = null;
-		public bool ShowTranslateFoldout = false;
-		public bool ShowRotateFoldout = false;
-		public bool ShowScaleFoldout = false;
 
 		//Editor mode specific
 		public GraphManager Manager;

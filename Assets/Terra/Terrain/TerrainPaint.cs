@@ -3,19 +3,11 @@ using UnityEngine;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using Terra.Terrain.Util;
 
 namespace Terra.Terrain {
 	[ExecuteInEditMode]
 	public class TerrainPaint {
-		public class MeshSample {
-			readonly public float Height;
-			readonly public float Angle;
-
-			public MeshSample(float height = 0f, float angle = 0f) {
-				Height = height;
-				Angle = angle;
-			}
-		}
 		[Serializable]
 		public class SplatSetting {
 			public Texture2D Diffuse;
@@ -48,11 +40,9 @@ namespace Terra.Terrain {
 		private List<SplatSetting> SplatSettings;
 
 		//Terrain/Mesh
+		private MeshSampler Sampler;
 		private Material TerrainMaterial;
 		private Mesh Mesh;
-		private Vector3[] Vertices;
-		private Vector3[] Normals;
-		private int MeshResolution;
 		
 		/// <summary>
 		/// Create a TerrainPaint object that paints the passed gameobject. For this to 
@@ -68,9 +58,9 @@ namespace Terra.Terrain {
 			TerrainMaterial = TerrainObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find(path));
 
 			Mesh = TerrainObject.GetComponent<MeshFilter>().sharedMesh;
-			Vertices = Mesh.vertices;
-			Normals = Mesh.normals;
-			MeshResolution = (int)Math.Sqrt(Mesh.vertexCount);
+
+			int res = (int)Math.Sqrt(Mesh.vertexCount);
+			Sampler = new MeshSampler(Mesh.normals, Mesh.vertices, res);
 		}
 
 		/// <summary>
@@ -88,7 +78,7 @@ namespace Terra.Terrain {
 			
 			for (int x = 0; x < AlphaMapResolution; x++) {
 				for (int y = 0; y < AlphaMapResolution; y++) {
-					MeshSample sample = SampleAt(y / (float)AlphaMapResolution, x / (float)AlphaMapResolution);
+					MeshSampler.MeshSample sample = Sampler.SampleAt(y / (float)AlphaMapResolution, x / (float)AlphaMapResolution);
 					AddWeightsToTextures(CalculateWeights(sample), ref maps, y, x);
 				}
 			}
@@ -123,7 +113,7 @@ namespace Terra.Terrain {
 		/// <param name="sample">Sample to base calculation on</param>
 		/// <param name="splat">Splat setting to base calculation on</param>
 		/// <returns>Weight values in the same order of the </returns>
-		float[] CalculateWeights(MeshSample sample) {
+		float[] CalculateWeights(MeshSampler.MeshSample sample) {
 			float height = sample.Height;
 			float angle = sample.Angle;
 			float[] weights = new float[SplatSettings.Count];
@@ -183,22 +173,6 @@ namespace Terra.Terrain {
 				
 				textures[i / 4].SetPixel(x, y, new Color(r, g, b, a));
 			}
-		}
-
-		/// <summary>
-		/// Finds the height and angle of the passed x and z values on the mesh.
-		/// </summary>
-		/// <param name="x">Normalized x position to sample</param>
-		/// <param name="z">Normalized z position to sample</param>
-		/// <returns>MeshSample instance with calculated height and angle (0 to 90)</returns>
-		MeshSample SampleAt(float x, float z) {
-			float res = MeshResolution;
-			int sampleLoc = Mathf.RoundToInt(Mathf.Clamp(x * res, 0f, res - 1)) +
-				Mathf.RoundToInt(Mathf.Clamp(z * res, 0f, res - 1)) * MeshResolution;
-			float height = Vertices[sampleLoc].y;
-			float angle = Vector3.Angle(Normals[sampleLoc], Vector3.up);
-
-			return new MeshSample(height, angle);
 		}
 
 		/// <summary>

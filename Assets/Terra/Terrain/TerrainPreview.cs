@@ -1,6 +1,11 @@
 ﻿using System.Collections.Generic;
-using Terra.Terrain;
 using UnityEngine;
+using System.Linq;
+using Assets.Terra;
+
+#if UNITY_EDITOR
+
+#endif
 
 namespace Terra.Terrain {
 	public class TerrainPreview {
@@ -8,6 +13,7 @@ namespace Terra.Terrain {
 
 		TerrainPaint Paint;
 		List<Texture2D> Splats;
+		ObjectPlacerPreview ObjPreview;
 		bool HideInInspector;
 		
 		/// <summary>
@@ -51,6 +57,25 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Updates only the procedural object placement. 
+		/// </summary>
+		public void TriggerObjectPlacementUpdate() {
+			if (Settings.DisplayPreview && HasMesh()) {
+				ObjectPlacerPreview preview = new ObjectPlacerPreview(Settings, Settings.GetComponent<MeshFilter>().sharedMesh);
+				preview.PreviewAllObjects();
+			}
+		}
+
+		/// <summary>
+		/// Checks to see if this gameobject has an attached mesh
+		/// </summary>
+		/// <returns>true if has MeshFilter component</returns>
+		public bool HasMesh() {
+			return Settings.GetComponent<MeshFilter>() != null && 
+			Settings.GetComponent<MeshFilter>().sharedMesh != null;
+		}
+
+		/// <summary>
 		/// Removes components associated with this preview, 
 		/// does not remove cached data
 		/// </summary>
@@ -61,6 +86,23 @@ namespace Terra.Terrain {
 
 			if (Settings.GetComponent<MeshFilter>() != null) {
 				Object.DestroyImmediate(Settings.GetComponent<MeshFilter>());
+			}
+		}
+
+		/// <summary>
+		/// Can be called at the beginning of Play mode. 
+		/// Removes all added components and objects used 
+		/// for previewing.
+		/// </summary>
+		public void Cleanup() {
+			if (Settings.GetComponent<MeshRenderer>() != null) Object.Destroy(Settings.GetComponent<MeshRenderer>());
+			if (Settings.GetComponent<MeshFilter>() != null) Object.Destroy(Settings.GetComponent<MeshFilter>());
+
+			foreach (Transform c in Settings.transform) {
+				if (c.name == ObjectPlacerPreview.OBJ_PREVIEW_NAME) {
+					Object.Destroy(c.gameObject);
+					break;
+				}
 			}
 		}
 
@@ -98,6 +140,7 @@ namespace Terra.Terrain {
 		private void AddComponents() {
 			AddMeshComponent();
 			TriggerMaterialsUpdate();
+			TriggerObjectPlacementUpdate();
 		}
 
 		private void AddMaterialComponent() {

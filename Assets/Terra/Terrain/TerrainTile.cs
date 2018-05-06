@@ -16,24 +16,6 @@ namespace Terra.Terrain {
 		public Mesh Terrain { get; private set; }
 		public Vector2 Position { get; private set; }
 
-		public delegate void TileEvent(TerrainTile tile);
-		
-		/// <summary>
-		/// Called when <c>this</c> TerrainTile successfully 
-		/// creates and attaches a Mesh
-		/// </summary>
-		public event TileEvent OnTileCreated;
-
-		/// <summary>
-		/// Called when <c>this</c> TerrainTile is deactivated
-		/// </summary>
-		public event TileEvent OnTileDeactivated;
-
-		/// <summary>
-		/// Called when <c>this</c> TerrainTile is activated
-		/// </summary>
-		public event TileEvent OnTileActivated;
-
 		private TerraSettings Settings;
 		private TerrainPaint Paint;
 

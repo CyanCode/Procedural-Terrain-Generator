@@ -96,6 +96,8 @@ namespace Terra.Terrain {
 			tile.gameObject.SetActive(false);
 			CachedTiles.AddFirst(tile);
 			EnforceCacheSize();
+
+			TerraEvent.TriggerOnTileDeactivated(tile);
 		}
 
 		/// <summary>
@@ -106,6 +108,8 @@ namespace Terra.Terrain {
 		public void AddActiveTile(TerrainTile tile) {
 			tile.gameObject.SetActive(true);
 			ActiveTiles.Add(tile);
+
+			TerraEvent.TriggerOnTileActivated(tile);
 		}
 
 		/// <summary>

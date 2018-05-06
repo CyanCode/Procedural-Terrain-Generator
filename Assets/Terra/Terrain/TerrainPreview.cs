@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using Assets.Terra;
 
 #if UNITY_EDITOR
 
@@ -11,6 +13,7 @@ namespace Terra.Terrain {
 
 		TerrainPaint Paint;
 		List<Texture2D> Splats;
+		ObjectPlacerPreview ObjPreview;
 		bool HideInInspector;
 		
 		/// <summary>
@@ -58,20 +61,8 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void TriggerObjectPlacementUpdate() {
 			if (Settings.DisplayPreview && HasMesh()) {
-				List<Vector2> objs = Settings.Placer.GetPoissonGrid(1);
-
-				Bounds meshBounds = Settings.GetComponent<MeshFilter>().sharedMesh.bounds;
-				float maxY = meshBounds.max.y;
-				float minY = meshBounds.min.y;
-				float length = meshBounds.size.x;
-
-				//Only draw Gizmos in editor mode
-				foreach (Vector2 pos in objs) {
-					//Get 3D Y location on Mesh via Raycasting
-					float x = (length / 2)
-
-					UnityEditor.EditorUtility.InstantiatePrefab()
-				}
+				ObjectPlacerPreview preview = new ObjectPlacerPreview(Settings, Settings.GetComponent<MeshFilter>().sharedMesh);
+				preview.PreviewAllObjects();
 			}
 		}
 
@@ -95,6 +86,23 @@ namespace Terra.Terrain {
 
 			if (Settings.GetComponent<MeshFilter>() != null) {
 				Object.DestroyImmediate(Settings.GetComponent<MeshFilter>());
+			}
+		}
+
+		/// <summary>
+		/// Can be called at the beginning of Play mode. 
+		/// Removes all added components and objects used 
+		/// for previewing.
+		/// </summary>
+		public void Cleanup() {
+			if (Settings.GetComponent<MeshRenderer>() != null) Object.Destroy(Settings.GetComponent<MeshRenderer>());
+			if (Settings.GetComponent<MeshFilter>() != null) Object.Destroy(Settings.GetComponent<MeshFilter>());
+
+			foreach (Transform c in Settings.transform) {
+				if (c.name == ObjectPlacerPreview.OBJ_PREVIEW_NAME) {
+					Object.Destroy(c.gameObject);
+					break;
+				}
 			}
 		}
 

@@ -247,8 +247,6 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Object Placement" tab
 		/// </summary>
 		public void ObjectPlacement() {
-			const int MAX_GRID_SIZE_WARNING = 15;
-
 			//Display each type
 			for (int i = 0; i < Settings.ObjectPlacementSettings.Count; i++) {
 				EditorGUILayout.Space();
@@ -268,29 +266,22 @@ namespace UnityEditor.Terra {
 					continue;
 				}
 
-				//Possible grid size warning
-				if (type.GridSize > MAX_GRID_SIZE_WARNING) {
-					const string warning = "Warning: Setting the \"Sample Grid Size\" component " +
-											"too high may spawn too many objects. The suggested value " +
-											"is less than or around 15.";
-					EditorGUILayout.HelpBox(warning, MessageType.Warning);
-				}
-
 				//General
 				type.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", type.Prefab, typeof(GameObject), false);
 				type.AllowsIntersection = EditorGUILayout.Toggle("Can Intersect", type.AllowsIntersection);
-				type.Density = EditorGUILayout.FloatField("Object Density", type.Density);
+				type.PlacementProbability = EditorGUILayout.IntSlider("Place Probability", type.PlacementProbability, 0, 100);
+				type.Spread = EditorGUILayout.Slider("Object Spread", type.Spread, 5f, 50f);
 				type.MaxObjects = EditorGUILayout.IntField("Max Objects", type.MaxObjects);
-				type.GridSize = EditorGUILayout.IntField("Sample Grid Size", type.GridSize);
 				if (type.MaxObjects < 1) type.MaxObjects = 1;
 
 				//Height
 				type.ConstrainHeight = EditorGUILayout.Toggle("Constrain Height", type.ConstrainHeight);
 				if (type.ConstrainHeight) {
 					EditorGUI.indentLevel = 1;
-
-					type.MaxHeight = EditorGUILayout.DelayedFloatField("Max Height", type.MaxHeight);
+					
 					type.MinHeight = EditorGUILayout.DelayedFloatField("Min Height", type.MinHeight);
+					type.MaxHeight = EditorGUILayout.DelayedFloatField("Max Height", type.MaxHeight);
+
 					FitMinMax(ref type.MinHeight, ref type.MaxHeight);
 
 					EditorGUILayout.BeginHorizontal();
@@ -312,8 +303,9 @@ namespace UnityEditor.Terra {
 				if (type.ConstrainAngle) {
 					EditorGUI.indentLevel = 1;
 
-					type.MaxAngle = EditorGUILayout.DelayedFloatField("Max Angle", type.MaxAngle);
 					type.MinAngle = EditorGUILayout.DelayedFloatField("Min Angle", type.MinAngle);
+					type.MaxAngle = EditorGUILayout.DelayedFloatField("Max Angle", type.MaxAngle);
+					
 					FitMinMax(ref type.MinAngle, ref type.MaxAngle);
 
 					EditorGUILayout.BeginHorizontal();
@@ -348,8 +340,9 @@ namespace UnityEditor.Terra {
 
 					if (type.IsRandomTranslate) {
 						EditorGUI.indentLevel = 2;
+
+					 	type.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomTranslateExtents.Min);
 						type.RandomTranslateExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomTranslateExtents.Max);
-						type.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomTranslateExtents.Min);
 
 						FitMinMax(ref type.RandomTranslateExtents.Min, ref type.RandomTranslateExtents.Max);
 						EditorGUI.indentLevel = 1;
@@ -373,8 +366,9 @@ namespace UnityEditor.Terra {
 
 					if (type.IsRandomRotation) {
 						EditorGUI.indentLevel = 2;
-						type.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomRotationExtents.Max);
+
 						type.RandomRotationExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomRotationExtents.Min);
+						type.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomRotationExtents.Max);
 
 						FitMinMax(ref type.RandomRotationExtents.Min, ref type.RandomRotationExtents.Max);
 						EditorGUI.indentLevel = 1;
@@ -397,11 +391,19 @@ namespace UnityEditor.Terra {
 					EditorGUILayout.EndHorizontal();
 
 					if (type.IsRandomScale) {
-						EditorGUI.indentLevel = 2;
-						type.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomScaleExtents.Max);
-						type.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomScaleExtents.Min);
+						type.IsUniformScale = EditorGUILayout.Toggle("Scale Uniformly", type.IsUniformScale);
 
-						FitMinMax(ref type.RandomScaleExtents.Min, ref type.RandomScaleExtents.Max);
+						EditorGUI.indentLevel = 2;
+
+						if (type.IsUniformScale) {
+							type.UniformScaleMin = EditorGUILayout.FloatField("Min", type.UniformScaleMin);
+							type.UniformScaleMax = EditorGUILayout.FloatField("Max", type.UniformScaleMax);
+						} else {
+							type.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomScaleExtents.Min);
+							type.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomScaleExtents.Max);
+
+							FitMinMax(ref type.RandomScaleExtents.Min, ref type.RandomScaleExtents.Max);
+						}
 						EditorGUI.indentLevel = 1;
 					}
 				}

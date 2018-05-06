@@ -69,6 +69,7 @@ namespace Terra.Terrain {
 		void Awake() {
 			Pool = new TilePool(this);
 			Preview = new TerrainPreview(this);
+			Placer = new ObjectPlacer(this);
 		}
 
 		void Start() {
@@ -137,8 +138,7 @@ namespace Terra.Terrain {
 
 			if (Application.isPlaying) {
 				//Cleanup preview from edit mode
-				if (GetComponent<MeshRenderer>() != null) Destroy(GetComponent<MeshRenderer>());
-				if (GetComponent<MeshFilter>() != null) Destroy(GetComponent<MeshFilter>());
+				Preview.Cleanup();
 
 				//Setup object tracking and generator reading
 				//Set default tracked object

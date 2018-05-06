@@ -7,6 +7,8 @@ using System.Threading;
 using Terra.CoherentNoise.Generation.Fractal;
 using Terra.CoherentNoise.Generation.Combination;
 using Terra.CoherentNoise;
+using Terra.Terrain.Util;
+using System.Collections.Generic;
 
 public class GenerationTests {
 	[Test]
@@ -115,6 +117,32 @@ public class GenerationTests {
 
 		Debug.Log("Mesh " + m.normals[0].normalized);
 		Debug.Log("Mesh " + m.normals[1].normalized);
+	}
+
+	[Test]
+	public void PoissonGridTest() {
+		Debug.Log("Calculate time of 500 grid samples");
+
+		const int sampleCount = 50;
+
+		System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+		sw.Start();
+		for (int i = 0; i < sampleCount; i++) {
+			PoissonDiscSampler pds = new PoissonDiscSampler(20, 20, 1);
+			List<Vector2> total = new List<Vector2>();
+
+			foreach (Vector2 sample in pds.Samples()) {
+				total.Add(sample);
+			}
+
+			Debug.Log(total.Count + " grid verts");
+		}
+
+		sw.Stop();
+		long time = sw.ElapsedMilliseconds;
+
+		Debug.Log("Elapsed time: " + time + " ms. " + time / 1000 + "s.");
+		Debug.Log("Approx " + ((float)(time / 1000)) / sampleCount + " seconds");
 	}
 
 	private Generator GetTestGenerator() {

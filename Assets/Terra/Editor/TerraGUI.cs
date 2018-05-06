@@ -29,8 +29,8 @@ namespace UnityEditor.Terra {
 				ToolbarImages = new Texture[] {
 					(Texture)Resources.Load("terra_gui_general"),
 					(Texture)Resources.Load("terra_gui_noise"),
-					(Texture)Resources.Load("terra_gui_material")
-					//(Texture)Resources.Load("terra_gui_object") //TODO: Put back
+					(Texture)Resources.Load("terra_gui_material"),
+					(Texture)Resources.Load("terra_gui_object") 
 				};
 			}
 			
@@ -81,6 +81,7 @@ namespace UnityEditor.Terra {
 					Settings.Preview.RemoveComponents();
 				}
 			}
+
 			Settings.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.UseMultithreading);
 		}
 
@@ -239,6 +240,220 @@ namespace UnityEditor.Terra {
 				if (GUILayout.Button("Update Preview")) {
 					Settings.Preview.TriggerPreviewUpdate();
 				}
+			}
+		}
+
+		/// <summary>
+		/// Displays GUI elements for the "Object Placement" tab
+		/// </summary>
+		public void ObjectPlacement() {
+			//Display each type
+			for (int i = 0; i < Settings.ObjectPlacementSettings.Count; i++) {
+				EditorGUILayout.Space();
+
+				//Surround each material w/ box
+				GUIStyle boxStyle = new GUIStyle();
+				boxStyle.padding = new RectOffset(3, 3, 3, 3);
+				boxStyle.normal.background = GetWhiteTexture();
+				EditorGUILayout.BeginVertical(boxStyle);
+
+				ObjectPlacementType type = Settings.ObjectPlacementSettings[i];
+
+				//Close button / name
+				if (GUILayout.Button("X", GUILayout.Height(16), GUILayout.Width(18))) {
+					Settings.ObjectPlacementSettings.RemoveAt(i);
+					i--;
+					continue;
+				}
+
+				//General
+				type.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", type.Prefab, typeof(GameObject), false);
+				type.AllowsIntersection = EditorGUILayout.Toggle("Can Intersect", type.AllowsIntersection);
+				type.PlacementProbability = EditorGUILayout.IntSlider("Place Probability", type.PlacementProbability, 0, 100);
+				type.Spread = EditorGUILayout.Slider("Object Spread", type.Spread, 5f, 50f);
+				type.MaxObjects = EditorGUILayout.IntField("Max Objects", type.MaxObjects);
+				if (type.MaxObjects < 1) type.MaxObjects = 1;
+
+				//Height
+				type.ConstrainHeight = EditorGUILayout.Toggle("Constrain Height", type.ConstrainHeight);
+				if (type.ConstrainHeight) {
+					EditorGUI.indentLevel = 1;
+					
+					type.MinHeight = EditorGUILayout.DelayedFloatField("Min Height", type.MinHeight);
+					type.MaxHeight = EditorGUILayout.DelayedFloatField("Max Height", type.MaxHeight);
+
+					FitMinMax(ref type.MinHeight, ref type.MaxHeight);
+
+					EditorGUILayout.BeginHorizontal();
+					type.HeightProbCurve = EditorGUILayout.CurveField("Probability", type.HeightProbCurve, Color.green, new Rect(0, 0, 1, 1));
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "This is the height probability curve. The X axis represents the " +
+											"min to max height and the Y axis represents the probability an " +
+											"object will spawn. By default, the curve is set to a 100% probability " +
+											"meaning all objects will spawn.";
+						EditorUtility.DisplayDialog("Help - Height Probability", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					EditorGUI.indentLevel = 0;
+				}
+
+				//Angle
+				type.ConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", type.ConstrainAngle);
+				if (type.ConstrainAngle) {
+					EditorGUI.indentLevel = 1;
+
+					type.MinAngle = EditorGUILayout.DelayedFloatField("Min Angle", type.MinAngle);
+					type.MaxAngle = EditorGUILayout.DelayedFloatField("Max Angle", type.MaxAngle);
+					
+					FitMinMax(ref type.MinAngle, ref type.MaxAngle);
+
+					EditorGUILayout.BeginHorizontal();
+					type.AngleProbCurve = EditorGUILayout.CurveField("Probability", type.AngleProbCurve, Color.green, new Rect(0, 0, 180, 1));
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "This is the angle probability curve. The X axis represents " +
+											"0 to 180 degrees and the Y axis represents the probability an " +
+											"object will spawn. By default, the curve is set to a 100% probability " +
+											"meaning all objects will spawn.";
+						EditorUtility.DisplayDialog("Help - Angle Probability", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					EditorGUI.indentLevel = 0;
+				}
+
+				//Translate
+				EditorGUI.indentLevel = 1;
+				Settings.ShowTranslateFoldout = EditorGUILayout.Foldout(Settings.ShowTranslateFoldout, "Translate");
+				if (Settings.ShowTranslateFoldout) {
+					type.TranslationAmount = EditorGUILayout.Vector3Field("Translate", type.TranslationAmount);
+
+					EditorGUILayout.BeginHorizontal();
+					type.IsRandomTranslate = EditorGUILayout.Toggle("Random", type.IsRandomTranslate);
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "Optionally randomly translate the placed object. " +
+											"Max and min extents for the random number generator can " +
+											"be set.";
+						EditorUtility.DisplayDialog("Help - Random Translate", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					if (type.IsRandomTranslate) {
+						EditorGUI.indentLevel = 2;
+
+					 	type.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomTranslateExtents.Min);
+						type.RandomTranslateExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomTranslateExtents.Max);
+
+						FitMinMax(ref type.RandomTranslateExtents.Min, ref type.RandomTranslateExtents.Max);
+						EditorGUI.indentLevel = 1;
+					}
+				}
+
+				//Rotate
+				Settings.ShowRotateFoldout = EditorGUILayout.Foldout(Settings.ShowRotateFoldout, "Rotate");
+				if (Settings.ShowRotateFoldout) {
+					type.RotationAmount = EditorGUILayout.Vector3Field("Rotation", type.RotationAmount);
+
+					EditorGUILayout.BeginHorizontal();
+					type.IsRandomRotation = EditorGUILayout.Toggle("Random", type.IsRandomRotation);
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "Optionally randomly rotate the placed object. " +
+											"Max and min extents for the random number generator can " +
+											"be set.";
+						EditorUtility.DisplayDialog("Help - Random Rotate", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					if (type.IsRandomRotation) {
+						EditorGUI.indentLevel = 2;
+
+						type.RandomRotationExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomRotationExtents.Min);
+						type.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomRotationExtents.Max);
+
+						FitMinMax(ref type.RandomRotationExtents.Min, ref type.RandomRotationExtents.Max);
+						EditorGUI.indentLevel = 1;
+					}
+				}
+
+				//Scale
+				Settings.ShowScaleFoldout = EditorGUILayout.Foldout(Settings.ShowScaleFoldout, "Scale");
+				if (Settings.ShowScaleFoldout) {
+					type.ScaleAmount = EditorGUILayout.Vector3Field("Scale", type.ScaleAmount);
+
+					EditorGUILayout.BeginHorizontal();
+					type.IsRandomScale = EditorGUILayout.Toggle("Random", type.IsRandomScale);
+					if (GUILayout.Button("?", GUILayout.Width(25))) {
+						const string msg = "Optionally randomly scale the placed object. " +
+											"Max and min extents for the random number generator can " +
+											"be set.";
+						EditorUtility.DisplayDialog("Help - Random Scale", msg, "Close");
+					}
+					EditorGUILayout.EndHorizontal();
+
+					if (type.IsRandomScale) {
+						type.IsUniformScale = EditorGUILayout.Toggle("Scale Uniformly", type.IsUniformScale);
+
+						EditorGUI.indentLevel = 2;
+
+						if (type.IsUniformScale) {
+							type.UniformScaleMin = EditorGUILayout.FloatField("Min", type.UniformScaleMin);
+							type.UniformScaleMax = EditorGUILayout.FloatField("Max", type.UniformScaleMax);
+						} else {
+							type.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomScaleExtents.Min);
+							type.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomScaleExtents.Max);
+
+							FitMinMax(ref type.RandomScaleExtents.Min, ref type.RandomScaleExtents.Max);
+						}
+						EditorGUI.indentLevel = 1;
+					}
+				}
+
+				EditorGUILayout.EndVertical();
+			}
+
+			//Add new button
+			EditorGUILayout.Space();
+			if (GUILayout.Button("Add Object")) {
+				if (Settings.ObjectPlacementSettings == null) {
+					Settings.ObjectPlacementSettings = new List<ObjectPlacementType>();
+				}
+
+				Settings.ObjectPlacementSettings.Add(new ObjectPlacementType(TerraSettings.GenerationSeed));
+			}
+
+			//Update preview
+			if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
+				Settings.Preview.TriggerObjectPlacementUpdate();
+			}
+		}
+
+		/// <summary>
+		/// Fits the min and max values so that the min is never 
+		/// greater than the max. 
+		/// 
+		/// If min > max
+		///   min = max
+		/// </summary>
+		/// <param name="min">Minimum value</param>
+		/// <param name="max">Maximum value</param>
+		public static void FitMinMax(ref float min, ref float max) {
+			min = min > max ? max : min;
+		}
+
+		/// <summary>
+		/// Fits the min and max values so that the min Vector3's 
+		/// components never exceed the max's.
+		/// 
+		/// If min > max
+		///   min = max
+		/// </summary>
+		/// <param name="min">Minimum vector</param>
+		/// <param name="max">Maximum vector</param>
+		public static void FitMinMax(ref Vector3 min, ref Vector3 max) {
+			if (min.x > max.x || min.y > max.y || min.z > max.z) {
+				min = new Vector3(min.x > max.x ? max.x : min.x,
+					min.y > max.y ? max.y : min.y,
+					min.z > max.z ? max.z : min.z);
 			}
 		}
 

@@ -4,6 +4,9 @@
 public class ObjectPlacementType {
 	private System.Random Rand;
 
+	[SerializeField]
+	private int Seed;
+
 	#region GeneralParams
 	/// <summary>
 	/// Extents for a random transformation.
@@ -38,19 +41,15 @@ public class ObjectPlacementType {
 	public bool AllowsIntersection = false;
 
 	/// <summary>
-	/// How dense should the objects be placed next to 
-	/// each other.
+	/// How spread apart should the objects be from each other?
 	/// </summary>
-	public float Density = 1f;
+	public float Spread = 10f;
 
 	/// <summary>
-	/// How big should the "grid" be that is used to poll 
-	/// the Poisson disc sampler?
-	/// <note type="note">Setting this value too high can have
-	/// unintended consequences. It is suggested that this value 
-	/// does not exceed 15 unless you are sure you want more samples.</note>
+	/// The probability that an object will be placed
 	/// </summary>
-	public int GridSize = 10;
+	public int PlacementProbability = 100;
+
 	#endregion
 
 	#region PlacementParams
@@ -179,12 +178,29 @@ public class ObjectPlacementType {
 	public bool IsRandomScale;
 
 	/// <summary>
+	/// Is this object scaled uniformly?
+	/// </summary>
+	public bool IsUniformScale = false;
+
+	/// <summary>
+	/// Min amount to scale IF this object is being scaled 
+	/// uniformly.
+	/// </summary>
+	public float UniformScaleMin = 1f;
+
+	/// <summary>
+	/// Max amount to scale IF this object is being scaled 
+	/// uniformly.
+	/// </summary>
+	public float UniformScaleMax = 1.5f;
+
+	/// <summary>
 	/// If the object is not randomly scaled, 
 	/// should it be scaled by a specified amount?
 	/// If it is randomly translated, what is the maximum amount 
 	/// that it should be allowed to transate?
 	/// </summary>
-	public Vector3 ScaleAmount = Vector3.zero;
+	public Vector3 ScaleAmount = new Vector3(1f, 1f, 1f);
 
 	/// <summary>
 	/// The maximum and minimum amounts that this object 
@@ -195,10 +211,20 @@ public class ObjectPlacementType {
 
 	/// <param name="seed">Optional seed value to use in the random number generator</param>
 	public ObjectPlacementType(int seed = -1) {
-		if (seed == -1)
-			Rand = new System.Random();
-		else
-			Rand = new System.Random(seed);
+		Seed = seed;
+		InitRNG();
+
+		//Set transformation defaults
+		RandomRotationExtents = new RandomTransformExtent();
+		RandomRotationExtents.Max = new Vector3(0, 360, 0);
+
+		RandomScaleExtents = new RandomTransformExtent();
+		RandomScaleExtents.Max = new Vector3(1.5f, 1.5f, 1.5f);
+		RandomScaleExtents.Min = new Vector3(1f, 1f, 1f);
+
+		RandomTranslateExtents = new RandomTransformExtent();
+		RandomTranslateExtents.Max = new Vector3(1f, 1f, 1f);
+		RandomTranslateExtents.Min = new Vector3(-1f, -1f, -1f);
 	}
 
 	/// <summary>
@@ -209,9 +235,30 @@ public class ObjectPlacementType {
 	/// <param name="angle">Angle to evaluate at (0 to 180 degrees)</param>
 	/// <returns></returns>
 	public bool ShouldPlaceAt(float height, float angle) {
+		//Fails height or angle check
+		if (ConstrainHeight && !IsInHeightExtents(height)) {
+			return false;
+		}
+		if (ConstrainAngle && !IsInAngleExtents(angle)) {
+			return false;
+		}
 
+		//Fails constrained height or constrained angle check
+		if (!EvaluateHeight(height) || !EvaluateAngle(angle)) {
+			return false;
+		}
 
-		return false; //TODO implement
+		//Place probability check
+		if (PlacementProbability != 100f) {
+			if (Rand == null) {
+				InitRNG();
+			}
+
+			int result = Rand.Next(0, 100);
+			return result >= (100 - PlacementProbability);
+		}
+
+		return true;
 	}
 
 	/// <summary>
@@ -238,25 +285,157 @@ public class ObjectPlacementType {
 	/// is used in a random number generator as a probability.
 	/// For example, if the HeightCurve sample was 0.5, there would be a 
 	/// 50% chance of being placed.
-	/// 
-	/// If the HeightProbCurve is not being used, the PlacementProbability
-	/// is used instead.
 	/// </summary>
 	/// <param name="height">Height to sample</param>
 	/// <returns></returns>
 	public bool EvaluateHeight(float height) {
 		float probability = 1f;
-		//TODO reimplement
+
 		if (ConstrainHeight) {
 			float totalHeight = MaxHeight - MinHeight;
-			float sampleAt = height / totalHeight;
+			float sampleAt = (height + MaxHeight) / totalHeight;
 
 			probability = HeightProbCurve.Evaluate(sampleAt);
 		} else {
-			//probability = PlacementProbability;
+			return true;
+		}
+
+		if (Rand == null) {
+			InitRNG();
 		}
 
 		float chance = ((float)Rand.Next(0, 100)) / 100;
 		return chance > (1 - probability);
+	}
+
+	/// <summary>
+	/// Decides whether the passed angle passes evaluation. 
+	/// The AngleProbCurve is sampled at the passed angle and 
+	/// its result is used in a random number generator as a 
+	/// probability.
+	/// For example, if the AngleCurve sample was 0.1, there would 
+	/// be a 50% chance of being placed.
+	/// </summary>
+	/// <param name="angle">Angle to sample</param>
+	/// <returns></returns>
+	public bool EvaluateAngle(float angle) {
+		float probability = 1f;
+
+		if (ConstrainAngle) {
+			float totalAngle = MaxAngle - MinAngle;
+			float sampleAt = (angle + MaxAngle) / totalAngle;
+
+			probability = AngleProbCurve.Evaluate(sampleAt);
+		} else {
+			return true;
+		}
+
+		if (Rand == null) {
+			InitRNG();
+		}
+
+		float chance = ((float)Rand.Next(0, 100)) / 100;
+		return chance > (1 - probability);
+	}
+
+	/// <summary>
+	/// Samples a rotation for this object placement type. Can 
+	/// return the rotation value that was set OR a random rotation 
+	/// within the specified extends (if random rotation is enabled)
+	/// </summary>
+	/// <returns>A rotation in Euler angles</returns>
+	public Vector3 GetRotation() {
+		if (IsRandomRotation) {
+			Vector3 max = RandomRotationExtents.Max;
+			Vector3 min = RandomRotationExtents.Min;
+
+			float x = Random.Range(min.x, max.x);
+			float y = Random.Range(min.y, max.y);
+			float z = Random.Range(min.z, max.z);
+
+			return new Vector3(x, y, z);
+		} else {
+			return RotationAmount;
+		}
+	}
+
+	/// <summary>
+	/// Samples a scaling factor for this object placement type. 
+	/// Can return the scale value that was set OR a random scale 
+	/// within the specified extends (if random scaling is enabled)
+	/// </summary>
+	public Vector3 GetScale() {
+		if (IsRandomScale) {
+			if (IsUniformScale) {
+				float max = UniformScaleMax;
+				float min = UniformScaleMin;
+				float amount = Random.Range(min, max);
+
+				return new Vector3(amount, amount, amount);
+			} else {
+				Vector3 max = RandomScaleExtents.Max;
+				Vector3 min = RandomScaleExtents.Min;
+
+				float x = Random.Range(min.x, max.x);
+				float y = Random.Range(min.y, max.y);
+				float z = Random.Range(min.z, max.z);
+
+				return new Vector3(x, y, z);
+			}
+		} else {
+			return ScaleAmount;
+		}
+	}
+
+	/// <summary>
+	/// Applies the translations specified in this instance. 
+	/// This includes translations OR a random translation between 
+	/// the specified min and max.
+	/// </summary>
+	/// <param name="pos">Start position before additional translations</param>
+	/// <returns>Translated Vector3</returns>
+	public Vector3 GetTranslation(Vector3 pos) {
+		if (IsRandomTranslate) {
+			Vector3 max = RandomTranslateExtents.Max;
+			Vector3 min = RandomTranslateExtents.Min;
+
+			float x = Random.Range(min.x, max.x);
+			float y = Random.Range(min.y, max.y);
+			float z = Random.Range(min.z, max.z);
+
+			return new Vector3(x, y, z) + pos;
+		} else {
+			return TranslationAmount + pos;
+		}
+	}
+
+	/// <summary>
+	/// Transforms the passed gameobject according to the 
+	/// passed Vector3 position and the (optional) random 
+	/// transformations specified in this placement type.
+	/// This does not set the parent for this gameobject
+	/// </summary>
+	/// <param name="go">GameObject to transform</param>
+	/// <param name="position">Calculated position</param>
+	/// <param name="length">Length of the mesh</param>
+	/// <param name="tileOffset">Location where the TerrainTile starts</param>
+	public void TransformGameObject(GameObject go, Vector3 position, int length, Vector3 tileOffset) {
+		float xPos = ((position.x * length) - length / 2) + tileOffset.x;
+		float yPos = position.y;
+		float zPos = ((position.z * length) - length / 2) + tileOffset.z;
+
+		go.transform.position = GetTranslation(new Vector3(xPos, yPos, zPos));
+		go.transform.eulerAngles = GetRotation();
+		go.transform.localScale = GetScale();
+	}
+
+	/// <summary>
+	/// Initializes the random number generator
+	/// </summary>
+	void InitRNG() {
+		if (Seed == -1)
+			Rand = new System.Random();
+		else
+			Rand = new System.Random(Seed);
 	}
 }

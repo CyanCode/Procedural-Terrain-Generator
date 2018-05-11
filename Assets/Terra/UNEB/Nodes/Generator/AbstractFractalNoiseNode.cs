@@ -18,9 +18,13 @@ namespace Terra.Nodes.Generation {
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
+			EditorGUI.BeginChangeCheck();
 			Frequency = EditorGUILayout.FloatField("Frequency", Frequency);
 			Lacunarity = EditorGUILayout.FloatField("Lacunarity", Lacunarity);
 			OctaveCount = EditorGUILayout.IntField("Octave Count", OctaveCount);
+			if (EditorGUI.EndChangeCheck()) {
+				NotifyValueChange();
+			}
 		}
 		#endif
 	}

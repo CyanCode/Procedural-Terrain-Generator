@@ -40,7 +40,7 @@ namespace Terra.Terrain {
 		public Material CustomMaterial = null;
 
 		//Object Placement Tab
-		public List<ObjectPlacementType> ObjectPlacementSettings = null;
+		public List<ObjectPlacementType> ObjectPlacementSettings = new List<ObjectPlacementType>();
 
 		//Editor mode specific
 		public GraphManager Manager;

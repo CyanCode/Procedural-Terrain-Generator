@@ -17,8 +17,12 @@ namespace Terra.Nodes.Generation {
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
+			EditorGUI.BeginChangeCheck();
 			Frequency = EditorGUILayout.FloatField("Frequency", Frequency);
 			Period = EditorGUILayout.FloatField("Period", Period);
+			if (EditorGUI.EndChangeCheck()) {
+				NotifyValueChange();
+			}
 		}
 #endif
 	}

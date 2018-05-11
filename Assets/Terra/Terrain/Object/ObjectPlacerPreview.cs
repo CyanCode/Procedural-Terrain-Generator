@@ -83,7 +83,7 @@ namespace Terra.Terrain {
 			Component[] children = Parent.GetComponentsInChildren<Transform>();
 
 			for (int i = 0; i < children.Length; i++) {
-				if (children[i].gameObject != Parent) {
+				if (children[i] != null && children[i].gameObject != Parent) {
 					GameObject.DestroyImmediate(children[i].gameObject);
 				}
 			}

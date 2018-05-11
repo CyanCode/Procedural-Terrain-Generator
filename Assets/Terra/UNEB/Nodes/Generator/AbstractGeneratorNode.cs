@@ -2,13 +2,15 @@
 using System;
 using UnityEngine;
 using UNEB;
+using System.Collections.Generic;
 
 namespace Terra.Nodes.Generation {
 	public abstract class AbstractGeneratorNode: Node {
 		public override void Init() {
 			base.Init();
 
-			AddOutput("Output", true);
+			NodeOutput output = AddOutput("Output", true);
+			output.getValue = GetGenerator;
 			FitKnobs();
 
 			name = GetName();
@@ -24,40 +26,45 @@ namespace Terra.Nodes.Generation {
 		}
 
 		/// <summary>
+		/// This can be called whenever a value changes in 
+		/// one of the nodes. By default this will make any 
+		/// NoisePreviewNode spanning off of <c>this</c> Node 
+		/// update its texture.
+		/// </summary>
+		public void NotifyValueChange() {
+			/**
+			 * Perform a depth first search for any NoisePreviewNode
+			 * that spans off of this Node
+			 */
+			var dfs = new Stack<Node>();
+
+			dfs.Push(this);
+
+			while (dfs.Count != 0) {
+
+				var node = dfs.Pop();
+
+				// Search neighbors
+				foreach (var output in node.Outputs) {
+					foreach (var input in output.Inputs) {
+						dfs.Push(input.ParentNode);
+					}
+				}
+
+				var outputNode = node as NoisePreviewNode;
+				if (outputNode != null) {
+					outputNode.TextureNeedsUpdating = true;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Get the generator associated with this node. Is 
 		/// Used to compute the final generator passed to the end 
 		/// node and preview nodes.
 		/// </summary>
 		/// <returns>Generator</returns>
 		public abstract Generator GetGenerator();
-
-		//[NonSerialized]
-		//protected OutputSocket OutSocket;
-		//[NonSerialized]
-		//protected Texture2D PreviewTexture;
-		//[NonSerialized]
-		//protected bool TextureNeedsUpdating = true;
-		//[NonSerialized]
-		//protected Generator Generator;
-
-		//[NonSerialized]
-		//private Rect ErrorMessageLabel;
-
-		//protected AbstractGeneratorNode(int id, Graph parent) : base(id, parent) {
-		//	OutSocket = new OutputSocket(this, typeof(AbstractGeneratorNode));
-		//	Sockets.Add(OutSocket);
-		//}
-
-
-		//public static Generator GetInputGenerator(InputSocket socket) {
-		//	if (socket.Type == typeof(AbstractGeneratorNode)) {
-		//		if (!socket.IsConnected()) return null;
-
-		//		return ((AbstractGeneratorNode)socket.GetConnectedSocket().Parent).GetGenerator();
-		//	} else {
-		//		Debug.LogError("InputSocket is not of type AbstractGeneratorNode");
-		//		return null;
-		//	}
-		//}
 	}
 }
+ 

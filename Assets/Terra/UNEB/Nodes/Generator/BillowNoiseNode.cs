@@ -38,7 +38,11 @@ namespace Terra.Nodes.Generation {
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
+			EditorGUI.BeginChangeCheck();
 			Persistence = EditorGUILayout.FloatField("Persistence", Persistence);
+			if (EditorGUI.EndChangeCheck()) {
+				NotifyValueChange();
+			}
 		}
 		#endif
 	}

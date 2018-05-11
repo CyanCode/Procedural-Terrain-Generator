@@ -43,9 +43,13 @@ namespace Terra.Nodes.Generation {
 		public override void OnBodyGUI() {
 			base.OnBodyGUI();
 
+			EditorGUI.BeginChangeCheck();
 			Exponent = EditorGUILayout.FloatField("Exponent", Exponent);
 			Offset = EditorGUILayout.FloatField("Offset", Offset);
 			Gain = EditorGUILayout.FloatField("Gain", Gain);
+			if (EditorGUI.EndChangeCheck()) {
+				NotifyValueChange();
+			}
 		}
 #endif
 	}

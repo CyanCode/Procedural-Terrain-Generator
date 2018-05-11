@@ -4,6 +4,7 @@
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
+
 /Assets/AssetStoreTools*
 /Assets/Standard Assets/
 /Assets/Custom/Tests/
@@ -13,6 +14,18 @@
 /Assets/Meshes/
 /Assets/Terrains/
 /AssetStore/
+/Assets/PBR Ground Materials/
+/Assets/PlantsReedCherry/
+/Assets/PostProcessing/
+/Assets/Profiles/
+/Assets/Promo/
+/Assets/Rocks Pack/
+/Assets/Skybox/
+/Assets/Terrain Textures Snow Free Samples/
+/Assets/Tree_Textures/
+/Assets/Tree9/
+/Assets/Ultra Skybox Fog/
+
 _site/
 .vs/
 

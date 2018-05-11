@@ -7,8 +7,7 @@ using Assets.Terra.UNEB.Utility;
 using UnityEngine;
 
 namespace Terra.Nodes.Modifier {
-	[Serializable]
-	[GraphContextMenuItem("Modifier", "Mask")]
+	[Serializable, GraphContextMenuItem("Modifier", "Mask")]
 	public class MaskNode: AbstractTwoModNode {
 		[SerializeField]
 		private NodeInput InputMaskGenerator;	
@@ -35,6 +34,10 @@ namespace Terra.Nodes.Modifier {
 
 		public override string GetName() {
 			return "Mask";
+		}
+
+		public override void OnBodyGUI() {
+			base.OnBodyGUI();
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace Terra.Nodes {
 		[SerializeField]
 		private NodeInput InputGenerator;
 
-		private float startHeight = 0f;
+		private float startHeight = 20f;
 		private float heightExpanded {
 			get {
 				return startHeight + 82f;
@@ -36,6 +36,7 @@ namespace Terra.Nodes {
 			base.Init();
 
 			InputGenerator = AddInput("Generator");
+			InputGenerator.name = "Generator";
 			FitKnobs();
 
 			name = "Preview";
@@ -54,8 +55,10 @@ namespace Terra.Nodes {
 			if (Texture != null) {
 				GUI.DrawTexture(new Rect(6, kHeaderHeight + 6, 90, 90), Texture);
 				bodyRect.height = heightExpanded;
+				SetNameText("");
 			} else {
 				bodyRect.height = heightContracted;
+				SetNameText("Generator");
 			}
 
 			NodeGraphEvent.OnNodeChanged -= OnGraphUpdate;
@@ -64,6 +67,12 @@ namespace Terra.Nodes {
 
 		private void OnGraphUpdate(Node n) {
 			TextureNeedsUpdating = true;
+		}
+
+		private void SetNameText(string name) {
+			if (InputGenerator != null) {
+				InputGenerator.name = name;
+			}
 		}
 
 		/// <summary>

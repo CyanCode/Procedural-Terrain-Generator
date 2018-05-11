@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Linq;
 using Assets.Terra;
+using Terra.CoherentNoise;
 
 #if UNITY_EDITOR
 
@@ -76,6 +77,14 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Checks to see if TerraSettings has an attached end Generator.
+		/// </summary>
+		/// <returns>true if an end generator is attached</returns>
+		public bool HasEndGenerator() {
+			return Settings.Manager.GetEndGenerator() != null;
+		}
+
+		/// <summary>
 		/// Removes components associated with this preview, 
 		/// does not remove cached data
 		/// </summary>
@@ -109,9 +118,14 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Creates a mesh with noise applied if a generator has been created
 		/// </summary>
-		/// <returns>Filled Mesh</returns>
+		/// <returns>Filled Mesh, null if no end generator is provided.</returns>
 		private Mesh CreateMesh() {
-			return TerrainTile.GetPreviewMesh(Settings, Settings.Manager.GetEndGenerator());
+			Generator end = Settings.Manager.GetEndGenerator();
+			if (end != null) {
+				return TerrainTile.GetPreviewMesh(Settings, Settings.Manager.GetEndGenerator());
+			}
+
+			return null;
 		}
 
 		/// <summary>
@@ -174,14 +188,21 @@ namespace Terra.Terrain {
 			}
 		}
 
+		/// <summary>
+		/// Adds a mesh component if one doesn't already exist AND 
+		/// there is an attached end generator.
+		/// </summary>
 		private void AddMeshComponent() {
-			if (Settings.GetComponent<MeshFilter>() == null) {
+			if (Settings.GetComponent<MeshFilter>() == null && HasEndGenerator()) {
 				MeshFilter filter = Settings.gameObject.AddComponent<MeshFilter>();
 				if (HideInInspector)
 					filter.hideFlags = HideFlags.HideInInspector;
 
 				//Generate mesh
-				filter.sharedMesh = CreateMesh();
+				Mesh m = CreateMesh();
+				if (m != null) {
+					filter.sharedMesh = CreateMesh();
+				}				
 			}
 		}
 	}

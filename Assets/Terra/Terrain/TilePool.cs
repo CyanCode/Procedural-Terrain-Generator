@@ -126,7 +126,10 @@ namespace Terra.Terrain {
 		/// <param name="delay">Delay in seconds before checking colliders again</param>
 		/// <returns>IEnumerator for use in a Coroutine</returns>
 		private IEnumerator UpdateColliders(float delay) {
-			List<TerrainTile> tiles = GetTilesInExtent(Settings.TrackedObject.transform.position, Settings.ColliderGenerationExtent);
+			//If we're generating all colliders the extent of collision generation is 
+			//technically infinity (max value works just as well though)
+			float extent = Settings.GenAllColliders ? float.MaxValue : Settings.ColliderGenerationExtent;
+			List<TerrainTile> tiles = GetTilesInExtent(Settings.TrackedObject.transform.position, extent);
 
 			foreach (TerrainTile t in tiles) {
 				t.GenerateCollider();

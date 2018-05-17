@@ -1,12 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-using Assets.Terra;
 using Terra.CoherentNoise;
-
-#if UNITY_EDITOR
-
-#endif
 
 namespace Terra.Terrain {
 	public class TerrainPreview {

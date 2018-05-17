@@ -1,0 +1,1 @@
+To run this example simply run the scene. If you want to move around I suggest importing the standard FPSController and setting it as the tracked gameobject.

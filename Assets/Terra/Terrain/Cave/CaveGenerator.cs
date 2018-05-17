@@ -1,6 +1,7 @@
 ﻿using MarchingCubesProject;
 using ProceduralNoiseProject;
 using System.Collections.Generic;
+using Terra.Terrain;
 using UnityEngine;
 
 namespace Assets.Terra.Terrain.Cave {
@@ -9,10 +10,22 @@ namespace Assets.Terra.Terrain.Cave {
 		public Material m_material;
 		public enum MARCHING_MODE { CUBES, TETRAHEDRON };
 		public MARCHING_MODE mode = MARCHING_MODE.CUBES;
-
 		public int seed = 0;
+		public int resolution = 32;
 
 		List<GameObject> meshes = new List<GameObject>();
+
+		private TerraSettings Settings {
+			get {
+				return FindObjectOfType<TerraSettings>();
+			}
+		}
+
+		public void ClearCave() {
+			foreach (GameObject go in meshes) {
+				DestroyImmediate(go, false);
+			}
+		} 
 
 		public void DrawCave() {
 			INoise perlin = new PerlinNoise(seed, 2.0f);
@@ -32,9 +45,9 @@ namespace Assets.Terra.Terrain.Cave {
 			marching.Surface = 0.0f;
 
 			//The size of voxel array.
-			int width = 32;
-			int height = 32;
-			int length = 32;
+			int width = resolution;
+			int height = resolution;
+			int length = resolution;
 
 			float[] voxels = new float[width * height * length];
 

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Terra.CoherentNoise.Generation.Displacement
@@ -22,6 +21,7 @@ namespace Terra.CoherentNoise.Generation.Displacement
 		{
 			
 		}
+
 		///<summary>
 		/// Create new translation
 		///</summary>

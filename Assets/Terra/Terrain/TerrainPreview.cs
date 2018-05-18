@@ -22,6 +22,14 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Checks whether a terrain preview can be created
+		/// </summary>
+		public bool CanPreview() {
+			return Settings.DisplayPreview && Settings.Graph != null &&
+				Settings.Graph.GetEndGenerator() != null && Settings.Preview != null;
+		}
+
+		/// <summary>
 		/// Creates a preview of the entire mesh including the Mesh, 
 		/// Materials, and object placement. Only performs update if
 		/// <c>Settings.DisplayPreview</c> is true
@@ -75,7 +83,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>true if an end generator is attached</returns>
 		public bool HasEndGenerator() {
-			return Settings.Manager.GetEndGenerator() != null;
+			return Settings.Graph.GetEndGenerator() != null;
 		}
 
 		/// <summary>
@@ -114,9 +122,12 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>Filled Mesh, null if no end generator is provided.</returns>
 		private Mesh CreateMesh() {
-			Generator end = Settings.Manager.GetEndGenerator();
-			if (end != null) {
-				return TerrainTile.GetPreviewMesh(Settings, Settings.Manager.GetEndGenerator());
+			if (Settings.Graph != null) {
+				Generator end = Settings.Graph.GetEndGenerator();
+
+				if (end != null) {
+					return TerrainTile.GetPreviewMesh(Settings, Settings.Graph.GetEndGenerator());
+				}
 			}
 
 			return null;

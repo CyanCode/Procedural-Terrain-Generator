@@ -158,7 +158,7 @@ namespace Terra.Terrain {
 			if (Settings.UseMultithreading) {
 				ThreadData data = new ThreadData();
 				data.tile = tile;
-				data.gen = Settings.Manager.GetEndGenerator();
+				data.gen = Settings.Graph.GetEndGenerator();
 
 				ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
 					//GetValue is not thread safe and must be locked

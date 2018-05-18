@@ -103,7 +103,7 @@ namespace Terra.Terrain {
 		/// <param name="renderOnCreation">If true, the attached MeshRenderer will be enabled after the mesh has been formed. 
 		/// Otherwise, the attached MeshRenderer will be disabled by default.</param>
 		public void CreateMesh(Vector2 position, bool renderOnCreation = true) {
-			CreateMesh(position, Settings.Manager.GetEndGenerator(), renderOnCreation);
+			CreateMesh(position, Settings.Graph.GetEndGenerator(), renderOnCreation);
 		}
 
 		/// <summary>

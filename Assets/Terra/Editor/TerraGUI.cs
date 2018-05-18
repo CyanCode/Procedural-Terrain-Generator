@@ -1,7 +1,7 @@
-﻿using Assets.Terra.Nodes;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Terra.Graph.Noise;
 using Terra.Terrain;
-using UNEB;
+using Terra.Terrain.Util;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -204,14 +204,13 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Noise" tab
 		/// </summary>
 		public void Noise() {
-			GraphManager manager = Settings.Manager;
-			manager.Update();
+			NoiseGraph graph = Settings.Graph;
 
 			EditorGUILayout.Space();	
 
 			//Check if graph is loaded and assign generator
 			//from end node
-			if (manager.Graph == null) {
+			if (graph == null) {
 				const string msg = "A node graph asset file must be attached to 'Graph' before " +
 					"terrain can be generated.";
 				EditorGUILayout.HelpBox(msg, MessageType.Warning);
@@ -219,17 +218,17 @@ namespace UnityEditor.Terra {
 			
 			//Display message if the generator failed to load
 			//OR display message about a successful load
-			if (manager.Graph != null && Settings.Manager.GetEndGenerator() == null) {
+			if (graph != null && graph.GetEndGenerator() == null) {
 				const string msg = "The attached node graph either does not have a supplied End node " +
 					"or the End node is missing its input.";
 				EditorGUILayout.HelpBox(msg, MessageType.Warning);
-			} else if (Settings.Manager.GetEndGenerator() != null) {
+			} else if (graph != null && graph.GetEndGenerator() != null) {
 				const string msg = "Hooray! The attached node graph is ready for use.";
 				EditorGUILayout.HelpBox(msg, MessageType.Info);
 			}
 
 			EditorGUILayout.Space();
-			manager.Graph = (NodeGraph) EditorGUILayout.ObjectField("Graph", manager.Graph, typeof(NodeGraph), false);
+			Settings.Graph = (NoiseGraph) EditorGUILayout.ObjectField("Graph", graph, typeof(NoiseGraph), false);
 			EditorGUILayout.Space();
 
 			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);

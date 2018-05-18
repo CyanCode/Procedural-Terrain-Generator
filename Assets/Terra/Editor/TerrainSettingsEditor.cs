@@ -1,5 +1,4 @@
-﻿using Assets.Terra.Nodes;
-using System;
+﻿using System;
 using Terra.Terrain;
 using UnityEngine;
 
@@ -15,10 +14,6 @@ namespace UnityEditor.Terra {
 		private TerraGUI gui;
 
 		void OnEnable() {
-			if (Settings.Manager == null) {
-				Settings.Manager = new GraphManager();
-			}
-
 			if (gui == null) {
 				gui = new TerraGUI(Settings);
 			}

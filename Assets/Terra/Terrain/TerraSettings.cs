@@ -1,7 +1,8 @@
-﻿using Terra.CoherentNoise;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Terra.Graph.Noise;
+using Terra.Terrain.Util;
 using UnityEngine;
-using Assets.Terra.Nodes;
+
 
 namespace Terra.Terrain {
 	[System.Serializable, ExecuteInEditMode]
@@ -29,6 +30,7 @@ namespace Terra.Terrain {
 		public bool UseMultithreading = true;
 
 		//Noise Tab
+		public NoiseGraph Graph;
 		public float Spread = 100f;
 		public float Amplitude = 50f;
 
@@ -41,9 +43,6 @@ namespace Terra.Terrain {
 
 		//Object Placement Tab
 		public List<ObjectPlacementType> ObjectPlacementSettings = new List<ObjectPlacementType>();
-
-		//Editor mode specific
-		public GraphManager Manager;
 
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated
@@ -75,7 +74,7 @@ namespace Terra.Terrain {
 #if UNITY_EDITOR
 			if (!Application.isPlaying && Application.isEditor) {
 				//Handle Previewing
-				if (DisplayPreview && Manager.GetEndGenerator() != null && Preview != null) {
+				if (Preview != null && Preview.CanPreview()) {
 					Preview.TriggerPreviewUpdate();
 				}
 			}

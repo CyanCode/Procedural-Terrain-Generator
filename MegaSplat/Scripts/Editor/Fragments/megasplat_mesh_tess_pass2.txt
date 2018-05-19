@@ -1,0 +1,25 @@
+﻿      Pass 
+      {
+         Name "FORWARD_DELTA"
+         Tags {  "LightMode"="ForwardAdd" }
+         Blend One One
+         
+         
+         CGPROGRAM
+         #define UNITY_PASS_FORWARDADD
+         #define SHOULD_SAMPLE_SH ( defined (LIGHTMAP_OFF) && defined(DYNAMICLIGHTMAP_OFF) )
+         #define _GLOSSYENV 1
+         #include "UnityCG.cginc"
+         #include "AutoLight.cginc"
+         #include "Lighting.cginc"
+         #include "Tessellation.cginc"
+         #include "UnityPBSLighting.cginc"
+         #include "UnityStandardBRDF.cginc"
+         #include "UnityMetaPass.cginc"
+         #pragma multi_compile_fwdadd_fullshadows
+         #pragma multi_compile LIGHTMAP_OFF LIGHTMAP_ON
+         #pragma multi_compile DIRLIGHTMAP_OFF DIRLIGHTMAP_COMBINED DIRLIGHTMAP_SEPARATE
+         #pragma multi_compile DYNAMICLIGHTMAP_OFF DYNAMICLIGHTMAP_ON
+         #pragma multi_compile_fog
+         #pragma target 4.6
+         #define _PASSFORWARDADD 1

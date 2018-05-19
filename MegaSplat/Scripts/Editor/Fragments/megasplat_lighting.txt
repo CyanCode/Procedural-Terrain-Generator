@@ -1,0 +1,216 @@
+
+           
+
+            inline half4 VertexGIForward(float2 uv1, float2 uv2, float3 posWorld, half3 normalWorld)
+            {
+               half4 ambientOrLightmapUV = 0;
+               // Static lightmaps
+               #ifdef LIGHTMAP_ON
+                  ambientOrLightmapUV.xy = uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+                  ambientOrLightmapUV.zw = 0;
+               // Sample light probe for Dynamic objects only (no static or dynamic lightmaps)
+               #elif UNITY_SHOULD_SAMPLE_SH
+                  #ifdef VERTEXLIGHT_ON
+                     // Approximated illumination from non-important point lights
+                     ambientOrLightmapUV.rgb = Shade4PointLights (
+                        unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
+                        unity_LightColor[0].rgb, unity_LightColor[1].rgb, unity_LightColor[2].rgb, unity_LightColor[3].rgb,
+                        unity_4LightAtten0, posWorld, normalWorld);
+                  #endif
+
+                  ambientOrLightmapUV.rgb = ShadeSHPerVertex (normalWorld, ambientOrLightmapUV.rgb);     
+               #endif
+
+               #ifdef DYNAMICLIGHTMAP_ON
+                  ambientOrLightmapUV.zw = uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+               #endif
+
+               return ambientOrLightmapUV;
+            }
+
+            SurfaceOutputStandard ToStandard(LightingTerms m)
+            {
+               #ifdef UNITY_COMPILER_HLSL
+                  SurfaceOutputStandard o = (SurfaceOutputStandard)0;
+               #else
+                  SurfaceOutputStandard o;
+               #endif
+               o.Albedo = m.Albedo;
+               o.Normal = m.Normal;
+               o.Smoothness = m.Smoothness;
+               o.Occlusion = m.Occlusion;
+               o.Alpha = m.Alpha;
+               o.Metallic = m.Metallic;
+               o.Emission = m.Emission;
+               return o;
+            }
+
+
+            #undef SHADOW_ATTENUATION
+            #if defined (SHADOWS_SCREEN)
+               #define SHADOW_ATTENUATION(a) unitySampleShadow(a._ShadowCoord)
+            #elif defined (SHADOWS_DEPTH) && defined (SPOT)
+               #define SHADOW_ATTENUATION(a) UnitySampleShadowmap(a._ShadowCoord)
+            #elif defined (SHADOWS_CUBE)
+               #define SHADOW_ATTENUATION(a) UnitySampleShadowmap(a._ShadowCoord)
+            #else
+              #define SHADOW_ATTENUATION(a) 1.0
+            #endif
+
+            void LightPBRDeferred(VertexOutput i, LightingTerms m, float3 viewDir,
+                           inout half4 gBuffer0, inout half4 gBuffer1, inout half4 gBuffer2, inout half4 gBuffer3
+                           #if defined(SHADOWS_SHADOWMASK) && (UNITY_ALLOWED_MRT_COUNT > 4)
+                           , inout half4 outShadowMask
+                           #endif
+                           )
+            {
+               #if _PASSDEFERRED
+
+
+               UnityGI gi;
+               UNITY_INITIALIZE_OUTPUT(UnityGI, gi);
+               gi.indirect.diffuse = 0;
+               gi.indirect.specular = 0;
+               gi.light.color = 0;
+               gi.light.dir = half3(0,1,0);
+               gi.light.ndotl = LambertTerm (m.Normal, gi.light.dir);
+               // Call GI (lightmaps/SH/reflections) lighting function
+               UnityGIInput giInput;
+               UNITY_INITIALIZE_OUTPUT(UnityGIInput, giInput);
+               giInput.light = gi.light;
+               giInput.worldPos = i.posWorld;
+               giInput.worldViewDir = viewDir;
+               giInput.atten = 1;
+
+               giInput.ambient = 0;
+               giInput.lightmapUV = i.ambientOrLightmapUV;
+
+               giInput.probeHDR[0] = unity_SpecCube0_HDR;
+               giInput.probeHDR[1] = unity_SpecCube1_HDR;
+               #if UNITY_SPECCUBE_BLENDING || UNITY_SPECCUBE_BOX_PROJECTION
+                giInput.boxMin[0] = unity_SpecCube0_BoxMin; // .w holds lerp value for blending
+               #endif
+               #if UNITY_SPECCUBE_BOX_PROJECTION
+                giInput.boxMax[0] = unity_SpecCube0_BoxMax;
+                giInput.probePosition[0] = unity_SpecCube0_ProbePosition;
+                giInput.boxMax[1] = unity_SpecCube1_BoxMax;
+                giInput.boxMin[1] = unity_SpecCube1_BoxMin;
+                giInput.probePosition[1] = unity_SpecCube1_ProbePosition;
+               #endif
+
+               SurfaceOutputStandard o = ToStandard(m);
+
+               LightingStandard_GI(o, giInput, gi);
+
+               // call lighting function to output g-buffer
+               gBuffer3 = LightingStandard_Deferred (o, viewDir, gi, gBuffer0, gBuffer1, gBuffer2);
+               #if defined(SHADOWS_SHADOWMASK) && (UNITY_ALLOWED_MRT_COUNT > 4)
+                outShadowMask = UnityGetRawBakedOcclusions (i.ambientOrLightmapUV.xy, float3(0, 0, 0));
+               #endif
+               #ifndef UNITY_HDR_ON
+               gBuffer3.rgb = exp2(-gBuffer3.rgb);
+               #endif
+               gBuffer0.a = o.Alpha;
+               #endif
+            }
+
+
+
+            half4 LightPBR(VertexOutput i, LightingTerms m, float3 viewDir, float4 ambientOrLightmapUV)
+            {
+               #ifndef USING_DIRECTIONAL_LIGHT
+                  fixed3 lightDir = normalize(UnityWorldSpaceLightDir(i.posWorld));
+               #else
+                  fixed3 lightDir = _WorldSpaceLightPos0.xyz;
+               #endif
+
+               UNITY_LIGHT_ATTENUATION(lightAtten, i, i.posWorld);
+               fixed3 worldViewDir = normalize(UnityWorldSpaceViewDir(i.posWorld));
+
+               #if _RAMPLIGHTING
+               {
+                  half4 ramped = half4(DoLightingRamp(m.Albedo * m.Occlusion, m.Normal, m.Emission, lightDir, lightAtten), 1);
+                  UNITY_APPLY_FOG(i.fogCoord, ramped);
+                  return ramped;
+               }
+               #endif
+
+               #if _PASSFORWARDBASE
+
+                  // Setup lighting environment
+                  UnityGI gi;
+                  UNITY_INITIALIZE_OUTPUT(UnityGI, gi);
+                  gi.indirect.diffuse = 0;
+                  gi.indirect.specular = 0;
+
+                  gi.light.color = _LightColor0.rgb;
+                  gi.light.dir = lightDir;
+                  gi.light.ndotl = LambertTerm (m.Normal, gi.light.dir);
+
+                  // Call GI (lightmaps/SH/reflections) lighting function
+                  UnityGIInput giInput;
+                  UNITY_INITIALIZE_OUTPUT(UnityGIInput, giInput);
+                  giInput.light = gi.light;
+                  giInput.worldPos = i.posWorld.xyz;
+                  giInput.worldViewDir = worldViewDir;
+                  giInput.atten = lightAtten;
+                  #if defined(LIGHTMAP_ON) || defined(DYNAMICLIGHTMAP_ON)
+                   giInput.lightmapUV = i.ambientOrLightmapUV;
+                  #else
+                   giInput.lightmapUV = 0.0;
+                  #endif
+                  #if UNITY_SHOULD_SAMPLE_SH
+                   giInput.ambient = i.ambientOrLightmapUV;
+                  #else
+                   giInput.ambient.rgb = 0.0;
+                  #endif
+                  giInput.probeHDR[0] = unity_SpecCube0_HDR;
+                  giInput.probeHDR[1] = unity_SpecCube1_HDR;
+                  #if defined(UNITY_SPECCUBE_BLENDING) || defined(UNITY_SPECCUBE_BOX_PROJECTION)
+                   giInput.boxMin[0] = unity_SpecCube0_BoxMin; // .w holds lerp value for blending
+                  #endif
+                  #ifdef UNITY_SPECCUBE_BOX_PROJECTION
+                     giInput.boxMax[0] = unity_SpecCube0_BoxMax;
+                     giInput.probePosition[0] = unity_SpecCube0_ProbePosition;
+                     giInput.boxMax[1] = unity_SpecCube1_BoxMax;
+                     giInput.boxMin[1] = unity_SpecCube1_BoxMin;
+                     giInput.probePosition[1] = unity_SpecCube1_ProbePosition;
+                  #endif
+
+                  SurfaceOutputStandard o = ToStandard(m);
+
+                  LightingStandard_GI(o, giInput, gi);
+                  fixed4 c = 0;
+                  c += LightingStandard (o, worldViewDir, gi);
+                  c.rgb += o.Emission;
+                  UNITY_APPLY_FOG(i.fogCoord, c.rgb);
+                  c.a = o.Alpha;
+                  return c;
+
+
+                #elif _PASSFORWARDADD
+
+                  fixed4 c = 0;
+
+                  // Setup lighting environment
+                  UnityGI gi;
+                  UNITY_INITIALIZE_OUTPUT(UnityGI, gi);
+                  gi.indirect.diffuse = 0;
+                  gi.indirect.specular = 0;
+                  gi.light.color = _LightColor0.rgb;
+                  gi.light.dir = lightDir;
+                  gi.light.color *= lightAtten;
+                  gi.light.ndotl = LambertTerm (m.Normal, gi.light.dir);
+
+                  SurfaceOutputStandard o = ToStandard(m);
+                  c += LightingStandard (o, worldViewDir, gi);
+                  c.rgb += o.Emission;
+                  UNITY_APPLY_FOG_COLOR(i.fogCoord, c.rgb, half4(0,0,0,0)); // fog towards black in additive pass
+                  c.a = o.Alpha;
+                  return c;
+
+                #endif
+                return half4(1, 1, 0, 0);
+            }
+
+

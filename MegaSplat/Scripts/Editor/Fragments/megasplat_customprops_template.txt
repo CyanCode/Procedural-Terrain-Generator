@@ -1,0 +1,11 @@
+
+//////////////////////////////////////////////////////
+// MegaSplat - 256 texture splat mapping
+// Copyright (c) Jason Booth, slipster216@gmail.com
+//////////////////////////////////////////////////////
+
+// insert Property definitions here. Properties must begin with _Custom_, so if you want a
+// texture you could define one like
+// _Custom_MyTexture("My Texture", 2D) = "black"
+
+

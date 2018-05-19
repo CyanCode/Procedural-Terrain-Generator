@@ -39,6 +39,7 @@ namespace Terra.Terrain {
 		public bool IsMaxHeightSelected = false;
 		public bool IsMinHeightSelected = false;
 		public bool UseCustomMaterial = false;
+		public bool ConvertMesh = false;
 		public Material CustomMaterial = null;
 
 		//Object Placement Tab

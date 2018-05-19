@@ -1,0 +1,13 @@
+﻿Shader "Hidden/MegaOutputShader"
+{
+	Properties
+	{
+      [NoScaleOffset]_LocalPositions ("Local Positions", 2D) = "white" {}
+      [NoScaleOffset]_WorldPositions ("World Positions", 2D) = "white" {}
+      [NoScaleOffset]_LocalNormals ("Local Normals", 2D) = "white" {}
+      [NoScaleOffset]_WorldNormals ("World Normals", 2D) = "white" {}
+      [NoScaleOffset]_UVCavity("Cavity map", 2D) = "white" {}
+      [NoScaleOffset]_CurveArray("Curve Array", 2DArray) = "black" {}
+      _HeightBounds("Height Bounds", Vector) = (0,1,0,0)
+      _Pass("Pass", Float) = 0
+	

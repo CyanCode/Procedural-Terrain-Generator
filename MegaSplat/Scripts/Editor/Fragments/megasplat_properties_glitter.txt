@@ -1,0 +1,4 @@
+      // glitter
+      [NoScaleOffset]_GlitterTexture("Glitter Texture", 2D) = "grey" {}
+      _GlitterParams("Glitter Params", Vector) = (80, 80, .21, 5) // uv scale, scale, flutterspeed, flutterscale
+      _GlitterSurfaces("Glitter Snow/Water", Vector) = (1, 8, 1, 8) //shine/reflect snow, shine/reflect water

@@ -1,0 +1,6 @@
+       // detail texturing
+       [NoScaleOffset]_DetailAlbedo("Detail Albedo Array", 2DArray) = "gray" {}
+       [NoScaleOffset]_DetailNormal("Detail Normal Array", 2DArray) = "bump" {}
+       _DetailBlendMode("Detail Blend Mode", Int) = 0
+       _DetailTextureStrength ("Blend Strength", Range(0.0, 1.0)) = 1.0
+

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Terra.CoherentNoise;
+using Assets.Terra.Terrain.Util;
 
 namespace Terra.Terrain {
 	public class TerrainPreview {
@@ -157,7 +158,7 @@ namespace Terra.Terrain {
 		/// either cached or generated.
 		/// </summary>
 		private void AddComponents() {
-			AddMeshComponent();
+			TriggerMeshUpdate();
 			TriggerMaterialsUpdate();
 			TriggerObjectPlacementUpdate();
 		}
@@ -166,21 +167,31 @@ namespace Terra.Terrain {
 			if (Settings.GetComponent<MeshRenderer>() == null) {
 				MeshRenderer rend = Settings.gameObject.AddComponent<MeshRenderer>();
 
-				//Get cached or generated splatmaps
-				if (Splats != null && Splats.Count > 0) {
-					Paint.ApplySplatmapsToShaders(Splats);
-				} else if (Settings.SplatSettings != null) {
-					Splats = CreateSplats();
-
-					if (Splats != null) {
-						Paint.ApplySplatmapsToShaders(Splats);
+				if (Settings.UseCustomMaterial && Settings.CustomMaterial != null) {
+					if (Settings.ConvertMesh) {
+						MeshFilter mf = Settings.gameObject.GetComponent<MeshFilter>();
+						mf.sharedMesh = MeshProcessor.Process(mf.sharedMesh);
 					}
-				}
 
-				//Apply default material
-				if (Splats == null || Splats.Count == 0) {
-					const string path = "Nature/Terrain/Standard";
-					rend.material = new Material(Shader.Find(path));
+					//Apply custom material to terrain
+					rend.sharedMaterial = Settings.CustomMaterial;
+				} else {
+					//Get cached or generated splatmaps
+					if (Splats != null && Splats.Count > 0) {
+						Paint.ApplySplatmapsToShaders(Splats);
+					} else if (Settings.SplatSettings != null) {
+						Splats = CreateSplats();
+
+						if (Splats != null) {
+							Paint.ApplySplatmapsToShaders(Splats);
+						}
+					}
+
+					//Apply default material
+					if (Splats == null || Splats.Count == 0) {
+						const string path = "Nature/Terrain/Standard";
+						rend.material = new Material(Shader.Find(path));
+					}
 				}
 
 				//Optionally hide renderer & material in inspector
@@ -197,7 +208,7 @@ namespace Terra.Terrain {
 		/// Adds a mesh component if one doesn't already exist AND 
 		/// there is an attached end generator.
 		/// </summary>
-		private void AddMeshComponent() {
+		private void TriggerMeshUpdate() {
 			if (Settings.GetComponent<MeshFilter>() == null && HasEndGenerator()) {
 				MeshFilter filter = Settings.gameObject.AddComponent<MeshFilter>();
 				if (HideInInspector)

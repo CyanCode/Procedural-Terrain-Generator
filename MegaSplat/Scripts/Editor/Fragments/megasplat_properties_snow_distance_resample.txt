@@ -1,0 +1,2 @@
+      // snow distance resample
+      _SnowDistanceResampleScaleStrengthFade("Snow Distance Resample", Vector) = (0.1, 0.5, 100, 150)

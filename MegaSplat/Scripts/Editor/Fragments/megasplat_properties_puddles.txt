@@ -1,0 +1,7 @@
+      // puddles
+      _PuddleFlowParams("Puddle Flow Params", Vector) = (1,1,0.1, 0.5)
+      _PuddleBlend("Puddle Blend", Range(1, 60)) = 6
+      _PuddleNormalFoam("Puddle Normal/Foam", Vector) = (0.6, 2, 0, 0)
+      _PuddleTint("Puddle Tint", Color) = (0.5,0.5,0.5,0)
+      _MaxPuddles("Max Puddles", Range(0,1)) = 1
+

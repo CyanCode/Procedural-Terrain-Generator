@@ -1,0 +1,4 @@
+
+      _TessData1("TessData1", Vector) = (4, 0.5, 2, 15)   // tess, displacement, mipBias, edge length
+      _TessData2("TessData2", Vector) = (10, 25, 0.3, 0.5) // distance min, max, shaping, upbias
+   

@@ -1,0 +1,2 @@
+      // emiss
+      [NoScaleOffset]_Emissive ("Emissive", 2DArray) = "black" {}

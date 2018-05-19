@@ -1,0 +1,3 @@
+      // distance noise
+      [NoScaleOffset]_DistanceNoise("Detail Noise (Lum/Normal)", 2D) = "grey" {}
+      _DistanceNoiseScaleStrengthFade("Detail Scale", Vector) = (0.1, 0.5, 100, 150)

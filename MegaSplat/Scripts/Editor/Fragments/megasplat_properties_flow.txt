@@ -1,0 +1,5 @@
+      // flow
+      _FlowSpeed("Flow Speed", Float) = 1
+      _FlowIntensity("Flow Intensity", Float) = 1
+      _FlowAlpha ("Flow Alpha", Range(0, 1)) = 1
+      _FlowRefraction("Flow Refraction", Range(0, 0.3)) = 0.04

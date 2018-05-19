@@ -1,0 +1,5 @@
+      // auto paint
+      _ProjectTexTop("Top Textures", Vector) = (0,0,0)
+      _ProjectTexSide("Side Textures", Vector) = (0,0,0)
+      _ProjectTexBottom("Bottom Textures", Vector) = (0,0,0)
+      _ProjectTexThresholdFreq("bottom/top Threshold and frequency of cluster noise", Vector) = (-0.3333, 0.3333, 0.05)

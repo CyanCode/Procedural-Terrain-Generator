@@ -1,0 +1,325 @@
+﻿ 
+      // heavility packed structure
+      struct Input
+      {
+          // avoid naming UV because unity magic..
+          float2 coords;               // uv, or triplanar UV
+          float4 valuesMain;           //index rgb, triplanar W
+          #if _TWOLAYER || _ALPHALAYER
+          float4 valuesSecond;         //index rgb + alpha
+          #endif
+          fixed3 weights : COLOR0;     // Causes unity to automagically map this from vertex color, erasing your values.. grr..
+
+          float2 camDist;              // distance from camera (for fades) and fog
+          float4 extraData;            // flowdir + fade, or if triplanar triplanarView, .w contains puddle height
+
+          float3 viewDir;              // auto unity view dir, which gets compiled out in some cases, grrr..
+
+          // everything after this requires > 3.5 shader model :(
+          #if _SECONDUV
+          float2 macroUV;              // special macro UV only used in alphalayer mode
+          #endif
+
+
+          #if _SNOW || _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+          float3 wsNormal;
+          #endif
+
+          #if _SNOW
+          half snowHeightFade;
+          float4 wsTangent;
+          #endif
+
+          #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+          float3 wsView;
+          #endif
+
+          #if _WETNESS
+          half wetness;
+          #endif
+
+          #if _GEOMAP
+          float3 worldPos;
+          #endif
+
+      };
+
+      SplatInput ToSplatInput(Input i)
+      {
+         SplatInput o = (SplatInput)0;
+         UNITY_INITIALIZE_OUTPUT(SplatInput,o);
+         o.weights = i.weights.xyz;
+         o.valuesMain = i.valuesMain.xyz;
+         o.viewDir = i.viewDir;
+         o.camDist.xy = i.camDist.xy;
+         #if _TWOLAYER || _ALPHALAYER
+         o.valuesSecond = i.valuesSecond.xyz;
+         o.layerBlend = i.valuesSecond.w;
+         #endif
+         o.splatUV = i.coords.xy;
+         o.macroUV = i.coords.xy;
+         #if _SECONDUV
+         o.macroUV = i.macroUV.xy;
+         #endif
+         #if _TRIPLANAR
+         o.triplanarUVW = float3(i.coords.xy, i.valuesMain.w);
+         o.triplanarBlend = i.extraData.xyz;
+         #endif
+         #if _FLOW || _FLOWREFRACTION || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+         o.flowDir = i.extraData.xy;
+         #endif
+         #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+         o.puddleHeight = i.extraData.w;
+         #endif
+
+         #if _TESSDAMPENING
+         o.displacementDampening = i.weights.w;
+         #endif
+
+         #if _SNOW
+         o.snowHeightFade = i.snowHeightFade;
+         #endif
+
+         #if _WETNESS
+         o.wetness = i.wetness;
+         #endif
+
+         #if _SNOW || _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsNormal = i.wsNormal;
+         #endif
+
+         #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsView = i.wsView;
+         #endif
+
+         #if _GEOMAP
+         o.worldPos = i.worldPos;
+         #endif
+
+         return o;
+      }
+
+      void vert (inout appdata_full i, out Input o) 
+      {
+          UNITY_INITIALIZE_OUTPUT(Input,o);
+
+          #if _CUSTOMUSERFUNCTION
+          CustomMegaSplatFunction_PreVertex(i.vertex, i.normal, i.tangent, i.texcoord.xy);
+          #endif
+
+          // select the texture coordinate for the splat texture
+          #if _USECURVEDWORLD
+          V_CW_TransformPointAndNormal(i.vertex, i.normal, i.tangent);
+          #endif
+
+          o.coords.xy = i.texcoord.xy;
+          #if _UVFROMSECOND
+          o.coords.xy = i.texcoord1.xy;
+          #endif
+
+          #if _SECONDUV
+             o.macroUV = i.texcoord.xy;
+             #if _UVFROMSECOND2
+             o.macroUV = i.texcoord1.xy;
+             #endif
+          #endif
+
+          float3 worldPos = mul (unity_ObjectToWorld, i.vertex).xyz;
+
+          #if _GEOMAP
+          o.worldPos = worldPos;
+          #endif
+
+          float3 worldNormal = i.normal;
+          #if (_TRIPLANAR_WORLDSPACE || _SNOW || _PROJECTTEXTURE_WORLD || _PROJECTTEXTURE2_WORLD || _UVWORLDTOP || _UVWORLDFRONT || _UVWORLDSIDE || _UVWORLDTOP2 || _UVWORLDFRONT2 || _UVWORLDSIDE2)
+          worldNormal = normalize(mul((float3x3)unity_ObjectToWorld, i.normal));
+          #endif
+
+          o.coords.xy = ProjectUVs(i.vertex.xyz, o.coords.xy, worldPos, worldNormal, i.tangent);
+          #if _SECONDUV
+          o.macroUV.xy = ProjectUV2(i.vertex.xyz, o.macroUV.xy, worldPos, worldNormal, i.tangent);
+          #endif
+
+          // filters in vertex color, main splat in color.a, secondary in uv2.a
+          o.weights = i.color.rgb;
+          o.valuesMain.xyz = i.color.rgb * i.color.a * 255;
+          #if _TWOLAYER || _ALPHALAYER
+          o.valuesSecond.xyz = i.color.rgb * i.texcoord3.a * 255;
+          o.valuesSecond.a = i.texcoord3.x;
+          #endif
+
+
+
+
+
+          #if _TWOLAYER || _ALPHALAYER
+          ProceduralTexture(i.vertex.xyz, worldPos, i.normal, worldNormal, o.valuesMain, o.valuesSecond, i.color.rgb);
+          #else
+          float4 fakeSecond = float4(0,0,0,0);
+          ProceduralTexture(i.vertex.xyz, worldPos, i.normal, worldNormal, o.valuesMain, fakeSecond, i.color.rgb);
+          #endif
+
+
+          float dist = distance(_WorldSpaceCameraPos, worldPos);
+          o.camDist.x = 1.0 - saturate((dist - _DistanceFades.x) / (_DistanceFades.y - _DistanceFades.x));
+          o.camDist.y = length(UnityObjectToViewPos(i.vertex.xyz));
+
+          #if _FLOW || _FLOWREFRACTION || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+          o.extraData.xy = (i.texcoord2.zw * 2.0 - 1.0);
+          #endif
+
+          #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+          o.extraData.w = i.texcoord3.y;
+          #endif
+
+          #if _WETNESS
+          o.wetness = i.texcoord1.w;
+          #endif
+
+          #if _TRIPLANAR
+             float3 norm = i.normal;
+             #if _TRIPLANAR_WORLDSPACE
+             float3 uvw = worldPos * _TriplanarTexScale + _TriplanarOffset;
+             norm = worldNormal;
+             #else
+             float3 uvw = i.vertex.xyz * _TriplanarTexScale + _TriplanarOffset;
+             #endif
+             o.coords.xy = uvw.xy;
+             o.valuesMain.w = uvw.z;
+             o.extraData.xyz = pow(abs(norm), _TriplanarContrast);
+             o.extraData.xyz /= dot(o.extraData.xyz, float3(1,1,1));
+          #endif
+
+         #if _SNOW || _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsNormal = worldNormal;
+         #endif
+
+         #if _SNOW
+         o.snowHeightFade = saturate((worldPos.y - _SnowHeightRange.x) / max(_SnowHeightRange.y, 0.001));
+         o.wsTangent = mul(unity_ObjectToWorld, i.tangent);
+         #endif
+
+         #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsView = WorldSpaceViewDir(i.vertex);
+         #endif
+
+      }  
+
+      void surf (Input i, inout SurfaceOutputStandard o) 
+      {
+         SplatInput si = ToSplatInput(i);
+         float3x3 tangentToWorld = (float3x3)0;
+         #if _SNOW
+         float3 tangent = normalize(i.wsTangent.xyz);
+         float3 normal = normalize(i.wsNormal);
+         float3 binormal = normalize(cross(normal, tangent) * i.wsTangent.w);
+         tangentToWorld = transpose(float3x3(tangent, binormal, normal));
+         #endif
+
+         MegaSplatLayer macro = (MegaSplatLayer)0;
+         #if _USEMACROTEXTURE || _ALPHALAYER
+            macro = SampleMacro(si.macroUV.xy);
+            #if _SNOW && _SNOWOVERMACRO
+            float snwAmt = DoSnow(macro, si.macroUV.xy, mul(tangentToWorld, normalize(macro.Normal)), si.snowHeightFade, 0, _GlobalPorosityWetness.x, si.camDist.y);
+            // TODO: Handle glitter?
+            #endif
+            #if _DISABLESPLATSINDISTANCE
+            UNITY_BRANCH
+            if (i.camDist.x <= 0.0)
+            {
+               #if _CUSTOMUSERFUNCTION
+               CustomMegaSplatFunction_Final(si, macro);
+               #endif
+               o.Albedo = macro.Albedo;
+               o.Normal = macro.Normal;
+               o.Emission = macro.Emission;
+               #if !_RAMPLIGHTING
+               o.Smoothness = macro.Smoothness;
+               o.Metallic = macro.Metallic;
+               o.Occlusion = macro.Occlusion;
+               #endif
+               #if _ALPHA || _ALPHATEST
+               o.Alpha = macro.Alpha;
+               #endif
+
+               return;
+            }
+            #endif
+         #endif
+
+
+         MegaSplatLayer splats = DoSurf(si, macro, tangentToWorld);
+
+         // hack around unity compiler stripping bug
+         #if _PARALLAX
+         splats.Albedo *= saturate(i.viewDir + 999);
+         #endif
+
+         #if _DEBUG_OUTPUT_ALBEDO
+         o.Albedo = splats.Albedo;
+         #elif _DEBUG_OUTPUT_HEIGHT
+         o.Albedo = splats.Height.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_NORMAL
+         o.Albedo = splats.Normal * 0.5 + 0.5 * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_SMOOTHNESS
+         o.Albedo = splats.Smoothness.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_METAL
+         o.Albedo = splats.Metallic.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_AO
+         o.Albedo = splats.Occlusion.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_EMISSION
+         o.Albedo = splats.Emission * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_SPLATDATA
+         o.Albedo = DebugSplatOutput(si);
+         #elif _RAMPLIGHTING
+         o.Albedo = splats.Albedo;
+         o.Emission = splats.Emission;
+         o.Normal = splats.Normal;
+
+         #else
+         o.Albedo = splats.Albedo;
+         o.Normal = splats.Normal;
+         o.Metallic = splats.Metallic;
+         o.Smoothness = splats.Smoothness;
+         o.Occlusion = splats.Occlusion;
+         o.Emission = splats.Emission;
+            #if _ALPHA || _ALPHATEST
+               o.Alpha = splats.Alpha;
+            #endif
+
+            #if _ALPHATEST
+            clip(o.Alpha - 0.5);
+            #endif
+         #endif
+      }
+
+      void ApplyFog(float dist, inout half4 col)
+      {
+         half4 fogColor = half4(0,0,0,0);
+
+         #ifndef UNITY_PASS_FORWARDADD
+            fogColor = unity_FogColor;
+         #endif
+
+         #if FOG_LINEAR
+             float unityFogFactor = dist * unity_FogParams.z + unity_FogParams.w;
+             UNITY_FOG_LERP_COLOR(col, fogColor, unityFogFactor);
+         #endif
+         #if FOG_EXP
+            float unityFogFactor = unity_FogParams.y * dist; 
+            unityFogFactor = exp2(-unityFogFactor);
+            UNITY_FOG_LERP_COLOR(col, fogColor, unityFogFactor);
+         #endif
+         #if FOG_EXP2
+            float unityFogFactor = unity_FogParams.x * dist; 
+            unityFogFactor = exp2(-unityFogFactor*unityFogFactor);
+            UNITY_FOG_LERP_COLOR(col, fogColor, unityFogFactor);
+         #endif
+
+
+      }
+
+      void fogcolor(Input i, SurfaceOutputStandard o, inout fixed4 col)
+      {
+         ApplyFog(i.camDist.y, col);
+      }

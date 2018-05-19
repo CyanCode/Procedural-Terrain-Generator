@@ -1,0 +1,156 @@
+﻿
+
+         struct MegaSplatLayer
+         {
+            half3 Albedo;
+            half3 Normal;
+            half3 Emission;
+            half  Metallic;
+            half  Smoothness;
+            half  Occlusion;
+            half  Height;
+            half  Alpha;
+         };
+
+         struct LightingTerms
+         {
+            half3 Albedo;
+            half3 Normal;
+            half  Smoothness;
+            half  Metallic;
+            half  Occlusion;
+            half3 Emission;
+            half Alpha;
+         };
+
+         struct SplatInput
+         {
+            float3 weights;
+            float2 splatUV;
+            float2 macroUV;
+            float3 valuesMain;
+            half3 viewDir;
+            float4 camDist;
+
+            #if _TWOLAYER || _ALPHALAYER
+            float3 valuesSecond;
+            half layerBlend;
+            #endif
+
+            #if _TRIPLANAR
+            float3 triplanarUVW;
+            #endif
+            half3 triplanarBlend; // passed to func, so always present
+
+            #if _FLOW || _FLOWREFRACTION || _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+            half2 flowDir;
+            #endif
+
+            #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+            half puddleHeight;
+            #endif
+
+            #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT
+            float3 waterNormalFoam;
+            #endif
+
+            #if _WETNESS
+            half wetness;
+            #endif
+
+            #if _TESSDAMPENING
+            half displacementDampening;
+            #endif
+
+            #if _SNOW
+            half snowHeightFade;
+            #endif
+
+            #if _SNOW || _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+            float3 wsNormal;
+            #endif
+
+            #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+            float3 wsView;
+            #endif
+
+            #if _GEOMAP
+            float3 worldPos;
+            #endif
+         };
+
+
+         struct LayerParams
+         {
+            float3 uv0, uv1, uv2;
+            float2 mipUV; // uv for mip selection
+            #if _TRIPLANAR
+            float3 tpuv0_x, tpuv0_y, tpuv0_z;
+            float3 tpuv1_x, tpuv1_y, tpuv1_z;
+            float3 tpuv2_x, tpuv2_y, tpuv2_z;
+            #endif
+            #if _FLOW || _FLOWREFRACTION
+            float3 fuv0a, fuv0b;
+            float3 fuv1a, fuv1b;
+            float3 fuv2a, fuv2b;
+            #endif
+
+            #if _DISTANCERESAMPLE
+               half distanceBlend;
+               float3 db_uv0, db_uv1, db_uv2;
+               #if _TRIPLANAR
+               float3 db_tpuv0_x, db_tpuv0_y, db_tpuv0_z;
+               float3 db_tpuv1_x, db_tpuv1_y, db_tpuv1_z;
+               float3 db_tpuv2_x, db_tpuv2_y, db_tpuv2_z;
+               #endif
+               float resampleMip;
+            #endif
+
+            half layerBlend;
+            half3 metallic;
+            half3 smoothness;
+            half3 porosity;
+            #if _FLOW || _FLOWREFRACTION
+            half3 flowIntensity;
+            half flowOn;
+            half3 flowAlphas;
+            half3 flowRefracts;
+            half3 flowInterps;
+            #endif
+            half3 weights;
+
+            #if _TESSDISTANCE || _TESSEDGE
+            half3 displacementScale;
+            half3 upBias;
+            #endif
+
+            #if _PERTEXNOISESTRENGTH
+            half3 detailNoiseStrength;
+            #endif
+
+            #if _PERTEXNORMALSTRENGTH
+            half3 normalStrength;
+            #endif
+
+            #if _PERTEXPARALLAXSTRENGTH
+            half3 parallaxStrength;
+            #endif
+
+            #if _PERTEXAOSTRENGTH
+            half3 aoStrength;
+            #endif
+
+            #if _PERTEXGLITTER
+            half3 perTexGlitterReflect;
+            #endif
+
+            half3 contrast;
+         };
+
+         struct VirtualMapping
+         {
+            float3 weights;
+            fixed4 c0, c1, c2;
+            fixed4 param;
+         };
+

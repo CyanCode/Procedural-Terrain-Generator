@@ -1,0 +1,329 @@
+
+      float4 _SplatControl_TexelSize;
+
+      struct Input 
+      {
+         float2 coords;
+         float3 viewDir;
+         float2 camDist;
+         #if _TRIPLANAR
+         float3 extraData;
+         float3 triplanarUVW;
+         #endif
+         #if _SECONDUV
+         float2 macroUV;
+         #endif
+
+         #if _SNOW || _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         float3 wsNormal;
+         #endif
+
+         #if _SNOW
+         half snowHeightFade;
+         float4 wsTangent;
+         #endif
+
+         #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         float3 wsView;
+         #endif
+
+         #if _GEOMAP
+         float3 worldPos;
+         #endif
+
+      };
+
+      void vert (inout appdata_full i, out Input o) 
+      {
+         UNITY_INITIALIZE_OUTPUT(Input,o);
+
+         // have to gen our own tangent..
+         float4 tangent;
+         tangent.xyz = cross(i.normal, float3(0,0,1));
+         tangent.w = -1;
+         i.tangent = tangent;
+
+         #if _CUSTOMUSERFUNCTION
+         CustomMegaSplatFunction_PreVertex(i.vertex, i.normal, tangent, i.texcoord.xy);
+         #endif
+
+         #if _USECURVEDWORLD
+         V_CW_TransformPointAndNormal(i.vertex, i.normal, tangent);
+         #endif
+
+         o.coords.xy = i.texcoord.xy;
+         float3 worldPos = mul(unity_ObjectToWorld, i.vertex);
+         #if _GEOMAP
+         o.worldPos = worldPos;
+         #endif
+
+         float3 worldNormal = normalize(mul((float3x3)unity_ObjectToWorld, i.normal));
+
+
+         #if _SECONDUV
+         o.macroUV = i.texcoord.xy;
+         o.macroUV = ProjectUV2(i.vertex, o.macroUV.xy, worldPos, worldNormal, tangent);
+         #endif
+
+         o.coords.xy = ProjectUVs(i.vertex, o.coords.xy, worldPos, worldNormal, tangent);
+
+         #if _SNOW
+         o.wsTangent = mul(unity_ObjectToWorld, tangent);
+         #endif
+         float dist = distance(_WorldSpaceCameraPos, worldPos);
+         o.camDist.x = 1.0 - saturate((dist - _DistanceFades.x) / (_DistanceFades.y - _DistanceFades.x));
+         float3 viewSpace = UnityObjectToViewPos(i.vertex);
+         o.camDist.y = length(viewSpace.xyz);
+         #if _TRIPLANAR
+            float3 norm = i.normal;
+            #if _TRIPLANAR_WORLDSPACE
+            o.triplanarUVW.xyz = worldPos.xyz * _TriplanarTexScale + _TriplanarOffset;
+            norm = normalize(mul((float3x3)unity_ObjectToWorld, norm));
+            #else
+            o.triplanarUVW.xyz = i.vertex.xyz * _TriplanarTexScale + _TriplanarOffset;
+            #endif
+            o.extraData.xyz = pow(abs(norm), _TriplanarContrast);
+            o.extraData.xyz /= dot(o.extraData.xyz, float3(1,1,1));
+         #endif
+
+         #if _SNOW
+         o.snowHeightFade = saturate((worldPos.y - _SnowHeightRange.x) / max(_SnowHeightRange.y, 0.001));
+         o.wsNormal = worldNormal;
+         #endif
+
+         #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsView = WorldSpaceViewDir(i.vertex);
+         o.wsNormal = worldNormal;
+         #endif
+
+
+      }
+
+
+      VirtualMapping GetMapping(Input i, sampler2D splatControl, sampler2D paramControl)
+      {
+         float2 texSize = _SplatControl_TexelSize.zw;
+         float2 stp = _SplatControl_TexelSize.xy;
+         // scale coords so we can take floor/frac to construct a cell
+         float2 stepped = i.coords.xy * texSize;
+         float2 uvBottom = floor(stepped);
+         float2 uvFrac = frac(stepped);
+         uvBottom /= texSize;
+
+         float2 center = stp * 0.5;
+         uvBottom += center;
+
+         // construct uv/positions of triangle based on our interpolation point
+         float2 cuv0, cuv1, cuv2;
+         // make virtual triangle
+         if (uvFrac.x > uvFrac.y)
+         {
+            cuv0 = uvBottom;
+            cuv1 = uvBottom + float2(stp.x, 0);
+            cuv2 = uvBottom + float2(stp.x, stp.y);
+         }
+         else
+         {
+            cuv0 = uvBottom;
+            cuv1 = uvBottom + float2(0, stp.y);
+            cuv2 = uvBottom + float2(stp.x, stp.y);
+         }
+
+         float2 uvBaryFrac = uvFrac * stp + uvBottom;
+         float3 weights = Barycentric(uvBaryFrac, cuv0, cuv1, cuv2);
+         VirtualMapping m = (VirtualMapping)0;
+         m.weights = weights;
+         m.c0 = tex2Dlod(splatControl, float4(cuv0, 0, 0));
+         m.c1 = tex2Dlod(splatControl, float4(cuv1, 0, 0));
+         m.c2 = tex2Dlod(splatControl, float4(cuv2, 0, 0));
+
+         #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _FLOW || _FLOWREFRACTION || _WETNESS || _LAVA
+         fixed4 p0 = tex2Dlod(paramControl, float4(cuv0, 0, 0));
+         fixed4 p1 = tex2Dlod(paramControl, float4(cuv1, 0, 0));
+         fixed4 p2 = tex2Dlod(paramControl, float4(cuv2, 0, 0));
+         m.param = p0 * weights.x + p1 * weights.y + p2 * weights.z;
+         #endif
+         return m;
+      }
+
+      SplatInput ToSplatInput(Input i, VirtualMapping m)
+      {
+         SplatInput o = (SplatInput)0;
+         UNITY_INITIALIZE_OUTPUT(SplatInput,o);
+
+         o.viewDir = i.viewDir;
+
+
+         o.camDist.xy = i.camDist.xy;
+         o.splatUV = i.coords;
+         o.macroUV = i.coords;
+         #if _SECONDUV
+         o.macroUV = i.macroUV;
+         #endif
+         o.weights = m.weights;
+
+
+         o.valuesMain = float3(m.c0.r, m.c1.r, m.c2.r);
+         #if _TWOLAYER || _ALPHALAYER
+         o.valuesSecond = float3(m.c0.g, m.c1.g, m.c2.g);
+         o.layerBlend = m.c0.b * o.weights.x + m.c1.b * o.weights.y + m.c2.b * o.weights.z;
+         #endif
+
+         #if _TRIPLANAR
+         o.triplanarUVW = i.triplanarUVW;
+         o.triplanarBlend = i.extraData.xyz;
+         #endif
+
+         #if _FLOW || _FLOWREFRACTION || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+         o.flowDir = m.param.xy;
+         #endif
+
+         #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+         o.puddleHeight = m.param.a;
+         #endif
+
+         #if _WETNESS
+         o.wetness = m.param.b;
+         #endif
+
+         #if _SNOW
+         o.snowHeightFade = i.snowHeightFade;
+         #endif
+
+         #if _SNOW || _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsNormal = i.wsNormal;
+         #endif
+
+         #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+         o.wsView = i.wsView;
+         #endif
+
+         #if _GEOMAP
+         o.worldPos = i.worldPos;
+         #endif
+         return o;
+      }
+
+      void surf (Input i, inout SurfaceOutputStandard o) 
+      {
+         float3x3 tangentToWorld = (float3x3)0;
+         #if _SNOW
+         float3 tangent = normalize(i.wsTangent.xyz);
+         float3 normal = normalize(i.wsNormal);
+         float3 binormal = normalize(cross(normal, tangent) * i.wsTangent.w);
+         tangentToWorld = transpose(float3x3(tangent, binormal, normal));
+         #endif
+
+         MegaSplatLayer macro = (MegaSplatLayer)0;
+         // keep this here so we early out before sampling the splat data
+         #if _USEMACROTEXTURE
+            float2 muv = i.coords.xy;
+
+            #if _SECONDUV
+            muv = i.macroUV.xy;
+            #endif
+            macro = SampleMacro(muv);
+            #if _SNOW && _SNOWOVERMACRO
+            DoSnow(macro, muv, mul(tangentToWorld, normalize(macro.Normal)), i.snowHeightFade, 0, _GlobalPorosityWetness.x, i.camDist.y);
+            #endif
+            #if _DISABLESPLATSINDISTANCE
+            if (i.camDist.x <= 0.0)
+            {
+               #if _CUSTOMUSERFUNCTION
+               CustomMegaSplatFunction_Final(si, macro);
+               #endif
+               o.Albedo = macro.Albedo;
+               o.Normal = macro.Normal;
+               o.Emission = macro.Emission;
+               #if !_RAMPLIGHTING
+               o.Smoothness = macro.Smoothness;
+               o.Metallic = macro.Metallic;
+               o.Occlusion = macro.Occlusion;
+               #endif
+               #if _ALPHA || _ALPHATEST
+               o.Alpha = macro.Alpha;
+               #endif
+               return;
+            }
+            #endif
+         #endif 
+
+
+
+         VirtualMapping mapping = GetMapping(i, _SplatControl, _SplatParams);
+         SplatInput si = ToSplatInput(i, mapping);
+         MegaSplatLayer splats = DoSurf(si, macro, tangentToWorld);
+
+         // hack around unity compiler stripping bug
+         #if _PARALLAX
+         splats.Albedo *= saturate(i.viewDir + 999);
+         #endif
+
+         #if _DEBUG_OUTPUT_ALBEDO
+         o.Albedo = splats.Albedo;
+         #elif _DEBUG_OUTPUT_HEIGHT
+         o.Albedo = splats.Height.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_NORMAL
+         o.Albedo = splats.Normal * 0.5 + 0.5 * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_SMOOTHNESS
+         o.Albedo = splats.Smoothness.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_METAL
+         o.Albedo = splats.Metallic.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_AO
+         o.Albedo = splats.Occlusion.xxx * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_EMISSION
+         o.Albedo = splats.Emission * saturate(splats.Albedo+1);
+         #elif _DEBUG_OUTPUT_SPLATDATA
+         o.Albedo = DebugSplatOutput(si);
+         #elif _RAMPLIGHTING
+         o.Albedo = splats.Albedo;
+         o.Emission = splats.Emission;
+         o.Normal = splats.Normal;
+
+         #else
+         o.Albedo = splats.Albedo;
+         o.Normal = splats.Normal;
+         o.Metallic = splats.Metallic;
+         o.Smoothness = splats.Smoothness;
+         o.Occlusion = splats.Occlusion;
+         o.Emission = splats.Emission;
+            #if _ALPHA || _ALPHATEST
+            o.Alpha = splats.Alpha;
+            #endif
+         #endif
+
+      }
+
+      #if _LOWPOLY
+      [maxvertexcount(3)]
+      void geom(triangle VertexOutput input[3], inout TriangleStream<VertexOutput> s)
+      {
+            VertexOutput v0 = input[0];
+            VertexOutput v1 = input[1];
+            VertexOutput v2 = input[2];
+
+            float3 norm = input[0].normal + input[1].normal + input[2].normal;
+            norm /= 3;
+            float3 tangent = input[0].tangent + input[1].tangent + input[2].tangent;
+            tangent /= 3;
+           
+            float3 bitangent = input[0].bitangent + input[1].bitangent + input[2].bitangent;
+            bitangent /= 3;
+           
+            v0.normal = norm;
+            v1.normal = norm;
+            v2.normal = norm;
+           
+            v0.tangent = tangent;
+            v1.tangent = tangent;
+            v2.tangent = tangent;
+           
+            v0.bitangent = bitangent;
+            v1.bitangent = bitangent;
+            v2.bitangent = bitangent;
+           
+            s.Append(v0);
+            s.Append(v1);
+            s.Append(v2);
+      }
+      #endif

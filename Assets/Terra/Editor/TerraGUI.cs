@@ -93,6 +93,7 @@ namespace UnityEditor.Terra {
 
 			//Use custom material instead
 			Settings.UseCustomMaterial = EditorGUILayout.Toggle("Custom Material", Settings.UseCustomMaterial);
+			Settings.ConvertMesh = EditorGUILayout.Toggle("Convert Mesh", Settings.ConvertMesh);
 
 			if (Settings.UseCustomMaterial) {
 				Settings.CustomMaterial = (Material)EditorGUILayout.ObjectField("material", Settings.CustomMaterial, typeof(Material), false);

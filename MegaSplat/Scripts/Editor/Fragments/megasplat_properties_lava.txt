@@ -1,0 +1,8 @@
+      // Lava
+      _LavaDiffuse("Lava Diffuse", 2D) = "white" {}
+      _LavaParams("lava blend, max, speed, interp", Vector) = (20, 1.0, 0.5, 0.5)
+      _LavaParams2("distort size, distort rate, dist uv scale", Vector) = (0.08, 0.005, 0.1, 2)
+      _LavaEdgeColor("Edge Color", Color) = (1, 0.75, 0)
+      _LavaColorLow("Color", Color) = (0.9, 0, 0)
+      _LavaColorHighlight("Highlight Color", Color) = (0.9, 0.9, 0)
+      _LavaUVScale("Lava UV Scale", Vector) = (70, 70, 0, 0)

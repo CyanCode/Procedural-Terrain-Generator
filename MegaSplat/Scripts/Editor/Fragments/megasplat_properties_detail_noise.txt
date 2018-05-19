@@ -1,0 +1,3 @@
+      // terrain
+      [NoScaleOffset]_DetailNoise("Detail Noise (Lum/Normal)", 2D) = "grey" {}
+      _DetailNoiseScaleStrengthFade("Detail Scale", Vector) = (8, 0.5, 5, 0)

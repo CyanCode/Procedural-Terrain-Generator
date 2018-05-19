@@ -1,0 +1,26 @@
+﻿
+	}
+	SubShader
+	{
+		// No culling or depth
+		Cull Off ZWrite Off ZTest Always
+
+		Pass
+		{
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma target 3.5
+			#include "UnityCG.cginc"
+      
+         sampler2D_float _LocalPositions;
+         sampler2D_float _WorldPositions;
+         sampler2D_float _LocalNormals;
+         sampler2D_float _WorldNormals;
+         sampler2D_float _UVCavity;
+         float _Pass;
+         float2 _HeightBounds;
+         UNITY_DECLARE_TEX2DARRAY(_CurveArray);
+
+
+			

@@ -1,0 +1,6 @@
+      // wetness
+      _RainDropTexture("RainDrop Texture", 2D) = "white" {}
+      _RainIntensity("Intensity", Range(0, 1)) = 0
+      _RainUVScales("UV Scale", Vector) = (60, 60, 0, 0)
+
+

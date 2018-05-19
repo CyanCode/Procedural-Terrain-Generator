@@ -1,0 +1,831 @@
+﻿            struct VertexInput
+            {
+                float4 vertex : POSITION;
+                float3 normal : NORMAL;
+                float4 tangent : TANGENT;
+                float2 texcoord0 : TEXCOORD0;
+                float4 texcoord1 : TEXCOORD1;
+                float4 texcoord2 : TEXCOORD2;
+                float4 texcoord3 : TEXCOORD3;
+                float4 color : COLOR;
+            };
+
+            SplatInput ToSplatInput(VertexOutput i)
+            {
+               SplatInput o = (SplatInput)0;
+               UNITY_INITIALIZE_OUTPUT(SplatInput,o);
+
+               o.weights = i.weights.xyz;
+               o.valuesMain = i.valuesMain.xyz;
+               o.viewDir = float3(0,0,1);
+               o.camDist = i.camDist;
+               #if _TWOLAYER || _ALPHALAYER
+               o.valuesSecond = i.valuesSecond.xyz;
+               o.layerBlend = i.valuesSecond.w;
+               #endif
+               o.splatUV = i.coords.xy;
+               o.macroUV = i.coords.xy;
+               #if _SECONDUV
+               o.macroUV = i.macroUV.xy;
+               #endif
+
+               #if _GEOMAP
+               o.worldPos = i.posWorld;
+               #endif
+
+               #if _TRIPLANAR
+               o.triplanarUVW = float3(i.coords.xy, i.valuesMain.w);
+               o.triplanarBlend = i.extraData.xyz;
+               #endif
+               #if _FLOW || _FLOWREFRACTION || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+               o.flowDir = i.extraData.xy;
+               #endif
+               #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+               o.puddleHeight = i.extraData.w;
+               #endif
+
+               #if _TESSDAMPENING || _PARALLAXDAMPENING
+               o.displacementDampening = i.weights.w;
+               #endif
+
+               #if _WETNESS
+               o.wetness = i.wetness;
+               #endif
+
+               return o;
+            }
+
+            VertexOutput NoTessVert(VertexInput v)
+            {
+               VertexOutput o = (VertexOutput)0;
+               UNITY_INITIALIZE_OUTPUT(VertexOutput,o);
+
+               #if _CUSTOMUSERFUNCTION
+               CustomMegaSplatFunction_PreVertex(v.vertex, v.normal, v.tangent, v.texcoord0.xy);
+               #endif
+
+
+               #if _USECURVEDWORLD
+               V_CW_TransformPointAndNormal(v.vertex, v.normal, v.tangent);
+               #endif
+
+               o.pos = UnityObjectToClipPos(v.vertex);
+               o.normal = UnityObjectToWorldNormal(v.normal);
+               o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+               #if !_PASSSHADOWCASTER && !_PASSMETA
+               o.ambientOrLightmapUV = VertexGIForward(v.texcoord1.xy, v.texcoord2.xy, o.posWorld, o.normal);
+               #endif
+               o.tangent = normalize( mul( unity_ObjectToWorld, float4( v.tangent.xyz, 0.0 ) ).xyz );
+               o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangent.w);  
+               o.coords.xy = v.texcoord0.xy;
+
+               #if _UVFROMSECOND
+                  o.coords.xy = v.texcoord1.xy;
+               #endif
+              
+               #if _SECONDUV
+                  o.macroUV.xy = v.texcoord0.xy;
+                  #if _UVFROMSECOND2
+                  o.macroUV.xy = v.texcoord1.xy;
+                  #endif
+               #endif
+
+               float3 worldNormal = v.normal;
+               #if (_TRIPLANAR_WORLDSPACE || _SNOW || _PROJECTTEXTURE_WORLD || _PROJECTTEXTURE2_WORLD || _UVWORLDTOP || _UVWORLDFRONT || _UVWORLDSIDE || _UVWORLDTOP2 || _UVWORLDFRONT2 || _UVWORLDSIDE2)
+               worldNormal = normalize(mul((float3x3)unity_ObjectToWorld, v.normal));
+               #endif
+
+
+               o.coords.xy = ProjectUVs(v.vertex.xyz, o.coords.xy, o.posWorld, worldNormal, v.tangent);
+               #if _SECONDUV
+               o.macroUV.xy = ProjectUV2(v.vertex.xyz, o.macroUV.xy, o.posWorld, worldNormal, v.tangent);
+               #endif
+               
+
+               o.weights.rgb = v.color.rgb;
+               o.valuesMain.xyz = v.color.rgb * v.color.a * 255;
+               #if _TWOLAYER || _ALPHALAYER
+               o.valuesSecond.xyz = v.color.rgb * v.texcoord3.a * 255;
+               o.valuesSecond.a = v.texcoord3.x;
+               #endif
+               float dist = distance (o.posWorld, _WorldSpaceCameraPos);
+
+
+               #if _TWOLAYER || _ALPHALAYER
+               ProceduralTexture(v.vertex.xyz, o.posWorld, v.normal, worldNormal, o.valuesMain, o.valuesSecond, v.color.rgb);
+               #else
+               ProceduralTexture(v.vertex.xyz, o.posWorld, v.normal, worldNormal, o.valuesMain, o.valuesMain, v.color.rgb);
+               #endif
+                     
+               
+               o.camDist.x = 1.0 - saturate((dist - _DistanceFades.x) / (_DistanceFades.y - _DistanceFades.x));
+               float3 viewSpace = UnityObjectToViewPos(v.vertex);
+               o.camDist.y = length(viewSpace.xyz);
+               
+               #if _FLOW || _FLOWREFRACTION || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+               o.extraData.xy = (v.texcoord2.zw * 2.0 - 1.0);
+               #endif
+               #if _TRIPLANAR
+                 float3 norm = v.normal;
+                 #if _TRIPLANAR_WORLDSPACE
+                 float3 uvw = o.posWorld * _TriplanarTexScale + _TriplanarOffset;
+                 norm = worldNormal;
+                 #else
+                 float3 uvw = v.vertex.xyz * _TriplanarTexScale + _TriplanarOffset;
+                 #endif
+                 o.coords.xy = uvw.xy;
+                 o.valuesMain.w = uvw.z;
+                 o.extraData.xyz = pow(abs(norm), _TriplanarContrast);
+                 o.extraData.xyz /= dot(o.extraData.xyz, float3(1,1,1));
+               #endif
+
+               o.coords.xy = ProjectUVs(v.vertex.xyz, o.coords.xy, o.posWorld, worldNormal, v.tangent);
+               #if _SECONDUV
+               o.macroUV.xy = ProjectUV2(v.vertex.xyz, o.macroUV.xy, o.posWorld, worldNormal, v.tangent);
+               #endif
+
+               o.camDist.z = length((mul ((float3x3)UNITY_MATRIX_IT_MV, v.normal)));
+               
+
+               #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+               o.extraData.w = v.texcoord3.y;
+               #endif
+
+               #if _WETNESS
+               o.wetness = v.texcoord1.w;
+               #endif
+
+
+               UNITY_TRANSFER_SHADOW(o,v.texcoord1.xy); // pass shadow coordinates to pixel shader
+               UNITY_TRANSFER_FOG(o,o.pos); // pass fog coordinates to pixel shader
+  
+               return o;
+
+            }
+
+            #if _TESSDISTANCE || _TESSEDGE
+            VertexOutput NoTessShadowVertBiased (VertexInput v) 
+            {
+               VertexOutput o = (VertexOutput)0;
+               UNITY_INITIALIZE_OUTPUT(VertexOutput,o);
+
+               #if _CUSTOMUSERFUNCTION
+               CustomMegaSplatFunction_PreVertex(v.vertex, v.normal, v.tangent, v.texcoord0.xy);
+               #endif
+
+
+               #if _USECURVEDWORLD
+               V_CW_TransformPointAndNormal(v.vertex, v.normal, v.tangent);
+               #endif
+
+               float3 norm = (mul ((float3x3)UNITY_MATRIX_IT_MV, v.normal));
+               float objScale = length(norm);
+               o.normal = UnityObjectToWorldNormal(v.normal);
+               v.vertex.xyz -= v.normal * _TessData1.y * 0.5 * objScale;
+               #if _PASSSHADOWCASTER
+                o.pos = UnityClipSpaceShadowCasterPos(v.vertex, v.normal);
+                o.pos = UnityApplyLinearShadowBias(o.pos);
+               #else
+               o.pos = UnityObjectToClipPos(v.vertex);
+               #endif
+               o.coords = v.texcoord0;
+
+               #if _PASSSHADOWCASTER
+               TRANSFER_SHADOW_CASTER(o)
+               #endif
+
+               return o;
+            }
+            #endif
+
+
+            #ifdef UNITY_CAN_COMPILE_TESSELLATION
+            #if _TESSDISTANCE || _TESSEDGE
+            struct TessVertex 
+            {
+               float4 pos       : INTERNALTESSPOS;
+               float3 normal       : NORMAL;
+               float4 tangent      : TANGENT;
+               fixed4 weights      : TEXCOORD0;     // weights + tessmult
+               float2 coords       : TEXCOORD1;      // uv, or triplanar UV
+               float4 valuesMain   : TEXCOORD2;      //index rgb, triplanar W
+               #if _TWOLAYER || _ALPHALAYER
+               float4 valuesSecond : TEXCOORD3;      //index rgb + alpha
+               #endif
+               float4 camDist      : TEXCOORD4;      // distance from camera (for fades) and fog
+               float4 extraData    : TEXCOORD5;       // puddles in w
+               float3 macroUV      : TEXCOORD6;       // uv + wetness
+               UNITY_SHADOW_COORDS(7)
+               UNITY_FOG_COORDS(8)
+               float2 texcoord1    : TEXCOORD10;
+
+               float4 ambientOrLightmapUV : TEXCOORD9;
+
+
+            };
+
+            LayerParams InitLayerParams(VertexOutput i, half3 values, half3 weights, half2 texScale)
+            {
+               LayerParams data = NewLayerParams();
+               int i0 = round(values.x / max(weights.x, 0.00001));
+               int i1 = round(values.y / max(weights.y, 0.00001));
+               int i2 = round(values.z / max(weights.z, 0.00001));
+
+               #if _TRIPLANAR
+               float3 coords = float3(i.coords.xy, i.valuesMain.w) * texScale.xxx;
+               data.tpuv0_x = float3(coords.zy, i0);
+               data.tpuv0_y = float3(coords.xz, i0);
+               data.tpuv0_z = float3(coords.xy, i0);
+               data.tpuv1_x = float3(coords.zy, i1);
+               data.tpuv1_y = float3(coords.xz, i1);
+               data.tpuv1_z = float3(coords.xy, i1);
+               data.tpuv2_x = float3(coords.zy, i2);
+               data.tpuv2_y = float3(coords.xz, i2);
+               data.tpuv2_z = float3(coords.xy, i2);
+
+               float2 splatUV = float2(i.coords.x, i.valuesMain.w) * texScale.xy;
+               data.uv0 = float3(splatUV, i0);
+               data.uv1 = float3(splatUV, i1);
+               data.uv2 = float3(splatUV, i2);
+               #else
+               float2 splatUV = i.coords.xy * texScale.xy;
+               data.uv0 = float3(splatUV, i0);
+               data.uv1 = float3(splatUV, i1);
+               data.uv2 = float3(splatUV, i2);
+               #endif
+
+               #if _FLOW || _FLOWREFRACTION
+               data.flowOn = 0;
+               #endif
+
+               return data;
+            }
+
+            VertexOutput vert (TessVertex v) 
+            {
+               VertexOutput o = (VertexOutput)0;
+               UNITY_INITIALIZE_OUTPUT(VertexOutput,o);
+
+               #if _CUSTOMUSERFUNCTION
+               CustomMegaSplatFunction_PreVertex(v.pos, v.normal, v.tangent, v.coords.xy);
+               #endif
+
+
+               #if _USECURVEDWORLD
+               V_CW_TransformPointAndNormal(v.pos, v.normal, v.tangent);
+               #endif
+
+               o.ambientOrLightmapUV = v.ambientOrLightmapUV;
+
+
+               o.pos = UnityObjectToClipPos(v.pos);
+               o.normal = UnityObjectToWorldNormal(v.normal);
+               o.posWorld = mul(unity_ObjectToWorld, v.pos);
+               o.tangent = normalize( mul( unity_ObjectToWorld, float4( v.tangent.xyz, 0.0 ) ).xyz );
+               o.bitangent = normalize(cross(o.normal, o.tangent) * v.tangent.w);  
+               o.coords = v.coords;
+               o.weights = v.weights.xyz;
+               o.valuesMain = v.valuesMain;
+               #if _TWOLAYER || _ALPHALAYER
+               o.valuesSecond = v.valuesSecond;
+               #endif
+               o.camDist = v.camDist;
+               o.extraData = v.extraData;
+
+               #if _SECONDUV
+               o.macroUV = v.macroUV.xy;
+               #endif
+
+               #if _WETNESS
+               o.wetness = v.macroUV.z;
+               #endif
+
+               #if defined(SHADOWS_ENABLED)
+               o._ShadowCoord = v._ShadowCoord;
+               #endif
+
+                UNITY_TRANSFER_SHADOW(o,v.texcoord1.xy); // pass shadow coordinates to pixel shader
+                UNITY_TRANSFER_FOG(o,o.pos); // pass fog coordinates to pixel shader
+  
+
+               return o;
+            }
+
+
+                
+             struct OutputPatchConstant {
+                 float edge[3]         : SV_TessFactor;
+                 float inside          : SV_InsideTessFactor;
+                 float3 vTangent[4]    : TANGENT;
+                 float2 vUV[4]         : TEXCOORD;
+                 float3 vTanUCorner[4] : TANUCORNER;
+                 float3 vTanVCorner[4] : TANVCORNER;
+                 float4 vCWts          : TANWEIGHTS;
+             };
+
+             TessVertex tessvert (VertexInput v) 
+             {
+                 TessVertex o;
+
+                 UNITY_INITIALIZE_OUTPUT(TessVertex,o);
+
+                 o.pos = v.vertex;
+                 o.normal = v.normal;
+                 o.tangent = v.tangent;
+                 o.coords.xy = v.texcoord0;
+
+                 #if _UVFROMSECOND
+                    o.coords.xy = v.texcoord1.xy;
+                 #endif
+
+                 #if _SECONDUV
+                    o.macroUV.xy = v.texcoord0.xy;
+                    #if _UVFROMSECOND2
+                    o.macroUV.xy = v.texcoord1.xy;
+                    #endif
+                 #endif
+                 float3 wpos = mul(unity_ObjectToWorld, v.vertex).xyz;
+
+                 float3 worldNormal = normalize(mul((float3x3)unity_ObjectToWorld, v.normal));
+                 o.coords.xy = ProjectUVs(v.vertex.xyz, o.coords.xy, wpos, worldNormal, v.tangent);
+                 #if _SECONDUV
+                 o.macroUV.xy = ProjectUV2(v.vertex.xyz, o.macroUV.xy, wpos, worldNormal, v.tangent);
+                 #endif
+
+                 o.weights.a = 1.0 - v.texcoord3.z;
+                 o.weights.rgb = v.color.rgb;
+                 o.valuesMain.xyz = v.color.rgb * v.color.a * 255;
+                 #if _TWOLAYER || _ALPHALAYER
+                 o.valuesSecond.xyz = v.color.rgb * v.texcoord3.a * 255;
+                 o.valuesSecond.a = v.texcoord3.x;
+                 #endif
+
+                 float dist = distance (wpos, _WorldSpaceCameraPos);
+
+
+
+                 #if _TWOLAYER || _ALPHALAYER
+                 ProceduralTexture(v.vertex.xyz, wpos, v.normal, worldNormal, o.valuesMain, o.valuesSecond, v.color.rgb);
+                 #else
+                 float4 fakeSecond = float4(0,0,0,0);
+                 ProceduralTexture(v.vertex.xyz, wpos, v.normal, worldNormal, o.valuesMain, fakeSecond, v.color.rgb);
+                 #endif
+                 
+
+
+
+                 #if !_PASSSHADOWCASTER && !_PASSMETA
+                 o.ambientOrLightmapUV = VertexGIForward(v.texcoord1.xy, v.texcoord2.xy, wpos, UnityObjectToWorldNormal(v.normal));
+                 #endif
+
+                 o.camDist.x = 1.0 - saturate((dist - _DistanceFades.x) / (_DistanceFades.y - _DistanceFades.x));
+                 float3 viewSpace = UnityObjectToViewPos(v.vertex);
+                 o.camDist.y = length(viewSpace.xyz);
+
+                 #if _FLOW || _FLOWREFRACTION || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+                 o.extraData.xy = (v.texcoord2.zw * 2.0 - 1.0);
+                 #endif
+                 #if _TRIPLANAR
+                   #if _TRIPLANAR_WORLDSPACE
+                   float3 uvw = wpos * _TriplanarTexScale + _TriplanarOffset;
+                   #else
+                   float3 uvw = v.vertex.xyz * _TriplanarTexScale + _TriplanarOffset;
+                   #endif
+                   o.coords.xy = uvw.xy;
+                   o.valuesMain.w = uvw.z;
+                   o.extraData.xyz = pow(abs(v.normal), _TriplanarContrast);
+                   o.extraData.xyz /= dot(o.extraData.xyz, float3(1,1,1));
+                 #endif
+
+                 float3 norm = (mul ((float3x3)UNITY_MATRIX_IT_MV, v.normal));
+                 o.camDist.z = length(norm);
+
+                 float tessFade = saturate((dist - _TessData2.x) / (_TessData2.y - _TessData2.x));
+                 tessFade *= tessFade;
+                 o.camDist.w = 1 - tessFade;
+                 #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+                 o.extraData.w = v.texcoord3.y;
+                 #endif
+
+                 #if _WETNESS
+                 o.macroUV.z = v.texcoord1.w;
+                 #endif
+
+                 o.texcoord1 = v.texcoord1;
+                 UNITY_TRANSFER_SHADOW(o,v.texcoord1.xy); // pass shadow coordinates to pixel shader
+                 UNITY_TRANSFER_FOG(o,o.pos); // pass fog coordinates to pixel shader
+  
+                 return o;
+             }
+
+             void displacement (inout TessVertex i)
+             {
+                  VertexOutput o = vert(i);
+                  float3 viewDir = float3(0,0,1);
+
+                  // Do splat blend here
+                  #if _ALPHALAYER
+                  LayerParams mData = InitLayerParams(o, o.valuesSecond.xyz, o.weights.xyz, _TexScales.xy);
+                  #else
+                  LayerParams mData = InitLayerParams(o, o.valuesMain.xyz, o.weights.xyz, _TexScales.xy);
+                  #endif
+
+                  SamplePerTex(_PropertyTex, mData, _PerTexScaleRange);
+
+                  #if _TWOLAYER
+                  LayerParams sData = InitLayerParams(o, o.valuesSecond.xyz, o.weights.xyz, _TexScales.zw);
+                  sData.layerBlend = o.valuesSecond.w;
+                  SamplePerTex(_PropertyTex, sData, _PerTexScaleRange);
+
+                  float second = SampleLayerHeight(o.weights.xyz, viewDir, sData, o.extraData.xyz, _TessData1.z, _TessData2.z);
+                  #endif
+
+                  float splats = SampleLayerHeight(o.weights.xyz, viewDir, mData, o.extraData.xyz, _TessData1.z, _TessData2.z);
+
+                  #if _TWOLAYER
+                     // blend layers together..
+                     float hfac = HeightBlend(splats, second, sData.layerBlend, _TessData2.z);
+                     splats = lerp(splats, second, hfac);
+                  #endif
+
+                  half upBias = _TessData2.w;
+                  #if _PERTEXDISPLACEPARAMS
+                  float3 upBias3 = mData.upBias;
+                     #if _TWOLAYER
+                        upBias3 = lerp(upBias3, sData.upBias, hfac);
+                     #endif
+                  upBias = upBias3.x * o.weights.x + upBias3.y * o.weights.y + upBias3.z * o.weights.z;
+                  #endif
+
+                  #if _PUDDLES || _PUDDLEFLOW || _PUDDLEREFRACT || _LAVA
+                     #if _PUDDLESPUSHTERRAIN
+                     splats = max(splats - i.extraData.w, 0);
+                     #else
+                     splats = max(splats, i.extraData.w);
+                     #endif
+                  #endif
+
+                  #if _TESSCENTERBIAS
+                  splats -= 0.5;
+                  #endif
+
+                  #if _SNOW
+                  float3 worldNormal = UnityObjectToWorldNormal(i.normal);
+                  float3 worldPos = mul(unity_ObjectToWorld, i.pos);
+                  float snowHeightFade = saturate((worldPos.y - _SnowHeightRange.x) / max(_SnowHeightRange.y, 0.001));
+                  float snowAmount = DoSnowDisplace(splats, i.coords.xy, worldNormal, snowHeightFade, i.extraData.w);
+                  splats += snowAmount;
+                  #endif
+
+                  float3 up = normalize(mul(float4( 0, 1, 0, 0 ),  unity_ObjectToWorld ).xyz);
+                  float3 offset = (lerp(i.normal, up, upBias) * (i.camDist.z * _TessData1.y * splats * i.camDist.w));
+
+                  #if _CUSTOMUSERFUNCTION
+                  CustomMegaSplatFunction_PostDisplacement(i.pos.xyz, offset * i.weights.w, i.normal, i.tangent, i.coords.xy);
+                  #else
+                  i.pos.xyz += offset * i.weights.w;
+                  #endif
+
+             }
+
+
+             #if _TESSEDGE
+             float4 Tessellation(TessVertex v, TessVertex v1, TessVertex v2)
+             {
+                 return UnityEdgeLengthBasedTess(v.pos, v1.pos, v2.pos, _TessData1.w);
+             }
+             #elif _TESSDISTANCE
+             float4 Tessellation (TessVertex v0, TessVertex v1, TessVertex v2) 
+             {
+                return MegaSplatDistanceBasedTess( v0.camDist.w, v1.camDist.w, v2.camDist.w, _TessData1.x);
+             }
+             #endif
+
+             OutputPatchConstant hullconst (InputPatch<TessVertex,3> v) 
+             {
+                 OutputPatchConstant o = (OutputPatchConstant)0;
+                 float4 ts = Tessellation( v[0], v[1], v[2] );
+                 o.edge[0] = ts.x;
+                 o.edge[1] = ts.y;
+                 o.edge[2] = ts.z;
+                 o.inside = ts.w;
+                 return o;
+             }
+             [UNITY_domain("tri")]
+             [UNITY_partitioning("fractional_odd")]
+             [UNITY_outputtopology("triangle_cw")]
+             [UNITY_patchconstantfunc("hullconst")]
+             [UNITY_outputcontrolpoints(3)]
+             TessVertex hull (InputPatch<TessVertex,3> v, uint id : SV_OutputControlPointID) 
+             {
+                 return v[id];
+             }
+
+
+             [UNITY_domain("tri")]
+             VertexOutput domain (OutputPatchConstant tessFactors, const OutputPatch<TessVertex,3> vi, float3 bary : SV_DomainLocation) 
+             {
+                 TessVertex v = (TessVertex)0;
+                 v.pos =         vi[0].pos * bary.x +       vi[1].pos * bary.y +       vi[2].pos * bary.z;
+                 v.normal =         vi[0].normal * bary.x +       vi[1].normal * bary.y +       vi[2].normal * bary.z;
+                 v.tangent =        vi[0].tangent * bary.x +      vi[1].tangent * bary.y +      vi[2].tangent * bary.z;
+                 v.coords =         vi[0].coords * bary.x +       vi[1].coords * bary.y +       vi[2].coords * bary.z;
+                 v.valuesMain =     vi[0].valuesMain * bary.x +   vi[1].valuesMain * bary.y +   vi[2].valuesMain * bary.z;
+                 #if _TWOLAYER || _ALPHALAYER
+                 v.valuesSecond =   vi[0].valuesSecond * bary.x + vi[1].valuesSecond * bary.y + vi[2].valuesSecond * bary.z;
+                 #endif
+                 v.camDist =        vi[0].camDist * bary.x +      vi[1].camDist * bary.y +      vi[2].camDist * bary.z;
+                 v.extraData =      vi[0].extraData * bary.x +    vi[1].extraData * bary.y +    vi[2].extraData * bary.z;
+                 v.weights =        vi[0].weights * bary.x +      vi[1].weights * bary.y +      vi[2].weights * bary.z; 
+                 v.macroUV =        vi[0].macroUV * bary.x +      vi[1].macroUV * bary.y +      vi[2].macroUV * bary.z;
+
+
+                 #if !_PASSMETA && !_PASSSHADOWCASTER && !_PASSDEFERRED
+                    #if FOG_LINEAR || FOG_EXP || FOG_EXP2
+                       v.fogCoord = vi[0].fogCoord * bary.x + vi[1].fogCoord * bary.y + vi[2].fogCoord * bary.z;
+                    #endif
+                 #endif
+
+                 v.ambientOrLightmapUV = vi[0].ambientOrLightmapUV * bary.x + vi[1].ambientOrLightmapUV * bary.y + vi[2].ambientOrLightmapUV * bary.z;
+                 #if defined(SHADOWS_ENABLED)
+                 v._ShadowCoord = vi[0]._ShadowCoord * bary.x + vi[1]._ShadowCoord * bary.y + vi[2]._ShadowCoord * bary.z;
+                 #endif
+                 v.texcoord1 = vi[0].texcoord1 * bary.x + vi[1].texcoord1 * bary.y + vi[2].texcoord1 * bary.z;
+                
+                 #if _TESSPHONG
+                 float3 p = v.pos.xyz;
+
+                 // Calculate deltas to project onto three tangent planes
+                 float3 p0 = dot(vi[0].pos.xyz - p, vi[0].normal) * vi[0].normal;
+                 float3 p1 = dot(vi[1].pos.xyz - p, vi[1].normal) * vi[1].normal;
+                 float3 p2 = dot(vi[2].pos.xyz - p, vi[2].normal) * vi[2].normal;
+
+                 // Lerp between projection vectors
+                 float3 vecOffset = bary.x * p0 + bary.y * p1 + bary.z * p2;
+
+                 // Add a fraction of the offset vector to the lerped position
+                 p += 0.5 * vecOffset;
+
+                 v.pos.xyz = p;
+                 #endif
+
+                 displacement(v);
+                 VertexOutput o = vert(v);
+                 return o;
+             }
+            #endif
+            #endif
+            void Splat(VertexOutput i, inout LightingTerms o, float3 viewDir, float3x3 tangentTransform)
+            {
+               SplatInput si = ToSplatInput(i);
+               si.viewDir = viewDir;
+               #if _SNOWGLITTER || _PUDDLEGLITTER || _PERTEXGLITTER
+               si.wsView = viewDir;
+               #endif
+               MegaSplatLayer macro = (MegaSplatLayer)0;
+
+               #if _USEMACROTEXTURE || _ALPHALAYER
+                  macro = SampleMacro(si.macroUV.xy);
+                  #if _SNOW && _SNOWOVERMACRO
+                  DoSnow(macro, si.macroUV.xy, mul(tangentTransform, normalize(macro.Normal)), si.snowHeightFade, 0, _GlobalPorosityWetness.x, si.camDist.y);
+                  #endif
+                  #if _DISABLESPLATSINDISTANCE
+                  if (i.camDist.x <= 0.0)
+                  {
+                     #if _CUSTOMUSERFUNCTION
+                     CustomMegaSplatFunction_Final(si, macro);
+                     #endif
+                     o.Albedo = macro.Albedo;
+                     o.Normal = macro.Normal;
+                     o.Emission = macro.Emission;
+                     #if !_RAMPLIGHTING
+                     o.Smoothness = macro.Smoothness;
+                     o.Metallic = macro.Metallic;
+                     o.Occlusion = macro.Occlusion;
+                     #endif
+                     #if _ALPHA || _ALPHATEST
+                     o.Alpha = macro.Alpha;
+                     #endif
+                     return;
+                  }
+                  #endif
+               #endif
+
+
+               #if _SNOW
+               si.snowHeightFade = saturate((i.posWorld.y - _SnowHeightRange.x) / max(_SnowHeightRange.y, 0.001));
+               #endif
+
+               MegaSplatLayer splats = DoSurf(si, macro, transpose(tangentTransform));
+
+               #if _DEBUG_OUTPUT_ALBEDO
+               o.Albedo = splats.Albedo;
+               #elif _DEBUG_OUTPUT_HEIGHT
+               o.Albedo = splats.Height.xxx * saturate(splats.Albedo+1);
+               #elif _DEBUG_OUTPUT_NORMAL
+               o.Albedo = splats.Normal * 0.5 + 0.5 * saturate(splats.Albedo+1);
+               #elif _DEBUG_OUTPUT_SMOOTHNESS
+               o.Albedo = splats.Smoothness.xxx * saturate(splats.Albedo+1);
+               #elif _DEBUG_OUTPUT_METAL
+               o.Albedo = splats.Metallic.xxx * saturate(splats.Albedo+1);
+               #elif _DEBUG_OUTPUT_AO
+               o.Albedo = splats.Occlusion.xxx * saturate(splats.Albedo+1);
+               #elif _DEBUG_OUTPUT_EMISSION
+               o.Albedo = splats.Emission * saturate(splats.Albedo+1);
+               #elif _DEBUG_OUTPUT_SPLATDATA
+               o.Albedo = DebugSplatOutput(si) * saturate(splats.Albedo+1);
+               #elif _RAMPLIGHTING
+               o.Albedo = splats.Albedo;
+               o.Normal = splats.Normal;
+               o.Emission = splats.Emission;
+               o.Occlusion = splats.Occlusion;
+               #else
+               o.Albedo = splats.Albedo;
+               o.Normal = splats.Normal;
+               o.Metallic = splats.Metallic;
+               o.Smoothness = splats.Smoothness;
+               o.Occlusion = splats.Occlusion;
+               o.Emission = splats.Emission;
+                  
+               #endif
+
+               #if _ALPHA || _ALPHATEST
+                  o.Alpha = splats.Alpha;
+               #endif
+            }
+
+            #if _PASSMETA
+            float4 frag(VertexOutput i) : SV_Target 
+            {
+                i.normal = normalize(i.normal);
+                float3x3 tangentTransform = (float3x3)0;
+                #if _SNOW
+                tangentTransform = float3x3( i.tangent, i.bitangent, i.normal);
+                #endif
+
+                float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+                float3 normalDirection = i.normal;
+                UnityMetaInput o;
+                UNITY_INITIALIZE_OUTPUT( UnityMetaInput, o );
+
+                LightingTerms lt = (LightingTerms)0;
+
+                Splat(i, lt, viewDirection, tangentTransform);
+
+                o.Emission = lt.Emission;
+                
+                float3 diffColor = lt.Albedo;
+                float specularMonochrome;
+                float3 specColor;
+                diffColor = DiffuseAndSpecularFromMetallic( diffColor, lt.Metallic, specColor, specularMonochrome );
+                float roughness = 1.0 - lt.Smoothness;
+                o.Albedo = diffColor + specColor * roughness * roughness * 0.5;
+                #if _ALPHATEST
+                clip(lt.Alpha - 0.5);
+                #endif
+                return UnityMetaFragment( o );
+
+            }
+            #elif _PASSSHADOWCASTER
+            float4 frag(VertexOutput i) : COLOR
+            {
+               #if _ALPHATEST
+               i.normal = normalize(i.normal);
+               float3x3 tangentTransform = (float3x3)0;
+               #if _SNOW
+               tangentTransform = float3x3( i.tangent, i.bitangent, i.normal);
+               #endif
+
+               float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+               float3 normalDirection = i.normal;
+
+               LightingTerms lt = (LightingTerms)0;
+
+               Splat(i, lt, viewDirection, tangentTransform);
+
+               clip(lt.Alpha - 0.5);
+               #endif
+
+               SHADOW_CASTER_FRAGMENT(i)
+            }
+            #elif _PASSDEFERRED
+            void frag(
+                VertexOutput i,
+                out half4 outDiffuse : SV_Target0,
+                out half4 outSpecSmoothness : SV_Target1,
+                out half4 outNormal : SV_Target2,
+                out half4 outEmission : SV_Target3
+                #if defined(SHADOWS_SHADOWMASK) && (UNITY_ALLOWED_MRT_COUNT > 4)
+                   , out half4 outShadowMask : SV_Target4
+                #endif
+                )
+            {
+                i.normal = normalize(i.normal);
+                float3x3 tangentTransform = float3x3( i.tangent, i.bitangent, i.normal);
+                float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+
+                LightingTerms o = (LightingTerms)0;
+                Splat(i, o, viewDirection, tangentTransform);
+
+                #if _ALPHATEST
+                clip(o.Alpha - 0.5);
+                #endif
+                o.Normal = normalize(mul( o.Normal, tangentTransform ));
+                LightPBRDeferred(i, o, viewDirection, outDiffuse, outSpecSmoothness, outNormal, outEmission
+                  #if defined(SHADOWS_SHADOWMASK) && (UNITY_ALLOWED_MRT_COUNT > 4)
+                  , outShadowMask
+                  #endif
+                  );
+                
+
+            }
+            #else
+            half4 frag(VertexOutput i) : COLOR 
+            {
+                i.normal = normalize(i.normal);
+                float3x3 tangentTransform = float3x3( i.tangent, i.bitangent, i.normal);
+                float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
+
+                LightingTerms o = (LightingTerms)0;
+
+                Splat(i, o, viewDirection, tangentTransform);
+
+                #if _ALPHATEST
+                clip(o.Alpha - 0.5);
+                #endif
+
+                #if _DEBUG_OUTPUT_ALBEDO || _DEBUG_OUTPUT_HEIGHT || _DEBUG_OUTPUT_NORMAL || _DEBUG_OUTPUT_SMOOTHNESS || _DEBUG_OUTPUT_METAL || _DEBUG_OUTPUT_AO || _DEBUG_OUTPUT_EMISSION
+                   return half4(o.Albedo,1);
+                #else
+                   o.Normal = normalize(mul( o.Normal, tangentTransform ));
+                   half4 lit = LightPBR(i, o, viewDirection, i.ambientOrLightmapUV);
+                   #if _ALPHA
+                   lit.a = o.Alpha;
+                   #endif
+                   return lit;
+                #endif
+            }
+            #endif
+
+
+            #if _LOWPOLY || _PREPROCESSMESH
+            [maxvertexcount(3)]
+            void geom(triangle VertexOutput input[3], inout TriangleStream<VertexOutput> s)
+            {
+               
+               VertexOutput v0 = input[0];
+               VertexOutput v1 = input[1];
+               VertexOutput v2 = input[2];
+               #if _LOWPOLY
+                  float3 norm = input[0].normal + input[1].normal + input[2].normal;
+                  norm /= 3;
+                  float3 tangent = input[0].tangent + input[1].tangent + input[2].tangent;
+                  tangent /= 3;
+                 
+                  float3 bitangent = input[0].bitangent + input[1].bitangent + input[2].bitangent;
+                  bitangent /= 3;
+
+                  #if _LOWPOLYADJUST
+                  v0.normal = lerp(v0.normal, norm, _EdgeHardness);
+                  v1.normal = lerp(v1.normal, norm, _EdgeHardness);
+                  v2.normal = lerp(v2.normal, norm, _EdgeHardness);
+                 
+                  v0.tangent = lerp(v0.tangent, tangent, _EdgeHardness);
+                  v1.tangent = lerp(v1.tangent, tangent, _EdgeHardness);
+                  v2.tangent = lerp(v2.tangent, tangent, _EdgeHardness);
+                 
+                  v0.bitangent = lerp(v0.bitangent, bitangent, _EdgeHardness);;
+                  v1.bitangent = lerp(v1.bitangent, bitangent, _EdgeHardness);;
+                  v2.bitangent = lerp(v2.bitangent, bitangent, _EdgeHardness);;
+                  #else
+                  v0.normal = norm;
+                  v1.normal = norm;
+                  v2.normal = norm;
+                 
+                  v0.tangent = tangent;
+                  v1.tangent = tangent;
+                  v2.tangent = tangent;
+                 
+                  v0.bitangent = bitangent;
+                  v1.bitangent = bitangent;
+                  v2.bitangent = bitangent;
+                  #endif // low poly adjust
+               #endif // low poly
+
+               #if _PREPROCESSMESH
+               v0.weights.rgb = half3(1,0,0);
+               v1.weights.rgb = half3(0,1,0);
+               v2.weights.rgb = half3(0,0,1);
+               #endif
+
+               s.Append(v0);
+               s.Append(v1);
+               s.Append(v2);
+            }
+            #endif
+
+            ENDCG
+        }
+
+
+      

@@ -1,0 +1,2 @@
+      // UV Projection2
+      _UVProjectOffsetScale2 ("Offset Scale 2", Vector) = (0, 0, 0.3, 0.3)

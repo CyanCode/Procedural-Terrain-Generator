@@ -1,0 +1,5 @@
+      // distance resampling
+      // uv scale, near, fast
+      _ResampleDistanceParams("Puddle Flow Params", Vector) = (0.25, 80, 200, 0)
+
+

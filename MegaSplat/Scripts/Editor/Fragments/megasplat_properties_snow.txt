@@ -1,0 +1,10 @@
+      // snow
+      _SnowDiff("Diffuse/Height", 2D) = "white" {}
+      _SnowNormal("NormalSAO", 2D) = "white" {}
+      _SnowUpVector("Snow Up Vector", Vector) = (0, 1, 0, 0)
+
+      _SnowAmount("Amount", Range(0,1)) = 0.5
+      _SnowUVScales("UV Scale", Vector) = (50, 50, 0, 0)
+      _SnowHeightRange("Height Range", Vector) = (20, 30, 0, 0)
+      // influence, erosion, crystal, melt
+      _SnowParams("Params", Vector) = (0.5, 1, 0.5, 0.2) 

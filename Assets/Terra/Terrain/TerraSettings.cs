@@ -35,7 +35,7 @@ namespace Terra.Terrain {
 		public float Amplitude = 50f;
 
 		//Material Tab
-		public List<TerrainPaint.SplatSetting> SplatSettings = null;
+		public List<TerrainPaint.SplatSetting> SplatSettings = new List<TerrainPaint.SplatSetting>();
 		public bool IsMaxHeightSelected = false;
 		public bool IsMinHeightSelected = false;
 		public bool UseCustomMaterial = false;
@@ -47,7 +47,7 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated
 		/// in <code>Awake</code>.
-		/// </summary>
+		/// </summary> 
 		public TilePool Pool;
 
 		/// <summary>

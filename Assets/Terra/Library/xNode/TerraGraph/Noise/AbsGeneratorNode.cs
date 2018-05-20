@@ -37,11 +37,13 @@ namespace Terra.Graph.Noise {
 
 				// Search neighbors
 				foreach (var output in node.Outputs) {
-					if (output != null && output.Connection != null) {
-						Node outNode = output.Connection.node;
+					if (output != null) {
+						for (int i = 0; i < output.ConnectionCount; i++) {
+							Node outNode = output.GetConnection(i).node;
 
-						if (outNode != null && (!visited.ContainsKey(outNode) || !visited[outNode])) {
-							dfs.Push(outNode);
+							if (outNode != null && (!visited.ContainsKey(outNode) || !visited[outNode])) {
+								dfs.Push(outNode);
+							}
 						}
 					}
 				}

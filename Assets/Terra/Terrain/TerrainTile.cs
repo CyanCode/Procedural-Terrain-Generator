@@ -174,11 +174,6 @@ namespace Terra.Terrain {
 		/// <param name="mat">Custom material to apply</param>
 		public void ApplyCustomMaterial() {
 			TerraEvent.TriggerOnCustomMaterialWillApply(gameObject);
-		
-			//Mesh data needs to be recalculated
-			if (Settings.ConvertMesh) {
-				Terrain = MeshProcessor.Process(Terrain);
-			}
 
 			MeshRenderer mr = GetComponent<MeshRenderer>();
 			mr.sharedMaterial = Settings.CustomMaterial;

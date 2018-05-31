@@ -168,11 +168,6 @@ namespace Terra.Terrain {
 				MeshRenderer rend = Settings.gameObject.AddComponent<MeshRenderer>();
 
 				if (Settings.UseCustomMaterial && Settings.CustomMaterial != null) {
-					if (Settings.ConvertMesh) {
-						MeshFilter mf = Settings.gameObject.GetComponent<MeshFilter>();
-						mf.sharedMesh = MeshProcessor.Process(mf.sharedMesh);
-					}
-
 					//Apply custom material to terrain
 					rend.sharedMaterial = Settings.CustomMaterial;
 				} else {

@@ -21,8 +21,8 @@ namespace Terra.Terrain {
 
 			public PlacementType PlacementType;
 
-			public float AngleMin;
-			public float AngleMax;
+			public float AngleMin = 5f;
+			public float AngleMax = 25f;
 
 			public float MinRange;
 			public float MaxRange;

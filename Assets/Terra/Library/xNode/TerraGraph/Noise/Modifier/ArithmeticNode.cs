@@ -27,5 +27,9 @@ namespace Terra.Graph.Noise.Modifier {
 					return null;
 			}
 		}
+
+		public override string GetTitle() {
+			return "Arithmetic";
+		}
 	}
 }

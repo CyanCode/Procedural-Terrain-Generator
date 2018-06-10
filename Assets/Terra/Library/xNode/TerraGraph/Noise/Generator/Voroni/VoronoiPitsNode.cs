@@ -12,5 +12,9 @@ namespace Terra.Nodes.Generation {
 
 			return noise;
 		}
+
+		public override string GetTitle() {
+			return "Voronoi Pits";
+		}
 	}
 }

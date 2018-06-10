@@ -11,5 +11,9 @@ namespace Terra.Graph.Noise.Modifier {
 
 			return new Max(GetGenerator1(), GetGenerator2());
 		}
+
+		public override string GetTitle() {
+			return "Max";
+		}
 	}
 }

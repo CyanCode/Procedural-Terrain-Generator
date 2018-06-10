@@ -79,6 +79,13 @@ namespace Terra.Graph.Noise {
 		/// </summary>
 		/// <returns>Generator</returns>
 		public abstract Generator GetGenerator();
+
+		/// <summary>
+		/// Gets the name of this node to display in the 
+		/// title.
+		/// </summary>
+		/// <returns>Title in string form</returns>
+		public abstract string GetTitle();
 	}
 }
  

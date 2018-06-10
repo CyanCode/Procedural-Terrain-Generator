@@ -4,6 +4,6 @@
 		[Input] public float Lacunarity = 2.17f;
 		[Input] public int OctaveCount = 6;
 
-		protected const string MENU_PARENT_NAME = "Noise/";
+		protected const string MENU_PARENT_NAME = "Terrain/Noise/";
 	}
 }

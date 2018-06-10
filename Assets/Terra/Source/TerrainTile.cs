@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
 using System.Collections.Generic;
-using System.Threading;
-using System;
-using Assets.Terra.Terrain.Util;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -28,7 +25,7 @@ namespace Terra.Terrain {
 		}
 
 		void OnEnable() {
-			if (Settings == null) Settings = FindObjectOfType<TerraSettings>();
+			Settings = TerraSettings.Instance;
 			if (Settings == null) {
 				Debug.LogError("Cannot find a TerraSettings object in the scene");
 			}
@@ -43,7 +40,15 @@ namespace Terra.Terrain {
 		/// <returns>The attached TerrainTile component</returns>
 		public static TerrainTile CreateTileGameobject(string name) {
 			GameObject go = new GameObject(name);
-			return go.AddComponent<TerrainTile>();
+			TerrainTile tt = go.AddComponent<TerrainTile>();
+
+			//Perform initilization before OnEnable
+			if (tt.Settings == null) tt.Settings = FindObjectOfType<TerraSettings>();
+			if (tt.Settings == null) {
+				Debug.LogError("Cannot find a TerraSettings object in the scene");
+			}
+
+			return tt;
 		}
 
 		/// <summary>
@@ -147,6 +152,7 @@ namespace Terra.Terrain {
 				MeshCollider collider = gameObject.AddComponent<MeshCollider>();
 				collider.sharedMesh = Terrain;
 
+
 				TerraEvent.TriggerOnMeshDidForm(gameObject, Terrain);
 			}
 		}
@@ -160,7 +166,7 @@ namespace Terra.Terrain {
 		public TerrainPaint ApplySplatmap() {
 			TerraEvent.TriggerOnSplatmapWillCalculate(gameObject);
 			if (Paint == null)
-				Paint = new TerrainPaint(gameObject, Settings);
+				Paint = new TerrainPaint(gameObject);
 
 			List<Texture2D> maps = Paint.GenerateSplatmaps();
 			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));

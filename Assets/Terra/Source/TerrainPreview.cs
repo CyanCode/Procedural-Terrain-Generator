@@ -15,8 +15,8 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="settings">Active settings component</param>
 		/// <param name="hideInInspector">Optionally hide created components in the inspector</param>
-		public TerrainPreview(TerraSettings settings) {
-			this.Settings = settings;
+		public TerrainPreview() {
+			this.Settings = TerraSettings.Instance;
 		}
 
 		/// <summary>
@@ -140,7 +140,7 @@ namespace Terra.Terrain {
 		private List<Texture2D> CreateSplats() {
 			if (Settings.SplatSettings != null) {
 				if (Paint == null)
-					Paint = new TerrainPaint(Settings.gameObject, Settings);
+					Paint = new TerrainPaint(Settings.gameObject);
 
 				List<Texture2D> splats = Paint.GenerateSplatmaps(false);
 				return splats.Count > 0 ? splats : null;
@@ -158,6 +158,7 @@ namespace Terra.Terrain {
 			TriggerMeshUpdate();
 			TriggerMaterialsUpdate();
 			TriggerObjectPlacementUpdate();
+			TriggerHideInInspectorUpdate();
 		}
 
 		private void AddMaterialComponent() {
@@ -185,14 +186,6 @@ namespace Terra.Terrain {
 						rend.material = new Material(Shader.Find(path));
 					}
 				}
-
-				//Optionally hide renderer & material in inspector
-				if (TerraDebug.HIDE_IN_INSPECTOR) {
-					rend.hideFlags = HideFlags.HideInInspector;
-
-					if (rend.sharedMaterial != null)
-						rend.sharedMaterial.hideFlags = HideFlags.HideInInspector;
-				}
 			}
 		}
 
@@ -203,15 +196,40 @@ namespace Terra.Terrain {
 		private void TriggerMeshUpdate() {
 			if (Settings.GetComponent<MeshFilter>() == null && HasEndGenerator()) {
 				MeshFilter filter = Settings.gameObject.AddComponent<MeshFilter>();
-				if (TerraDebug.HIDE_IN_INSPECTOR) {
-					filter.hideFlags = HideFlags.HideInInspector;
-				}
 
 				//Generate mesh
 				Mesh m = CreateMesh();
 				if (m != null) {
 					filter.sharedMesh = CreateMesh();
 				}				
+			}
+		}
+
+		/// <summary>
+		/// Hides or shows components in inspector based on 
+		/// set TerraDebug setting.
+		/// </summary>
+		private void TriggerHideInInspectorUpdate() {
+			MeshFilter mf = Settings.GetComponent<MeshFilter>();
+			MeshRenderer mr = Settings.GetComponent<MeshRenderer>();
+			HideFlags isHidden = TerraDebug.HIDE_IN_INSPECTOR ? HideFlags.HideInInspector : HideFlags.None;
+
+			//If hiding in inspector, only hide specific components
+			if (isHidden == HideFlags.HideInInspector) {
+				if (mf != null) {
+					mf.hideFlags = isHidden;
+				}
+				if (mr != null) {
+					mr.hideFlags = isHidden;
+
+					if (mr.sharedMaterial != null) {
+						mr.sharedMaterial.hideFlags = isHidden;
+					}
+				}
+			} else { //Otherwise show everything
+				foreach (Component c in Settings.GetComponents<Component>()) {
+					c.hideFlags = HideFlags.None;
+				}
 			}
 		}
 	}

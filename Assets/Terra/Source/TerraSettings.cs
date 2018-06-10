@@ -7,6 +7,11 @@ using UnityEngine;
 namespace Terra.Terrain {
 	[System.Serializable, ExecuteInEditMode]
 	public class TerraSettings: MonoBehaviour {
+		/// <summary>
+		/// Internal TerraSettings instance to avoid finding when its not needed
+		/// </summary>
+		private static TerraSettings _instance;
+
 		[System.Serializable]
 		public enum ToolbarOptions {
 			General = 0,
@@ -67,9 +72,23 @@ namespace Terra.Terrain {
 		/// </summary>
 		public ObjectPlacer Placer;
 
+		/// <summary>
+		/// Finds the active TerraSettings instance in this scene if one exists.
+		/// </summary>
+		public static TerraSettings Instance {
+			get {
+				if (_instance != null) {
+					return _instance;
+				}
+
+				_instance = FindObjectOfType<TerraSettings>();
+				return _instance;
+			}
+		}
+
 		void Awake() {
 			Pool = new TilePool(this);
-			Preview = new TerrainPreview(this);
+			Preview = new TerrainPreview();
 			Placer = new ObjectPlacer(this);
 		}
 
@@ -92,7 +111,7 @@ namespace Terra.Terrain {
 		void Update() {
 #if UNITY_EDITOR
 			if (Application.isEditor && !Application.isPlaying && Preview == null) {
-				Preview = new TerrainPreview(this);
+				Preview = new TerrainPreview();
 			}
 #endif
 			if (Application.isPlaying && Pool != null && GenerateOnStart) {
@@ -141,7 +160,6 @@ namespace Terra.Terrain {
 				//Cleanup preview from edit mode
 				Preview.Cleanup();
 
-				//Setup object tracking and generator reading
 				//Set default tracked object
 				if (TrackedObject == null) {
 					TrackedObject = new GameObject("Default Tracked Position");
@@ -165,7 +183,7 @@ namespace Terra.Terrain {
 		/// Sets components to display/hide in TerraSettings 
 		/// gameobject
 		/// </summary>
-		internal const bool HIDE_IN_INSPECTOR = true;
+		internal const bool HIDE_IN_INSPECTOR = false;
 
 		/// <summary>
 		/// Writes splat control textures to the file system 

@@ -14,6 +14,7 @@ namespace Terra.Editor.Graph {
 
 		private readonly int TEXTURE_PADDING = 16;
 		private readonly int TEXTURE_HEIGHT_OFFSET = 55;
+		private readonly int NODE_WIDTH = 150;
 
 		private int EXPANDED_HEIGHT {
 			get {
@@ -38,6 +39,14 @@ namespace Terra.Editor.Graph {
 				EditorGUILayout.LabelField("", GUILayout.Height(EXPANDED_HEIGHT));
 				GUI.DrawTexture(dimensions, PreviewNode.PreviewTexture);
 			}
+		}
+
+		public override int GetWidth() {
+			return NODE_WIDTH;
+		}
+
+		public override string GetTitle() {
+			return "Preview";
 		}
 	}
 }

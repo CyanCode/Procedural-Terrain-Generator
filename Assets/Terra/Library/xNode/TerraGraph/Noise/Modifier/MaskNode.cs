@@ -24,6 +24,10 @@ namespace Terra.Graph.Noise.Modifier {
 
 			return new Blend(g1, g2, mask);
 		}
+
+		public override string GetTitle() {
+			return "Mask";
+		}
 	}
 }
  

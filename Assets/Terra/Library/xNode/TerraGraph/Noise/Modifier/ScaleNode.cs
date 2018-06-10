@@ -27,5 +27,9 @@ namespace Terra.Graph.Noise.Modifier {
 				return new Scale(gen, Factor);
 			}
 		}
+
+		public override string GetTitle() {
+			return "Scale";
+		}
 	}
 }

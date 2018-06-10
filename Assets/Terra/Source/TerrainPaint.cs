@@ -51,10 +51,11 @@ namespace Terra.Terrain {
 		/// MeshFilter, MeshRenderer, and TerrainTile
 		/// </summary>
 		/// <param name="gameobject">Gameobject to paint</param>
-		public TerrainPaint(GameObject gameobject, TerraSettings settings) {
+		public TerrainPaint(GameObject gameobject) {
 			TerrainObject = gameobject;
-			SplatSettings = settings.SplatSettings;
-			Settings = settings;
+			Settings = TerraSettings.Instance;
+			SplatSettings = Settings.SplatSettings;
+			
 
 			SetFirstPassShader();
 			Mesh = TerrainObject.GetComponent<MeshFilter>().sharedMesh;

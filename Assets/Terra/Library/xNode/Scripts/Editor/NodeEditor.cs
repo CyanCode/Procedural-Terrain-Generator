@@ -23,7 +23,7 @@ namespace XNodeEditor {
 
         public virtual void OnHeaderGUI() {
             GUI.color = Color.white;
-            string title = target.name;
+			string title = GetTitle();
             GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
         }
 
@@ -51,6 +51,10 @@ namespace XNodeEditor {
             if (NodeEditorWindow.nodeTint.ContainsKey(type)) return NodeEditorWindow.nodeTint[type];
             else return Color.white;
         }
+
+		public virtual string GetTitle() {
+			return target.name;
+		}
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,

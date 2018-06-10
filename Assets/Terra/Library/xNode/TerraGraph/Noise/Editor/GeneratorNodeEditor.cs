@@ -12,5 +12,9 @@ namespace Terra.Editor.Graph {
 				((AbsGeneratorNode)target).OnValueChange();
 			}
 		}
+
+		public override string GetTitle() {
+			return ((AbsGeneratorNode)target).GetTitle();
+		}
 	}
 }

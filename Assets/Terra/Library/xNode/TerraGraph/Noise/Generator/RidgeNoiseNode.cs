@@ -21,5 +21,9 @@ namespace Terra.Graph.Noise.Generation {
 
 			return noise;
 		}
+
+		public override string GetTitle() {
+			return "Ridge";
+		}
 	}
 }

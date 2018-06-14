@@ -12,6 +12,30 @@ namespace Terra.Terrain {
 	public class TilePool {
 		public TerraSettings Settings;
 
+		/// <summary>
+		/// Returns the amount of tiles that are currently set as 
+		/// active.
+		/// </summary>
+		public int ActiveTileCount {
+			get {
+				if (Cache == null) {
+					return 0;
+				}
+
+				return Cache.ActiveTiles.Count;
+			}
+		}
+
+		/// <summary>
+		/// Returns a list of tiles that are currently active in the 
+		/// scene
+		/// </summary>
+		public List<TerrainTile> ActiveTiles {
+			get {
+				return Cache.ActiveTiles;
+			}
+		}
+
 		private TileCache Cache = new TileCache(CACHE_SIZE);
 		private int queuedTiles = 0;
 		private Object pollLock = new Object();
@@ -23,8 +47,9 @@ namespace Terra.Terrain {
 			public Generator gen;
 		}
 
-		public TilePool(TerraSettings settings) {
-			Settings = settings;
+		public TilePool() {
+			Settings = TerraSettings.Instance;
+
 		}
 
 		/// <summary>
@@ -40,8 +65,8 @@ namespace Terra.Terrain {
 		}
 
 		public static List<Vector2> GetTilePositionsFromRadius(int radius, Vector3 position, int length) {
-			int xPos = Mathf.FloorToInt(position.x / length);
-			int zPos = Mathf.FloorToInt(position.z / length);
+			int xPos = Mathf.RoundToInt(position.x / length);
+			int zPos = Mathf.RoundToInt(position.z / length);
 			List<Vector2> result = new List<Vector2>(25);
 
 			for (var zCircle = -radius; zCircle <= radius; zCircle++) {
@@ -173,7 +198,7 @@ namespace Terra.Terrain {
 								if (Settings.UseCustomMaterial)
 									tile.ApplyCustomMaterial();
 								else
-									tile.ApplySplatmap();
+									tile.Details.ApplySplatmap();
 
 								tile.UpdatePosition(pos);
 								Cache.AddActiveTile(tile);
@@ -191,7 +216,7 @@ namespace Terra.Terrain {
 				if (Settings.UseCustomMaterial)
 					tile.ApplyCustomMaterial();
 				else
-					tile.ApplySplatmap();
+					tile.Details.ApplySplatmap();
 				tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
 
 				Cache.AddActiveTile(tile);

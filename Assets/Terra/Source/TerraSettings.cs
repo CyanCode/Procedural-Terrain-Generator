@@ -50,9 +50,23 @@ namespace Terra.Terrain {
 		public bool IsMinHeightSelected = false;
 		public bool UseCustomMaterial = false;
 		public Material CustomMaterial = null;
-
+		public bool PlaceGrass = false;
+		public float GrassStepLength = 1.5f;
+		public float GrassVariation = 0.8f;
+		public float GrassHeight = 1.5f;
+		public float BillboardDistance = 75f;
+		public float ClipCutoff = 0.25f;
+		public bool GrassConstrainHeight = false;
+		public float GrassMinHeight = 0f;
+		public float GrassMaxHeight = 200f;
+		public bool GrassConstrainAngle = false;
+		public float GrassAngleMin = 0f;
+		public float GrassAngleMax = 25f;
+		public Texture2D GrassTexture = null;
+		
 		//Object Placement Tab
 		public List<ObjectPlacementType> ObjectPlacementSettings = new List<ObjectPlacementType>();
+
 
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated
@@ -65,12 +79,6 @@ namespace Terra.Terrain {
 		/// <code>Awake</code> and handles previewing of the generated terrain.
 		/// </summary>
 		public TerrainPreview Preview;
-
-		/// <summary>
-		/// ObjectPlacer instance attached to this TerraSettings instance. This is instantiated
-		/// in <code>Awake</code>.
-		/// </summary>
-		public ObjectPlacer Placer;
 
 		/// <summary>
 		/// Finds the active TerraSettings instance in this scene if one exists.
@@ -87,9 +95,8 @@ namespace Terra.Terrain {
 		}
 
 		void Awake() {
-			Pool = new TilePool(this);
+			Pool = new TilePool();
 			Preview = new TerrainPreview();
-			Placer = new ObjectPlacer(this);
 		}
 
 		void Start() {
@@ -162,8 +169,7 @@ namespace Terra.Terrain {
 
 				//Set default tracked object
 				if (TrackedObject == null) {
-					TrackedObject = new GameObject("Default Tracked Position");
-					TrackedObject.transform.position = Vector3.zero;
+					TrackedObject = Camera.main.gameObject;
 				}
 
 				//Set seed for RNG
@@ -183,7 +189,7 @@ namespace Terra.Terrain {
 		/// Sets components to display/hide in TerraSettings 
 		/// gameobject
 		/// </summary>
-		internal const bool HIDE_IN_INSPECTOR = false;
+		internal const bool HIDE_IN_INSPECTOR = true;
 
 		/// <summary>
 		/// Writes splat control textures to the file system 

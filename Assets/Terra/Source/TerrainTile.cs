@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
 using System.Collections.Generic;
+using Terra.Terrain.Detail;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -13,9 +14,9 @@ namespace Terra.Terrain {
 		public bool IsColliderDirty = false;
 		public Mesh Terrain { get; private set; }
 		public Vector2 Position { get; private set; }
+		public DetailManager Details { get; private set; }
 
 		private TerraSettings Settings;
-		private TerrainPaint Paint;
 
 		public struct MeshData {
 			public Vector3[] vertices;
@@ -25,10 +26,16 @@ namespace Terra.Terrain {
 		}
 
 		void OnEnable() {
+			Details = new DetailManager(this);
+
 			Settings = TerraSettings.Instance;
 			if (Settings == null) {
 				Debug.LogError("Cannot find a TerraSettings object in the scene");
 			}
+		}
+
+		void Update() {
+			Details.Update();
 		}
 
 		/// <summary>
@@ -152,26 +159,8 @@ namespace Terra.Terrain {
 				MeshCollider collider = gameObject.AddComponent<MeshCollider>();
 				collider.sharedMesh = Terrain;
 
-
-				TerraEvent.TriggerOnMeshDidForm(gameObject, Terrain);
+				TerraEvent.TriggerOnMeshColliderDidForm(gameObject, collider);
 			}
-		}
-
-		/// <summary>
-		/// Applies the SplatSettings specified in TerraSettings to this 
-		/// TerrainTile. A TerrainPaint instance is created if it didn't exist 
-		/// already, and is returned.
-		/// </summary>
-		/// <returns>TerrainTile instance</returns>
-		public TerrainPaint ApplySplatmap() {
-			TerraEvent.TriggerOnSplatmapWillCalculate(gameObject);
-			if (Paint == null)
-				Paint = new TerrainPaint(gameObject);
-
-			List<Texture2D> maps = Paint.GenerateSplatmaps();
-			maps.ForEach(m => TerraEvent.TriggerOnSplatmapDidCalculate(gameObject, m));
-
-			return Paint;
 		}
 
 		/// <summary>

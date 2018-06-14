@@ -197,12 +197,11 @@ public static class GrassRenderer {
 
 		private TerrainTile Tile;
 		private float StepLength;
-		private int NumDivisions;
 
-		public GrassTile(TerrainTile tile, float stepLength, int numDivisions = 5) {
+
+		public GrassTile(TerrainTile tile, float stepLength) {
 			Tile = tile;
 			StepLength = stepLength;
-			NumDivisions = numDivisions;
 		}
 
 		/// <summary>
@@ -217,13 +216,10 @@ public static class GrassRenderer {
 			float variation = TerraSettings.Instance.GrassVariation;
 
 			List<MeshData> data = new List<MeshData>();
-			MeshCollider mc = Tile.GetComponent<MeshCollider>();
-			
 			Bounds bounds = Tile.Terrain.bounds;
 			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
 			int res = TerraSettings.Instance.MeshResolution;
-			float step = bounds.size.x / res;
 			float rayHeight = worldBounds.max.y + 5;
 			float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
 

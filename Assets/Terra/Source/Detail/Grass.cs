@@ -42,7 +42,7 @@ public class Grass: MonoBehaviour {
 		//Keep track of TerrainTiles that have been added
 		//in order to know the maximum height
 
-		TerraEvent.OnMeshDidForm += ((go, m) => {
+		TerraEvent.OnMeshColliderDidForm += ((go, m) => {
 			float height = go.transform.position.y + m.bounds.max.y;
 			MaxHeight = height > MaxHeight ? height + 10 : MaxHeight;
 		});

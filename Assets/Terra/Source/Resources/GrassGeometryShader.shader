@@ -15,7 +15,7 @@
 // Low Poly Shader developed as part of World of Zero: http://youtube.com/worldofzerodevelopment
 // Based upon the example at: http://www.battlemaze.com/?p=153
 
-Shader "Custom/Grass Geometry Shader" {
+Shader "Terra/GrassGeometry" {
 	Properties{
 		[HDR]_BackgroundColor("Background Color", Color) = (1,0,0,1)
 		[HDR]_ForegroundColor("Foreground Color", Color) = (0,0,1,1)

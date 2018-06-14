@@ -141,6 +141,35 @@ namespace UnityEditor.Terra {
 
 				}
 
+				//Use Grass
+				Settings.PlaceGrass = EditorGUILayout.Toggle("Place Grass", Settings.PlaceGrass);
+				if (Settings.PlaceGrass) {
+					Settings.GrassStepLength = EditorGUILayout.Slider("Density",  Settings.GrassStepLength, 1.5f, 30f);
+					Settings.GrassVariation = EditorGUILayout.Slider("Variation", Settings.GrassVariation, 0f, 3f);
+					Settings.GrassHeight = EditorGUILayout.Slider("Height", Settings.GrassHeight, 1f, 10f);
+					Settings.BillboardDistance = EditorGUILayout.FloatField("Billboard Distance", Settings.BillboardDistance);
+					Settings.ClipCutoff = EditorGUILayout.Slider("Clip Cutoff", Settings.ClipCutoff, 0.05f, 1f);
+
+					Settings.GrassConstrainHeight = EditorGUILayout.Toggle("Constrain Height", Settings.GrassConstrainHeight);
+					if (Settings.GrassConstrainHeight) {
+						EditorGUI.indentLevel = 1;
+						Settings.GrassMaxHeight = EditorGUILayout.FloatField("Max Height", Settings.GrassMaxHeight);
+						Settings.GrassMinHeight = EditorGUILayout.FloatField("Min Height", Settings.GrassMinHeight);
+						EditorGUI.indentLevel = 0;
+					}
+
+					Settings.GrassConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", Settings.GrassConstrainAngle);
+					if (Settings.GrassConstrainAngle) {
+						EditorGUI.indentLevel = 1;
+						EditorGUILayout.LabelField("Min Angle", Settings.GrassAngleMin.ToString("0") + " deg");
+						EditorGUILayout.LabelField("Max Angle", Settings.GrassAngleMax.ToString("0") + " deg");
+						EditorGUILayout.MinMaxSlider(ref Settings.GrassAngleMin, ref Settings.GrassAngleMax, 0f, 90f);
+						EditorGUI.indentLevel = 0;
+					}
+
+					Settings.GrassTexture = (Texture2D)EditorGUILayout.ObjectField("Texture", Settings.GrassTexture, typeof(Texture2D), false);
+				}
+
 				EditorGUILayout.Space();
 				if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
 					Settings.Preview.TriggerMaterialsUpdate();

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Terra.Terrain.Detail;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,7 +16,7 @@ namespace Terra.Terrain {
 		private TerraSettings Settings;
 		private Mesh PreviewMesh;
 		private GameObject Parent;
-		private ObjectPlacer Placer;
+		private ObjectRenderer Placer;
 
 		public static readonly string OBJ_PREVIEW_NAME = "OBJECT_PREVIEW";
 
@@ -29,7 +30,7 @@ namespace Terra.Terrain {
 		public ObjectPlacerPreview(TerraSettings settings, Mesh m) {
 			Settings = settings;
 			PreviewMesh = m;
-			Placer = new ObjectPlacer(settings);
+			Placer = new ObjectRenderer();
 			CreateParentGO();
 		}
 

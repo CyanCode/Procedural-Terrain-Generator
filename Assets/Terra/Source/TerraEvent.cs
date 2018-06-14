@@ -5,11 +5,13 @@ namespace Terra.Terrain {
 	public class TerraEvent {
 		public delegate void Action(GameObject go);
 		public delegate void MeshAction(GameObject go, Mesh mesh);
+		public delegate void MeshColliderAction(GameObject go, MeshCollider meshCollider);
 		public delegate void SplatAction(GameObject go, Texture2D splat);
 		public delegate void TileEvent(TerrainTile tile);
 
 		public static event Action OnMeshWillForm;
-		public static event MeshAction OnMeshDidForm;
+
+		public static event MeshColliderAction OnMeshColliderDidForm;
 
 		public static event Action OnSplatmapWillCalculate;
 		public static event SplatAction OnSplatmapDidCalculate;
@@ -30,8 +32,8 @@ namespace Terra.Terrain {
 			if (OnMeshWillForm != null) OnMeshWillForm(go);
 		}
 
-		public static void TriggerOnMeshDidForm(GameObject go, Mesh mesh) {
-			if (OnMeshDidForm != null) OnMeshDidForm(go, mesh);
+		public static void TriggerOnMeshColliderDidForm(GameObject go, MeshCollider collider) {
+			if (OnMeshColliderDidForm != null) OnMeshColliderDidForm(go, collider);
 		}
 
 		public static void TriggerOnSplatmapWillCalculate(GameObject go) {

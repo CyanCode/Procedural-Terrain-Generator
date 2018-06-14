@@ -1,270 +1,314 @@
-﻿using System.Collections.Generic;
-using Terra.CoherentNoise;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Terra.Terrain;
 using UnityEngine;
 
-public class GrassRenderer {
-	#region Instance Vars
+public static class GrassRenderer {
+	private static Material _material;
 
-	/// <summary>
-	/// Stores information used in the creation of 
-	/// a point cloud mesh
-	/// </summary>
-	private class PointCloudMesh {
-		public Vector3[] points;
-		public Vector3[] normals;
-		public int[] indices;
+	public static int Resolution = 128;
+	public static Material Material {
+		get {
+			if (_material == null) {
+				_material = GetGrassMaterial();
+			}
+
+			return _material;
+		}
 	}
 
 	/// <summary>
-	/// Stores the height and mask maps used in computing a 
-	/// fast point cloud
+	/// True if this GrassRenderer is currently calculating grass 
+	/// data for a TerrainTile. Used for syncing up coroutines.
 	/// </summary>
-	private class PointCloudData {
-		public int Resolution;
+	private static bool CalculatingTile = false;
+
+	/// <summary>
+	/// Used for retrieving previously created mesh information
+	/// </summary>
+	private static Dictionary<TerrainTile, List<GameObject>> CachedMeshData = new Dictionary<TerrainTile, List<GameObject>>();
+	private static LinkedList<TerrainTile> GenerationQueue = new LinkedList<TerrainTile>();
+
+	private const string GRASS_SHADER_LOC = "Terra/GrassGeometry";
+	private const string GRASS_CONTAINER_NAME = "Grass Meshes";
+
+	static GrassRenderer() {
+		//Watch for the addition of tiles
+		TerraEvent.OnMeshColliderDidForm += (go, mc) => {
+			TerrainTile t = go.GetComponent<TerrainTile>();
+
+			if (TerraSettings.Instance.PlaceGrass && !CachedMeshData.ContainsKey(t) && !GenerationQueue.Contains(t)) {
+				GenerationQueue.AddFirst(t);
+			}
+		};
+	}
+
+	/// <summary>
+	/// Updates the internal generation queue by working on the 
+	/// next available tile
+	/// </summary>
+	public static void Update() {
+		UpdateMaterialData();
+
+		if (!CalculatingTile && GenerationQueue.Count > 0) {
+			TerrainTile t = GenerationQueue.Last.Value;
+			GenerationQueue.RemoveLast();
+
+			CalculateGrassMeshes(t);
+		}
+	}
+
+	/// <summary>
+	/// Returns true if this instance of GrassRenderer has already 
+	/// computed data for placing grass on the passed tile.
+	/// </summary>
+	public static bool HasGrassData(TerrainTile tile) {
+		return CachedMeshData.ContainsKey(tile);
+	}
+
+	/// <summary>
+	/// Calculates data used for placing grass on terrain regardless of 
+	/// whether or not this data has already been computed previously.
+	/// Use <c>HasGrassData</c> to check if its already been computed.
+	/// This method calculates grass meshes via a coroutine which calculates a 
+	/// mesh and then waits for the next frame before continuing to the next.
+	/// </summary>
+	public static void CalculateGrassMeshes(TerrainTile tile) {
+		GrassTile gt = new GrassTile(tile, TerraSettings.Instance.GrassStepLength);
+		CalculatingTile = true;
+
+		tile.StartCoroutine(gt.CalculateCells((data) => {
+			List<GameObject> createdGos = new List<GameObject>(data.Count);
+			GameObject parent = SetupGrassParent(tile);
+
+			foreach (GrassTile.MeshData md in data) { 
+				//Apply material to each Mesh
+				if (md.vertices != null) {
+					GameObject grassGO = new GameObject("Grass");
+					grassGO.transform.parent = parent.transform;
+					createdGos.Add(grassGO);
+
+					var mf = grassGO.AddComponent<MeshFilter>();
+					var mr = grassGO.AddComponent<MeshRenderer>();
+					mr.material = Material;
+
+					Mesh m = new Mesh();
+					m.SetVertices(md.vertices);
+					m.SetNormals(md.normals);
+					m.SetIndices(md.indicies.ToArray(), MeshTopology.Points, 0);
+
+					mf.mesh = m;
+				}
+			}
+
+			CachedMeshData.Add(tile, createdGos);
+			CalculatingTile = false;
+		}));
+	}
+
+	/// <summary>
+	/// Sets up the container that will contain all grass mesh 
+	/// gameobjects
+	/// </summary>
+	/// <returns>Parent gameobject</returns>
+	private static GameObject SetupGrassParent(TerrainTile tile) {
+		//Setup parent gameobject
+		GameObject parent = null;
+		foreach (Transform trans in tile.transform) {
+			if (trans.gameObject.name == GRASS_CONTAINER_NAME) {
+				parent = trans.gameObject;
+				break;
+			}
+		}
+		if (parent == null) {
+			parent = new GameObject(GRASS_CONTAINER_NAME);
+			parent.transform.parent = tile.transform;
+		}
+
+		return parent;
+	}
+
+	/// <summary>
+	/// Gets the grass material and assigns it the shader 
+	/// located in resources
+	/// </summary>
+	/// <returns>Created material</returns>
+	private static Material GetGrassMaterial() {
+		Shader grassShader = Shader.Find(GRASS_SHADER_LOC);
+		Material mat = new Material(grassShader);
+
+		var sett = TerraSettings.Instance;
+		mat.SetTexture("_MainTex", sett.GrassTexture);
+		mat.SetFloat("_BillboardDistance", sett.BillboardDistance);
+		mat.SetFloat("_GrassHeight", sett.GrassHeight);
+		mat.SetFloat("_Cutoff", sett.ClipCutoff);
+
+		return mat;
+	}
+
+	/// <summary>
+	/// Updates grass material information from information in 
+	/// TerraSettings. 
+	/// </summary>
+	private static void UpdateMaterialData() {
+		if (Material != null) {
+			var sett = TerraSettings.Instance;
+			Material.SetTexture("_MainTex", sett.GrassTexture);
+			Material.SetFloat("_BillboardDistance", sett.BillboardDistance);
+			Material.SetFloat("_GrassHeight", sett.GrassHeight);
+			Material.SetFloat("_Cutoff", sett.ClipCutoff);
+		}
+	}
+
+	private class GrassTile {
+		public delegate void CalcFinished(List<MeshData> data);
+
+		public struct MeshData {
+			public List<Vector3> vertices;
+			public List<Vector3> normals;
+			public List<int> indicies;
+		}
+
+		private MeshCollider _mc;
+		private MeshCollider MeshCollider {
+			get {
+				if (_mc == null) {
+					_mc = Tile.GetComponent<MeshCollider>();
+
+					if (_mc == null) {
+						Debug.Log("GrassRenderer requires the passed TerrainTile have a MeshCollider");
+					}
+				}
+
+				return _mc;
+			}
+		}
 
 		/// <summary>
-		/// Contains matrix of Y positions representing 
-		/// the heights of the mesh (in world space)
+		/// Maximum amount of iterations CalculateCells is alotted before 
+		/// waiting for the next frame.
 		/// </summary>
-		public float[,] HeightMap;
+		private const int MAX_ITERATIONS_PER_FRAME = 10000;
 
 		/// <summary>
-		/// Contains matrix of mask values pulled from the 
-		/// supplied Generator
+		/// Maxmimum amount of vertices a grass mesh is allowed.
 		/// </summary>
-		public float[,] MaskMap;
-	}
+		private const int MAX_VERTS_PER_MESH = 60000;
 
-	/// <summary>
-	/// Stores vertex / index data for the point clouds
-	/// </summary>
-	private List<PointCloudMesh> CloudMesh;
+		private TerrainTile Tile;
+		private float StepLength;
+		private int NumDivisions;
 
-	private List<GrassDataTest> Data;
-
-	private PointCloudData CloudData = new PointCloudData();
-
-	/// <summary>
-	/// TerrainTile component attached to this gameobject
-	/// </summary>
-	public TerrainTile Tile;
-
-	/// <summary>
-	/// GameObject attached to the TerrainTile component
-	/// </summary>
-	private GameObject gameObject {
-		get {
-			return Tile == null ? null : Tile.gameObject;
+		public GrassTile(TerrainTile tile, float stepLength, int numDivisions = 5) {
+			Tile = tile;
+			StepLength = stepLength;
+			NumDivisions = numDivisions;
 		}
-	}
 
-	/// <summary>
-	/// If this GrassRenderer is attached to a gameobject that 
-	/// has a TerrainTile
-	/// </summary>
-	private bool HasTile {
-		get {
-			return Tile != null;
-		}
-	}
-	
-	/// <summary>
-	/// Returns true if this GrassRenderer has the required 
-	/// information to create a point cloud
-	/// </summary>
-	public bool HasPointCloudData {
-		get {
-			return CloudMesh != null && CloudMesh.Count == Data.Count;
-		}
-	}
-
-	#endregion
-
-	/// <summary>
-	/// Creates a new GrassRenderer and places grass according 
-	/// to the settings specified in each GrassData instance
-	/// </summary>
-	public GrassRenderer(TerrainTile tt, List<GrassDataTest> data, int mapRes) {
-		Tile = tt;
-		Data = data;
-		CloudData.Resolution = mapRes;
-	}
-
-
-	#region OLD
-	/// <summary>
-	/// Updates the height and mask maps by Raycasting 
-	/// the terrain
-	/// </summary>
-	public void UpdateMaps() {
-		if (HasTile && gameObject.GetComponent<MeshCollider>() != null &&
-				gameObject.GetComponent<MeshRenderer>() != null) {
-
+		/// <summary>
+		/// Calculates MeshData incrementally using a coroutine. 
+		/// TerrainTile instance must have a MeshCollider attached to 
+		/// the same gameobject
+		/// </summary>
+		/// <param name="onCalculated">Callback delegate when operations have finished</param>
+		/// 
+		public IEnumerator CalculateCells(CalcFinished onCalculated) {
 			Random.InitState(TerraSettings.GenerationSeed);
-			MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
+			float variation = TerraSettings.Instance.GrassVariation;
 
-			if (CloudData == null)
-				CloudData = new PointCloudData();
+			List<MeshData> data = new List<MeshData>();
+			MeshCollider mc = Tile.GetComponent<MeshCollider>();
+			
+			Bounds bounds = Tile.Terrain.bounds;
+			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
-			//Initialize maps
-			int res = CloudData.Resolution;
-			CloudData.HeightMap = new float[res, res];
-			CloudData.MaskMap = new float[res, res];
+			int res = TerraSettings.Instance.MeshResolution;
+			float step = bounds.size.x / res;
+			float rayHeight = worldBounds.max.y + 5;
+			float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
 
-			float length = mr.bounds.size.x; //X & Z lengths are equal
-			float xStart = mr.bounds.extents.x;
-			float zStart = mr.bounds.extents.z;
-			float maxHeight = mr.bounds.extents.y + 10;
+			List<Vector3> verts = new List<Vector3>(MAX_VERTS_PER_MESH);
+			List<Vector3> norms = new List<Vector3>(MAX_VERTS_PER_MESH);
+			List<int> indicies = new List<int>(MAX_VERTS_PER_MESH);
 
-			for (int i = 0; i < res; i++) {
-				for (int j = 0; j < res; j++) {
-					float x = (i / (float)res) * length;
-					float z = (j / (float)res) * length;
-					Vector3 rayPos = new Vector3(xStart + x, maxHeight, zStart + z);
+			int idx = 0;
+			int iterationCount = 0; //Tracks when to wait for next frame
+			for (float x = worldBounds.min.x; x < worldBounds.max.x; x += StepLength) {
+				for (float z = worldBounds.min.z; z < worldBounds.max.z; z += StepLength) {
+					float varX = x + Random.Range(-variation, variation);
+					float varZ = z + Random.Range(-variation, variation);
 
-					Ray r = new Ray(rayPos, Vector3.down);
+					Ray r = new Ray(new Vector3(varX, rayHeight, varZ), Vector3.down);
 					RaycastHit hit;
 
-					if (Physics.Raycast(r, out hit) && hit.collider.GetComponent<TerrainTile>() != null) {
-						//Raycast hit a terrain tile
-						CloudData.HeightMap[i, j] = hit.point.y;
+					if (MeshCollider.Raycast(r, out hit, rayMaxLength) && CanPlaceAt(hit))  {
+						verts.Add(new Vector3(varX, hit.point.y, varZ));
+						norms.Add(hit.normal);
+						indicies.Add(idx);
+						idx++;
+					}
 
-						foreach (GrassDataTest gd in Data) {
-							if (gd.MaskMap == null)
-								gd.MaskMap = new float[res, res];
+					//If max verts met, flush to MeshData list
+					if (verts.Count >= MAX_VERTS_PER_MESH) {
+						MeshData d = new MeshData();
+						d.vertices = verts;
+						d.normals = norms;
+						d.indicies = indicies;
+						data.Add(d);
 
-							gd.MaskMap[i, j] = gd.Mask.GetValue(x, z, 0);
-						}
+						//Clear existing data
+						verts = new List<Vector3>();
+						norms = new List<Vector3>();
+						indicies = new List<int>();
+						idx = 0;
+					}
+
+					//Possibly wait for next frame
+					iterationCount++;
+					if (iterationCount > MAX_ITERATIONS_PER_FRAME) {
+						iterationCount = 0;
+						yield return null; //Wait for next frame
 					}
 				}
 			}
+
+			//Pause before returning as we want to create mesh in a different frame
+			yield return null;
+
+			MeshData md = new MeshData();
+			md.vertices = verts;
+			md.normals = norms;
+			md.indicies = indicies;
+			data.Add(md);
+
+			onCalculated(data);
 		}
-	}
 
-	/// <summary>
-	/// Calculates the necessary data needed for the creation of 
-	/// a point cloud. Requires that this gameobject has an 
-	/// attached MeshCollider & MeshRenderer
-	/// </summary>
-	public void CalculatePointCloudData() {
-		//Cannot calculate point cloud data without 
-		//a TerrainTile, MeshCollider, & MeshRenderer
-		if (HasTile && gameObject.GetComponent<MeshCollider>() != null &&
-			gameObject.GetComponent<MeshRenderer>() != null) {
+		/// <summary>
+		/// Uses raycast hit information to check whether a grass 
+		/// vertex can be placed at this location in the world. 
+		/// Checks against grass height and angle information found 
+		/// in TerraSettings.
+		/// </summary>
+		/// <param name="hit">Raycast hit</param>
+		/// <returns>true if this vertex should be placed here</returns>
+		private bool CanPlaceAt(RaycastHit hit) {
+			float height = hit.point.y;
+			float angle = Vector3.Angle(Vector3.up, hit.normal);
+			TerraSettings set = TerraSettings.Instance;
 
-			//Clear existing point cloud data if it exists
-			if (CloudMesh != null)
-				CloudMesh.Clear();
+			bool passesHeight = height >= set.GrassMinHeight && height <= set.GrassMaxHeight;
+			bool passesAngle = angle >= set.GrassAngleMin && angle <= set.GrassAngleMax;
 
-			Random.InitState(TerraSettings.GenerationSeed);
-			MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
-			MeshCollider mc = gameObject.GetComponent<MeshCollider>();
-
-			for (int i = 0; i < Data.Count; i++) {
-				PointCloudMesh pcd = new PointCloudMesh();
-				GrassDataTest gd = Data[i];
-
-				const int ESTIMATED_AMT = 1000;
-				List<Vector3> verts = new List<Vector3>(ESTIMATED_AMT);
-				List<Vector3> norms = new List<Vector3>(ESTIMATED_AMT);
-				List<int> indices = new List<int>(ESTIMATED_AMT);
-
-				float length = mr.bounds.size.x; //X & Z lengths are equal
-				float xStart = mr.bounds.extents.x;
-				float zStart = mr.bounds.extents.z;
-				float maxHeight = mr.bounds.extents.y + 1000;
-
-				for (float x = xStart; x > xStart - mr.bounds.size.x; x -= gd.Density) {
-					for (float z = zStart; z < zStart + mr.bounds.size.z; z += gd.Density) {
-						//Add some random variation to the grass positions
-						float modX = x + Random.Range(-0.5f, 0.5f);
-						float modZ = z + Random.Range(-0.5f, 0.5f);
-
-						Vector3 pos = new Vector3(modX, maxHeight, modZ);
-						Ray r = new Ray(pos, Vector3.down);
-						RaycastHit hit;
-
-						if (Physics.Raycast(r, out hit)) {
-							bool hitTT = hit.collider.gameObject.GetComponent<TerrainTile>() != null;
-							bool canPlace = gd.PlaceAt(hit.point.x, hit.point.z);
-
-							if (hitTT && canPlace) {
-								verts.Add(hit.point);
-								norms.Add(hit.normal);
-								indices.Add(i);
-							}
-						}
-					}
-				}
-
-				if (CloudMesh == null)
-					CloudMesh = new List<PointCloudMesh>();
-
-				//Unfortunately we don't know the size of 
-				//these data structures at the start
-				pcd.points = verts.ToArray();
-				pcd.normals = norms.ToArray();
-				pcd.indices = indices.ToArray();
+			if (set.GrassConstrainHeight && set.GrassConstrainAngle) {
+				return passesHeight && passesAngle;
+			} else if (set.GrassConstrainHeight) {
+				return passesHeight;
+			} else if (set.GrassConstrainAngle) {
+				return passesAngle;
+			} else {
+				return true;
 			}
 		}
-	}
-
-	#endregion
-}
-
-/// <summary>
-/// A data handler class that is responsible for 
-/// keeping track of settings applied to a GrassRenderer
-/// </summary>
-public class GrassDataTest {
-	/// <summary>
-	/// Texture to be displayed on quad(s)
-	/// </summary>
-	public Texture2D Texture { get; private set; }
-
-	/// <summary>
-	/// Mask used for finding where to place 
-	/// grass points
-	/// </summary>
-	public Generator Mask { get; private set; }
-
-	/// <summary>
-	/// How big the polled generator point must be 
-	/// before deciding whether to show grass.
-	/// 
-	/// Ex. Influence = 0.75, Generator Point = 0.8
-	/// Grass shows up
-	/// </summary>
-	public float Influence { get; private set; }
-
-	/// <summary>
-	/// How spread out the grass pieces are from each other
-	/// </summary>
-	public float Density { get; private set; }
-
-	/// <summary>
-	/// Map used for placing grass using a Generator
-	/// </summary>
-	public float[,] MaskMap;
-	
-	public GrassDataTest(Texture2D texture, Generator mask, float influence, float density) {
-		Texture = texture;
-		Mask = mask;
-		Influence = influence;
-		Density = density;
-	}
-
-	/// <summary>
-	/// Should a grass quad be placed at the passed x & z 
-	/// coordinates. Polls the Mask Generator and returns true 
-	/// if it passes the influence
-	/// </summary>
-	/// <param name="x">X coordinate</param>
-	/// <param name="z">Z coordinate</param>
-	/// <returns></returns>
-	public bool PlaceAt(float x, float z) {
-		float res = Mask.GetValue(x, z, 0);
-		return res < Influence;
 	}
 }

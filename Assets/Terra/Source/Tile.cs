@@ -85,8 +85,8 @@ namespace Terra.Terrain {
 		/// <param name="gen">Generator to get value from</param>
 		/// <returns></returns>
 		public static float PollGenerator(float xPos, float zPos, TerraSettings settings, Generator gen) {
-			float spread = 1f / (settings.Data.Spread * settings.Data.MeshResolution);
-			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Data.Amplitude;
+			float spread = 1f / (settings.Spread * settings.MeshResolution);
+			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
 		}
 
         /// <summary>
@@ -98,8 +98,8 @@ namespace Terra.Terrain {
 		/// <returns>height value if available, float default otherwise (0.0)</returns>
 		public static float PollGenerator(float xPos, float zPos) {
             var sett = TerraSettings.Instance;
-            if (sett != null && sett.Data.Graph.GetEndGenerator() != null) {
-                return PollGenerator(xPos, zPos, sett, sett.Data.Graph.GetEndGenerator());
+            if (sett != null && sett.Graph.GetEndGenerator() != null) {
+                return PollGenerator(xPos, zPos, sett, sett.Graph.GetEndGenerator());
             }
 
             return default(float);
@@ -113,7 +113,7 @@ namespace Terra.Terrain {
         /// <param name="position">Position to set the Tile to (ie [1,0])</param>
         public void UpdatePosition(Vector2 position) {
 			Position = position;
-			int len = Settings.Data.Length;
+			int len = Settings.Length;
 			transform.position = new Vector3(position.x * len, 0f, position.y * len);
 		}
 
@@ -131,7 +131,7 @@ namespace Terra.Terrain {
 		/// <param name="renderOnCreation">If true, the attached MeshRenderer will be enabled after the mesh has been formed. 
 		/// Otherwise, the attached MeshRenderer will be disabled by default.</param>
 		public void CreateMesh(Vector2 position, bool renderOnCreation = true) {
-			CreateMesh(position, Settings.Data.Graph.GetEndGenerator(), renderOnCreation);
+			CreateMesh(position, Settings.Graph.GetEndGenerator(), renderOnCreation);
 		}
 
 		/// <summary>
@@ -209,8 +209,8 @@ namespace Terra.Terrain {
         /// <param name="heightmap">vertices in world space to apply to the mesh</param>
         /// <param name="res">resolution of the heightmap</param>
         public MeshData CreateRawMesh(Vector3[] vertices, int res) {
-            float len = Settings.Data.Length;
-            float spread = 1f / (Settings.Data.Spread * Settings.Data.MeshResolution);
+            float len = Settings.Length;
+            float spread = 1f / (Settings.Spread * Settings.MeshResolution);
 
             Vector2[] uvs = new Vector2[vertices.Length];
             for (int v = 0; v < res; v++) {
@@ -274,9 +274,9 @@ namespace Terra.Terrain {
 		/// <param name="gen">Generator to apply</param>
 		/// <returns>triangles, vertices, normals, and UVs of the generated mesh</returns>
 		public static MeshData CreateRawMesh(TerraSettings settings, Vector2 position, Generator gen) {
-			int res = settings.Data.MeshResolution;
-			float len = settings.Data.Length;
-			float spread = 1f / (settings.Data.Spread * settings.Data.MeshResolution);
+			int res = settings.MeshResolution;
+			float len = settings.Length;
+			float spread = 1f / (settings.Spread * settings.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -331,7 +331,7 @@ namespace Terra.Terrain {
         /// <param name="resolution">resolution of this mesh</param>
         /// <returns></returns>
         public Vector3 GetPositionAt(int xPos, int zPos, int resolution) {
-            return GetPositionAt(xPos, zPos, resolution, Settings, Settings.Data.Graph.GetEndGenerator(), Position);
+            return GetPositionAt(xPos, zPos, resolution, Settings, Settings.Graph.GetEndGenerator(), Position);
         }
 
         /// <summary>
@@ -339,14 +339,14 @@ namespace Terra.Terrain {
         /// </summary>
         /// <returns></returns>
         public static Vector3 GetPositionAt(int xPos, int zPos, int resolution, TerraSettings settings, Generator gen, Vector2 position) {
-            float amp = settings.Data.Amplitude;
-            float spread = settings.Data.Spread;
-            float length = settings.Data.Length;
+            float amp = settings.Amplitude;
+            float spread = settings.Spread;
+            float length = settings.Length;
 
             float worldX = ((float)xPos / (resolution - 1) - .5f) * length;
             float worldZ = ((float)zPos / (resolution - 1) - .5f) * length;
             float worldY = gen.GetValue(((position.x * length) + xPos) * spread,
-                ((position.y * length) + zPos) * spread, 0f) * settings.Data.Amplitude;
+                ((position.y * length) + zPos) * spread, 0f) * settings.Amplitude;
 
             return new Vector3(worldX, worldY, worldZ);
         }

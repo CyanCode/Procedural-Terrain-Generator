@@ -12,7 +12,8 @@ namespace Terra.Graph {
 		/// node's input
 		/// </summary>
 		public Generator GetFinalGenerator() {
-			return GetInputValue<AbsGeneratorNode>("Noise").GetGenerator();
+			var iv = GetInputValue<AbsGeneratorNode>("Noise");
+			return iv == null ? null : iv.GetGenerator();
 		}
 	}
 }

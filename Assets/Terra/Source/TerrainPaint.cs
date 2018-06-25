@@ -89,6 +89,7 @@ namespace Terra.Terrain {
 				}
 			}
 
+#pragma warning disable CS0162 // Unreachable code detected
 			if (TerraDebug.WRITE_SPLAT_TEXTURES) {
 				Tile tile = TerrainObject.GetComponent<Tile>();
 
@@ -105,6 +106,7 @@ namespace Terra.Terrain {
 					File.WriteAllBytes(folderPath + name, bytes);
 				}
 			}
+#pragma warning restore CS0162 // Unreachable code detected
 
 			//Apply set pixel values to textures
 			maps.ForEach(t => t.Apply());

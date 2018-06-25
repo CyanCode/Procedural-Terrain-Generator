@@ -8,25 +8,25 @@ using UnityEngine;
 /// and changing the resolution at runtime.
 /// </summary>
 public class LODLevel {
-    private TerrainTile Tile;
+    private Tile Tile;
     private List<Level> Levels;
 
-    public LODLevel(TerrainTile tile) {
+    public LODLevel(Tile tile) {
         Tile = tile;
         Levels = new List<Level>();
     }
 
-    public LODLevel(TerrainTile tile, List<Level> levels) {
+    public LODLevel(Tile tile, List<Level> levels) {
         Tile = tile;
         Levels = levels;
     }
 
-    public LODLevel(TerrainTile tile, Level level) : this(tile) {
+    public LODLevel(Tile tile, Level level) : this(tile) {
         Levels.Add(level);
     }
 
     /// <summary>
-    /// Sets the available LOD levels of this TerrainTile
+    /// Sets the available LOD levels of this Tile
     /// </summary>
     /// <param name="levels"></param>
     public void SetLODLevels(List<Level> levels) {
@@ -34,7 +34,7 @@ public class LODLevel {
     }
 
     /// <summary>
-    /// Adds a new LOD level to this TerrainTile
+    /// Adds a new LOD level to this Tile
     /// </summary>
     /// <param name="level"></param>
     public void AddLODLevel(Level level) {
@@ -43,7 +43,7 @@ public class LODLevel {
 
     /// <summary>
     /// Activates an LOD Level and applies the changes to the 
-    /// assigned TerrainTile. If the vertex map hasn't already been 
+    /// assigned Tile. If the vertex map hasn't already been 
     /// computed for the requested LOD level, it is computed.
     /// </summary>
     /// <param name="level">level to activate</param>
@@ -65,7 +65,7 @@ public class LODLevel {
     /// <summary>
     /// Precomputes the necessary information needed by the 
     /// passed LOD level to change the resolution of the 
-    /// current TerrainTile. Consider calling this before 
+    /// current Tile. Consider calling this before 
     /// <see cref="ActivateLODLevel(int)"></see> as computing a heightmap 
     /// can take time. This method is thread safe.
     /// </summary>

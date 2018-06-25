@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using Terra.CoherentNoise;
-using System.Collections.Generic;
 using Terra.Terrain.Detail;
 
 namespace Terra.Terrain {
 	/// <summary>
-	///	TerrainTile represents a Terrain gameobject in the scene. 
+	///	Tile represents a Terrain gameobject in the scene. 
 	///	This class handles the instantiation of Terrain, noise application, 
 	///	position, and texture application.
 	/// </summary>
-	public class TerrainTile: MonoBehaviour {
+	public class Tile: MonoBehaviour {
 		[HideInInspector]
 		public bool IsColliderDirty = false;
 		public Mesh Terrain { get; private set; }
@@ -39,15 +38,15 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Creates a gameobject with an attached TerrainTile component and 
+		/// Creates a gameobject with an attached Tile component and 
 		/// places it in the scene. This is a convienence method and is not required 
 		/// for correct tile creation.
 		/// </summary>
 		/// <param name="name">Name of the created gameobject</param>
-		/// <returns>The attached TerrainTile component</returns>
-		public static TerrainTile CreateTileGameobject(string name) {
+		/// <returns>The attached Tile component</returns>
+		public static Tile CreateTileGameobject(string name) {
 			GameObject go = new GameObject(name);
-			TerrainTile tt = go.AddComponent<TerrainTile>();
+			Tile tt = go.AddComponent<Tile>();
 
 			//Perform initilization before OnEnable
 			if (tt.Settings == null) tt.Settings = FindObjectOfType<TerraSettings>();
@@ -111,7 +110,7 @@ namespace Terra.Terrain {
         /// the x and y values are integers on a grid. Internally the x and y values 
         /// are multiplied by the Length of the mesh specified in TerraSettings
         /// </summary>
-        /// <param name="position">Position to set the TerrainTile to (ie [1,0])</param>
+        /// <param name="position">Position to set the Tile to (ie [1,0])</param>
         public void UpdatePosition(Vector2 position) {
 			Position = position;
 			int len = Settings.Length;
@@ -192,7 +191,7 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Applies the passed Material to this TerrainTile by setting the 
+		/// Applies the passed Material to this Tile by setting the 
 		/// material assigned to the MeshRenderer component.
 		/// </summary>
 		/// <param name="mat">Material to apply</param>

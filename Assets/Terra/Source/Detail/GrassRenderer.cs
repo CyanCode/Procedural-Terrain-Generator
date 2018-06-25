@@ -19,15 +19,15 @@ public static class GrassRenderer {
 
 	/// <summary>
 	/// True if this GrassRenderer is currently calculating grass 
-	/// data for a TerrainTile. Used for syncing up coroutines.
+	/// data for a Tile. Used for syncing up coroutines.
 	/// </summary>
 	private static bool CalculatingTile = false;
 
 	/// <summary>
 	/// Used for retrieving previously created mesh information
 	/// </summary>
-	private static Dictionary<TerrainTile, List<GameObject>> CachedMeshData = new Dictionary<TerrainTile, List<GameObject>>();
-	private static LinkedList<TerrainTile> GenerationQueue = new LinkedList<TerrainTile>();
+	private static Dictionary<Tile, List<GameObject>> CachedMeshData = new Dictionary<Tile, List<GameObject>>();
+	private static LinkedList<Tile> GenerationQueue = new LinkedList<Tile>();
 
 	private const string GRASS_SHADER_LOC = "Terra/GrassGeometry";
 	private const string GRASS_CONTAINER_NAME = "Grass Meshes";
@@ -35,7 +35,7 @@ public static class GrassRenderer {
 	static GrassRenderer() {
 		//Watch for the addition of tiles
 		TerraEvent.OnMeshColliderDidForm += (go, mc) => {
-			TerrainTile t = go.GetComponent<TerrainTile>();
+			Tile t = go.GetComponent<Tile>();
 
 			if (TerraSettings.Instance.PlaceGrass && !CachedMeshData.ContainsKey(t) && !GenerationQueue.Contains(t)) {
 				GenerationQueue.AddFirst(t);
@@ -51,7 +51,7 @@ public static class GrassRenderer {
 		UpdateMaterialData();
 
 		if (!CalculatingTile && GenerationQueue.Count > 0) {
-			TerrainTile t = GenerationQueue.Last.Value;
+			Tile t = GenerationQueue.Last.Value;
 			GenerationQueue.RemoveLast();
 
 			CalculateGrassMeshes(t);
@@ -62,7 +62,7 @@ public static class GrassRenderer {
 	/// Returns true if this instance of GrassRenderer has already 
 	/// computed data for placing grass on the passed tile.
 	/// </summary>
-	public static bool HasGrassData(TerrainTile tile) {
+	public static bool HasGrassData(Tile tile) {
 		return CachedMeshData.ContainsKey(tile);
 	}
 
@@ -73,7 +73,7 @@ public static class GrassRenderer {
 	/// This method calculates grass meshes via a coroutine which calculates a 
 	/// mesh and then waits for the next frame before continuing to the next.
 	/// </summary>
-	public static void CalculateGrassMeshes(TerrainTile tile) {
+	public static void CalculateGrassMeshes(Tile tile) {
 		GrassTile gt = new GrassTile(tile, TerraSettings.Instance.GrassStepLength);
 		CalculatingTile = true;
 
@@ -111,7 +111,7 @@ public static class GrassRenderer {
 	/// gameobjects
 	/// </summary>
 	/// <returns>Parent gameobject</returns>
-	private static GameObject SetupGrassParent(TerrainTile tile) {
+	private static GameObject SetupGrassParent(Tile tile) {
 		//Setup parent gameobject
 		GameObject parent = null;
 		foreach (Transform trans in tile.transform) {
@@ -176,7 +176,7 @@ public static class GrassRenderer {
 					_mc = Tile.GetComponent<MeshCollider>();
 
 					if (_mc == null) {
-						Debug.Log("GrassRenderer requires the passed TerrainTile have a MeshCollider");
+						Debug.Log("GrassRenderer requires the passed Tile have a MeshCollider");
 					}
 				}
 
@@ -195,18 +195,18 @@ public static class GrassRenderer {
 		/// </summary>
 		private const int MAX_VERTS_PER_MESH = 60000;
 
-		private TerrainTile Tile;
+		private Tile Tile;
 		private float StepLength;
 
 
-		public GrassTile(TerrainTile tile, float stepLength) {
+		public GrassTile(Tile tile, float stepLength) {
 			Tile = tile;
 			StepLength = stepLength;
 		}
 
 		/// <summary>
 		/// Calculates MeshData incrementally using a coroutine. 
-		/// TerrainTile instance must have a MeshCollider attached to 
+		/// Tile instance must have a MeshCollider attached to 
 		/// the same gameobject
 		/// </summary>
 		/// <param name="onCalculated">Callback delegate when operations have finished</param>

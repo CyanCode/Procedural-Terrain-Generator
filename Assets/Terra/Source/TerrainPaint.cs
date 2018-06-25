@@ -48,7 +48,7 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Create a TerrainPaint object that paints the passed gameobject. For this to 
 		/// work, the passed gameobject must have the following components:
-		/// MeshFilter, MeshRenderer, and TerrainTile
+		/// MeshFilter, MeshRenderer, and Tile
 		/// </summary>
 		/// <param name="gameobject">Gameobject to paint</param>
 		public TerrainPaint(GameObject gameobject) {
@@ -90,7 +90,7 @@ namespace Terra.Terrain {
 			}
 
 			if (TerraDebug.WRITE_SPLAT_TEXTURES) {
-				TerrainTile tile = TerrainObject.GetComponent<TerrainTile>();
+				Tile tile = TerrainObject.GetComponent<Tile>();
 
 				string tileName = tile != null ?
 					"Tile[" + tile.Position.x + "_" + tile.Position.y + "]" :

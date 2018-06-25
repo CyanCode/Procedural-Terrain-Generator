@@ -3,19 +3,19 @@ using System.Collections.Generic;
 
 namespace Terra.Terrain {
 	/// <summary>
-	/// A cache that handles individual TerrainTile instances. This class 
+	/// A cache that handles individual Tile instances. This class 
 	/// handles the activation, deactivation, removal, and caching of 
 	/// TerrainTiles.
 	/// </summary>
 	public class TileCache {
-		public List<TerrainTile> ActiveTiles { get; private set; }
+		public List<Tile> ActiveTiles { get; private set; }
 
 		private int CacheCapacity;
-		private LinkedList<TerrainTile> CachedTiles = new LinkedList<TerrainTile>();
+		private LinkedList<Tile> CachedTiles = new LinkedList<Tile>();
 
 		public TileCache(int cacheCapacity = 20) {
 			CacheCapacity = cacheCapacity;
-			ActiveTiles = new List<TerrainTile>();
+			ActiveTiles = new List<Tile>();
 		}
 
 		/// <summary>
@@ -28,11 +28,11 @@ namespace Terra.Terrain {
 		/// Returns the cached tile if it exists in the cache. If the tile
 		/// is not cached, returns null.
 		/// </returns>
-		public TerrainTile GetCachedTileAtPosition(Vector2 position) {
-			LinkedListNode<TerrainTile> node = CachedTiles.First;
+		public Tile GetCachedTileAtPosition(Vector2 position) {
+			LinkedListNode<Tile> node = CachedTiles.First;
 
 			while (node != null) {
-				LinkedListNode<TerrainTile> next = node.Next;
+				LinkedListNode<Tile> next = node.Next;
 
 				if (node.Value.Position == position) { //Move Tile to front of cache
 					CachedTiles.Remove(node);
@@ -52,7 +52,7 @@ namespace Terra.Terrain {
 		/// <param name="position">Position to look for</param>
 		/// <returns>True if tile at position was found, false otherwise</returns>
 		public bool TileActiveAtPosition(Vector2 position) {
-			foreach (TerrainTile t in ActiveTiles) {
+			foreach (Tile t in ActiveTiles) {
 				if (t.Position == position)
 					return true;
 			}
@@ -72,7 +72,7 @@ namespace Terra.Terrain {
 			foreach (Vector2 position in positions) {
 				bool matched = false;
 
-				foreach (TerrainTile t in ActiveTiles) {
+				foreach (Tile t in ActiveTiles) {
 					if (t.Position == position) {
 						matched = true;
 						break;
@@ -87,12 +87,12 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Adds the passed TerrainTile to the tile cache. This 
+		/// Adds the passed Tile to the tile cache. This 
 		/// deactivates the passed tile and will no longer be rendered 
 		/// until pulled from the cache.
 		/// </summary>
 		/// <param name="tile">Tile to cache</param>
-		public void CacheTile(TerrainTile tile) {
+		public void CacheTile(Tile tile) {
 			tile.gameObject.SetActive(false);
 			CachedTiles.AddFirst(tile);
 			EnforceCacheSize();
@@ -105,7 +105,7 @@ namespace Terra.Terrain {
 		/// the passed tile is not active, it is made active.
 		/// </summary>
 		/// <param name="tile">Tile to activate</param>
-		public void AddActiveTile(TerrainTile tile) {
+		public void AddActiveTile(Tile tile) {
 			tile.gameObject.SetActive(true);
 			ActiveTiles.Add(tile);
 

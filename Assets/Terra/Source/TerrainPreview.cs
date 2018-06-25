@@ -124,7 +124,7 @@ namespace Terra.Terrain {
 				Generator end = Settings.Graph.GetEndGenerator();
 
 				if (end != null) {
-					return TerrainTile.GetPreviewMesh(Settings, Settings.Graph.GetEndGenerator());
+					return Tile.GetPreviewMesh(Settings, Settings.Graph.GetEndGenerator());
 				}
 			}
 

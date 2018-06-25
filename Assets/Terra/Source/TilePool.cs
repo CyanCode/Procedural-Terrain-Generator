@@ -153,8 +153,8 @@ namespace Terra.Terrain {
 		private IEnumerator UpdateColliders(float delay) {
 			//If we're generating all colliders the extent of collision generation is 
 			//technically infinity (max value works just as well though)
-			float extent = Settings.GenAllColliders ? float.MaxValue : Settings.ColliderGenerationExtent;
-			List<Tile> tiles = GetTilesInExtent(Settings.TrackedObject.transform.position, extent);
+			float extent = Settings.Data.GenAllColliders ? float.MaxValue : Settings.Data.ColliderGenerationExtent;
+			List<Tile> tiles = GetTilesInExtent(Settings.Data.TrackedObject.transform.position, extent);
 
 			foreach (Tile t in tiles) {
 				t.GenerateCollider();
@@ -169,7 +169,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>Tile x & z positions to add to world</returns>
 		private List<Vector2> GetTilePositionsFromRadius() {
-			return GetTilePositionsFromRadius(Settings.GenerationRadius, Settings.TrackedObject.transform.position, Settings.Length);
+			return GetTilePositionsFromRadius(Settings.Data.GenerationRadius, Settings.Data.TrackedObject.transform.position, Settings.Data.Length);
 		}
 
 		/// <summary>
@@ -180,10 +180,10 @@ namespace Terra.Terrain {
 			Tile tile = new GameObject("Tile: " + pos).AddComponent<Tile>();
 			queuedTiles++;
 
-			if (Settings.UseMultithreading) {
+			if (Settings.Data.UseMultithreading) {
 				ThreadData data = new ThreadData();
 				data.tile = tile;
-				data.gen = Settings.Graph.GetEndGenerator();
+				data.gen = Settings.Data.Graph.GetEndGenerator();
 
 				ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
 					//GetValue is not thread safe and must be locked

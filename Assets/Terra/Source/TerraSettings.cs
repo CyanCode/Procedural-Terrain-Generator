@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Terra.Graph.Noise;
-using Terra.Terrain.Util;
 using UnityEngine;
 
 
@@ -8,7 +7,7 @@ namespace Terra.Terrain {
 	[System.Serializable, ExecuteInEditMode]
 	public class TerraSettings: MonoBehaviour {
 		/// <summary>
-		/// Internal TerraSettings instance to avoid finding when its not needed
+		/// Internal TerraSettings instance to avoid finding when not needed
 		/// </summary>
 		private static TerraSettings _instance;
 
@@ -21,23 +20,10 @@ namespace Terra.Terrain {
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
-		//General Tab
-		public GameObject TrackedObject;
-		public bool GenerateOnStart = true;
-		public int GenerationRadius = 3;
-		public float ColliderGenerationExtent = 50f;
-		public static int GenerationSeed = 1337;
-		public int MeshResolution = 128;
-		public int Length = 500;
-		public bool UseRandomSeed = false;
-		public bool GenAllColliders = false;
-		public bool DisplayPreview = false;
-		public bool UseMultithreading = true;
+		public static int Seed = 1337;
 
-		//Noise Tab
-		public NoiseGraph Graph;
-		public float Spread = 100f;
-		public float Amplitude = 50f;
+		//General Tab
+		public TerraData Data;
 
 		//Material Tab
 		public List<TerrainPaint.SplatSetting> SplatSettings = new List<TerrainPaint.SplatSetting>();
@@ -94,7 +80,15 @@ namespace Terra.Terrain {
 			}
 		}
 
+		void OnEnable() {
+			if (Data == null)
+				Data = ScriptableObject.CreateInstance<TerraData>();
+		}
+
 		void Awake() {
+			if (Data == null)
+				Data = ScriptableObject.CreateInstance<TerraData>();
+
 			Pool = new TilePool();
 			Preview = new TerrainPreview();
 		}
@@ -110,7 +104,7 @@ namespace Terra.Terrain {
 				}
 			}
 #endif
-			if (GenerateOnStart) {
+			if (Data.GenerateOnStart) {
 				Generate();
 			}
 		}
@@ -121,30 +115,30 @@ namespace Terra.Terrain {
 				Preview = new TerrainPreview();
 			}
 #endif
-			if (Application.isPlaying && Pool != null && GenerateOnStart) {
+			if (Application.isPlaying && Pool != null && Data.GenerateOnStart) {
 				Pool.Update();
 			}
 		}
 
 		void OnDrawGizmosSelected() {
 			//On general tab selected: display mesh radius squares and collider radius
-			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(GenerationRadius, transform.position, Length);
+			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(Data.GenerationRadius, transform.position, Data.Length);
 
 			//Mesh radius squares
 			foreach (Vector2 pos in positions) {
-				Vector3 pos3d = new Vector3(pos.x * Length, 0, pos.y * Length);
+				Vector3 pos3d = new Vector3(pos.x * Data.Length, 0, pos.y * Data.Length);
 
 				Gizmos.color = Color.white;
-				Gizmos.DrawWireCube(pos3d, new Vector3(Length, 0, Length));
+				Gizmos.DrawWireCube(pos3d, new Vector3(Data.Length, 0, Data.Length));
 			}
 
 			//Generation radius
-			if (TrackedObject != null) {
-				var pos = TrackedObject.transform.position;
+			if (Data.TrackedObject != null) {
+				var pos = Data.TrackedObject.transform.position;
 				Vector3 extPos = new Vector3(pos.x, 0, pos.z);
 
 				Gizmos.color = Color.blue;
-				Gizmos.DrawWireCube(extPos, new Vector3(ColliderGenerationExtent, 0, ColliderGenerationExtent));
+				Gizmos.DrawWireCube(extPos, new Vector3(Data.ColliderGenerationExtent, 0, Data.ColliderGenerationExtent));
 			}
 		}
 
@@ -168,20 +162,39 @@ namespace Terra.Terrain {
 				Preview.Cleanup();
 
 				//Set default tracked object
-				if (TrackedObject == null) {
-					TrackedObject = Camera.main.gameObject;
+				if (Data.TrackedObject == null) {
+					Data.TrackedObject = Camera.main.gameObject;
 				}
 
 				//Set seed for RNG
-				if (!UseRandomSeed)
-					Random.InitState(GenerationSeed);
+				if (!Data.UseRandomSeed)
+					Random.InitState(Seed);
 				else
-					GenerationSeed = new System.Random().Next(0, System.Int32.MaxValue);
+					Seed = new System.Random().Next(System.Int32.MinValue, System.Int32.MaxValue);
 			}
 
 			//Allows for update to continue
-			GenerateOnStart = true;
+			Data.GenerateOnStart = true;
 		}
+	}
+
+	public class TerraData: ScriptableObject {
+		//General
+		public GameObject TrackedObject;
+		public bool GenerateOnStart = true;
+		public int GenerationRadius = 3;
+		public float ColliderGenerationExtent = 50f;
+		public int MeshResolution = 128;
+		public int Length = 500;
+		public bool UseRandomSeed = false;
+		public bool GenAllColliders = false;
+		public bool DisplayPreview = false;
+		public bool UseMultithreading = true;
+
+		//Noise
+		public float Spread = 100f;
+		public float Amplitude = 50f;
+		public NoiseGraph Graph;
 	}
 
 	internal static class TerraDebug {

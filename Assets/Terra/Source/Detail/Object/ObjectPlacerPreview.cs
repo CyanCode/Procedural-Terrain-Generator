@@ -51,7 +51,7 @@ namespace Terra.Terrain {
 
 						//Calculate correct positioning
 						obj.transform.parent = Parent.transform;
-						type.TransformGameObject(obj, positions[i], Settings.Length, Vector3.zero);
+						type.TransformGameObject(obj, positions[i], Settings.Data.Length, Vector3.zero);
 						#endif
 					}
 				}

@@ -69,7 +69,7 @@ namespace Terra.Terrain.Detail {
 		/// <param name="type">object placement type to sample</param>
 		/// <returns>List of vectors within the grid and sample constraints</returns>
 		public List<Vector3> GetFilteredGrid(Mesh m, ObjectPlacementType type) {
-			MeshSampler sampler = new MeshSampler(m, Settings.MeshResolution);
+			MeshSampler sampler = new MeshSampler(m, Settings.Data.MeshResolution);
 			List<Vector2> grid = GetPoissonGrid(type.Spread / 10);
 			List<Vector3> toAdd = new List<Vector3>();
 
@@ -265,7 +265,7 @@ namespace Terra.Terrain.Detail {
 						if (container != null) {
 							foreach (Vector3 pos in p.Positions) {
 								GameObject go = container.GetObject(parent);
-								p.Type.TransformGameObject(go, pos, settings.Length, Tile.transform.position);
+								p.Type.TransformGameObject(go, pos, settings.Data.Length, Tile.transform.position);
 
 								PlacedObjects.Add(go);
 							}

@@ -23,8 +23,8 @@ namespace Terra.Terrain {
 		/// Checks whether a terrain preview can be created
 		/// </summary>
 		public bool CanPreview() {
-			return Settings.DisplayPreview && Settings.Graph != null &&
-				Settings.Graph.GetEndGenerator() != null && Settings.Preview != null;
+			return Settings.Data.DisplayPreview && Settings.Data.Graph != null &&
+				Settings.Data.Graph.GetEndGenerator() != null && Settings.Preview != null;
 		}
 
 		/// <summary>
@@ -33,7 +33,7 @@ namespace Terra.Terrain {
 		/// <c>Settings.DisplayPreview</c> is true
 		/// </summary>
 		public void TriggerPreviewUpdate() {
-			if (Settings.DisplayPreview) {
+			if (Settings.Data.DisplayPreview) {
 				RemoveComponents();
 				AddComponents();
 			}
@@ -44,7 +44,7 @@ namespace Terra.Terrain {
 		/// <c>Settings.DisplayPreview</c> is true
 		/// </summary>
 		public void TriggerMaterialsUpdate() {
-			if (Settings.DisplayPreview) {
+			if (Settings.Data.DisplayPreview) {
 				//Remove old splats
 				Splats = null;
 				Paint = null;
@@ -61,7 +61,7 @@ namespace Terra.Terrain {
 		/// Updates only the procedural object placement. 
 		/// </summary>
 		public void TriggerObjectPlacementUpdate() {
-			if (Settings.DisplayPreview && HasMesh()) {
+			if (Settings.Data.DisplayPreview && HasMesh()) {
 				ObjectPlacerPreview preview = new ObjectPlacerPreview(Settings, Settings.GetComponent<MeshFilter>().sharedMesh);
 				preview.PreviewAllObjects();
 			}
@@ -81,7 +81,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>true if an end generator is attached</returns>
 		public bool HasEndGenerator() {
-			return Settings.Graph.GetEndGenerator() != null;
+			return Settings.Data.Graph.GetEndGenerator() != null;
 		}
 
 		/// <summary>
@@ -120,11 +120,11 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>Filled Mesh, null if no end generator is provided.</returns>
 		private Mesh CreateMesh() {
-			if (Settings.Graph != null) {
-				Generator end = Settings.Graph.GetEndGenerator();
+			if (Settings.Data.Graph != null) {
+				Generator end = Settings.Data.Graph.GetEndGenerator();
 
 				if (end != null) {
-					return Tile.GetPreviewMesh(Settings, Settings.Graph.GetEndGenerator());
+					return Tile.GetPreviewMesh(Settings, Settings.Data.Graph.GetEndGenerator());
 				}
 			}
 

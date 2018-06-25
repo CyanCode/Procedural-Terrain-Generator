@@ -212,14 +212,14 @@ public static class GrassRenderer {
 		/// <param name="onCalculated">Callback delegate when operations have finished</param>
 		/// 
 		public IEnumerator CalculateCells(CalcFinished onCalculated) {
-			Random.InitState(TerraSettings.GenerationSeed);
+			Random.InitState(TerraSettings.Seed);
 			float variation = TerraSettings.Instance.GrassVariation;
 
 			List<MeshData> data = new List<MeshData>();
 			Bounds bounds = Tile.Terrain.bounds;
 			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
-			int res = TerraSettings.Instance.MeshResolution;
+			int res = TerraSettings.Instance.Data.MeshResolution;
 			float rayHeight = worldBounds.max.y + 5;
 			float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
 

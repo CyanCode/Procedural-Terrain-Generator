@@ -48,7 +48,7 @@ namespace UnityEditor.Terra {
 			//Tracked gameobject
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Tracked GameObject", EditorStyles.boldLabel);
-			Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
+			Settings.Data.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.Data.TrackedObject, typeof(GameObject), true);
 
 			//Terrain settings
 			string[] stringResOptions = { "32", "64", "128" };
@@ -56,37 +56,37 @@ namespace UnityEditor.Terra {
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
-			Settings.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", Settings.GenerateOnStart);
-			Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
-			if (!Settings.UseRandomSeed)
-				TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
-			Settings.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", Settings.UseRandomSeed);
+			Settings.Data.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", Settings.Data.GenerateOnStart);
+			Settings.Data.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.Data.GenerationRadius);
+			if (!Settings.Data.UseRandomSeed)
+				TerraSettings.Seed = EditorGUILayout.IntField("Seed", TerraSettings.Seed);
+			Settings.Data.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", Settings.Data.UseRandomSeed);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
-			Settings.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.MeshResolution, stringResOptions, resOptions);
-			Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
-			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+			Settings.Data.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.Data.MeshResolution, stringResOptions, resOptions);
+			Settings.Data.Length = EditorGUILayout.IntField("Length", Settings.Data.Length);
+			Settings.Data.Spread = EditorGUILayout.FloatField("Spread", Settings.Data.Spread);
+			Settings.Data.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Data.Amplitude);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);
-			if (!Settings.GenAllColliders)
-				Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
-			Settings.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.GenAllColliders);
+			if (!Settings.Data.GenAllColliders)
+				Settings.Data.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.Data.ColliderGenerationExtent);
+			Settings.Data.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.Data.GenAllColliders);
 
 			EditorGUILayout.Space();
 			EditorGUI.BeginChangeCheck();
-			Settings.DisplayPreview = EditorGUILayout.Toggle("Display Preview", Settings.DisplayPreview);
+			Settings.Data.DisplayPreview = EditorGUILayout.Toggle("Display Preview", Settings.Data.DisplayPreview);
 			if (EditorGUI.EndChangeCheck()) {
-				if (Settings.DisplayPreview) {
+				if (Settings.Data.DisplayPreview) {
 					Settings.Preview.TriggerPreviewUpdate();
 				} else {
 					Settings.Preview.RemoveComponents();
 				}
 			}
 
-			Settings.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.UseMultithreading);
+			Settings.Data.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.Data.UseMultithreading);
 		}
 
 		/// <summary>
@@ -171,7 +171,7 @@ namespace UnityEditor.Terra {
 				}
 
 				EditorGUILayout.Space();
-				if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
+				if (Settings.Data.DisplayPreview && GUILayout.Button("Update Preview")) {
 					Settings.Preview.TriggerMaterialsUpdate();
 				}
 			}
@@ -188,7 +188,7 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Noise" tab
 		/// </summary>
 		public void Noise() {
-			NoiseGraph graph = Settings.Graph;
+			NoiseGraph graph = Settings.Data.Graph;
 
 			EditorGUILayout.Space();
 
@@ -212,14 +212,14 @@ namespace UnityEditor.Terra {
 			}
 
 			EditorGUILayout.Space();
-			Settings.Graph = (NoiseGraph)EditorGUILayout.ObjectField("Graph", graph, typeof(NoiseGraph), false);
+			Settings.Data.Graph = (NoiseGraph)EditorGUILayout.ObjectField("Graph", graph, typeof(NoiseGraph), false);
 			EditorGUILayout.Space();
 
-			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+			Settings.Data.Spread = EditorGUILayout.FloatField("Spread", Settings.Data.Spread);
+			Settings.Data.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Data.Amplitude);
 
 			EditorGUILayout.Space();
-			if (Application.isEditor && Settings.DisplayPreview) {
+			if (Application.isEditor && Settings.Data.DisplayPreview) {
 				if (GUILayout.Button("Update Preview")) {
 					Settings.Preview.TriggerPreviewUpdate();
 				}
@@ -402,11 +402,11 @@ namespace UnityEditor.Terra {
 					Settings.ObjectPlacementSettings = new List<ObjectPlacementType>();
 				}
 
-				Settings.ObjectPlacementSettings.Add(new ObjectPlacementType(TerraSettings.GenerationSeed));
+				Settings.ObjectPlacementSettings.Add(new ObjectPlacementType(TerraSettings.Seed));
 			}
 
 			//Update preview
-			if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
+			if (Settings.Data.DisplayPreview && GUILayout.Button("Update Preview")) {
 				Settings.Preview.TriggerObjectPlacementUpdate();
 			}
 		}

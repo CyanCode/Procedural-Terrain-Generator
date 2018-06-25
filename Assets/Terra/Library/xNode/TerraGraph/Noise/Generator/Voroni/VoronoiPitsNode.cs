@@ -6,7 +6,7 @@ namespace Terra.Nodes.Generation {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Pits")]
 	public class VoronoiPitsNode: AbsVoronoiNoiseNode {
 		public override Generator GetGenerator() {
-			VoronoiPits2D noise = new VoronoiPits2D(TerraSettings.GenerationSeed);
+			VoronoiPits2D noise = new VoronoiPits2D(TerraSettings.Seed);
 			noise.Frequency = Frequency;
 			noise.Period = (int)Period;
 

@@ -4,16 +4,16 @@ using UnityEngine;
 namespace Terra.Terrain.Detail {
 	/// <summary>
 	/// Class responsible for the displaying of details on a 
-	/// TerrainTile. These details include object placement, 
+	/// Tile. These details include object placement, 
 	/// material application, and 
 	/// </summary>
 	public class DetailManager {
-		private TerrainTile Tile;
+		private Tile Tile;
 
 		public TerrainPaint Paint { get; private set; }
 		public static ObjectRenderer ObjectPlacer { get; private set; }
 		
-		public DetailManager(TerrainTile tt) {
+		public DetailManager(Tile tt) {
 			Tile = tt;
 
 			if (ObjectPlacer == null) {
@@ -31,10 +31,10 @@ namespace Terra.Terrain.Detail {
 
 		/// <summary>
 		/// Applies the SplatSettings specified in TerraSettings to this 
-		/// TerrainTile. A TerrainPaint instance is created if it didn't exist 
+		/// Tile. A TerrainPaint instance is created if it didn't exist 
 		/// already, and is returned.
 		/// </summary>
-		/// <returns>TerrainTile instance</returns>
+		/// <returns>Tile instance</returns>
 		public TerrainPaint ApplySplatmap() {
 			TerraEvent.TriggerOnSplatmapWillCalculate(Tile.gameObject);
 			if (Paint == null)

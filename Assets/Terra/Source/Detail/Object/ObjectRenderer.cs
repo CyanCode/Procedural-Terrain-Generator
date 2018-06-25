@@ -21,9 +21,9 @@ namespace Terra.Terrain.Detail {
 		/// by TerraSettings to calculate where to place objects on meshes. 
 		/// Optionally disable observing TerrainTiles if you wish to 
 		/// manage the placement of tiles manually rather than displaying 
-		/// and hiding when a TerrainTile activates or deactivates.
+		/// and hiding when a Tile activates or deactivates.
 		/// </summary>
-		/// <param name="observeTiles">Observe TerrainTile events?</param>
+		/// <param name="observeTiles">Observe Tile events?</param>
 		public ObjectRenderer(bool observeTiles = true) {
 			Settings = TerraSettings.Instance;
 			ObserveTiles = observeTiles;
@@ -94,28 +94,28 @@ namespace Terra.Terrain.Detail {
 		/// <param name="type">object placement type to sample</param>
 		/// <param name="density">How dense should the samples be</param>
 		/// <returns>List of vectors within the grid and sample constraints</returns>
-		public List<Vector3> GetFilteredGrid(TerrainTile tile, ObjectPlacementType type, float density) {
+		public List<Vector3> GetFilteredGrid(Tile tile, ObjectPlacementType type, float density) {
 			MeshFilter mf = tile.GetComponent<MeshFilter>();
 			if (mf == null) {
-				throw new ArgumentException("The passed TerrainTile does not have an attached MeshFilter. Has a mesh been created?");
+				throw new ArgumentException("The passed Tile does not have an attached MeshFilter. Has a mesh been created?");
 			}
 
 			return GetFilteredGrid(mf.sharedMesh, type);
 		}
 
 		/// <summary>
-		/// Called when a TerrainTile has been activated 
+		/// Called when a Tile has been activated 
 		/// </summary>
 		/// <param name="tile">Activated tile</param>
-		void OnTerrainTileActivate(TerrainTile tile) {
+		void OnTerrainTileActivate(Tile tile) {
 			Pool.ActivateTile(tile);
 		}
 
 		/// <summary>
-		/// Called when a TerrainTile has been deactivated
+		/// Called when a Tile has been deactivated
 		/// </summary>
 		/// <param name="tile">Deactivated tile</param>
-		void OnTerrainTileDeactivate(TerrainTile tile) {
+		void OnTerrainTileDeactivate(Tile tile) {
 			Pool.DeactivateTile(tile);
 		}
 	}
@@ -232,7 +232,7 @@ namespace Terra.Terrain.Detail {
 				}
 			}
 
-			public TerrainTile Tile { get; private set; }
+			public Tile Tile { get; private set; }
 
 			private readonly ObjectPool Pool;
 			private PositionsContainer[] Positions;
@@ -244,13 +244,13 @@ namespace Terra.Terrain.Detail {
 			/// Creates a new TileContainer
 			/// </summary>
 			/// <param name="tile">Tile to track</param>
-			public TileContainer(TerrainTile tile, ObjectPool pool) {
+			public TileContainer(Tile tile, ObjectPool pool) {
 				Tile = tile;
 				Pool = pool;
 			}
 
 			/// <summary>
-			/// Places objects on the TerrainTile if positions have 
+			/// Places objects on the Tile if positions have 
 			/// already been computed.
 			/// </summary>
 			public void PlaceObjects() {
@@ -276,7 +276,7 @@ namespace Terra.Terrain.Detail {
 
 			/// <summary>
 			/// Removes any objects that have been placed on this 
-			/// TerrainTile.
+			/// Tile.
 			/// </summary>
 			public void RemoveObjects() {
 				foreach (PositionsContainer p in Positions) {
@@ -292,7 +292,7 @@ namespace Terra.Terrain.Detail {
 			}
 
 			/// <summary>
-			/// Computes positions for this TerrainTile and caches 
+			/// Computes positions for this Tile and caches 
 			/// them.
 			/// </summary>
 			public void ComputePositions() {
@@ -306,7 +306,7 @@ namespace Terra.Terrain.Detail {
 			}
 
 			/// <summary>
-			/// Checks whether positions for this TerrainTile have been computed 
+			/// Checks whether positions for this Tile have been computed 
 			/// or not.
 			/// </summary>
 			/// <returns></returns>
@@ -315,7 +315,7 @@ namespace Terra.Terrain.Detail {
 			}
 
 			/// <summary>
-			/// Creates a parent GameObject under this TerrainTile that contains 
+			/// Creates a parent GameObject under this Tile that contains 
 			/// its objects. If one already exists, it is returned.
 			/// </summary>
 			Transform GetParent() {
@@ -369,10 +369,10 @@ namespace Terra.Terrain.Detail {
 
 		/// <summary>
 		/// Activates all necessary objects and places them 
-		/// on the passed TerrainTile.
+		/// on the passed Tile.
 		/// </summary>
 		/// <param name="tile"></param>
-		public void ActivateTile(TerrainTile tile) {
+		public void ActivateTile(Tile tile) {
 			TileContainer setContainer = null;
 
 			foreach (TileContainer container in Tiles) {
@@ -394,7 +394,7 @@ namespace Terra.Terrain.Detail {
 			setContainer.PlaceObjects();
 		}
 
-		public void DeactivateTile(TerrainTile tile) {
+		public void DeactivateTile(Tile tile) {
 			TileContainer setContainer = null;
 
 			foreach (TileContainer container in Tiles) {

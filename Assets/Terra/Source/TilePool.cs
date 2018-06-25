@@ -30,7 +30,7 @@ namespace Terra.Terrain {
 		/// Returns a list of tiles that are currently active in the 
 		/// scene
 		/// </summary>
-		public List<TerrainTile> ActiveTiles {
+		public List<Tile> ActiveTiles {
 			get {
 				return Cache.ActiveTiles;
 			}
@@ -43,7 +43,7 @@ namespace Terra.Terrain {
 		private const float ADD_TILE_DELAY = 0.5f;
 		
 		private struct ThreadData {
-			public TerrainTile tile;
+			public Tile tile;
 			public Generator gen;
 		}
 
@@ -80,17 +80,17 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Finds all <b>enabled</b> TerrainTile instances that intersect 
+		/// Finds all <b>enabled</b> Tile instances that intersect 
 		/// the passed square parameters
 		/// </summary>
 		/// <param name="trackedPos"><code>TrackedObject</code> position</param>
 		/// <param name="extent">Extent of collision square, most likely <code>ColliderGenerationExtent</code></param>
-		/// <returns>Found, overlapping, TerrainTile instances</returns>
-		public List<TerrainTile> GetTilesInExtent(Vector3 trackedPos, float extent) {
+		/// <returns>Found, overlapping, Tile instances</returns>
+		public List<Tile> GetTilesInExtent(Vector3 trackedPos, float extent) {
 			//TODO Remove params
-			List<TerrainTile> tiles = new List<TerrainTile>(Cache.ActiveTiles.Count);
+			List<Tile> tiles = new List<Tile>(Cache.ActiveTiles.Count);
 
-			foreach (TerrainTile t in Cache.ActiveTiles) {
+			foreach (Tile t in Cache.ActiveTiles) {
 				MeshRenderer renderer = t.GetComponent<MeshRenderer>();
 
 				if (renderer != null) {
@@ -133,7 +133,7 @@ namespace Terra.Terrain {
 
 			//Add new positions
 			foreach (Vector2 pos in newPositions) {
-				TerrainTile cached = Cache.GetCachedTileAtPosition(pos);
+				Tile cached = Cache.GetCachedTileAtPosition(pos);
 
 				//Attempt to pull from cache, generate if not available
 				if (cached != null) {
@@ -154,9 +154,9 @@ namespace Terra.Terrain {
 			//If we're generating all colliders the extent of collision generation is 
 			//technically infinity (max value works just as well though)
 			float extent = Settings.GenAllColliders ? float.MaxValue : Settings.ColliderGenerationExtent;
-			List<TerrainTile> tiles = GetTilesInExtent(Settings.TrackedObject.transform.position, extent);
+			List<Tile> tiles = GetTilesInExtent(Settings.TrackedObject.transform.position, extent);
 
-			foreach (TerrainTile t in tiles) {
+			foreach (Tile t in tiles) {
 				t.GenerateCollider();
 				yield return null;
 			}
@@ -177,7 +177,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="pos">Position to add tile at</param>
 		public IEnumerator AddTileAsync(Vector2 pos) {
-			TerrainTile tile = new GameObject("Tile: " + pos).AddComponent<TerrainTile>();
+			Tile tile = new GameObject("Tile: " + pos).AddComponent<Tile>();
 			queuedTiles++;
 
 			if (Settings.UseMultithreading) {
@@ -190,7 +190,7 @@ namespace Terra.Terrain {
 					lock (pollLock) {
 						if (d is ThreadData) {
 							ThreadData tData = (ThreadData)d;
-							TerrainTile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
+							Tile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
 
 							MTDispatch.Instance().Enqueue(() => { //Main Thread
 								tData.tile.RenderRawMeshData(md);

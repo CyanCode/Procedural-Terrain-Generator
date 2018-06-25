@@ -422,7 +422,7 @@ public class ObjectPlacementType {
 	/// <param name="go">GameObject to transform</param>
 	/// <param name="position">Calculated position</param>
 	/// <param name="length">Length of the mesh</param>
-	/// <param name="tileOffset">Location where the TerrainTile starts</param>
+	/// <param name="tileOffset">Location where the Tile starts</param>
 	public void TransformGameObject(GameObject go, Vector3 position, int length, Vector3 tileOffset) {
 		float xPos = ((position.x * length) - length / 2) + tileOffset.x;
 		float yPos = position.y;

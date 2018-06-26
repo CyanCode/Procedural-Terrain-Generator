@@ -190,7 +190,7 @@ namespace Terra.Terrain {
 					lock (pollLock) {
 						if (d is ThreadData) {
 							ThreadData tData = (ThreadData)d;
-							Tile.MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
+							MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
 
 							MTDispatch.Instance().Enqueue(() => { //Main Thread
 								tData.tile.RenderRawMeshData(md);

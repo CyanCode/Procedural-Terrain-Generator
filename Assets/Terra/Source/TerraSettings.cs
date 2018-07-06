@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Terra.CoherentNoise;
+using Terra.CoherentNoise.Generation;
+using Terra.CoherentNoise.Generation.Fractal;
 using Terra.Graph.Noise;
 using Terra.Terrain.Util;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 
 namespace Terra.Terrain {
@@ -20,6 +25,8 @@ namespace Terra.Terrain {
 			ObjectPlacement = 3
 		}
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
+
+		#region Tab Settings
 
 		//General Tab
 		public GameObject TrackedObject;
@@ -67,6 +74,11 @@ namespace Terra.Terrain {
 		//Object Placement Tab
 		public List<ObjectPlacementType> ObjectPlacementSettings = new List<ObjectPlacementType>();
 
+		public TileMapData HeightMapData = new TileMapData();
+		public TileMapData TemperatureMapData = new TileMapData();
+		public TileMapData MoistureMapData = new TileMapData();
+
+		#endregion
 
 		/// <summary>
 		/// TilePool instance attached to this TerraSettings instance. This is instantiated
@@ -196,5 +208,120 @@ namespace Terra.Terrain {
 		/// for debug purposes
 		/// </summary>
 		internal const bool WRITE_SPLAT_TEXTURES = false;
+	}
+
+	[Serializable]
+	public enum MapGeneratorType {
+		Fractal,
+		Perlin,
+		Billow,
+		Custom
+	}
+
+	/// <summary>
+	/// Holds data relating to various types of maps (ie height, temperature, etc). 
+	/// Used by <see cref="TerraSettings"/> for storing information.
+	/// </summary>
+	[Serializable]
+	public class TileMapData {
+		/// <summary>
+		/// The CoherentNoise Generator attached to this instance. If 
+		/// <see cref="MapType"/> is set to <see cref="MapGeneratorType.Custom"/>, 
+		/// <see cref="CustomGenerator"/> is returned.
+		/// </summary>
+		public Generator Generator {
+			get {
+				return GetGenerator();
+			}
+		}
+
+		/// <summary>
+		/// The type of Generator to use when constructing a map.
+		/// </summary>
+		public MapGeneratorType MapType = MapGeneratorType.Perlin;
+
+		/// <summary>
+		/// If <see cref="MapType"/> is set to Custom, this Generator 
+		/// is returned upon accessing <see cref="Generator"/>
+		/// </summary>
+		public Generator CustomGenerator {
+			get { return _customGenerator; }
+			set {
+				_customGenerator = value;
+				if (value != null) {
+					MapType = MapGeneratorType.Custom;
+				}
+			}
+		}
+
+		/// <summary>
+		/// "Zoom" level applied to the preview texture
+		/// </summary>
+		public float TextureZoom = 1f;
+
+		/// <summary>
+		/// Internal <see cref="CustomGenerator"/>
+		/// </summary>
+		private Generator _customGenerator;
+
+		/// <summary>
+		/// Creates a preview texture using the two passed colors 
+		/// to form a gradient where -1 is color 1 and 1 is color 2. 
+		/// Data is taken from <see cref="Generator"/>
+		/// </summary>
+		/// <param name="width">Width of texture in pixels</param>
+		/// <param name="height">Height of texture in pixels</param>
+		/// <param name="c1">Color 1 in gradient</param>
+		/// <param name="c2">Color 2 in gradient</param>
+		public Texture2D CreatePreviewTexture(int width, int height, Color c1, Color c2) {
+			Texture2D tex = new Texture2D(width, height);
+			Generator gen = Generator.Scale(TextureZoom, TextureZoom, TextureZoom);
+
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					//normalize [-1, 1] -> [0, 1]
+					float v = (gen.GetValue(x, 0, y) + 1) / 2;
+					Color c = Color.Lerp(c1, c2, v);
+
+					tex.SetPixel(x, y, c);
+				}
+			}
+
+			return tex;
+		}
+
+		/// <summary>
+		/// Creates a map preview texture with data from <see cref="Generator"/>. 
+		/// The texture is colored as a gradient between black 
+		/// and white.
+		/// </summary>
+		/// <param name="width">Width of texture in pixels</param>
+		/// <param name="height">Height of texture in pixels</param>
+		public Texture2D CreatePreviewTexture(int width, int height) {
+			return CreatePreviewTexture(width, height, Color.black, Color.white);
+		}
+
+		/// <summary>
+		/// Gets the Generator assigned to this instance based on the 
+		/// set <see cref="MapGeneratorType"/>.
+		/// </summary>
+		/// <returns>Generator if set, null if <see cref="MapGeneratorType.Custom"/> 
+		/// is set and no <see cref="CustomGeneratorGraph"/> is specified</returns>
+		private Generator GetGenerator() {
+			int seed = TerraSettings.GenerationSeed;
+
+			switch (MapType) {
+				case MapGeneratorType.Perlin:
+					return new ValueNoise(seed);
+				case MapGeneratorType.Fractal:
+					return new PinkNoise(seed);
+				case MapGeneratorType.Billow:
+					return new BillowNoise(seed);
+				case MapGeneratorType.Custom:
+					return CustomGenerator;
+				default:
+					return null;
+			}
+		}
 	}
 }

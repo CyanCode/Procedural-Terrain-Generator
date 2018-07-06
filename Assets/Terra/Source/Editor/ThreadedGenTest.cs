@@ -145,6 +145,21 @@ public class GenerationTests {
 		Debug.Log("Approx " + ((float)(time / 1000)) / sampleCount + " seconds");
 	}
 
+
+	[Test]
+	public void TestPerpendicular() {
+		var a = new Vector2(1, -4);
+		var b = new Vector2(5, 2);
+		var c = new Vector2(-1, 1);
+
+		float t = ((c.x - a.x) * (b.x - a.x) + (c.y - a.y) * (b.y - a.y)) /
+		          (Mathf.Pow(b.x - a.x, 2f) + Mathf.Pow(b.y - a.y, 2f));
+		var dist = new Vector2(a.x + (t * (b.x - a.x)), a.y + (t * (b.y - a.y)));
+
+		Debug.Log(dist + " mag: "+ dist.magnitude);
+		Assert.AreEqual(dist.magnitude, 3.06f, 0.5f);
+	}
+
 	private Generator GetTestGenerator() {
 		RidgeNoise rn = new RidgeNoise(1337);
 		rn.Frequency = 2;

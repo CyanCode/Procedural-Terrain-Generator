@@ -232,7 +232,7 @@ namespace Terra.Terrain {
 			float worldX = ((float)xPos / (resolution - 1) - .5f) * length;
 			float worldZ = ((float)zPos / (resolution - 1) - .5f) * length;
 			float worldY = gen.GetValue(((position.x * length) + xPos) * spread,
-				               ((position.y * length) + zPos) * spread, 0f) * settings.Amplitude;
+				               ((position.y * length) + zPos) * spread, 0f) * amp;
 
 			return new Vector3(worldX, worldY, worldZ);
 		}

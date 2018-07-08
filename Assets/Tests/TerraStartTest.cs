@@ -20,7 +20,7 @@ public class TerraStartTest : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0)) {
 			Started = true;
 
-			if (!Settings.GenerateOnStart)
+			if (!Settings.EditorState.GenerateOnStart)
 				Settings.Generate();
 		}
 	}

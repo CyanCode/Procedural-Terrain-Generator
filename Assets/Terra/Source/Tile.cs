@@ -84,7 +84,7 @@ namespace Terra.Terrain {
 		/// <param name="position">Position to set the Tile to (ie [1,0])</param>
 		public void UpdatePosition(Vector2 position) {
 			Position = position;
-			int len = _settings.Length;
+			int len = _settings.Generator.Length;
 			transform.position = new Vector3(position.x * len, 0f, position.y * len);
 		}
 
@@ -102,7 +102,7 @@ namespace Terra.Terrain {
 		/// <param name="renderOnCreation">If true, the attached MeshRenderer will be enabled after the mesh has been formed. 
 		/// Otherwise, the attached MeshRenderer will be disabled by default.</param>
 		public void CreateMesh(Vector2 position, bool renderOnCreation = true) {
-			CreateMesh(position, _settings.Graph.GetEndGenerator(), renderOnCreation);
+			CreateMesh(position, _settings.Generator.Graph.GetEndGenerator(), renderOnCreation);
 		}
 
 		/// <summary>
@@ -180,8 +180,8 @@ namespace Terra.Terrain {
 		/// <param name="heightmap">vertices in world space to apply to the mesh</param>
 		/// <param name="res">resolution of the heightmap</param>
 		public MeshData CreateRawMesh(Vector3[] vertices, int res) {
-			float len = _settings.Length;
-			float spread = 1f / (_settings.Spread * _settings.MeshResolution);
+			float len = _settings.Generator.Length;
+			float spread = 1f / (_settings.Generator.Spread * _settings.Generator.MeshResolution);
 
 			Vector2[] uvs = new Vector2[vertices.Length];
 			for (int v = 0; v < res; v++) {
@@ -244,7 +244,7 @@ namespace Terra.Terrain {
 		/// <param name="resolution">resolution of this mesh</param>
 		/// <returns></returns>
 		public Vector3 GetPositionAt(int xPos, int zPos, int resolution) {
-			return TileMesh.GetPositionAt(xPos, zPos, resolution, _settings, _settings.Graph.GetEndGenerator(), Position);
+			return TileMesh.GetPositionAt(xPos, zPos, resolution, _settings, _settings.Generator.Graph.GetEndGenerator(), Position);
 		}
 
 		/// <summary>
@@ -296,7 +296,7 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// map data that is referenced when updating the internal map
 		/// </summary>
-		public TileMapData MapData;
+		public TerraSettings.TileMapData MapData;
 
 		/// <summary>
 		/// Tile instance attached to this TileMap
@@ -318,7 +318,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="tile">Tile</param>
 		/// <param name="resolution"></param>
-		public TileMap(Tile tile, int resolution, TileMapData mapData) {
+		public TileMap(Tile tile, int resolution, TerraSettings.TileMapData mapData) {
 			_tile = tile;
 			Resolution = resolution;
 			MapData = mapData;
@@ -339,7 +339,7 @@ namespace Terra.Terrain {
 
 			for (int x = 0; x < Resolution; x++) {
 				for (int y = 0; y < Resolution; y++) {
-					Map[x, y] = PollGeneratorWorld(x, y, gen, settings.Spread, settings.Amplitude);
+					Map[x, y] = PollGeneratorWorld(x, y, gen, settings.Generator.Spread, settings.Generator.Amplitude);
 				}
 			}
 		}
@@ -359,7 +359,7 @@ namespace Terra.Terrain {
 				return default(float);
 
 			spread = 1 / spread;
-			int length = TerraSettings.Instance.Length;
+			int length = TerraSettings.Instance.Generator.Length;
 
 			float x = (_tile.Position.x * length + xPos) * spread;
 			float z = (_tile.Position.y * length + zPos) * spread;

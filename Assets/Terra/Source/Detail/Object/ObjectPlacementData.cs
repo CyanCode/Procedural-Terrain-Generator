@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class ObjectPlacementType {
+public class ObjectPlacementData {
 	private System.Random Rand;
 
 	[SerializeField]
@@ -214,7 +214,7 @@ public class ObjectPlacementType {
 	#endregion
 
 	/// <param name="seed">Optional seed value to use in the random number generator</param>
-	public ObjectPlacementType(int seed = -1) {
+	public ObjectPlacementData(int seed = -1) {
 		Seed = seed;
 		InitRNG();
 

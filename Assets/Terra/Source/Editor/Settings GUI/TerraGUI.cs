@@ -40,7 +40,7 @@ namespace UnityEditor.Terra {
 				};
 			}
 
-			Settings.ToolbarSelection = (TerraSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(Settings.ToolbarSelection, ToolbarImages);
+			Settings.EditorState.ToolbarSelection = (TerraSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(Settings.EditorState.ToolbarSelection, ToolbarImages);
 		}
 
 		/// <summary>
@@ -50,7 +50,7 @@ namespace UnityEditor.Terra {
 			//Tracked gameobject
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Tracked GameObject", EditorStyles.boldLabel);
-			Settings.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.TrackedObject, typeof(GameObject), true);
+			Settings.Generator.TrackedObject = (GameObject)EditorGUILayout.ObjectField(Settings.Generator.TrackedObject, typeof(GameObject), true);
 
 			//Terrain settings
 			string[] stringResOptions = { "32", "64", "128" };
@@ -58,37 +58,37 @@ namespace UnityEditor.Terra {
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
-			Settings.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", Settings.GenerateOnStart);
-			Settings.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.GenerationRadius);
-			if (!Settings.UseRandomSeed)
+			Settings.EditorState.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", Settings.EditorState.GenerateOnStart);
+			Settings.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", Settings.Generator.GenerationRadius);
+			if (!Settings.EditorState.UseRandomSeed)
 				TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
-			Settings.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", Settings.UseRandomSeed);
+			Settings.EditorState.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", Settings.EditorState.UseRandomSeed);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
-			Settings.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.MeshResolution, stringResOptions, resOptions);
-			Settings.Length = EditorGUILayout.IntField("Length", Settings.Length);
-			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+			Settings.Generator.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", Settings.Generator.MeshResolution, stringResOptions, resOptions);
+			Settings.Generator.Length = EditorGUILayout.IntField("Length", Settings.Generator.Length);
+			Settings.Generator.Spread = EditorGUILayout.FloatField("Spread", Settings.Generator.Spread);
+			Settings.Generator.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Generator.Amplitude);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);
-			if (!Settings.GenAllColliders)
-				Settings.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.ColliderGenerationExtent);
-			Settings.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.GenAllColliders);
+			if (!Settings.Generator.GenAllColliders)
+				Settings.Generator.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", Settings.Generator.ColliderGenerationExtent);
+			Settings.Generator.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", Settings.Generator.GenAllColliders);
 
 			EditorGUILayout.Space();
 			EditorGUI.BeginChangeCheck();
-			Settings.DisplayPreview = EditorGUILayout.Toggle("Display Preview", Settings.DisplayPreview);
+			Settings.EditorState.DisplayPreview = EditorGUILayout.Toggle("Display Preview", Settings.EditorState.DisplayPreview);
 			if (EditorGUI.EndChangeCheck()) {
-				if (Settings.DisplayPreview) {
+				if (Settings.EditorState.DisplayPreview) {
 					Settings.Preview.TriggerPreviewUpdate();
 				} else {
 					Settings.Preview.RemoveComponents();
 				}
 			}
 
-			Settings.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.UseMultithreading);
+			Settings.EditorState.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.EditorState.UseMultithreading);
 		}
 
 		/// <summary>
@@ -98,24 +98,24 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 
 			//Use custom material instead
-			Settings.UseCustomMaterial = EditorGUILayout.Toggle("Custom Material", Settings.UseCustomMaterial);
+			Settings.EditorState.UseCustomMaterial = EditorGUILayout.Toggle("Custom Material", Settings.EditorState.UseCustomMaterial);
 
-			if (Settings.UseCustomMaterial) {
+			if (Settings.EditorState.UseCustomMaterial) {
 				Settings.CustomMaterial = (Material)EditorGUILayout.ObjectField("material", Settings.CustomMaterial, typeof(Material), false);
 				return;
 			}
 
 			//Use textures
-			if (Settings.SplatSettings != null) {
+			if (Settings.SplatData != null) {
 				//Display material list editor
 				ReorderableListGUI.ListField(matList);
 
 				//Advanced options
-				Settings.IsAdvancedFoldout = EditorGUILayout.Foldout(Settings.IsAdvancedFoldout, "Advanced");
-				if (Settings.IsAdvancedFoldout) {
+				Settings.EditorState.IsAdvancedFoldout = EditorGUILayout.Foldout(Settings.EditorState.IsAdvancedFoldout, "Advanced");
+				if (Settings.EditorState.IsAdvancedFoldout) {
 					EditorGUI.indentLevel = 1;
 					EditorGUILayout.BeginHorizontal();
-					Settings.UseTessellation = EditorGUILayout.Toggle("Tessellation", Settings.UseTessellation);
+					Settings.Tessellation.UseTessellation = EditorGUILayout.Toggle("Tessellation", Settings.Tessellation.UseTessellation);
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "Enabling tesselation can make your terrain mesh " +
 											"appear to have a higher resolution without increasing " +
@@ -125,18 +125,18 @@ namespace UnityEditor.Terra {
 					}
 					EditorGUILayout.EndHorizontal();
 
-					if (Settings.UseTessellation) {
+					if (Settings.Tessellation.UseTessellation) {
 						//TODO Use constant values
-						Settings.TessellationAmount = EditorGUILayout.Slider("Amount", Settings.TessellationAmount, 1f, 32f);
-						EditorGUILayout.MinMaxSlider("Distance", ref Settings.TessellationMinDistance,
-													ref Settings.TessellationMaxDistance, 1f, 100f);
+						Settings.Tessellation.TessellationAmount = EditorGUILayout.Slider("Amount", Settings.Tessellation.TessellationAmount, 1f, 32f);
+						EditorGUILayout.MinMaxSlider("Distance", ref Settings.Tessellation.TessellationMinDistance,
+													ref Settings.Tessellation.TessellationMaxDistance, 1f, 100f);
 
 						//Display right aligned distance label
 						GUIStyle style = GUI.skin.GetStyle("Label");
 						style.alignment = TextAnchor.MiddleRight;
 
-						string min = Settings.TessellationMinDistance.ToString("n1");
-						string max = Settings.TessellationMaxDistance.ToString("n1");
+						string min = Settings.Tessellation.TessellationMinDistance.ToString("n1");
+						string max = Settings.Tessellation.TessellationMaxDistance.ToString("n1");
 						EditorGUILayout.LabelField("Min: " + min + " Max: " + max, style);
 					}
 					EditorGUI.indentLevel = 0;
@@ -144,45 +144,45 @@ namespace UnityEditor.Terra {
 				}
 
 				//Use Grass
-				Settings.PlaceGrass = EditorGUILayout.Toggle("Place Grass", Settings.PlaceGrass);
-				if (Settings.PlaceGrass) {
-					Settings.GrassStepLength = EditorGUILayout.Slider("Density", Settings.GrassStepLength, 1.5f, 30f);
-					Settings.GrassVariation = EditorGUILayout.Slider("Variation", Settings.GrassVariation, 0f, 3f);
-					Settings.GrassHeight = EditorGUILayout.Slider("Height", Settings.GrassHeight, 1f, 10f);
-					Settings.BillboardDistance = EditorGUILayout.FloatField("Billboard Distance", Settings.BillboardDistance);
-					Settings.ClipCutoff = EditorGUILayout.Slider("Clip Cutoff", Settings.ClipCutoff, 0.05f, 1f);
+				Settings.Grass.PlaceGrass = EditorGUILayout.Toggle("Place Grass", Settings.Grass.PlaceGrass);
+				if (Settings.Grass.PlaceGrass) {
+					Settings.Grass.GrassStepLength = EditorGUILayout.Slider("Density", Settings.Grass.GrassStepLength, 1.5f, 30f);
+					Settings.Grass.GrassVariation = EditorGUILayout.Slider("Variation", Settings.Grass.GrassVariation, 0f, 3f);
+					Settings.Grass.GrassHeight = EditorGUILayout.Slider("Height", Settings.Grass.GrassHeight, 1f, 10f);
+					Settings.Grass.BillboardDistance = EditorGUILayout.FloatField("Billboard Distance", Settings.Grass.BillboardDistance);
+					Settings.Grass.ClipCutoff = EditorGUILayout.Slider("Clip Cutoff", Settings.Grass.ClipCutoff, 0.05f, 1f);
 
-					Settings.GrassConstrainHeight = EditorGUILayout.Toggle("Constrain Height", Settings.GrassConstrainHeight);
-					if (Settings.GrassConstrainHeight) {
+					Settings.Grass.GrassConstrainHeight = EditorGUILayout.Toggle("Constrain Height", Settings.Grass.GrassConstrainHeight);
+					if (Settings.Grass.GrassConstrainHeight) {
 						EditorGUI.indentLevel = 1;
-						Settings.GrassMaxHeight = EditorGUILayout.FloatField("Max Height", Settings.GrassMaxHeight);
-						Settings.GrassMinHeight = EditorGUILayout.FloatField("Min Height", Settings.GrassMinHeight);
+						Settings.Grass.GrassMaxHeight = EditorGUILayout.FloatField("Max Height", Settings.Grass.GrassMaxHeight);
+						Settings.Grass.GrassMinHeight = EditorGUILayout.FloatField("Min Height", Settings.Grass.GrassMinHeight);
 						EditorGUI.indentLevel = 0;
 					}
 
-					Settings.GrassConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", Settings.GrassConstrainAngle);
-					if (Settings.GrassConstrainAngle) {
+					Settings.Grass.GrassConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", Settings.Grass.GrassConstrainAngle);
+					if (Settings.Grass.GrassConstrainAngle) {
 						EditorGUI.indentLevel = 1;
-						EditorGUILayout.LabelField("Min Angle", Settings.GrassAngleMin.ToString("0") + " deg");
-						EditorGUILayout.LabelField("Max Angle", Settings.GrassAngleMax.ToString("0") + " deg");
-						EditorGUILayout.MinMaxSlider(ref Settings.GrassAngleMin, ref Settings.GrassAngleMax, 0f, 90f);
+						EditorGUILayout.LabelField("Min Angle", Settings.Grass.GrassAngleMin.ToString("0") + " deg");
+						EditorGUILayout.LabelField("Max Angle", Settings.Grass.GrassAngleMax.ToString("0") + " deg");
+						EditorGUILayout.MinMaxSlider(ref Settings.Grass.GrassAngleMin, ref Settings.Grass.GrassAngleMax, 0f, 90f);
 						EditorGUI.indentLevel = 0;
 					}
 
-					Settings.GrassTexture = (Texture2D)EditorGUILayout.ObjectField("Texture", Settings.GrassTexture, typeof(Texture2D), false);
+					Settings.Grass.GrassTexture = (Texture2D)EditorGUILayout.ObjectField("Texture", Settings.Grass.GrassTexture, typeof(Texture2D), false);
 				}
 
 				EditorGUILayout.Space();
-				if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
+				if (Settings.EditorState.DisplayPreview && GUILayout.Button("Update Preview")) {
 					Settings.Preview.TriggerMaterialsUpdate();
 				}
 			}
 
 			if (GUILayout.Button("Add Material")) {
-				if (Settings.SplatSettings == null)
-					Settings.SplatSettings = new List<TerrainPaint.SplatSetting>();
+				if (Settings.SplatData == null)
+					Settings.SplatData = new List<TerrainPaint.SplatData>();
 
-				Settings.SplatSettings.Add(new TerrainPaint.SplatSetting());
+				Settings.SplatData.Add(new TerrainPaint.SplatData());
 			}
 		}
 
@@ -196,7 +196,7 @@ namespace UnityEditor.Terra {
 
 			var mapTypes = new[] { Settings.HeightMapData, Settings.MoistureMapData, Settings.TemperatureMapData };
 			bool updateTextures = mapTypes.Any(m => m.PreviewTexture == null);
-			float texWidth = Settings.EditorState.inspectorWidth;
+			float texWidth = Settings.EditorState.InspectorWidth;
 			
 			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
 			EditorGUIExtension.BeginBlockArea();
@@ -211,7 +211,7 @@ namespace UnityEditor.Terra {
 				bold.fontStyle = FontStyle.Bold;
 				EditorGUILayout.LabelField(md.Name, bold);
 
-				md.MapType = (MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
+				md.MapType = (TerraSettings.MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
 				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
 				EditorGUILayout.Space();
 
@@ -239,7 +239,7 @@ namespace UnityEditor.Terra {
 		/// </summary>
 		public void ObjectPlacement() {
 			//Display each type
-			for (int i = 0; i < Settings.ObjectPlacementSettings.Count; i++) {
+			for (int i = 0; i < Settings.ObjectData.Count; i++) {
 				EditorGUILayout.Space();
 
 				//Surround each material w/ box
@@ -248,35 +248,35 @@ namespace UnityEditor.Terra {
 				boxStyle.normal.background = GetWhiteTexture();
 				EditorGUILayout.BeginVertical(boxStyle);
 
-				ObjectPlacementType type = Settings.ObjectPlacementSettings[i];
+				ObjectPlacementData objectPlacementData = Settings.ObjectData[i];
 
 				//Close button / name
 				if (GUILayout.Button("X", GUILayout.Height(16), GUILayout.Width(18))) {
-					Settings.ObjectPlacementSettings.RemoveAt(i);
+					Settings.ObjectData.RemoveAt(i);
 					i--;
 					continue;
 				}
 
 				//General
-				type.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", type.Prefab, typeof(GameObject), false);
-				type.AllowsIntersection = EditorGUILayout.Toggle("Can Intersect", type.AllowsIntersection);
-				type.PlacementProbability = EditorGUILayout.IntSlider("Place Probability", type.PlacementProbability, 0, 100);
-				type.Spread = EditorGUILayout.Slider("Object Spread", type.Spread, 5f, 50f);
-				type.MaxObjects = EditorGUILayout.IntField("Max Objects", type.MaxObjects);
-				if (type.MaxObjects < 1) type.MaxObjects = 1;
+				objectPlacementData.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", objectPlacementData.Prefab, typeof(GameObject), false);
+				objectPlacementData.AllowsIntersection = EditorGUILayout.Toggle("Can Intersect", objectPlacementData.AllowsIntersection);
+				objectPlacementData.PlacementProbability = EditorGUILayout.IntSlider("Place Probability", objectPlacementData.PlacementProbability, 0, 100);
+				objectPlacementData.Spread = EditorGUILayout.Slider("Object Spread", objectPlacementData.Spread, 5f, 50f);
+				objectPlacementData.MaxObjects = EditorGUILayout.IntField("Max Objects", objectPlacementData.MaxObjects);
+				if (objectPlacementData.MaxObjects < 1) objectPlacementData.MaxObjects = 1;
 
 				//Height
-				type.ConstrainHeight = EditorGUILayout.Toggle("Constrain Height", type.ConstrainHeight);
-				if (type.ConstrainHeight) {
+				objectPlacementData.ConstrainHeight = EditorGUILayout.Toggle("Constrain Height", objectPlacementData.ConstrainHeight);
+				if (objectPlacementData.ConstrainHeight) {
 					EditorGUI.indentLevel = 1;
 
-					type.MinHeight = EditorGUILayout.FloatField("Min Height", type.MinHeight);
-					type.MaxHeight = EditorGUILayout.FloatField("Max Height", type.MaxHeight);
+					objectPlacementData.MinHeight = EditorGUILayout.FloatField("Min Height", objectPlacementData.MinHeight);
+					objectPlacementData.MaxHeight = EditorGUILayout.FloatField("Max Height", objectPlacementData.MaxHeight);
 
-					FitMinMax(ref type.MinHeight, ref type.MaxHeight);
+					FitMinMax(ref objectPlacementData.MinHeight, ref objectPlacementData.MaxHeight);
 
 					EditorGUILayout.BeginHorizontal();
-					type.HeightProbCurve = EditorGUILayout.CurveField("Probability", type.HeightProbCurve, Color.green, new Rect(0, 0, 1, 1));
+					objectPlacementData.HeightProbCurve = EditorGUILayout.CurveField("Probability", objectPlacementData.HeightProbCurve, Color.green, new Rect(0, 0, 1, 1));
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "This is the height probability curve. The X axis represents the " +
 											"min to max height and the Y axis represents the probability an " +
@@ -290,17 +290,17 @@ namespace UnityEditor.Terra {
 				}
 
 				//Angle
-				type.ConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", type.ConstrainAngle);
-				if (type.ConstrainAngle) {
+				objectPlacementData.ConstrainAngle = EditorGUILayout.Toggle("Constrain Angle", objectPlacementData.ConstrainAngle);
+				if (objectPlacementData.ConstrainAngle) {
 					EditorGUI.indentLevel = 1;
 
-					type.MinAngle = EditorGUILayout.FloatField("Min Angle", type.MinAngle);
-					type.MaxAngle = EditorGUILayout.FloatField("Max Angle", type.MaxAngle);
+					objectPlacementData.MinAngle = EditorGUILayout.FloatField("Min Angle", objectPlacementData.MinAngle);
+					objectPlacementData.MaxAngle = EditorGUILayout.FloatField("Max Angle", objectPlacementData.MaxAngle);
 
-					FitMinMax(ref type.MinAngle, ref type.MaxAngle);
+					FitMinMax(ref objectPlacementData.MinAngle, ref objectPlacementData.MaxAngle);
 
 					EditorGUILayout.BeginHorizontal();
-					type.AngleProbCurve = EditorGUILayout.CurveField("Probability", type.AngleProbCurve, Color.green, new Rect(0, 0, 180, 1));
+					objectPlacementData.AngleProbCurve = EditorGUILayout.CurveField("Probability", objectPlacementData.AngleProbCurve, Color.green, new Rect(0, 0, 180, 1));
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "This is the angle probability curve. The X axis represents " +
 											"0 to 180 degrees and the Y axis represents the probability an " +
@@ -315,12 +315,12 @@ namespace UnityEditor.Terra {
 
 				//Translate
 				EditorGUI.indentLevel = 1;
-				type.ShowTranslateFoldout = EditorGUILayout.Foldout(type.ShowTranslateFoldout, "Translate");
-				if (type.ShowTranslateFoldout) {
-					type.TranslationAmount = EditorGUILayout.Vector3Field("Translate", type.TranslationAmount);
+				objectPlacementData.ShowTranslateFoldout = EditorGUILayout.Foldout(objectPlacementData.ShowTranslateFoldout, "Translate");
+				if (objectPlacementData.ShowTranslateFoldout) {
+					objectPlacementData.TranslationAmount = EditorGUILayout.Vector3Field("Translate", objectPlacementData.TranslationAmount);
 
 					EditorGUILayout.BeginHorizontal();
-					type.IsRandomTranslate = EditorGUILayout.Toggle("Random", type.IsRandomTranslate);
+					objectPlacementData.IsRandomTranslate = EditorGUILayout.Toggle("Random", objectPlacementData.IsRandomTranslate);
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "Optionally randomly translate the placed object. " +
 											"Max and min extents for the random number generator can " +
@@ -329,24 +329,24 @@ namespace UnityEditor.Terra {
 					}
 					EditorGUILayout.EndHorizontal();
 
-					if (type.IsRandomTranslate) {
+					if (objectPlacementData.IsRandomTranslate) {
 						EditorGUI.indentLevel = 2;
 
-						type.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomTranslateExtents.Min);
-						type.RandomTranslateExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomTranslateExtents.Max);
+						objectPlacementData.RandomTranslateExtents.Min = EditorGUILayout.Vector3Field("Min", objectPlacementData.RandomTranslateExtents.Min);
+						objectPlacementData.RandomTranslateExtents.Max = EditorGUILayout.Vector3Field("Max", objectPlacementData.RandomTranslateExtents.Max);
 
-						FitMinMax(ref type.RandomTranslateExtents.Min, ref type.RandomTranslateExtents.Max);
+						FitMinMax(ref objectPlacementData.RandomTranslateExtents.Min, ref objectPlacementData.RandomTranslateExtents.Max);
 						EditorGUI.indentLevel = 1;
 					}
 				}
 
 				//Rotate
-				type.ShowRotateFoldout = EditorGUILayout.Foldout(type.ShowRotateFoldout, "Rotate");
-				if (type.ShowRotateFoldout) {
-					type.RotationAmount = EditorGUILayout.Vector3Field("Rotation", type.RotationAmount);
+				objectPlacementData.ShowRotateFoldout = EditorGUILayout.Foldout(objectPlacementData.ShowRotateFoldout, "Rotate");
+				if (objectPlacementData.ShowRotateFoldout) {
+					objectPlacementData.RotationAmount = EditorGUILayout.Vector3Field("Rotation", objectPlacementData.RotationAmount);
 
 					EditorGUILayout.BeginHorizontal();
-					type.IsRandomRotation = EditorGUILayout.Toggle("Random", type.IsRandomRotation);
+					objectPlacementData.IsRandomRotation = EditorGUILayout.Toggle("Random", objectPlacementData.IsRandomRotation);
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "Optionally randomly rotate the placed object. " +
 											"Max and min extents for the random number generator can " +
@@ -355,24 +355,24 @@ namespace UnityEditor.Terra {
 					}
 					EditorGUILayout.EndHorizontal();
 
-					if (type.IsRandomRotation) {
+					if (objectPlacementData.IsRandomRotation) {
 						EditorGUI.indentLevel = 2;
 
-						type.RandomRotationExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomRotationExtents.Min);
-						type.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomRotationExtents.Max);
+						objectPlacementData.RandomRotationExtents.Min = EditorGUILayout.Vector3Field("Min", objectPlacementData.RandomRotationExtents.Min);
+						objectPlacementData.RandomRotationExtents.Max = EditorGUILayout.Vector3Field("Max", objectPlacementData.RandomRotationExtents.Max);
 
-						FitMinMax(ref type.RandomRotationExtents.Min, ref type.RandomRotationExtents.Max);
+						FitMinMax(ref objectPlacementData.RandomRotationExtents.Min, ref objectPlacementData.RandomRotationExtents.Max);
 						EditorGUI.indentLevel = 1;
 					}
 				}
 
 				//Scale
-				type.ShowScaleFoldout = EditorGUILayout.Foldout(type.ShowScaleFoldout, "Scale");
-				if (type.ShowScaleFoldout) {
-					type.ScaleAmount = EditorGUILayout.Vector3Field("Scale", type.ScaleAmount);
+				objectPlacementData.ShowScaleFoldout = EditorGUILayout.Foldout(objectPlacementData.ShowScaleFoldout, "Scale");
+				if (objectPlacementData.ShowScaleFoldout) {
+					objectPlacementData.ScaleAmount = EditorGUILayout.Vector3Field("Scale", objectPlacementData.ScaleAmount);
 
 					EditorGUILayout.BeginHorizontal();
-					type.IsRandomScale = EditorGUILayout.Toggle("Random", type.IsRandomScale);
+					objectPlacementData.IsRandomScale = EditorGUILayout.Toggle("Random", objectPlacementData.IsRandomScale);
 					if (GUILayout.Button("?", GUILayout.Width(25))) {
 						const string msg = "Optionally randomly scale the placed object. " +
 											"Max and min extents for the random number generator can " +
@@ -381,19 +381,19 @@ namespace UnityEditor.Terra {
 					}
 					EditorGUILayout.EndHorizontal();
 
-					if (type.IsRandomScale) {
-						type.IsUniformScale = EditorGUILayout.Toggle("Scale Uniformly", type.IsUniformScale);
+					if (objectPlacementData.IsRandomScale) {
+						objectPlacementData.IsUniformScale = EditorGUILayout.Toggle("Scale Uniformly", objectPlacementData.IsUniformScale);
 
 						EditorGUI.indentLevel = 2;
 
-						if (type.IsUniformScale) {
-							type.UniformScaleMin = EditorGUILayout.FloatField("Min", type.UniformScaleMin);
-							type.UniformScaleMax = EditorGUILayout.FloatField("Max", type.UniformScaleMax);
+						if (objectPlacementData.IsUniformScale) {
+							objectPlacementData.UniformScaleMin = EditorGUILayout.FloatField("Min", objectPlacementData.UniformScaleMin);
+							objectPlacementData.UniformScaleMax = EditorGUILayout.FloatField("Max", objectPlacementData.UniformScaleMax);
 						} else {
-							type.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", type.RandomScaleExtents.Min);
-							type.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", type.RandomScaleExtents.Max);
+							objectPlacementData.RandomScaleExtents.Min = EditorGUILayout.Vector3Field("Min", objectPlacementData.RandomScaleExtents.Min);
+							objectPlacementData.RandomScaleExtents.Max = EditorGUILayout.Vector3Field("Max", objectPlacementData.RandomScaleExtents.Max);
 
-							FitMinMax(ref type.RandomScaleExtents.Min, ref type.RandomScaleExtents.Max);
+							FitMinMax(ref objectPlacementData.RandomScaleExtents.Min, ref objectPlacementData.RandomScaleExtents.Max);
 						}
 						EditorGUI.indentLevel = 1;
 					}
@@ -406,15 +406,15 @@ namespace UnityEditor.Terra {
 			//Add new button
 			EditorGUILayout.Space();
 			if (GUILayout.Button("Add Object")) {
-				if (Settings.ObjectPlacementSettings == null) {
-					Settings.ObjectPlacementSettings = new List<ObjectPlacementType>();
+				if (Settings.ObjectData == null) {
+					Settings.ObjectData = new List<ObjectPlacementData>();
 				}
 
-				Settings.ObjectPlacementSettings.Add(new ObjectPlacementType(TerraSettings.GenerationSeed));
+				Settings.ObjectData.Add(new ObjectPlacementData(TerraSettings.GenerationSeed));
 			}
 
 			//Update preview
-			if (Settings.DisplayPreview && GUILayout.Button("Update Preview")) {
+			if (Settings.EditorState.DisplayPreview && GUILayout.Button("Update Preview")) {
 				Settings.Preview.TriggerObjectPlacementUpdate();
 			}
 		}

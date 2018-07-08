@@ -37,7 +37,7 @@ public static class GrassRenderer {
 		TerraEvent.OnMeshColliderDidForm += (go, mc) => {
 			Tile t = go.GetComponent<Tile>();
 
-			if (TerraSettings.Instance.PlaceGrass && !CachedMeshData.ContainsKey(t) && !GenerationQueue.Contains(t)) {
+			if (TerraSettings.Instance.Grass.PlaceGrass && !CachedMeshData.ContainsKey(t) && !GenerationQueue.Contains(t)) {
 				GenerationQueue.AddFirst(t);
 			}
 		};
@@ -74,7 +74,7 @@ public static class GrassRenderer {
 	/// mesh and then waits for the next frame before continuing to the next.
 	/// </summary>
 	public static void CalculateGrassMeshes(Tile tile) {
-		GrassTile gt = new GrassTile(tile, TerraSettings.Instance.GrassStepLength);
+		GrassTile gt = new GrassTile(tile, TerraSettings.Instance.Grass.GrassStepLength);
 		CalculatingTile = true;
 
 		tile.StartCoroutine(gt.CalculateCells((data) => {
@@ -138,10 +138,10 @@ public static class GrassRenderer {
 		Material mat = new Material(grassShader);
 
 		var sett = TerraSettings.Instance;
-		mat.SetTexture("_MainTex", sett.GrassTexture);
-		mat.SetFloat("_BillboardDistance", sett.BillboardDistance);
-		mat.SetFloat("_GrassHeight", sett.GrassHeight);
-		mat.SetFloat("_Cutoff", sett.ClipCutoff);
+		mat.SetTexture("_MainTex", sett.Grass.GrassTexture);
+		mat.SetFloat("_BillboardDistance", sett.Grass.BillboardDistance);
+		mat.SetFloat("_GrassHeight", sett.Grass.GrassHeight);
+		mat.SetFloat("_Cutoff", sett.Grass.ClipCutoff);
 
 		return mat;
 	}
@@ -153,10 +153,10 @@ public static class GrassRenderer {
 	private static void UpdateMaterialData() {
 		if (Material != null) {
 			var sett = TerraSettings.Instance;
-			Material.SetTexture("_MainTex", sett.GrassTexture);
-			Material.SetFloat("_BillboardDistance", sett.BillboardDistance);
-			Material.SetFloat("_GrassHeight", sett.GrassHeight);
-			Material.SetFloat("_Cutoff", sett.ClipCutoff);
+			Material.SetTexture("_MainTex", sett.Grass.GrassTexture);
+			Material.SetFloat("_BillboardDistance", sett.Grass.BillboardDistance);
+			Material.SetFloat("_GrassHeight", sett.Grass.GrassHeight);
+			Material.SetFloat("_Cutoff", sett.Grass.ClipCutoff);
 		}
 	}
 
@@ -213,13 +213,13 @@ public static class GrassRenderer {
 		/// 
 		public IEnumerator CalculateCells(CalcFinished onCalculated) {
 			Random.InitState(TerraSettings.GenerationSeed);
-			float variation = TerraSettings.Instance.GrassVariation;
+			float variation = TerraSettings.Instance.Grass.GrassVariation;
 
 			List<MeshData> data = new List<MeshData>();
 			Bounds bounds = Tile.Terrain.bounds;
 			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
-			int res = TerraSettings.Instance.MeshResolution;
+			int res = TerraSettings.Instance.Generator.MeshResolution;
 			float rayHeight = worldBounds.max.y + 5;
 			float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
 
@@ -293,14 +293,14 @@ public static class GrassRenderer {
 			float angle = Vector3.Angle(Vector3.up, hit.normal);
 			TerraSettings set = TerraSettings.Instance;
 
-			bool passesHeight = height >= set.GrassMinHeight && height <= set.GrassMaxHeight;
-			bool passesAngle = angle >= set.GrassAngleMin && angle <= set.GrassAngleMax;
+			bool passesHeight = height >= set.Grass.GrassMinHeight && height <= set.Grass.GrassMaxHeight;
+			bool passesAngle = angle >= set.Grass.GrassAngleMin && angle <= set.Grass.GrassAngleMax;
 
-			if (set.GrassConstrainHeight && set.GrassConstrainAngle) {
+			if (set.Grass.GrassConstrainHeight && set.Grass.GrassConstrainAngle) {
 				return passesHeight && passesAngle;
-			} else if (set.GrassConstrainHeight) {
+			} else if (set.Grass.GrassConstrainHeight) {
 				return passesHeight;
-			} else if (set.GrassConstrainAngle) {
+			} else if (set.Grass.GrassConstrainAngle) {
 				return passesAngle;
 			} else {
 				return true;

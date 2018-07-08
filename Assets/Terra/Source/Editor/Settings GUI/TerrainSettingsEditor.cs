@@ -23,7 +23,7 @@ namespace UnityEditor.Terra {
 			//Options toolbar
 			gui.Toolbar();
 
-			switch (Settings.ToolbarSelection) {
+			switch (Settings.EditorState.ToolbarSelection) {
 				case TerraSettings.ToolbarOptions.General:
 					gui.General();
 

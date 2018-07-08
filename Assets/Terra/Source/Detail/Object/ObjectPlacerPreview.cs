@@ -38,7 +38,7 @@ namespace Terra.Terrain {
 			//Clear existing objects if any
 			ClearExistingObjects();
 
-			foreach (ObjectPlacementType type in Settings.ObjectPlacementSettings) {
+			foreach (ObjectPlacementData type in Settings.ObjectData) {
 				List<Vector3> positions = Placer.GetFilteredGrid(PreviewMesh, type);
 				
 				//Don't exceed max objects count
@@ -51,7 +51,7 @@ namespace Terra.Terrain {
 
 						//Calculate correct positioning
 						obj.transform.parent = Parent.transform;
-						type.TransformGameObject(obj, positions[i], Settings.Length, Vector3.zero);
+						type.TransformGameObject(obj, positions[i], Settings.Generator.Length, Vector3.zero);
 						#endif
 					}
 				}

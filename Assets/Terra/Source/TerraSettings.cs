@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 namespace Terra.Terrain {
 	[System.Serializable, ExecuteInEditMode]
 	public class TerraSettings: MonoBehaviour {
-		private static bool _isAwake = false;
+		private static bool _isInitialized = false;
 
 		/// <summary>
 		/// Internal TerraSettings instance to avoid finding when its not needed
@@ -34,7 +34,7 @@ namespace Terra.Terrain {
 		public Material CustomMaterial = null;
 
 		public TessellationData Tessellation;
-		public GrassData Grass = new GrassData();
+		public GrassData Grass;
 
 		//Editor state information
 		public EditorStateData EditorState;
@@ -48,7 +48,7 @@ namespace Terra.Terrain {
 				if (_instance != null) {
 					return _instance;
 				}
-				if (!_isAwake) {
+				if (!_isInitialized) {
 					return null;
 				}
 
@@ -57,17 +57,21 @@ namespace Terra.Terrain {
 			}
 		}
 
-		void Awake() {
-			if (Generator == null) Generator = new Generation();
+		/// <summary>
+		/// Initializes fields to default values if they were null 
+		/// post serialization.
+		/// </summary>
+		void OnEnable() {
+			_isInitialized = true;
+
+			if (Generator == null) Generator = ScriptableObject.CreateInstance<Generation>();
 			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 			if (MoistureMapData == null) MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
-			if (Tessellation == null) Tessellation = new TessellationData();
-			if (Grass == null) Grass = new GrassData();
-			if (EditorState == null) EditorState = new EditorStateData();
-			if (Preview == null) Preview = new TerrainPreview();
-
-			_isAwake = true;
+			if (Tessellation == null) Tessellation = ScriptableObject.CreateInstance<TessellationData>();
+			if (Grass == null) Grass = ScriptableObject.CreateInstance<GrassData>();
+			if (EditorState == null) EditorState = ScriptableObject.CreateInstance<EditorStateData>();
+			if (Preview == null) Preview = ScriptableObject.CreateInstance<TerrainPreview>();
 		}
 
 		void Start() {
@@ -177,7 +181,7 @@ namespace Terra.Terrain {
 		/// Container for data relating to the state of the TerraSettingsEditor
 		/// </summary>
 		[Serializable]
-		public class EditorStateData {
+		public class EditorStateData : ScriptableObject {
 			public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
 			public bool GenerateOnStart = true;
@@ -199,7 +203,7 @@ namespace Terra.Terrain {
 		}
 
 		[Serializable]
-		public class Generation {
+		public class Generation : ScriptableObject {
 			public GameObject TrackedObject;
 			public int GenerationRadius = 3;
 
@@ -212,12 +216,16 @@ namespace Terra.Terrain {
 			public float Amplitude = 50f;
 
 			public NoiseGraph Graph;
-			
-			public TilePool Pool = new TilePool();
+			public TilePool Pool;
+
+			void OnEnable() {
+				if (Pool == null) Pool = new TilePool();
+				if (Graph == null) Graph = CreateInstance<NoiseGraph>();
+			}
 		}
 
 		[Serializable]
-		public class TessellationData {
+		public class TessellationData : ScriptableObject {
 			public float TessellationAmount = 4f;
 			public float TessellationMinDistance = 5f;
 			public float TessellationMaxDistance = 30f;
@@ -225,7 +233,7 @@ namespace Terra.Terrain {
 		}
 
 		[Serializable]
-		public class GrassData {
+		public class GrassData : ScriptableObject {
 			public bool PlaceGrass = false;
 			public float GrassStepLength = 1.5f;
 			public float GrassVariation = 0.8f;

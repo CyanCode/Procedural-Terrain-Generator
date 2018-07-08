@@ -4,19 +4,14 @@ using Terra.CoherentNoise;
 using Assets.Terra.Terrain.Util;
 
 namespace Terra.Terrain {
-	public class TerrainPreview {
+	public class TerrainPreview : ScriptableObject {
 		TerraSettings Settings;
 
 		TerrainPaint Paint;
 		List<Texture2D> Splats;
 		
-		/// <summary>
-		/// Creates a new TerrainPreview instance
-		/// </summary>
-		/// <param name="settings">Active settings component</param>
-		/// <param name="hideInInspector">Optionally hide created components in the inspector</param>
-		public TerrainPreview() {
-			this.Settings = TerraSettings.Instance;
+		void OnEnable() {
+			this.Settings = TerraSettings.Instance; 
 		}
 
 		/// <summary>
@@ -33,7 +28,7 @@ namespace Terra.Terrain {
 		/// <c>Settings.DisplayPreview</c> is true
 		/// </summary>
 		public void TriggerPreviewUpdate() {
-			if (Settings.EditorState.DisplayPreview) {
+			if (CanPreview() && Settings.EditorState.DisplayPreview) {
 				RemoveComponents();
 				AddComponents();
 			}

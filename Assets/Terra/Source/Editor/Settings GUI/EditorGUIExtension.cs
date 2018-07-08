@@ -1,8 +1,12 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using Terra.ReorderableList;
+using Terra.ReorderableList.Internal;
+using TextureArrayInspector;
+using UnityEditor.PostProcessing;
 
-public class EditorGUIExtension {
+public static class EditorGUIExtension {
 	/// <summary>
 	/// Creates a min/max element that doesn't allow the min 
 	/// to be greater than the max OR the max to be smaller than 
@@ -170,6 +174,31 @@ public class EditorGUIExtension {
 			return state;
 	}
 
+	private static readonly Color BlockAreaColor = new Color(0.83f, 0.83f, 0.83f);
+
+	public static void BeginBlockArea() {
+		Texture2D bg = new Texture2D(1, 1);
+		bg.SetPixel(1, 1, BlockAreaColor);
+
+		GUIStyle style = ReorderableListStyles.Container;
+		style.margin = new RectOffset(5, 5, 0, 0);
+		style.padding = new RectOffset(8, 8, 2, 2);
+
+		EditorGUILayout.BeginVertical(style);
+		EditorGUILayout.Space();
+	}
+
+	public static void AddSeperator() {
+		EditorGUILayout.Space();
+		GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1f), ReorderableListStyles.HorizontalLineColor);
+		EditorGUILayout.Space();
+	}
+
+	public static void EndBlockArea() {
+		EditorGUILayout.Space();
+		EditorGUILayout.EndVertical();
+	}
+
 	public class ModalPopupWindow: EditorWindow {
 		public event System.Action<bool> OnChosen;
 		string popText = "";
@@ -212,7 +241,7 @@ public class EditorGUIExtension {
 	//	}
 
 	static GUIStyle toggled_style;
-	public GUIStyle StyleButtonToggled {
+	public static GUIStyle StyleButtonToggled {
 		get {
 			BuildStyle();
 			return toggled_style;

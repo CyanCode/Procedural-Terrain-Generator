@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Terra.Terrain {
 	public class AddTextureWindow: EditorWindow {
-		private TerrainPaint.SplatSetting Splat;
+		private TerrainPaint.SplatData Splat;
 
-		public static AddTextureWindow Init(ref TerrainPaint.SplatSetting splat) {
+		public static AddTextureWindow Init(ref TerrainPaint.SplatData splat) {
 			AddTextureWindow win = CreateInstance<AddTextureWindow>();
 			win.titleContent = new GUIContent("Add Splat Material");
 			win.maxSize = new Vector2(200, 280);

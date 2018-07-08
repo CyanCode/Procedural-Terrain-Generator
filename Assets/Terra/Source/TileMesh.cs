@@ -142,8 +142,8 @@ namespace Terra.Terrain {
 		/// <param name="gen">Generator to get value from</param>
 		/// <returns></returns>
 		public static float PollGenerator(float xPos, float zPos, TerraSettings settings, Generator gen) {
-			float spread = 1f / (settings.Spread * settings.MeshResolution);
-			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Amplitude;
+			float spread = 1f / (settings.Generator.Spread * settings.Generator.MeshResolution);
+			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Generator.Amplitude;
 		}
 
 		/// <summary>
@@ -155,8 +155,8 @@ namespace Terra.Terrain {
 		/// <returns>height value if available, float default otherwise (0.0)</returns>
 		public static float PollGenerator(float xPos, float zPos) {
 			var sett = TerraSettings.Instance;
-			if (sett != null && sett.Graph.GetEndGenerator() != null) {
-				return PollGenerator(xPos, zPos, sett, sett.Graph.GetEndGenerator());
+			if (sett != null && sett.Generator.Graph.GetEndGenerator() != null) {
+				return PollGenerator(xPos, zPos, sett, sett.Generator.Graph.GetEndGenerator());
 			}
 
 			return default(float);
@@ -175,9 +175,9 @@ namespace Terra.Terrain {
 		/// <param name="gen">Generator to apply</param>
 		/// <returns>triangles, vertices, normals, and UVs of the generated mesh</returns>
 		public static MeshData CreateRawMesh(TerraSettings settings, Vector2 position, Generator gen) {
-			int res = settings.MeshResolution;
-			float len = settings.Length;
-			float spread = 1f / (settings.Spread * settings.MeshResolution);
+			int res = settings.Generator.MeshResolution;
+			float len = settings.Generator.Length;
+			float spread = 1f / (settings.Generator.Spread * settings.Generator.MeshResolution);
 
 			Vector3[] vertices = new Vector3[res * res];
 			for (int z = 0; z < res; z++) {
@@ -225,9 +225,9 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns></returns>
 		public static Vector3 GetPositionAt(int xPos, int zPos, int resolution, TerraSettings settings, Generator gen, Vector2 position) {
-			float amp = settings.Amplitude;
-			float spread = settings.Spread;
-			float length = settings.Length;
+			float amp = settings.Generator.Amplitude;
+			float spread = settings.Generator.Spread;
+			float length = settings.Generator.Length;
 
 			float worldX = ((float)xPos / (resolution - 1) - .5f) * length;
 			float worldZ = ((float)zPos / (resolution - 1) - .5f) * length;

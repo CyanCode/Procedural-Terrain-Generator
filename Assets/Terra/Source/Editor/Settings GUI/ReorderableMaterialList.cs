@@ -4,7 +4,7 @@ using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
-	public class ReorderableMaterialList: GenericListAdaptor<TerrainPaint.SplatSetting> {
+	public class ReorderableMaterialList: GenericListAdaptor<TerrainPaint.SplatData> {
 		private TerraSettings Settings;
 
 		private const float MAX_HEIGHT = 200f;
@@ -16,14 +16,14 @@ namespace UnityEditor.Terra {
 		const int TEX_HEIGHT = 60;
 		const int TEX_CAPTION_HEIGHT = 16;
 
-		public ReorderableMaterialList(TerraSettings settings) : base(settings.SplatSettings, null, MAX_HEIGHT) {
+		public ReorderableMaterialList(TerraSettings settings) : base(settings.SplatData, null, MAX_HEIGHT) {
 			Settings = settings;
 		}
 
 		public override void DrawItem(Rect position, int index) {
 			//To-be modified original-- caching original position
 			Rect pos = position;
-			TerrainPaint.SplatSetting splat = Settings.SplatSettings[index];
+			TerrainPaint.SplatData splat = Settings.SplatData[index];
 			
 			//Set the title
 			//ReorderableListGUI.Title("Elevation Material " + (index + 1));
@@ -99,21 +99,21 @@ namespace UnityEditor.Terra {
 
 					//Checkboxes for infinity & -infinity heights
 					EditorGUI.BeginChangeCheck();
-					if (splat.IsMaxHeight || !Settings.IsMaxHeightSelected) {
+					if (splat.IsMaxHeight || !Settings.EditorState.IsMaxHeightSelected) {
 						splat.IsMaxHeight = EditorGUI.Toggle(pos, "Is Highest Material", splat.IsMaxHeight);
 						pos.y += CTRL_HEIGHT + PADDING_SM;
 					}
 					if (EditorGUI.EndChangeCheck()) {
-						Settings.IsMaxHeightSelected = splat.IsMaxHeight;
+						Settings.EditorState.IsMaxHeightSelected = splat.IsMaxHeight;
 					}
 
 					EditorGUI.BeginChangeCheck();
-					if (splat.IsMinHeight || !Settings.IsMinHeightSelected) {
+					if (splat.IsMinHeight || !Settings.EditorState.IsMinHeightSelected) {
 						splat.IsMinHeight = EditorGUI.Toggle(pos, "Is Lowest Material", splat.IsMinHeight);
 						pos.y += CTRL_HEIGHT + PADDING_SM;
 					}
 					if (EditorGUI.EndChangeCheck()) {
-						Settings.IsMinHeightSelected = splat.IsMinHeight;
+						Settings.EditorState.IsMinHeightSelected = splat.IsMinHeight;
 					}
 
 					break;
@@ -122,12 +122,12 @@ namespace UnityEditor.Terra {
 
 		public override void Remove(int index) {
 			//Remove max / min height bools if necessary
-			var ss = Settings.SplatSettings[index];
+			var ss = Settings.SplatData[index];
 			if (ss.IsMaxHeight) {
-				Settings.IsMaxHeightSelected = false;
+				Settings.EditorState.IsMaxHeightSelected = false;
 			} 
 			if (ss.IsMinHeight) {
-				Settings.IsMinHeightSelected = false;
+				Settings.EditorState.IsMinHeightSelected = false;
 			}
 
 			base.Remove(index);
@@ -135,7 +135,7 @@ namespace UnityEditor.Terra {
 
 		public override float GetItemHeight(int index) {
 			const int minHeight = (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
-			TerrainPaint.SplatSetting splat = Settings.SplatSettings[index];
+			TerrainPaint.SplatData splat = Settings.SplatData[index];
 
 			float height = minHeight;
 
@@ -152,9 +152,9 @@ namespace UnityEditor.Terra {
 					height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
 					break;
 				case TerrainPaint.PlacementType.ElevationRange:
-					if (Settings.IsMaxHeightSelected && Settings.IsMinHeightSelected) { //Both selected
+					if (Settings.EditorState.IsMaxHeightSelected && Settings.EditorState.IsMinHeightSelected) { //Both selected
 						height += (CTRL_HEIGHT * 2) + (PADDING_SM * 2);
-					} else if (Settings.IsMaxHeightSelected || Settings.IsMinHeightSelected) { //One selected
+					} else if (Settings.EditorState.IsMaxHeightSelected || Settings.EditorState.IsMinHeightSelected) { //One selected
 						height += (CTRL_HEIGHT * 3) + (PADDING_SM * 3);
 					} else { //None selected
 						height += (CTRL_HEIGHT * 4) + (PADDING_SM * 4);

@@ -9,7 +9,7 @@ namespace Terra.Terrain {
 	[ExecuteInEditMode]
 	public class TerrainPaint {
 		[Serializable]
-		public class SplatSetting {
+		public class SplatData {
 			public Texture2D Diffuse;
 			public Texture2D Normal;
 			public Vector2 Tiling = new Vector2(1, 1);
@@ -37,7 +37,7 @@ namespace Terra.Terrain {
 		public int AlphaMapResolution = 128;
 
 		private GameObject TerrainObject;
-		private List<SplatSetting> SplatSettings;
+		private List<SplatData> SplatSettings;
 		private TerraSettings Settings;
 
 		//Terrain/Mesh
@@ -54,7 +54,7 @@ namespace Terra.Terrain {
 		public TerrainPaint(GameObject gameobject) {
 			TerrainObject = gameobject;
 			Settings = TerraSettings.Instance;
-			SplatSettings = Settings.SplatSettings;
+			SplatSettings = Settings.SplatData;
 			
 
 			SetFirstPassShader();
@@ -90,7 +90,7 @@ namespace Terra.Terrain {
 			}
 
 #pragma warning disable CS0162 // Unreachable code detected
-			if (TerraDebug.WRITE_SPLAT_TEXTURES) {
+			if (TerraSettings.TerraDebug.WRITE_SPLAT_TEXTURES) {
 				Tile tile = TerrainObject.GetComponent<Tile>();
 
 				string tileName = tile != null ?
@@ -133,14 +133,14 @@ namespace Terra.Terrain {
 				{ PlacementType.ElevationRange, 0 },
 				{ PlacementType.Angle, 1 }
 			};
-			List<SplatSetting> ordered = SplatSettings
+			List<SplatData> ordered = SplatSettings
 			.OrderBy(s => orderMap[s.PlacementType]) //Order elevation before angle
 			//.OrderBy(s => s.MinRange)                //Order lower ranges 
 			//.OrderBy(s => s.IsMinHeight)             //Order min height first
 			.ToList();
 
 			for (int i = 0; i < SplatSettings.Count; i++) {
-				SplatSetting splat = ordered[i];
+				SplatData splat = ordered[i];
 
 				float min = splat.IsMinHeight ? float.MinValue : splat.MinRange;
 				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxRange;
@@ -202,7 +202,7 @@ namespace Terra.Terrain {
 			MeshRenderer mr = TerrainObject.GetComponent<MeshRenderer>();
 			Material toSet = TerrainMaterial;
 
-			if (Settings.UseTessellation) {
+			if (Settings.Tessellation.UseTessellation) {
 				SetTessellation(toSet);
 			}
 
@@ -235,7 +235,7 @@ namespace Terra.Terrain {
 		/// <param name="index">Splat index to apply material to (0 - 3)</param>
 		/// <param name="splat"></param>
 		/// <param name="mat">Material to apply</param>
-		void SetMaterialForSplatIndex(int index, SplatSetting splat, Material mat) {
+		void SetMaterialForSplatIndex(int index, SplatData splat, Material mat) {
 			//Main Texture
 			mat.SetTexture("_Splat" + index, splat.Diffuse);
 			mat.SetTextureScale("_Splat" + index, splat.Tiling);
@@ -260,9 +260,9 @@ namespace Terra.Terrain {
 			const string tessMin = "_TessMin";
 			const string tessMax = "_TessMax";
 
-			mat.SetFloat(tess, Settings.TessellationAmount);
-			mat.SetFloat(tessMin, Settings.TessellationMinDistance);
-			mat.SetFloat(tessMax, Settings.TessellationMaxDistance);
+			mat.SetFloat(tess, Settings.Tessellation.TessellationAmount);
+			mat.SetFloat(tessMin, Settings.Tessellation.TessellationMinDistance);
+			mat.SetFloat(tessMax, Settings.Tessellation.TessellationMaxDistance);
 		}
 
 		/// <summary>
@@ -272,7 +272,7 @@ namespace Terra.Terrain {
 		/// <param name="overwrite">When enabled, the correct first pass shader is 
 		/// applied to a material regardless of whether or not one is already set.</param>
 		void SetFirstPassShader(bool overwrite = false) {
-			string path = Settings.UseTessellation ? "Terra/TerrainFirstPassTess" : "Terra/TerrainFirstPass";
+			string path = Settings.Tessellation.UseTessellation ? "Terra/TerrainFirstPassTess" : "Terra/TerrainFirstPass";
 
 			if (TerrainMaterial == null) {
 				TerrainMaterial = TerrainObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find(path));

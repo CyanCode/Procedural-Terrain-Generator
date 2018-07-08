@@ -23,8 +23,8 @@ namespace Terra.Terrain {
 		/// Checks whether a terrain preview can be created
 		/// </summary>
 		public bool CanPreview() {
-			return Settings.DisplayPreview && Settings.Graph != null &&
-				Settings.Graph.GetEndGenerator() != null && Settings.Preview != null;
+			return Settings.EditorState.DisplayPreview && Settings.Generator.Graph != null &&
+				Settings.Generator.Graph.GetEndGenerator() != null && Settings.Preview != null;
 		}
 
 		/// <summary>
@@ -33,7 +33,7 @@ namespace Terra.Terrain {
 		/// <c>Settings.DisplayPreview</c> is true
 		/// </summary>
 		public void TriggerPreviewUpdate() {
-			if (Settings.DisplayPreview) {
+			if (Settings.EditorState.DisplayPreview) {
 				RemoveComponents();
 				AddComponents();
 			}
@@ -44,7 +44,7 @@ namespace Terra.Terrain {
 		/// <c>Settings.DisplayPreview</c> is true
 		/// </summary>
 		public void TriggerMaterialsUpdate() {
-			if (Settings.DisplayPreview) {
+			if (Settings.EditorState.DisplayPreview) {
 				//Remove old splats
 				Splats = null;
 				Paint = null;
@@ -61,7 +61,7 @@ namespace Terra.Terrain {
 		/// Updates only the procedural object placement. 
 		/// </summary>
 		public void TriggerObjectPlacementUpdate() {
-			if (Settings.DisplayPreview && HasMesh()) {
+			if (Settings.EditorState.DisplayPreview && HasMesh()) {
 				ObjectPlacerPreview preview = new ObjectPlacerPreview(Settings, Settings.GetComponent<MeshFilter>().sharedMesh);
 				preview.PreviewAllObjects();
 			}
@@ -81,7 +81,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>true if an end generator is attached</returns>
 		public bool HasEndGenerator() {
-			return Settings.Graph.GetEndGenerator() != null;
+			return Settings.Generator.Graph.GetEndGenerator() != null;
 		}
 
 		/// <summary>
@@ -120,11 +120,11 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>Filled Mesh, null if no end generator is provided.</returns>
 		private Mesh CreateMesh() {
-			if (Settings.Graph != null) {
-				Generator end = Settings.Graph.GetEndGenerator();
+			if (Settings.Generator.Graph != null) {
+				Generator end = Settings.Generator.Graph.GetEndGenerator();
 
 				if (end != null) {
-					return Tile.GetPreviewMesh(Settings, Settings.Graph.GetEndGenerator());
+					return Tile.GetPreviewMesh(Settings, Settings.Generator.Graph.GetEndGenerator());
 				}
 			}
 
@@ -138,7 +138,7 @@ namespace Terra.Terrain {
 		/// <returns>List of splat textures if SplatSettings is not null and 
 		/// more than 0 splats were generated. Null otherwise.</returns>
 		private List<Texture2D> CreateSplats() {
-			if (Settings.SplatSettings != null) {
+			if (Settings.SplatData != null) {
 				if (Paint == null)
 					Paint = new TerrainPaint(Settings.gameObject);
 
@@ -165,14 +165,14 @@ namespace Terra.Terrain {
 			if (Settings.GetComponent<MeshRenderer>() == null) {
 				MeshRenderer rend = Settings.gameObject.AddComponent<MeshRenderer>();
 
-				if (Settings.UseCustomMaterial && Settings.CustomMaterial != null) {
+				if (false && Settings.CustomMaterial != null) {
 					//Apply custom material to terrain
 					rend.sharedMaterial = Settings.CustomMaterial;
 				} else {
 					//Get cached or generated splatmaps
 					if (Splats != null && Splats.Count > 0) {
 						Paint.ApplySplatmapsToShaders(Splats);
-					} else if (Settings.SplatSettings != null) {
+					} else if (Settings.SplatData != null) {
 						Splats = CreateSplats();
 
 						if (Splats != null) {
@@ -212,7 +212,7 @@ namespace Terra.Terrain {
 		private void TriggerHideInInspectorUpdate() {
 			MeshFilter mf = Settings.GetComponent<MeshFilter>();
 			MeshRenderer mr = Settings.GetComponent<MeshRenderer>();
-			HideFlags isHidden = TerraDebug.HIDE_IN_INSPECTOR ? HideFlags.HideInInspector : HideFlags.None;
+			HideFlags isHidden = TerraSettings.TerraDebug.HIDE_IN_INSPECTOR ? HideFlags.HideInInspector : HideFlags.None;
 
 			//If hiding in inspector, only hide specific components
 			if (isHidden == HideFlags.HideInInspector) {

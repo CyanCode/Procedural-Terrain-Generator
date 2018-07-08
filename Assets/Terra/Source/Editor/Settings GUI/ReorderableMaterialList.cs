@@ -116,7 +116,6 @@ namespace UnityEditor.Terra {
 						Settings.IsMinHeightSelected = splat.IsMinHeight;
 					}
 
-					//if (splat.MinRange > splat.MaxRange) splat.MinRange = splat.MaxRange;
 					break;
 			}
 		}

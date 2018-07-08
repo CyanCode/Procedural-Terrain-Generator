@@ -5,6 +5,7 @@ using Terra.CoherentNoise.Generation;
 using Terra.CoherentNoise.Generation.Fractal;
 using Terra.Graph.Noise;
 using Terra.Terrain.Util;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -20,7 +21,7 @@ namespace Terra.Terrain {
 		[System.Serializable]
 		public enum ToolbarOptions {
 			General = 0,
-			Noise = 1,
+			Maps = 1,
 			Materials = 2,
 			ObjectPlacement = 3
 		}
@@ -70,13 +71,16 @@ namespace Terra.Terrain {
 		public float GrassAngleMin = 0f;
 		public float GrassAngleMax = 25f;
 		public Texture2D GrassTexture = null;
-		
+
 		//Object Placement Tab
 		public List<ObjectPlacementType> ObjectPlacementSettings = new List<ObjectPlacementType>();
 
-		public TileMapData HeightMapData = new TileMapData();
-		public TileMapData TemperatureMapData = new TileMapData();
-		public TileMapData MoistureMapData = new TileMapData();
+		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
+		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
+		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
+
+		//Editor state information
+		public EditorStateData EditorState = new EditorStateData();
 
 		#endregion
 
@@ -194,6 +198,18 @@ namespace Terra.Terrain {
 			//Allows for update to continue
 			GenerateOnStart = true;
 		}
+
+		/// <summary>
+		/// Container for data relating to the state of the TerraSettingsEditor
+		/// </summary>
+		public class EditorStateData {
+			public float lastInspectorWidth = 0f;
+			public float inspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
+
+			public bool DidResize(float currentWidth) {
+				return Math.Abs(lastInspectorWidth - currentWidth) > 0.1f;
+			}
+		}
 	}
 
 	internal static class TerraDebug {
@@ -257,7 +273,28 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// "Zoom" level applied to the preview texture
 		/// </summary>
-		public float TextureZoom = 1f;
+		public float TextureZoom = 25f;
+
+		/// <summary>
+		/// Lower color in the preview texture gradient
+		/// </summary>
+		public Color RampColor1 = Color.black;
+
+		/// <summary>
+		/// Higher color in the preview texture gradient
+		/// </summary>
+		public Color RampColor2 = Color.white;
+
+		/// <summary>
+		/// Last generated preview texture. Assuming <see cref="UpdatePreviewTexture(int,int,UnityEngine.Color,UnityEngine.Color)"/> 
+		/// has already been called.
+		/// </summary>
+		public Texture2D PreviewTexture;
+
+		/// <summary>
+		/// Name of this map
+		/// </summary>
+		public string Name = "";
 
 		/// <summary>
 		/// Internal <see cref="CustomGenerator"/>
@@ -265,40 +302,41 @@ namespace Terra.Terrain {
 		private Generator _customGenerator;
 
 		/// <summary>
-		/// Creates a preview texture using the two passed colors 
+		/// Updates the preview texture using the two passed colors 
 		/// to form a gradient where -1 is color 1 and 1 is color 2. 
-		/// Data is taken from <see cref="Generator"/>
+		/// Data is taken from <see cref="Generator"/>.
 		/// </summary>
 		/// <param name="width">Width of texture in pixels</param>
 		/// <param name="height">Height of texture in pixels</param>
 		/// <param name="c1">Color 1 in gradient</param>
 		/// <param name="c2">Color 2 in gradient</param>
-		public Texture2D CreatePreviewTexture(int width, int height, Color c1, Color c2) {
+		public void UpdatePreviewTexture(int width, int height, Color c1, Color c2) {
 			Texture2D tex = new Texture2D(width, height);
-			Generator gen = Generator.Scale(TextureZoom, TextureZoom, TextureZoom);
+			Generator gen = Generator;
 
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
 					//normalize [-1, 1] -> [0, 1]
-					float v = (gen.GetValue(x, 0, y) + 1) / 2;
+					float v = (gen.GetValue(x / TextureZoom, 0, y / TextureZoom) + 1) / 2;
 					Color c = Color.Lerp(c1, c2, v);
 
 					tex.SetPixel(x, y, c);
 				}
 			}
 
-			return tex;
+			tex.Apply();
+			PreviewTexture = tex;
 		}
 
 		/// <summary>
-		/// Creates a map preview texture with data from <see cref="Generator"/>. 
-		/// The texture is colored as a gradient between black 
-		/// and white.
+		/// Updates the preview texture with data from <see cref="Generator"/>. 
+		/// The texture is colored as a gradient between the two colors 
+		/// from <see cref="RampColor1"/> and <see cref="RampColor2"/>
 		/// </summary>
 		/// <param name="width">Width of texture in pixels</param>
 		/// <param name="height">Height of texture in pixels</param>
-		public Texture2D CreatePreviewTexture(int width, int height) {
-			return CreatePreviewTexture(width, height, Color.black, Color.white);
+		public void UpdatePreviewTexture(int width, int height) {
+			UpdatePreviewTexture(width, height, RampColor1, RampColor2);
 		}
 
 		/// <summary>
@@ -312,7 +350,7 @@ namespace Terra.Terrain {
 
 			switch (MapType) {
 				case MapGeneratorType.Perlin:
-					return new ValueNoise(seed);
+					return new GradientNoise(seed);
 				case MapGeneratorType.Fractal:
 					return new PinkNoise(seed);
 				case MapGeneratorType.Billow:

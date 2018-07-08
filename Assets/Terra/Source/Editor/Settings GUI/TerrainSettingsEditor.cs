@@ -28,7 +28,7 @@ namespace UnityEditor.Terra {
 					gui.General();
 
 					break;
-				case TerraSettings.ToolbarOptions.Noise:
+				case TerraSettings.ToolbarOptions.Maps:
 					gui.Noise();
 
 					break;

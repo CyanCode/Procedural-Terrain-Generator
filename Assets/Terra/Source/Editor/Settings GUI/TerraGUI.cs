@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Terra.Graph.Noise;
 using Terra.ReorderableList;
 using Terra.Terrain;
 using Terra.Terrain.Util;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -144,7 +146,7 @@ namespace UnityEditor.Terra {
 				//Use Grass
 				Settings.PlaceGrass = EditorGUILayout.Toggle("Place Grass", Settings.PlaceGrass);
 				if (Settings.PlaceGrass) {
-					Settings.GrassStepLength = EditorGUILayout.Slider("Density",  Settings.GrassStepLength, 1.5f, 30f);
+					Settings.GrassStepLength = EditorGUILayout.Slider("Density", Settings.GrassStepLength, 1.5f, 30f);
 					Settings.GrassVariation = EditorGUILayout.Slider("Variation", Settings.GrassVariation, 0f, 3f);
 					Settings.GrassHeight = EditorGUILayout.Slider("Height", Settings.GrassHeight, 1f, 10f);
 					Settings.BillboardDistance = EditorGUILayout.FloatField("Billboard Distance", Settings.BillboardDistance);
@@ -188,42 +190,48 @@ namespace UnityEditor.Terra {
 		/// Displays GUI elements for the "Noise" tab
 		/// </summary>
 		public void Noise() {
-			NoiseGraph graph = Settings.Graph;
+			const int texMaxWidth = 188;
+			const int texMinZoom = 20;
+			const int texMaxZoom = 100;
 
-			EditorGUILayout.Space();
+			var mapTypes = new[] { Settings.HeightMapData, Settings.MoistureMapData, Settings.TemperatureMapData };
+			bool updateTextures = mapTypes.Any(m => m.PreviewTexture == null);
+			float texWidth = Settings.EditorState.inspectorWidth;
+			
+			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
+			EditorGUIExtension.BeginBlockArea();
 
-			//Check if graph is loaded and assign generator
-			//from end node
-			if (graph == null) {
-				const string msg = "A node graph asset file must be attached to 'Graph' before " +
-					"terrain can be generated.";
-				EditorGUILayout.HelpBox(msg, MessageType.Warning);
-			}
+			for (int i = 0; i < mapTypes.Length; i++) {
+				var md = mapTypes[i];
+				bool updateThis = false; //Update THIS texture because of editor change?
 
-			//Display message if the generator failed to load
-			//OR display message about a successful load
-			if (graph != null && graph.GetEndGenerator() == null) {
-				const string msg = "The attached node graph either does not have a supplied End node " +
-					"or the End node is missing its input.";
-				EditorGUILayout.HelpBox(msg, MessageType.Warning);
-			} else if (graph != null && graph.GetEndGenerator() != null) {
-				const string msg = "Hooray! The attached node graph is ready for use.";
-				EditorGUILayout.HelpBox(msg, MessageType.Info);
-			}
+				EditorGUI.BeginChangeCheck();
 
-			EditorGUILayout.Space();
-			Settings.Graph = (NoiseGraph)EditorGUILayout.ObjectField("Graph", graph, typeof(NoiseGraph), false);
-			EditorGUILayout.Space();
+				var bold = new GUIStyle();
+				bold.fontStyle = FontStyle.Bold;
+				EditorGUILayout.LabelField(md.Name, bold);
 
-			Settings.Spread = EditorGUILayout.FloatField("Spread", Settings.Spread);
-			Settings.Amplitude = EditorGUILayout.FloatField("Amplitude", Settings.Amplitude);
+				md.MapType = (MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
+				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
+				EditorGUILayout.Space();
 
-			EditorGUILayout.Space();
-			if (Application.isEditor && Settings.DisplayPreview) {
-				if (GUILayout.Button("Update Preview")) {
-					Settings.Preview.TriggerPreviewUpdate();
+				if (EditorGUI.EndChangeCheck()) updateThis = true;
+				if (updateTextures || updateThis) md.UpdatePreviewTexture((int) texWidth, (int) (texWidth / 2));
+
+				//Draw preview texture
+				if (md.PreviewTexture != null) {
+					var ctr = EditorGUILayout.GetControlRect(false, texWidth / 2);
+					ctr.width = texWidth;
+					ctr.x += 2;
+
+					EditorGUI.DrawPreviewTexture(ctr, md.PreviewTexture);
 				}
+
+				if (i != mapTypes.Length - 1)
+					EditorGUIExtension.AddSeperator();
 			}
+
+			EditorGUIExtension.EndBlockArea();
 		}
 
 		/// <summary>
@@ -420,7 +428,7 @@ namespace UnityEditor.Terra {
 		/// </summary>
 		/// <param name="min">Minimum value</param>
 		/// <param name="max">Maximum value</param>
-		public static void FitMinMax(ref float min, ref float max) {
+		private static void FitMinMax(ref float min, ref float max) {
 			min = min > max ? max : min;
 		}
 
@@ -433,7 +441,7 @@ namespace UnityEditor.Terra {
 		/// </summary>
 		/// <param name="min">Minimum vector</param>
 		/// <param name="max">Maximum vector</param>
-		public static void FitMinMax(ref Vector3 min, ref Vector3 max) {
+		private static void FitMinMax(ref Vector3 min, ref Vector3 max) {
 			if (min.x > max.x || min.y > max.y || min.z > max.z) {
 				min = new Vector3(min.x > max.x ? max.x : min.x,
 					min.y > max.y ? max.y : min.y,
@@ -459,5 +467,9 @@ namespace UnityEditor.Terra {
 
 			return WhiteTex;
 		}
+	}
+
+	public static class EditorGUILayoutExtensions {
+		
 	}
 }

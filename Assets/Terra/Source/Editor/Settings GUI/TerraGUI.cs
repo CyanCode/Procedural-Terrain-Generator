@@ -34,10 +34,10 @@ namespace UnityEditor.Terra {
 			//Set toolbar images
 			if (ToolbarImages == null) {
 				ToolbarImages = new Texture[] {
-					(Texture)Resources.Load("terra_gui_general"),
-					(Texture)Resources.Load("terra_gui_noise"),
-					(Texture)Resources.Load("terra_gui_material"),
-					(Texture)Resources.Load("terra_gui_object")
+					(Texture)Resources.Load("terra_gui_wrench"),
+					(Texture)Resources.Load("terra_gui_map"),
+					(Texture)Resources.Load("terra_gui_biome"),
+					(Texture)Resources.Load("terra_gui_detail")
 				};
 			}
 

@@ -188,7 +188,7 @@ public static class EditorGUIExtension {
 		EditorGUILayout.Space();
 	}
 
-	public static void AddSeperator() {
+	public static void AddBlockAreaSeperator() {
 		EditorGUILayout.Space();
 		GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1f), ReorderableListStyles.HorizontalLineColor);
 		EditorGUILayout.Space();
@@ -197,6 +197,13 @@ public static class EditorGUIExtension {
 	public static void EndBlockArea() {
 		EditorGUILayout.Space();
 		EditorGUILayout.EndVertical();
+	}
+
+	public struct TerraStyle {
+		public const int TITLE_FONT_SIZE = 12;
+
+		public static GUIStyle TextBold = new GUIStyle { fontStyle = FontStyle.Bold };
+		public static GUIStyle TextTitle = new GUIStyle { fontStyle = FontStyle.Bold, fontSize = TITLE_FONT_SIZE };
 	}
 
 	public class ModalPopupWindow: EditorWindow {

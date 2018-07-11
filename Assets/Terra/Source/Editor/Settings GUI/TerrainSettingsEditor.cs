@@ -20,6 +20,9 @@ namespace UnityEditor.Terra {
 		}
 
 		public override void OnInspectorGUI() {
+			if (!TerraSettings.IsInitialized)
+				return;
+
 			//Options toolbar
 			gui.Toolbar();
 
@@ -29,14 +32,14 @@ namespace UnityEditor.Terra {
 
 					break;
 				case TerraSettings.ToolbarOptions.Maps:
-					gui.Noise();
+					gui.Maps();
 
 					break;
-				case TerraSettings.ToolbarOptions.Materials:
+				case TerraSettings.ToolbarOptions.Biomes:
 					gui.Material();
 
 					break;
-				case TerraSettings.ToolbarOptions.ObjectPlacement:
+				case TerraSettings.ToolbarOptions.Details:
 					gui.ObjectPlacement();
 
 					break;

@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 namespace Terra.Terrain {
 	[System.Serializable, ExecuteInEditMode]
 	public class TerraSettings: MonoBehaviour {
-		private static bool _isInitialized = false;
+		public static bool IsInitialized = false;
 
 		/// <summary>
 		/// Internal TerraSettings instance to avoid finding when its not needed
@@ -24,7 +24,7 @@ namespace Terra.Terrain {
 
 		//Topology Generation
 		public Generation Generator;
-		public TileMapData HeightMapData;
+		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
 		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 
@@ -39,7 +39,7 @@ namespace Terra.Terrain {
 		//Editor state information
 		public EditorStateData EditorState;
 		public TerrainPreview Preview;
-
+		 
 		/// <summary>
 		/// Finds the active TerraSettings instance in this scene if one exists.
 		/// </summary>
@@ -48,7 +48,7 @@ namespace Terra.Terrain {
 				if (_instance != null) {
 					return _instance;
 				}
-				if (!_isInitialized) {
+				if (!IsInitialized) {
 					return null;
 				}
 
@@ -62,8 +62,8 @@ namespace Terra.Terrain {
 		/// post serialization.
 		/// </summary>
 		void OnEnable() {
-			_isInitialized = true;
-
+			IsInitialized = true;
+			 
 			if (Generator == null) Generator = ScriptableObject.CreateInstance<Generation>();
 			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
@@ -72,6 +72,10 @@ namespace Terra.Terrain {
 			if (Grass == null) Grass = ScriptableObject.CreateInstance<GrassData>();
 			if (EditorState == null) EditorState = ScriptableObject.CreateInstance<EditorStateData>();
 			if (Preview == null) Preview = ScriptableObject.CreateInstance<TerrainPreview>();
+		}
+
+		void Reset() {
+			OnEnable(); //Initialize default values
 		}
 
 		void Start() {
@@ -91,6 +95,8 @@ namespace Terra.Terrain {
 		}
 
 		void Update() {
+			if (!IsInitialized) return;
+
 #if UNITY_EDITOR
 			if (Application.isEditor && !Application.isPlaying && Preview == null) {
 				Preview = new TerrainPreview();
@@ -102,7 +108,7 @@ namespace Terra.Terrain {
 		}
 
 		void OnDrawGizmosSelected() {
-			if (!isActiveAndEnabled)
+			if (!IsInitialized)
 				return;
 
 			//On general tab selected: display mesh radius squares and collider radius
@@ -126,7 +132,7 @@ namespace Terra.Terrain {
 			}
 		}
 
-		void CreateMTD() {
+		private void CreateMTD() {
 			//Create MT Dispatch if not already there
 			if (FindObjectOfType<MTDispatch>() == null) {
 				GameObject mtd = new GameObject("Main Thread Dispatch");
@@ -392,8 +398,8 @@ namespace Terra.Terrain {
 		public enum ToolbarOptions {
 			General = 0,
 			Maps = 1,
-			Materials = 2,
-			ObjectPlacement = 3
+			Biomes = 2,
+			Details = 3
 		}
 	}
 }

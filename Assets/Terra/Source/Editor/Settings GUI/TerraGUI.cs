@@ -5,6 +5,7 @@ using Terra.ReorderableList;
 using Terra.Terrain;
 using Terra.Terrain.Util;
 using System.Linq;
+using Terra.ReorderableList.Internal;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -89,6 +90,80 @@ namespace UnityEditor.Terra {
 			}
 
 			Settings.EditorState.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", Settings.EditorState.UseMultithreading);
+		}
+
+		/// <summary>
+		/// Displays GUI elements for the "Maps" tab
+		/// </summary>
+		public void Maps() {
+			const string mapDescription = "Create height, temperature, and moisture maps from various noise functions; or create your own custom map generator.";
+			Header("Maps", mapDescription);
+
+			const int texMaxWidth = 188;
+			const int texMinZoom = 20;
+			const int texMaxZoom = 100;
+
+			var mapTypes = new[] { Settings.HeightMapData, Settings.MoistureMapData, Settings.TemperatureMapData };
+			bool updateTextures = mapTypes.Any(m => m.PreviewTexture == null);
+
+			float texWidth = Settings.EditorState.InspectorWidth;
+			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
+
+			//GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1));
+
+			for (int i = 0; i < mapTypes.Length; i++) {
+				EditorGUILayout.Space();
+
+				var md = mapTypes[i];
+				bool updateThis = false; //Update THIS texture because of editor change?
+
+				EditorGUI.BeginChangeCheck();
+
+				var bold = new GUIStyle();
+				bold.fontStyle = FontStyle.Bold;
+				EditorGUILayout.LabelField(md.Name, bold);
+
+				EditorGUI.indentLevel++; //Indent following controls
+				md.MapType = (TerraSettings.MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
+				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
+				EditorGUILayout.Space();
+
+				//Update texture if editor changed
+				if (EditorGUI.EndChangeCheck()) updateThis = true;
+				if (updateTextures || updateThis) {
+					texWidth -= 20;
+					md.UpdatePreviewTexture((int)texWidth, (int)(texWidth / 2));
+				}
+
+				//Draw preview texture
+				if (md.PreviewTexture != null) {
+
+					//Draw texture
+					var ctr = EditorGUILayout.GetControlRect(false, texWidth / 2);
+					ctr.width = texWidth;
+					ctr.x += 17;
+
+					EditorGUI.DrawPreviewTexture(ctr, md.PreviewTexture);
+
+					//Draw color fields
+					EditorGUILayout.BeginHorizontal();
+
+					ctr = EditorGUILayout.GetControlRect(false, 16);
+					ctr.width = (texWidth / 2) + 8;
+					ctr.x += 2;
+
+					md.RampColor1 = EditorGUI.ColorField(ctr, md.RampColor1);
+					ctr.x += ctr.width - 2;
+					md.RampColor2 = EditorGUI.ColorField(ctr, md.RampColor2);
+					
+					EditorGUILayout.EndHorizontal();
+				}
+
+				EditorGUILayout.Space();
+				EditorGUI.indentLevel--;
+				//if (i != mapTypes.Length - 1) 
+				//	GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1));
+			}
 		}
 
 		/// <summary>
@@ -184,54 +259,6 @@ namespace UnityEditor.Terra {
 
 				Settings.SplatData.Add(new TerrainPaint.SplatData());
 			}
-		}
-
-		/// <summary>
-		/// Displays GUI elements for the "Noise" tab
-		/// </summary>
-		public void Noise() {
-			const int texMaxWidth = 188;
-			const int texMinZoom = 20;
-			const int texMaxZoom = 100;
-
-			var mapTypes = new[] { Settings.HeightMapData, Settings.MoistureMapData, Settings.TemperatureMapData };
-			bool updateTextures = mapTypes.Any(m => m.PreviewTexture == null);
-			float texWidth = Settings.EditorState.InspectorWidth;
-			
-			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
-			EditorGUIExtension.BeginBlockArea();
-
-			for (int i = 0; i < mapTypes.Length; i++) {
-				var md = mapTypes[i];
-				bool updateThis = false; //Update THIS texture because of editor change?
-
-				EditorGUI.BeginChangeCheck();
-
-				var bold = new GUIStyle();
-				bold.fontStyle = FontStyle.Bold;
-				EditorGUILayout.LabelField(md.Name, bold);
-
-				md.MapType = (TerraSettings.MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
-				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
-				EditorGUILayout.Space();
-
-				if (EditorGUI.EndChangeCheck()) updateThis = true;
-				if (updateTextures || updateThis) md.UpdatePreviewTexture((int) texWidth, (int) (texWidth / 2));
-
-				//Draw preview texture
-				if (md.PreviewTexture != null) {
-					var ctr = EditorGUILayout.GetControlRect(false, texWidth / 2);
-					ctr.width = texWidth;
-					ctr.x += 2;
-
-					EditorGUI.DrawPreviewTexture(ctr, md.PreviewTexture);
-				}
-
-				if (i != mapTypes.Length - 1)
-					EditorGUIExtension.AddSeperator();
-			}
-
-			EditorGUIExtension.EndBlockArea();
 		}
 
 		/// <summary>
@@ -420,6 +447,22 @@ namespace UnityEditor.Terra {
 		}
 
 		/// <summary>
+		/// Displays a header underneath the toolbar
+		/// </summary>
+		/// <param name="title">Title of toolbar option</param>
+		/// <param name="description">Description under title</param>
+		public void Header(string title, string description) {
+			EditorGUILayout.Space();
+			EditorGUILayout.LabelField(title, EditorGUIExtension.TerraStyle.TextTitle);
+
+			//Description readonly text area
+			EditorStyles.label.wordWrap = true;
+			EditorGUILayout.LabelField(description, GUILayout.ExpandWidth(false));
+
+			EditorGUILayout.Space();
+		}
+
+		/// <summary>
 		/// Fits the min and max values so that the min is never 
 		/// greater than the max. 
 		/// 
@@ -467,9 +510,5 @@ namespace UnityEditor.Terra {
 
 			return WhiteTex;
 		}
-	}
-
-	public static class EditorGUILayoutExtensions {
-		
 	}
 }

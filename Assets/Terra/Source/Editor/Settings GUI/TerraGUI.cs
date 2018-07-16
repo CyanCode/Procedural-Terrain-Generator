@@ -6,6 +6,7 @@ using Terra.Terrain;
 using Terra.Terrain.Util;
 using System.Linq;
 using Terra.ReorderableList.Internal;
+using TextureArrayInspector;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -17,11 +18,14 @@ namespace UnityEditor.Terra {
 		private TerraSettings Settings;
 		private Texture[] ToolbarImages;
 
-		private ReorderableMaterialList matList;
+		private ReorderableMaterialList _matList;
+		private ReorderableBiomeList _biomeList;
 
 		public TerraGUI(TerraSettings settings) {
 			this.Settings = settings;
-			matList = new ReorderableMaterialList(settings);
+
+			_matList = new ReorderableMaterialList(settings);
+			_biomeList = new ReorderableBiomeList(settings);
 		}
 
 		/// <summary>
@@ -155,7 +159,7 @@ namespace UnityEditor.Terra {
 					md.RampColor1 = EditorGUI.ColorField(ctr, md.RampColor1);
 					ctr.x += ctr.width - 2;
 					md.RampColor2 = EditorGUI.ColorField(ctr, md.RampColor2);
-					
+
 					EditorGUILayout.EndHorizontal();
 				}
 
@@ -164,6 +168,83 @@ namespace UnityEditor.Terra {
 				//if (i != mapTypes.Length - 1) 
 				//	GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1));
 			}
+		}
+
+		/// <summary>
+		/// Displays GUI elements for the "Biomes" tab
+		/// </summary>
+		public void Biomes() {
+			const string description = "Create biomes by building a list of constraints that define when a biome should appear.";
+			Header("Biomes", description);
+
+			//Display material list editor
+			ReorderableListGUI.ListField(_biomeList);
+
+			//Calculate texture preview size
+			const float texMaxWidth = 188;
+			float texWidth = Settings.EditorState.InspectorWidth;
+			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
+
+			//Previewing
+			EditorGUILayout.Space();
+			EditorGUI.indentLevel++;
+			Settings.EditorState.ShowBiomePreview = EditorGUILayout.Foldout(Settings.EditorState.ShowBiomePreview, "Show Preview");
+			if (Settings.EditorState.ShowBiomePreview) {
+				if (Settings.EditorState.BiomePreview != null) {
+					var ctr = EditorGUILayout.GetControlRect(false, texWidth / 2);
+					ctr.width = texWidth;
+					ctr.x += 17;
+
+					EditorGUI.DrawPreviewTexture(ctr, Settings.EditorState.BiomePreview);
+				}
+
+				//Zoom slider
+				var margin = new GUIStyle { margin = new RectOffset(25, 0, 0, 0) };
+				EditorGUILayout.BeginHorizontal(margin, GUILayout.MaxWidth(texWidth));
+				
+				GUILayout.Label("Zoom");
+				Settings.EditorState.BiomePreviewZoom = 
+					GUILayout.HorizontalSlider(Settings.EditorState.BiomePreviewZoom, 10f, 50f, GUILayout.MaxWidth(EditorGUIUtility.fieldWidth));
+				
+				EditorGUILayout.EndHorizontal();
+
+				//Update preview button
+				var rect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
+				rect.x += 17;
+				rect.y += 2;
+				rect.width = texWidth;
+				if (GUI.Button(rect, "Update Preview")) {
+					Settings.EditorState.BiomePreview =
+						TerraSettings.BiomeData.GetPreviewTexture((int)texWidth, (int)texWidth / 2, _biomeList.List, Settings.EditorState.BiomePreviewZoom);
+				}
+			}
+
+			//Whittaker diagram
+			Settings.EditorState.ShowWhittakerInfo = EditorGUILayout.Foldout(Settings.EditorState.ShowWhittakerInfo, "Whittaker Diagram");
+			if (Settings.EditorState.ShowWhittakerInfo) {
+				const string text = "Terra's biomes are based off of Whittaker's biome classification system. " +
+									"You can read more below.";
+				var linkStyle = new GUIStyle(GUI.skin.label) {
+					normal = {textColor = Color.blue},
+					padding = {left = 32}
+				};
+
+				EditorGUI.indentLevel++;
+								
+				EditorGUILayout.LabelField(text);
+
+				if (GUILayout.Button("Whittaker Diagram", linkStyle)) {
+					Application.OpenURL("https://en.wikipedia.org/wiki/File:Climate_influence_on_terrestrial_biome.svg");
+				}
+				if (GUILayout.Button("Biome Wikipedia", linkStyle)) {
+					Application.OpenURL("https://en.wikipedia.org/wiki/Biome");
+				}
+				
+				EditorGUI.indentLevel--;
+			}
+
+			EditorGUILayout.Space();
+			EditorGUI.indentLevel--;
 		}
 
 		/// <summary>
@@ -183,7 +264,7 @@ namespace UnityEditor.Terra {
 			//Use textures
 			if (Settings.SplatData != null) {
 				//Display material list editor
-				ReorderableListGUI.ListField(matList);
+				ReorderableListGUI.ListField(_matList);
 
 				//Advanced options
 				Settings.EditorState.IsAdvancedFoldout = EditorGUILayout.Foldout(Settings.EditorState.IsAdvancedFoldout, "Advanced");

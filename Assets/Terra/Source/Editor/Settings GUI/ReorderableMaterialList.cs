@@ -7,9 +7,7 @@ namespace UnityEditor.Terra {
 	public class ReorderableMaterialList: GenericListAdaptor<TerrainPaint.SplatData> {
 		private TerraSettings Settings;
 
-		private const float MAX_HEIGHT = 200f;
-		private const float MIN_HEIGHT = 100f;
-
+		const float MAX_HEIGHT = 200f;
 		const int PADDING = 8;
 		const int PADDING_SM = 4;
 		const int CTRL_HEIGHT = 16; //Default height for controls

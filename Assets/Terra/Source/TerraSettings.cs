@@ -29,6 +29,7 @@ namespace Terra.Terrain {
 		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 
 		//Detail
+		public List<BiomeData> BiomesData;
 		public List<TerrainPaint.SplatData> SplatData;
 		public List<ObjectPlacementData> ObjectData;
 		public Material CustomMaterial = null;
@@ -65,6 +66,7 @@ namespace Terra.Terrain {
 			IsInitialized = true;
 			 
 			if (Generator == null) Generator = ScriptableObject.CreateInstance<Generation>();
+			if (BiomesData == null) BiomesData = new List<BiomeData>();
 			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 			if (MoistureMapData == null) MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
@@ -198,11 +200,17 @@ namespace Terra.Terrain {
 			public bool IsAdvancedFoldout = false;
 			public bool IsMaxHeightSelected = false;
 			public bool IsMinHeightSelected = false;
-			
+
+			//Biomes
+			public bool ShowBiomePreview = false;
+			public float BiomePreviewZoom = 25f;
+			public Texture2D BiomePreview = null;
+			public bool ShowWhittakerInfo = false;
+
 			public float InspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
 
 			private float lastInspectorWidth = 0f;
-
+ 
 			public bool DidResize(float currentWidth) {
 				return Math.Abs(lastInspectorWidth - currentWidth) > 0.1f;
 			}
@@ -256,6 +264,140 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Represents a Biome and its various settings
+		/// </summary>
+		[Serializable]
+		public class BiomeData {
+			/// <summary>
+			/// Represents a constraint between a minimum and 
+			/// a maximum.
+			/// </summary>
+			[Serializable]
+			public struct Constraint {
+				public float Min;
+				public float Max;
+
+				public Constraint(float min, float max) {
+					Min = min;
+					Max = max;
+				}
+
+				/// <summary>
+				/// Does the passed value fit within the min and max?
+				/// </summary>
+				/// <param name="val">Value to check</param>
+				public bool Fits(float val) {
+					return val > Min && val < Max;
+				}
+			}
+
+			/// <summary>
+			/// Name of this Biome
+			/// </summary>
+			public string Name = "";
+
+			/// <summary>
+			/// Height constraints if enabled
+			/// </summary>
+			public Constraint HeightConstraint = new Constraint();
+
+			/// <summary>
+			/// Angle constraints if enabled
+			/// </summary>
+			public Constraint AngleConstraint = new Constraint();
+
+			/// <summary>
+			/// Temperature constraint if enabled
+			/// </summary>
+			public Constraint TemperatureConstraint = new Constraint(0, 1f);
+
+			/// <summary>
+			/// Moisture map constraint if enabled
+			/// </summary>
+			public Constraint MoistureConstraint = new Constraint(0, 1f);
+
+			/// <summary>
+			/// Will this biome only appear between constrained 
+			/// heights?
+			/// </summary>
+			public bool IsHeightConstrained = false;
+
+			/// <summary>
+			/// Will this biome only appear between constrained 
+			/// angles?
+			/// </summary>
+			public bool IsAngleConstrained = false;
+
+			/// <summary>
+			/// Is this biome constrained by the temperature map?
+			/// </summary>
+			public bool IsTemperatureConstrained = false;
+
+			/// <summary>
+			/// Is this biome constrained by the moisture map?
+			/// </summary>
+			public bool IsMoistureConstrained = false;
+
+			/// <summary>
+			/// Display preview texture in editor?
+			/// </summary>
+			public bool ShowPreviewTexture = false;
+
+			/// <summary>
+			/// Preview texture that has possibly been previously calculated
+			/// </summary>
+			public Texture2D CachedPreviewTexture = null;
+
+			/// <summary>
+			/// "Color" assigned to this biome. Used for editor previewing
+			/// </summary>
+			public Color Color = default(Color);
+
+			/// <summary>
+			/// Create a preview texture for the passed list of biomes by 
+			/// coloring biomes that pass constraints.
+			/// </summary>
+			public static Texture2D GetPreviewTexture(int width, int height, IList<BiomeData> biomeList, float zoom = 1f) {
+				Texture2D tex = new Texture2D(width, height);
+
+				for (int i = 0; i < width; i++) {
+					for (int j = 0; j < height; j++) {
+						BiomeData b = GetBiomeAt(i / zoom, j / zoom, biomeList);
+						tex.SetPixel(i, j, b == null ? Color.black : b.Color);
+					}
+				}
+
+				tex.Apply();
+				return tex;
+			}
+
+			public static BiomeData GetBiomeAt(float x, float y, IList<BiomeData> biomes) {
+				BiomeData chosen = null;
+				var settings = Instance;
+
+				foreach (BiomeData b in biomes) {
+					var hm = settings.HeightMapData;
+					var tm = settings.TemperatureMapData;
+					var mm = settings.MoistureMapData;
+
+					if (b.IsHeightConstrained && !hm.HasGenerator()) continue;
+					if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
+					if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
+
+					bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(hm.GetValue(x, y)) || !b.IsHeightConstrained;
+					bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(x, y)) || !b.IsTemperatureConstrained;
+					bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(x, y)) || !b.IsMoistureConstrained;
+
+					if (passHeight && passTemp && passMoisture) {
+						chosen = b;
+					}
+				}
+
+				return chosen;
+			}
+		}
+
+		/// <summary>
 		/// Holds data relating to various types of maps (ie height, temperature, etc). 
 		/// Used by <see cref="TerraSettings"/> for storing information.
 		/// </summary>
@@ -266,16 +408,21 @@ namespace Terra.Terrain {
 			/// <see cref="MapType"/> is set to <see cref="MapGeneratorType.Custom"/>, 
 			/// <see cref="CustomGenerator"/> is returned.
 			/// </summary>
-			public Generator Generator {
-				get {
-					return GetGenerator();
-				}
-			}
+			public Generator Generator;
 
 			/// <summary>
 			/// The type of Generator to use when constructing a map.
 			/// </summary>
-			public MapGeneratorType MapType = MapGeneratorType.Perlin;
+			public MapGeneratorType MapType {
+				get { return _mapType; }
+				set {
+					if (_mapType != value) {
+						//Update generator on MapType change
+						_mapType = value;
+						UpdateGenerator();
+					}
+				}
+			}
 
 			/// <summary>
 			/// If <see cref="MapType"/> is set to Custom, this Generator 
@@ -323,6 +470,16 @@ namespace Terra.Terrain {
 			private Generator _customGenerator;
 
 			/// <summary>
+			/// Internal <see cref="MapType"/>
+			/// </summary>
+			private MapGeneratorType _mapType;
+
+			public TileMapData() {
+				MapType = MapGeneratorType.Perlin;
+				UpdateGenerator();
+			}
+
+			/// <summary>
 			/// Updates the preview texture using the two passed colors 
 			/// to form a gradient where -1 is color 1 and 1 is color 2. 
 			/// Data is taken from <see cref="Generator"/>.
@@ -333,12 +490,10 @@ namespace Terra.Terrain {
 			/// <param name="c2">Color 2 in gradient</param>
 			public void UpdatePreviewTexture(int width, int height, Color c1, Color c2) {
 				Texture2D tex = new Texture2D(width, height);
-				Generator gen = Generator;
-
+				
 				for (int x = 0; x < width; x++) {
 					for (int y = 0; y < height; y++) {
-						//normalize [-1, 1] -> [0, 1]
-						float v = (gen.GetValue(x / TextureZoom, 0, y / TextureZoom) + 1) / 2;
+						float v = GetValue(x, y, TextureZoom);
 						Color c = Color.Lerp(c1, c2, v);
 
 						tex.SetPixel(x, y, c);
@@ -361,26 +516,55 @@ namespace Terra.Terrain {
 			}
 
 			/// <summary>
-			/// Gets the Generator assigned to this instance based on the 
-			/// set <see cref="TerraSettings.MapGeneratorType"/>.
+			/// Calls GetValue on <see cref="gen"/> at the passed 
+			/// x / y coordinates. Normalizes value from [-1, 1] to [0, 1] 
+			/// before returning.
+			/// </summary>
+			/// <param name="x">x coordinate</param>
+			/// <param name="y">y coordinate</param>
+			/// <param name="zoom">Optionally specify a zoom factor</param>
+			/// <returns></returns>
+			public float GetValue(float x, float y, float zoom = 1f) {
+				return (Generator.GetValue(x / zoom, 0, y / zoom) + 1) / 2;
+			}
+
+			/// <summary>
+			/// Updates the <see cref="Generator"/> assigned to this instance based on the 
+			/// set <see cref="TerraSettings.MapGeneratorType"/> and returns it.
 			/// </summary>
 			/// <returns>Generator if set, null if <see cref="TerraSettings.MapGeneratorType.Custom"/> 
-			/// is set and no <see cref="CustomGeneratorGraph"/> is specified</returns>
-			private Generator GetGenerator() {
+			/// is set and no <see cref="CustomGenerator"/> is specified</returns>
+			public Generator UpdateGenerator() {
 				int seed = TerraSettings.GenerationSeed;
+				Generator gen = null;
 
 				switch (MapType) {
 					case MapGeneratorType.Perlin:
-						return new GradientNoise(seed);
+						gen = new GradientNoise(seed);
+						break;
 					case MapGeneratorType.Fractal:
-						return new PinkNoise(seed);
+						gen = new PinkNoise(seed);
+						break;
 					case MapGeneratorType.Billow:
-						return new BillowNoise(seed);
+						gen = new BillowNoise(seed);
+						break;
 					case MapGeneratorType.Custom:
-						return CustomGenerator;
+						gen = CustomGenerator;
+						break;
 					default:
 						return null;
 				}
+
+				Generator = gen;
+				return gen;
+			}
+
+			/// <summary>
+			/// Does this have a (non-null) generator?
+			/// </summary>
+			/// <returns>true if there is a generator</returns>
+			public bool HasGenerator() {
+				return Generator != null;
 			}
 		}
 

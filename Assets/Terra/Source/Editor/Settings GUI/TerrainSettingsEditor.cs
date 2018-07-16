@@ -36,7 +36,7 @@ namespace UnityEditor.Terra {
 
 					break;
 				case TerraSettings.ToolbarOptions.Biomes:
-					gui.Material();
+					gui.Biomes();
 
 					break;
 				case TerraSettings.ToolbarOptions.Details:

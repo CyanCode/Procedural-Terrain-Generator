@@ -247,6 +247,11 @@ namespace UnityEditor.Terra {
 			EditorGUI.indentLevel--;
 		}
 
+		public void Details() {
+			const string description = "Apply details to your biomes. These include textures, objects, and grass.";
+			Header("Details", description);
+		}
+
 		/// <summary>
 		/// Displays GUI elements for the "Materials" tab
 		/// </summary>
@@ -336,9 +341,9 @@ namespace UnityEditor.Terra {
 
 			if (GUILayout.Button("Add Material")) {
 				if (Settings.SplatData == null)
-					Settings.SplatData = new List<TerrainPaint.SplatData>();
+					Settings.SplatData = new List<TerrainPaint.SplatInfo>();
 
-				Settings.SplatData.Add(new TerrainPaint.SplatData());
+				Settings.SplatData.Add(new TerrainPaint.SplatInfo());
 			}
 		}
 

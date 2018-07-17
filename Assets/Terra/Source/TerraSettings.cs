@@ -30,12 +30,12 @@ namespace Terra.Terrain {
 
 		//Detail
 		public List<BiomeData> BiomesData;
-		public List<TerrainPaint.SplatData> SplatData;
+		public List<TerrainPaint.SplatInfo> SplatData;
 		public List<ObjectPlacementData> ObjectData;
 		public Material CustomMaterial = null;
 
 		public TessellationData Tessellation;
-		public GrassData Grass;
+		public DetailData.GrassData Grass;
 
 		//Editor state information
 		public EditorStateData EditorState;
@@ -71,7 +71,7 @@ namespace Terra.Terrain {
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 			if (MoistureMapData == null) MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 			if (Tessellation == null) Tessellation = new TessellationData();
-			if (Grass == null) Grass = new GrassData();
+			if (Grass == null) Grass = new DetailData.GrassData();
 			if (EditorState == null) EditorState = new EditorStateData();
 			if (Preview == null) Preview = new TerrainPreview();
 		}
@@ -267,7 +267,6 @@ namespace Terra.Terrain {
 
 			public Generation() { 
 				if (Pool == null) Pool = new TilePool();
-				if (Graph == null) Graph = ScriptableObject.CreateInstance<NoiseGraph>();
 			}
 		}
 
@@ -280,20 +279,49 @@ namespace Terra.Terrain {
 		}
 
 		[Serializable]
-		public class GrassData {
-			public bool PlaceGrass = false;
-			public float GrassStepLength = 1.5f;
-			public float GrassVariation = 0.8f;
-			public float GrassHeight = 1.5f;
-			public float BillboardDistance = 75f;
-			public float ClipCutoff = 0.25f;
-			public bool GrassConstrainHeight = false;
-			public float GrassMinHeight = 0f;
-			public float GrassMaxHeight = 200f;
-			public bool GrassConstrainAngle = false;
-			public float GrassAngleMin = 0f;
-			public float GrassAngleMax = 25f;
-			public Texture2D GrassTexture = null;
+		public class DetailData {
+			public enum PlacementType {
+				ElevationRange,
+				Angle
+			}
+			[Serializable]
+			public class SplatData {
+				public Texture2D Diffuse;
+				public Texture2D Normal;
+				public Vector2 Tiling = new Vector2(1, 1);
+				public Vector2 Offset;
+
+				public float Smoothness;
+				public float Metallic;
+				public float Blend = 30f;
+
+				public PlacementType PlacementType;
+
+				public float AngleMin = 5f;
+				public float AngleMax = 25f;
+
+				public float MinRange;
+				public float MaxRange;
+				public bool IsMaxHeight;
+				public bool IsMinHeight;
+			}
+
+			[Serializable]
+			public class GrassData {
+				public bool PlaceGrass = false;
+				public float GrassStepLength = 1.5f;
+				public float GrassVariation = 0.8f;
+				public float GrassHeight = 1.5f;
+				public float BillboardDistance = 75f;
+				public float ClipCutoff = 0.25f;
+				public bool GrassConstrainHeight = false;
+				public float GrassMinHeight = 0f;
+				public float GrassMaxHeight = 200f;
+				public bool GrassConstrainAngle = false;
+				public float GrassAngleMin = 0f;
+				public float GrassAngleMax = 25f;
+				public Texture2D GrassTexture = null;
+			}
 		}
 
 		/// <summary>

@@ -119,7 +119,7 @@ namespace Terra.Terrain {
 				Generator end = Settings.Generator.Graph.GetEndGenerator();
 
 				if (end != null) {
-					return Tile.GetPreviewMesh(Settings, Settings.Generator.Graph.GetEndGenerator());
+					//return Tile.GetPreviewMesh(Settings, Settings.Generator.Graph.GetEndGenerator());
 				}
 			}
 

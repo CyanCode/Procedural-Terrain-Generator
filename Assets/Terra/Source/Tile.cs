@@ -1,10 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using Terra.CoherentNoise;
-using Terra.CoherentNoise.Generation;
-using Terra.CoherentNoise.Generation.Fractal;
-using Terra.CoherentNoise.Texturing;
-using Terra.Graph.Noise;
 using Terra.Terrain.Detail;
 
 namespace Terra.Terrain {
@@ -21,7 +17,7 @@ namespace Terra.Terrain {
 		public DetailManager Details { get; private set; }
 
 		public TileMesh Mesh;
-
+		
 		private TerraSettings _settings;
 
 		void OnEnable() {
@@ -32,10 +28,6 @@ namespace Terra.Terrain {
 			if (_settings == null) {
 				Debug.LogError("Cannot find a TerraSettings object in the scene");
 			}
-		}
-
-		void Update() {
-			Details.Update();
 		}
 
 		/// <summary>
@@ -50,7 +42,7 @@ namespace Terra.Terrain {
 			Tile tt = go.AddComponent<Tile>();
 
 			//Perform initilization before OnEnable
-			if (tt._settings == null) tt._settings = FindObjectOfType<TerraSettings>();
+			if (tt._settings == null) tt._settings = TerraSettings.Instance;
 			if (tt._settings == null) {
 				Debug.LogError("Cannot find a TerraSettings object in the scene");
 			}
@@ -68,10 +60,10 @@ namespace Terra.Terrain {
 			MeshData md = TileMesh.CreateRawMesh(settings, new Vector2(0, 0), gen);
 
 			Mesh mesh = new Mesh();
-			mesh.vertices = md.vertices;
-			mesh.normals = md.normals;
-			mesh.uv = md.uvs;
-			mesh.triangles = md.triangles;
+			mesh.vertices = md.Vertices;
+			mesh.normals = md.Normals;
+			mesh.uv = md.Uvs;
+			mesh.triangles = md.Triangles;
 
 			return mesh;
 		}
@@ -128,10 +120,10 @@ namespace Terra.Terrain {
 			Terrain = gameObject.AddComponent<MeshFilter>().mesh;
 
 			MeshData md = CreateRawMesh(position, generator);
-			Terrain.vertices = md.vertices;
-			Terrain.triangles = md.triangles;
-			Terrain.uv = md.uvs;
-			Terrain.normals = md.normals;
+			Terrain.vertices = md.Vertices;
+			Terrain.triangles = md.Triangles;
+			Terrain.uv = md.Uvs;
+			Terrain.normals = md.Normals;
 
 			UpdatePosition(position);
 		}
@@ -209,10 +201,10 @@ namespace Terra.Terrain {
 			TileMesh.CalculateNormalsManaged(vertices, ref normals, triangles);
 
 			MeshData mesh = new MeshData();
-			mesh.triangles = triangles;
-			mesh.vertices = vertices;
-			mesh.normals = normals;
-			mesh.uvs = uvs;
+			mesh.Triangles = triangles;
+			mesh.Vertices = vertices;
+			mesh.Normals = normals;
+			mesh.Uvs = uvs;
 
 			return mesh;
 		}
@@ -232,17 +224,7 @@ namespace Terra.Terrain {
 			return TileMesh.CreateRawMesh(_settings, position, gen);
 		}
 
-		/// <summary>
-		/// Polls the <see cref="Generator"/> found in <see cref="TerraSettings"/> and 
-		/// retrieves the y height value and x & z world coordinates for the passed x 
-		/// and z location. The x and z values are integers representing a local point on 
-		/// the to-be-created mesh. Internally, these values are transformed into world 
-		/// coordinates based on the passed resolution.
-		/// </summary>
-		/// <param name="xPos">mesh x position</param>
-		/// <param name="zPos">mesh z position</param>
-		/// <param name="resolution">resolution of this mesh</param>
-		/// <returns></returns>
+
 		public Vector3 GetPositionAt(int xPos, int zPos, int resolution) {
 			return TileMesh.GetPositionAt(xPos, zPos, resolution, _settings, _settings.Generator.Graph.GetEndGenerator(), Position);
 		}
@@ -262,108 +244,67 @@ namespace Terra.Terrain {
 				Terrain = gameObject.AddComponent<MeshFilter>().mesh;
 			}
 
-			Terrain.vertices = data.vertices;
-			Terrain.triangles = data.triangles;
-			Terrain.uv = data.uvs;
-			Terrain.normals = data.normals;
+			Terrain.vertices = data.Vertices;
+			Terrain.triangles = data.Triangles;
+			Terrain.uv = data.Uvs;
+			Terrain.normals = data.Normals;
 		}
-	}
 
-	public struct MeshData {
-		public Vector3[] vertices;
-		public Vector3[] normals;
-		public Vector2[] uvs;
-		public int[] triangles;
+		/// <summary>
+		/// Add a MeshFilter to this gameobject if one does not yet exist.
+		/// </summary>
+		public MeshFilter AddMeshFilter() {
+			MeshFilter mf = GetComponent<MeshFilter>();
+			if (mf == null) {
+				mf = gameObject.AddComponent<MeshFilter>();
+			}
+
+			return mf;
+		}
+
+		/// <summary>
+		/// Add a MeshRenderer to this gameobject if one does not yet exist.
+		/// </summary>
+		public MeshRenderer AddMeshRenderer() {
+			MeshRenderer mr = GetComponent<MeshRenderer>();
+			if (mr == null) {
+				mr = gameObject.AddComponent<MeshRenderer>();
+			}
+
+			return mr;
+		}
 	}
 
 	/// <summary>
-	/// Represents a "map" attached to a TerrainTile. Internally 
-	/// this contains a texture for previewing, generator(s), and 
-	/// ways to retrieve map data.
+	/// An implementation of <see cref="Mesh"/> that does not return 
+	/// copies of its' parameters.
 	/// </summary>
-	[Serializable]
-	public class TileMap {
-		/// <summary>
-		/// 2-Dimensional float array representation of this map. 
-		/// </summary>
-		public float[,] Map { get; private set; }
+	public struct MeshData {
+		public Vector3[] Vertices;
+		public Vector3[] Normals;
+		public Vector2[] Uvs;
+		public int[] Triangles;
 
 		/// <summary>
-		/// Resolution of this TileMap
+		/// The <see cref="Mesh"/> class representation of this MeshData. 
+		/// Internally, the construction of this Mesh instance is only done 
+		/// once as the result is cached after the first construction.
 		/// </summary>
-		public int Resolution { get; private set; }
-
-		/// <summary>
-		/// map data that is referenced when updating the internal map
-		/// </summary>
-		public TerraSettings.TileMapData MapData;
-
-		/// <summary>
-		/// Tile instance attached to this TileMap
-		/// </summary>
-		private Tile _tile;
-
-		/// <summary>
-		/// Generator specified in <see cref="MapData"/>
-		/// </summary>
-		private Generator _generator {
+		public Mesh Mesh {
 			get {
-				return MapData.Generator;
-			}
-		}
-
-		/// <summary>
-		/// Creates a new TileMap with the passed resolution used 
-		/// as the resolution in <see cref="Map"/>
-		/// </summary>
-		/// <param name="tile">Tile</param>
-		/// <param name="resolution"></param>
-		public TileMap(Tile tile, int resolution, TerraSettings.TileMapData mapData) {
-			_tile = tile;
-			Resolution = resolution;
-			MapData = mapData;
-		}
-
-		/// <summary>
-		/// Updates <see cref="Map"/> with values pulled from  <see cref="Generator"/>.
-		/// The polled positions are in world coordinates supplied by the Tile passed 
-		/// into the constructor. If <see cref="Generator"/> is null, nothing is updated.
-		/// </summary>
-		public void UpdateMap() {
-			Map = new float[Resolution, Resolution];
-			Generator gen = _generator;
-			TerraSettings settings = TerraSettings.Instance;
-
-			if (gen == null)
-				return;
-
-			for (int x = 0; x < Resolution; x++) {
-				for (int y = 0; y < Resolution; y++) {
-					Map[x, y] = PollGeneratorWorld(x, y, gen, settings.Generator.Spread, settings.Generator.Amplitude);
+				if (_mesh == null) {
+					_mesh = new Mesh {
+						vertices = Vertices,
+						normals = Normals,
+						uv = Uvs,
+						triangles = Triangles
+					};
 				}
+
+				return _mesh;
 			}
 		}
 
-		/// <summary>
-		/// Polls <see cref="Generator"/> by passing in world coordinates 
-		/// of the provided <see cref="Tile"/>. 
-		/// </summary>
-		/// <param name="xPos">Local x position</param>
-		/// <param name="zPos">Local z position</param>
-		/// <param name="generator">Generator to poll</param>
-		/// <param name="spread">Optional horizontal stretch or squash of the X & Z coordinates</param>
-		/// <param name="amplitude">Optional vertical stretch or squash of the Y coordinate</param>
-		/// <returns>float value returned by Generator</returns>
-		public float PollGeneratorWorld(int xPos, int zPos, Generator generator, float spread = 1f, float amplitude = 1f) {
-			if (_generator == null)
-				return default(float);
-
-			spread = 1 / spread;
-			int length = TerraSettings.Instance.Generator.Length;
-
-			float x = (_tile.Position.x * length + xPos) * spread;
-			float z = (_tile.Position.y * length + zPos) * spread;
-			return generator.GetValue(x, z, 0f) * amplitude;
-		}
+		private Mesh _mesh;
 	}
 }

@@ -65,15 +65,15 @@ namespace Terra.Terrain {
 		void OnEnable() {
 			IsInitialized = true;
 			 
-			if (Generator == null) Generator = ScriptableObject.CreateInstance<Generation>();
+			if (Generator == null) Generator = new Generation();
 			if (BiomesData == null) BiomesData = new List<BiomeData>();
 			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 			if (MoistureMapData == null) MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
-			if (Tessellation == null) Tessellation = ScriptableObject.CreateInstance<TessellationData>();
-			if (Grass == null) Grass = ScriptableObject.CreateInstance<GrassData>();
-			if (EditorState == null) EditorState = ScriptableObject.CreateInstance<EditorStateData>();
-			if (Preview == null) Preview = ScriptableObject.CreateInstance<TerrainPreview>();
+			if (Tessellation == null) Tessellation = new TessellationData();
+			if (Grass == null) Grass = new GrassData();
+			if (EditorState == null) EditorState = new EditorStateData();
+			if (Preview == null) Preview = new TerrainPreview();
 		}
 
 		void Reset() {
@@ -134,6 +134,37 @@ namespace Terra.Terrain {
 			}
 		}
 
+		/// <summary>
+		/// Gets the biome at the passed x and z world coordinates.
+		/// </summary>
+		/// <param name="x">world space x coordinate</param>
+		/// <param name="z">world space z coordinate</param>
+		/// <returns>Found <see cref="BiomeData"/> instance, null if nothing was found.</returns>
+		public BiomeData GetBiomeAt(float x, float z) {
+			BiomeData chosen = null;
+			var settings = Instance;
+
+			foreach (BiomeData b in BiomesData) {
+				var hm = settings.HeightMapData;
+				var tm = settings.TemperatureMapData;
+				var mm = settings.MoistureMapData;
+
+				if (b.IsHeightConstrained && !hm.HasGenerator()) continue;
+				if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
+				if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
+
+				bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(hm.GetValue(x, z)) || !b.IsHeightConstrained;
+				bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(x, z)) || !b.IsTemperatureConstrained;
+				bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(x, z)) || !b.IsMoistureConstrained;
+
+				if (passHeight && passTemp && passMoisture) {
+					chosen = b;
+				}
+			}
+
+			return chosen;
+		}
+
 		private void CreateMTD() {
 			//Create MT Dispatch if not already there
 			if (FindObjectOfType<MTDispatch>() == null) {
@@ -169,6 +200,8 @@ namespace Terra.Terrain {
 			EditorState.GenerateOnStart = true;
 		}
 
+
+
 		#region Terra Related Setting Classes
 
 		internal static class TerraDebug {
@@ -189,7 +222,7 @@ namespace Terra.Terrain {
 		/// Container for data relating to the state of the TerraSettingsEditor
 		/// </summary>
 		[Serializable]
-		public class EditorStateData : ScriptableObject {
+		public class EditorStateData {
 			public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
 			public bool GenerateOnStart = true;
@@ -217,7 +250,7 @@ namespace Terra.Terrain {
 		}
 
 		[Serializable]
-		public class Generation : ScriptableObject {
+		public class Generation {
 			public GameObject TrackedObject;
 			public int GenerationRadius = 3;
 
@@ -232,14 +265,14 @@ namespace Terra.Terrain {
 			public NoiseGraph Graph;
 			public TilePool Pool;
 
-			void OnEnable() {
+			public Generation() { 
 				if (Pool == null) Pool = new TilePool();
-				if (Graph == null) Graph = CreateInstance<NoiseGraph>();
+				if (Graph == null) Graph = ScriptableObject.CreateInstance<NoiseGraph>();
 			}
 		}
 
 		[Serializable]
-		public class TessellationData : ScriptableObject {
+		public class TessellationData {
 			public float TessellationAmount = 4f;
 			public float TessellationMinDistance = 5f;
 			public float TessellationMaxDistance = 30f;
@@ -247,7 +280,7 @@ namespace Terra.Terrain {
 		}
 
 		[Serializable]
-		public class GrassData : ScriptableObject {
+		public class GrassData {
 			public bool PlaceGrass = false;
 			public float GrassStepLength = 1.5f;
 			public float GrassVariation = 0.8f;
@@ -357,43 +390,18 @@ namespace Terra.Terrain {
 			/// Create a preview texture for the passed list of biomes by 
 			/// coloring biomes that pass constraints.
 			/// </summary>
-			public static Texture2D GetPreviewTexture(int width, int height, IList<BiomeData> biomeList, float zoom = 1f) {
+			public static Texture2D GetPreviewTexture(int width, int height, float zoom = 1f) {
 				Texture2D tex = new Texture2D(width, height);
 
 				for (int i = 0; i < width; i++) {
 					for (int j = 0; j < height; j++) {
-						BiomeData b = GetBiomeAt(i / zoom, j / zoom, biomeList);
+						BiomeData b = Instance.GetBiomeAt(i / zoom, j / zoom);
 						tex.SetPixel(i, j, b == null ? Color.black : b.Color);
 					}
 				}
 
 				tex.Apply();
 				return tex;
-			}
-
-			public static BiomeData GetBiomeAt(float x, float y, IList<BiomeData> biomes) {
-				BiomeData chosen = null;
-				var settings = Instance;
-
-				foreach (BiomeData b in biomes) {
-					var hm = settings.HeightMapData;
-					var tm = settings.TemperatureMapData;
-					var mm = settings.MoistureMapData;
-
-					if (b.IsHeightConstrained && !hm.HasGenerator()) continue;
-					if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
-					if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
-
-					bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(hm.GetValue(x, y)) || !b.IsHeightConstrained;
-					bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(x, y)) || !b.IsTemperatureConstrained;
-					bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(x, y)) || !b.IsMoistureConstrained;
-
-					if (passHeight && passTemp && passMoisture) {
-						chosen = b;
-					}
-				}
-
-				return chosen;
 			}
 		}
 
@@ -408,7 +416,15 @@ namespace Terra.Terrain {
 			/// <see cref="MapType"/> is set to <see cref="MapGeneratorType.Custom"/>, 
 			/// <see cref="CustomGenerator"/> is returned.
 			/// </summary>
-			public Generator Generator;
+			public Generator Generator {
+				get {
+					if (_generator == null) {
+						UpdateGenerator();
+					}
+
+					return _generator;
+				}
+			}
 
 			/// <summary>
 			/// The type of Generator to use when constructing a map.
@@ -463,6 +479,11 @@ namespace Terra.Terrain {
 			/// Name of this map
 			/// </summary>
 			public string Name = "";
+
+			/// <summary>
+			/// Internal <see cref="Generator"/>
+			/// </summary>
+			private Generator _generator;
 
 			/// <summary>
 			/// Internal <see cref="CustomGenerator"/>
@@ -521,11 +542,11 @@ namespace Terra.Terrain {
 			/// before returning.
 			/// </summary>
 			/// <param name="x">x coordinate</param>
-			/// <param name="y">y coordinate</param>
+			/// <param name="z">z coordinate</param>
 			/// <param name="zoom">Optionally specify a zoom factor</param>
 			/// <returns></returns>
-			public float GetValue(float x, float y, float zoom = 1f) {
-				return (Generator.GetValue(x / zoom, 0, y / zoom) + 1) / 2;
+			public float GetValue(float x, float z, float zoom = 1f) {
+				return (Generator.GetValue(x / zoom, 0, z / zoom) + 1) / 2;
 			}
 
 			/// <summary>
@@ -555,7 +576,7 @@ namespace Terra.Terrain {
 						return null;
 				}
 
-				Generator = gen;
+				_generator = gen;
 				return gen;
 			}
 

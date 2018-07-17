@@ -11,69 +11,82 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Resolution of this mesh
 		/// </summary>
-		public int MeshResolution { get; private set; }
+		public Resolution MeshResolution { get; private set; }
 
 		/// <summary>
-		/// List of existing mesh resolutions sorted by key 
-		/// (numerical representation of the resolution)
+		/// List of meshes that have already been computed. Sorted by 
+		/// their resolutions.
 		/// </summary>
-		private SortedList<int, MeshData> ExistingResolutions = new SortedList<int, MeshData>();
+		public SortedList<int, MeshData> ComputedMeshes { get; private set; }
 
 		/// <summary>
 		/// Tile using this TileMesh
 		/// </summary>
-		private Tile Tile;
+		private Tile _tile;
 		
-		/// <inheritdoc />
-		public TileMesh(Tile tile, Resolution res = Resolution.HIGH) : this(tile, (int)res) { }
-
 		/// <summary>
 		/// Constructs a new TileMesh instance.
 		/// </summary>
 		/// <param name="tile">Tile to attach mesh to</param>
 		/// <param name="res">Resolution of the mesh (default 128)</param>
-		public TileMesh(Tile tile, int res = 128) {
-			Tile = tile;
+		public TileMesh(Tile tile, Resolution res = Resolution.HIGH) {
+			_tile = tile;
 			MeshResolution = res;
+
+			ComputedMeshes = new SortedList<int, MeshData>(3);
 		}
 
 		/// <summary>
-		/// Computes a mesh with the passed resolution regardless 
-		/// of whether this resolution mesh has already been computed 
-		/// or not. Once the MeshData has been computed it is cached.
+		/// Creates a mesh of resolution <see cref="MeshResolution"/> 
+		/// The result of this method is cached in <see cref="ComputedMeshes"/> 
+		/// and overwrites the old mesh if one is already cached.
+		/// 
+		/// This method can only be called asynchronously when 
+		/// <see cref="addToScene"/> is false. See <see cref="CreateMeshAsync"/>
 		/// </summary>
-		public void ComputeMesh() {
-			if (ExistingResolutions.ContainsKey(MeshResolution)) {
-				//Remove existing MeshData if it already exists
-				ExistingResolutions.Remove(MeshResolution);
+		/// <param name="addToScene">Optionally disable adding the Mesh directly to the scene</param>
+		public MeshData CreateMesh(bool addToScene = true) {
+			Vector3[] vertices = new Vector3[(int)MeshResolution * (int)MeshResolution];
+
+			for (int x = 0; x < (int)MeshResolution; x++) {
+				for (int z = 0; z < (int)MeshResolution; z++) {
+					Vector2 localXZ = PositionToLocal(x, z);
+					Vector2 worldXZ = LocalToWorld(localXZ.x, localXZ.y);
+					float y = HeightAt(worldXZ.x, worldXZ.y);
+
+					vertices[x + z * (int)MeshResolution] = new Vector3(worldXZ.x, y, worldXZ.y);
+				}
 			}
 
-			MeshData md = new MeshData();
-			//TODO: Get generator at point on Tile (implement in get generator at point in the tile class)
+			MeshData md = MeshDataFromVertices(vertices);
+			if (ComputedMeshes.ContainsKey((int)MeshResolution)) {
+				ComputedMeshes.Remove((int)MeshResolution);
+			}
+
+			ComputedMeshes.Add((int)MeshResolution, md);
+
+			if (addToScene) {
+				var mf = _tile.AddMeshFilter();
+				_tile.AddMeshRenderer();
+
+				mf.sharedMesh = md.Mesh;
+			}
+
+			return md;
+		}
+
+		/// <summary>
+		/// Creates a mesh of resolution <see cref="MeshResolution"/> 
+		/// The result of this method is cached in <see cref="ComputedMeshes"/> 
+		/// and overwrites the old mesh if one is already cached.
+		/// 
+		/// The mesh is computed asynchronously in this method. To create the mesh 
+		/// on the main thread call <see cref="CreateMesh"/> instead.
+		/// </summary>
+		/// <param name="onComplete">Callback method that is executed once computation 
+		/// has finished. Called on the main thread.</param>
+		public void CreateMeshAsync(Func<MeshData> onComplete) {
 			
-
-			//l.VertexMap = new Vector3[l.Resolution * l.Resolution];
-			//for (int x = 0; x < l.Resolution; x++) {
-			//	for (int z = 0; z < l.Resolution; z++) {
-			//		l.VertexMap[x + z * l.Resolution] = Tile.GetPositionAt(x, z, l.Resolution);
-			//	}
-			//}
-		}
-
-		/// <summary>
-		/// Sets the mesh resolution to use when creating new meshes
-		/// </summary>
-		/// <param name="res">resolution to set</param>
-		public void SetResolution(Resolution level) {
-			MeshResolution = (int)level;
-		}
-
-		/// <summary>
-		/// Sets the mesh resolution to use when creating new meshes
-		/// </summary>
-		/// <param name="res">resolution to set</param>
-		public void SetResolution(int res) {
-			MeshResolution = res;
 		}
 
 		/// <summary>
@@ -82,16 +95,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="res">resolution to check</param>
 		public bool HasComputedResolution(Resolution res) {
-			return HasComputedResolution((int)res);
-		}
-
-		/// <summary>
-		/// Whether this TileMesh has already computed a mesh 
-		/// with the passed resolution.
-		/// </summary>
-		/// <param name="res">resolution to check</param>
-		public bool HasComputedResolution(int res) {
-			return ExistingResolutions.ContainsKey(res);
+			return ComputedMeshes.ContainsKey((int)res);
 		}
 
 		/// <summary>
@@ -111,7 +115,7 @@ namespace Terra.Terrain {
 				Vector3 vert0 = verts[tri0];
 				Vector3 vert1 = verts[tri1];
 				Vector3 vert2 = verts[tri2];
-				Vector3 normal = new Vector3() {
+				Vector3 normal = new Vector3 {
 					x = vert0.y * vert1.z - vert0.y * vert2.z - vert1.y * vert0.z + vert1.y * vert2.z + vert2.y * vert0.z - vert2.y * vert1.z,
 					y = -vert0.x * vert1.z + vert0.x * vert2.z + vert1.x * vert0.z - vert1.x * vert2.z - vert2.x * vert0.z + vert2.x * vert1.z,
 					z = vert0.x * vert1.y - vert0.x * vert2.y - vert1.x * vert0.y + vert1.x * vert2.y + vert2.x * vert0.y - vert2.x * vert1.y
@@ -133,59 +137,63 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Polls the passed Generator for a value at the passed x / z position. 
-		/// Applies spread and amplitude to computation.
+		/// Transforms the passed x and z incrementors into local coordinates 
+		/// of a Mesh plane.
 		/// </summary>
-		/// <param name="xPos">X position to get value at</param>
-		/// <param name="zPos">Z position to get value at</param>
-		/// <param name="settings">Settings instance for amplitude and spread</param>
-		/// <param name="gen">Generator to get value from</param>
+		/// <param name="x">x position to transform</param>
+		/// <param name="z">z position to transform</param>
 		/// <returns></returns>
-		public static float PollGenerator(float xPos, float zPos, TerraSettings settings, Generator gen) {
-			float spread = 1f / (settings.Generator.Spread * settings.Generator.MeshResolution);
-			return gen.GetValue(xPos * spread, zPos * spread, 0f) * settings.Generator.Amplitude;
+		public Vector2 PositionToLocal(int x, int z) {
+			float length = TerraSettings.Instance.Generator.Length;
+
+			float xLocal = ((float)x / ((int)MeshResolution - 1) - .5f) * length;
+			float zLocal = ((float)z / ((int)MeshResolution - 1) - .5f) * length;
+
+			return new Vector2(xLocal, zLocal);
 		}
 
 		/// <summary>
-		/// Polls the passed Generator for a value at the passed x / z position. 
-		/// Applies spread and amplitude from TerraSettings global instance to computation.
+		/// Converts local X and Z coordinates to <see cref="Tile"/> world 
+		/// coordinates.
 		/// </summary>
-		/// <param name="xPos">X position to get value at</param>
-		/// <param name="zPos">Z position to get value at</param>
-		/// <returns>height value if available, float default otherwise (0.0)</returns>
-		public static float PollGenerator(float xPos, float zPos) {
+		/// <param name="localX">Local x coordinate on mesh</param>
+		/// <param name="localZ">Local z coordinate on mesh</param>
+		/// <returns>World X and Z coordinates</returns>
+		public Vector2 LocalToWorld(float localX, float localZ) {
+			float worldX = localX + (_tile.Position.x * (int)MeshResolution);
+			float worldZ = localZ + (_tile.Position.y * (int)MeshResolution);
+
+			return new Vector2(worldX, worldZ);
+		}
+
+		/// <summary>
+		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
+		/// returns the height value found at [x, 0, z]. This method applies the 
+		/// amplitude and spread from <see cref="TerraSettings"/> to the result.
+		/// </summary>
+		/// <param name="worldX">World x coordinate</param>
+		/// <param name="worldZ">World z coordinate</param>
+		/// <returns>height</returns>
+		public float HeightAt(float worldX, float worldZ) {
 			var sett = TerraSettings.Instance;
-			if (sett != null && sett.Generator.Graph.GetEndGenerator() != null) {
-				return PollGenerator(xPos, zPos, sett, sett.Generator.Graph.GetEndGenerator());
-			}
-
-			return default(float);
+			var amp = sett.Generator.Amplitude;
+			var spread = sett.Generator.Spread;
+			var gen = sett.HeightMapData.Generator;
+		
+			//CoherentNoise considers Z to be up & down
+			return gen.GetValue(worldX * spread, worldZ * spread, 0) * amp;
 		}
 
 		/// <summary>
-		/// Static version of <see cref="Terra.Terrain.Tile.CreateRawMesh(UnityEngine.Vector2,Terra.CoherentNoise.Generator)"/>
-		/// Creates a "raw" mesh from the passed generator and settings specified 
-		/// in <c>TerraSettings</c>. This method can be executed off the main thread.
-		/// 
-		/// Because of Unity's incompatibility with multithreading, a <see cref="MeshData"></see> 
-		/// struct is returned with contents of the generated Mesh, instead of using the 
-		/// <see cref="Terra.Terrain.Tile.Mesh"></see> class.
+		/// Creates the rest of the mesh by referencing the passed vertices 
+		/// for normals, UVS, and triangles.
 		/// </summary>
-		/// <param name="position">Position in tile grid, used for polling generator</param>
-		/// <param name="gen">Generator to apply</param>
-		/// <returns>triangles, vertices, normals, and UVs of the generated mesh</returns>
-		public static MeshData CreateRawMesh(TerraSettings settings, Vector2 position, Generator gen) {
-			int res = settings.Generator.MeshResolution;
-			float len = settings.Generator.Length;
-			float spread = 1f / (settings.Generator.Spread * settings.Generator.MeshResolution);
+		/// <param name="vertices">Vertices of mesh</param>
+		/// <returns>Filled MeshData</returns>
+		private MeshData MeshDataFromVertices(Vector3[] vertices) {
+			int res = (int)MeshResolution;
 
-			Vector3[] vertices = new Vector3[res * res];
-			for (int z = 0; z < res; z++) {
-				for (int x = 0; x < res; x++) {
-					vertices[x + z * res] = GetPositionAt(x, z, res, settings, gen, position);
-				}
-			}
-
+			//UVs
 			Vector2[] uvs = new Vector2[vertices.Length];
 			for (int v = 0; v < res; v++) {
 				for (int u = 0; u < res; u++) {
@@ -193,6 +201,7 @@ namespace Terra.Terrain {
 				}
 			}
 
+			//Triangles
 			int nbFaces = (res - 1) * (res - 1);
 			int[] triangles = new int[nbFaces * 6];
 			int t = 0;
@@ -208,33 +217,17 @@ namespace Terra.Terrain {
 				triangles[t++] = i + 1;
 			}
 
+			//Normals
 			Vector3[] normals = new Vector3[vertices.Length];
-			TileMesh.CalculateNormalsManaged(vertices, ref normals, triangles);
+			CalculateNormalsManaged(vertices, ref normals, triangles);
 
-			MeshData mesh = new MeshData();
-			mesh.triangles = triangles;
-			mesh.vertices = vertices;
-			mesh.normals = normals;
-			mesh.uvs = uvs;
+			MeshData md = new MeshData();
+			md.Triangles = triangles;
+			md.Vertices = vertices;
+			md.Normals = normals;
+			md.Uvs = uvs;
 
-			return mesh;
-		}
-
-		/// <summary>
-		/// Static version of <see cref="GetPositionAt(int, int, int)"/>
-		/// </summary>
-		/// <returns></returns>
-		public static Vector3 GetPositionAt(int xPos, int zPos, int resolution, TerraSettings settings, Generator gen, Vector2 position) {
-			float amp = settings.Generator.Amplitude;
-			float spread = settings.Generator.Spread;
-			float length = settings.Generator.Length;
-
-			float worldX = ((float)xPos / (resolution - 1) - .5f) * length;
-			float worldZ = ((float)zPos / (resolution - 1) - .5f) * length;
-			float worldY = gen.GetValue(((position.x * length) + xPos) * spread,
-				               ((position.y * length) + zPos) * spread, 0f) * amp;
-
-			return new Vector3(worldX, worldY, worldZ);
+			return md;
 		}
 	}
 
@@ -247,143 +240,5 @@ namespace Terra.Terrain {
 		LOW = 32, 
 		MEDIUM = 64,
 		HIGH = 128
-	}
-
-	/// <summary>
-	/// Handles assigning LOD levels to individual TerrainTiles 
-	/// and changing the resolution at runtime.
-	/// </summary>
-	public class LODLevel {
-		private Tile Tile;
-		private List<Level> Levels;
-
-		public LODLevel(Tile tile) {
-			Tile = tile;
-			Levels = new List<Level>();
-		}
-
-		public LODLevel(Tile tile, List<Level> levels) {
-			Tile = tile;
-			Levels = levels;
-		}
-
-		public LODLevel(Tile tile, Level level) : this(tile) {
-			Levels.Add(level);
-		}
-
-		/// <summary>
-		/// Sets the available LOD levels of this Tile
-		/// </summary>
-		/// <param name="levels"></param>
-		public void SetLODLevels(List<Level> levels) {
-			Levels = levels;
-		}
-
-		/// <summary>
-		/// Adds a new LOD level to this Tile
-		/// </summary>
-		/// <param name="level"></param>
-		public void AddLODLevel(Level level) {
-			Levels.Add(level);
-		}
-
-		/// <summary>
-		/// Activates an LOD Level and applies the changes to the 
-		/// assigned Tile. If the vertex map hasn't already been 
-		/// computed for the requested LOD level, it is computed.
-		/// </summary>
-		/// <param name="level">level to activate</param>
-		/// <exception cref="LevelNotSetException">Thrown when the passed level hasn't been set</exception>
-		public void ActivateLODLevel(int level) {
-			Level l = GetLevel(level);
-			if (l == null) {
-				throw new LevelNotSetException();
-			}
-
-			if (!l.HasHeightmap()) {
-				PrecomputeLODLevel(l.LevelNum);
-			}
-
-			var md = Tile.CreateRawMesh(l.VertexMap, l.Resolution);
-			Tile.RenderRawMeshData(md);
-		}
-
-		/// <summary>
-		/// Precomputes the necessary information needed by the 
-		/// passed LOD level to change the resolution of the 
-		/// current Tile. Consider calling this before 
-		/// <see cref="ActivateLODLevel(int)"></see> as computing a heightmap 
-		/// can take time. This method is thread safe.
-		/// </summary>
-		/// <param name="level">level to precompute</param>
-		/// <exception cref="LevelNotSetException">Thrown when the passed level hasn't been set</exception>
-		public void PrecomputeLODLevel(int level) {
-			Level l = GetLevel(level);
-			if (l == null) {
-				throw new LevelNotSetException();
-			}
-
-			//Setup vertex map
-			l.VertexMap = new Vector3[l.Resolution * l.Resolution];
-			for (int x = 0; x < l.Resolution; x++) {
-				for (int z = 0; z < l.Resolution; z++) {
-					l.VertexMap[x + z * l.Resolution] = Tile.GetPositionAt(x, z, l.Resolution);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Finds the LOD level that is internally stored and 
-		/// returns it if its found.
-		/// </summary>
-		/// <param name="level">level to search for</param>
-		/// <returns>Level instance if found, null otherwise</returns>
-		public Level GetLevel(int level) {
-			foreach (Level l in Levels) {
-				if (l.LevelNum == level) {
-					return l;
-				}
-			}
-
-			return null;
-		}
-
-		/// <summary>
-		/// Container class for information level of detail data. 
-		/// Contains the resolution of the heightmap and the cached 
-		/// heightmap if one is available.
-		/// </summary>
-		public class Level {
-			public int Resolution = 128;
-
-			/// <summary>
-			/// Array of Vector3 positions in world space that each represent 
-			/// a single vertex. Indicies should be accessed using the following 
-			/// equation: x + z * resolution = position
-			/// </summary>
-			public Vector3[] VertexMap = null;
-
-			public int LevelNum;
-
-			public Level(int resolution, int level) {
-				Resolution = resolution;
-				LevelNum = level;
-			}
-
-			public bool HasHeightmap() {
-				return VertexMap != null;
-			}
-		}
-
-		/// <summary>
-		/// This exception occurs when a numerical LOD level 
-		/// is passed but this LODLevel instance hasn't been assigned 
-		/// the passed level.
-		/// </summary>
-		public class LevelNotSetException: Exception {
-			public LevelNotSetException(string message) : base(message) { }
-
-			public LevelNotSetException() : base("A LOD level was not set for the passed number") { }
-		}
 	}
 }

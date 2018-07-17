@@ -215,7 +215,7 @@ namespace UnityEditor.Terra {
 				rect.width = texWidth;
 				if (GUI.Button(rect, "Update Preview")) {
 					Settings.EditorState.BiomePreview =
-						TerraSettings.BiomeData.GetPreviewTexture((int)texWidth, (int)texWidth / 2, _biomeList.List, Settings.EditorState.BiomePreviewZoom);
+						TerraSettings.BiomeData.GetPreviewTexture((int)texWidth, (int)texWidth / 2, Settings.EditorState.BiomePreviewZoom);
 				}
 			}
 

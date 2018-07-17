@@ -139,9 +139,11 @@ namespace Terra.Terrain {
 				if (cached != null) {
 					Cache.AddActiveTile(cached);
 				} else {
-					yield return AddTileAsync(pos);
+					//yield return AddTileAsync(pos);
 				}
 			}
+
+			yield return null;
 		}
 
 		/// <summary>
@@ -170,59 +172,6 @@ namespace Terra.Terrain {
 		/// <returns>Tile x & z positions to add to world</returns>
 		private List<Vector2> GetTilePositionsFromRadius() {
 			return GetTilePositionsFromRadius(Settings.Generator.GenerationRadius, Settings.Generator.TrackedObject.transform.position, Settings.Generator.Length);
-		}
-
-		/// <summary>
-		/// Adds a tile at the passed position asynchronously
-		/// </summary>
-		/// <param name="pos">Position to add tile at</param>
-		public IEnumerator AddTileAsync(Vector2 pos) {
-			Tile tile = new GameObject("Tile: " + pos).AddComponent<Tile>();
-			queuedTiles++;
-
-			if (Settings.EditorState.UseMultithreading) {
-				ThreadData data = new ThreadData();
-				data.tile = tile;
-				data.gen = Settings.Generator.Graph.GetEndGenerator();
-
-				ThreadPool.QueueUserWorkItem(new WaitCallback((d) => {
-					//GetValue is not thread safe and must be locked
-					lock (pollLock) {
-						if (d is ThreadData) {
-							ThreadData tData = (ThreadData)d;
-							MeshData md = tData.tile.CreateRawMesh(pos, tData.gen);
-
-							MTDispatch.Instance().Enqueue(() => { //Main Thread
-								tData.tile.RenderRawMeshData(md);
-
-								if (Settings.EditorState.UseCustomMaterial)
-									tile.ApplyCustomMaterial();
-								else
-									tile.Details.ApplySplatmap();
-
-								tile.UpdatePosition(pos);
-								Cache.AddActiveTile(tile);
-								queuedTiles--;
-							});
-						}
-					}
-				}), data);
-			} else {
-				yield return new WaitForSecondsRealtime(ADD_TILE_DELAY);
-
-				tile.CreateMesh(pos, false);
-				yield return null;
-
-				if (Settings.EditorState.UseCustomMaterial)
-					tile.ApplyCustomMaterial();
-				else
-					tile.Details.ApplySplatmap();
-				tile.gameObject.GetComponent<MeshRenderer>().enabled = true;
-
-				Cache.AddActiveTile(tile);
-
-				queuedTiles--;
-			}
 		}
 	}
 }

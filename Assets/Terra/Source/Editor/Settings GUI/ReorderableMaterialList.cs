@@ -4,7 +4,7 @@ using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
-	public class ReorderableMaterialList: GenericListAdaptor<TerrainPaint.SplatData> {
+	public class ReorderableMaterialList: GenericListAdaptor<TerrainPaint.SplatInfo> {
 		private TerraSettings Settings;
 
 		const float MAX_HEIGHT = 200f;
@@ -21,7 +21,7 @@ namespace UnityEditor.Terra {
 		public override void DrawItem(Rect position, int index) {
 			//To-be modified original-- caching original position
 			Rect pos = position;
-			TerrainPaint.SplatData splat = Settings.SplatData[index];
+			TerrainPaint.SplatInfo splat = Settings.SplatData[index];
 			
 			//Set the title
 			//ReorderableListGUI.Title("Elevation Material " + (index + 1));
@@ -70,11 +70,11 @@ namespace UnityEditor.Terra {
 			pos.y += CTRL_HEIGHT + PADDING_SM;
 
 			//GUI for different placement types
-			splat.PlacementType = (TerrainPaint.PlacementType)EditorGUI.EnumPopup(pos, "Placement Type", splat.PlacementType);
+			splat.PlacementType = (TerraSettings.DetailData.PlacementType)EditorGUI.EnumPopup(pos, "Placement Type", splat.PlacementType);
 			pos.y += CTRL_HEIGHT + PADDING_SM;
 
 			switch (splat.PlacementType) {
-				case TerrainPaint.PlacementType.Angle:
+				case TerraSettings.DetailData.PlacementType.Angle:
 					EditorGUI.LabelField(pos, "Min Angle", splat.AngleMin.ToString("0") + " deg");
 					pos.y += CTRL_HEIGHT + PADDING_SM;
 
@@ -85,7 +85,7 @@ namespace UnityEditor.Terra {
 					pos.y += CTRL_HEIGHT + PADDING_SM;
 
 					break;
-				case TerrainPaint.PlacementType.ElevationRange:
+				case TerraSettings.DetailData.PlacementType.ElevationRange:
 					if (!splat.IsMaxHeight) {
 						splat.MaxRange = EditorGUI.FloatField(pos, "Max Height", splat.MaxRange);
 						pos.y += CTRL_HEIGHT + PADDING_SM;
@@ -133,7 +133,7 @@ namespace UnityEditor.Terra {
 
 		public override float GetItemHeight(int index) {
 			const int minHeight = (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
-			TerrainPaint.SplatData splat = Settings.SplatData[index];
+			TerrainPaint.SplatInfo splat = Settings.SplatData[index];
 
 			float height = minHeight;
 
@@ -146,10 +146,10 @@ namespace UnityEditor.Terra {
 
 			//Placement type specific heights
 			switch (splat.PlacementType) {
-				case TerrainPaint.PlacementType.Angle:
+				case TerraSettings.DetailData.PlacementType.Angle:
 					height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
 					break;
-				case TerrainPaint.PlacementType.ElevationRange:
+				case TerraSettings.DetailData.PlacementType.ElevationRange:
 					if (Settings.EditorState.IsMaxHeightSelected && Settings.EditorState.IsMinHeightSelected) { //Both selected
 						height += (CTRL_HEIGHT * 2) + (PADDING_SM * 2);
 					} else if (Settings.EditorState.IsMaxHeightSelected || Settings.EditorState.IsMinHeightSelected) { //One selected

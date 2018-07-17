@@ -9,7 +9,7 @@ namespace Terra.Terrain {
 	[ExecuteInEditMode]
 	public class TerrainPaint {
 		[Serializable]
-		public class SplatData {
+		public class SplatInfo {
 			public Texture2D Diffuse;
 			public Texture2D Normal;
 			public Vector2 Tiling = new Vector2(1, 1);
@@ -19,7 +19,7 @@ namespace Terra.Terrain {
 			public float Metallic;
 			public float Blend = 30f;
 
-			public PlacementType PlacementType;
+			public TerraSettings.DetailData.PlacementType PlacementType;
 
 			public float AngleMin = 5f;
 			public float AngleMax = 25f;
@@ -29,15 +29,12 @@ namespace Terra.Terrain {
 			public bool IsMaxHeight;
 			public bool IsMinHeight;
 		}
-		public enum PlacementType {
-			ElevationRange,
-			Angle
-		}
+
 
 		public int AlphaMapResolution = 128;
 
 		private GameObject TerrainObject;
-		private List<SplatData> SplatSettings;
+		private List<SplatInfo> SplatSettings;
 		private TerraSettings Settings;
 
 		//Terrain/Mesh
@@ -129,31 +126,31 @@ namespace Terra.Terrain {
 			float angle = sample.Angle;
 			float[] weights = new float[SplatSettings.Count];
 
-			var orderMap = new Dictionary<PlacementType, int>() {
-				{ PlacementType.ElevationRange, 0 },
-				{ PlacementType.Angle, 1 }
+			var orderMap = new Dictionary<TerraSettings.DetailData.PlacementType, int>() {
+				{ TerraSettings.DetailData.PlacementType.ElevationRange, 0 },
+				{ TerraSettings.DetailData.PlacementType.Angle, 1 }
 			};
-			List<SplatData> ordered = SplatSettings
+			List<SplatInfo> ordered = SplatSettings
 			.OrderBy(s => orderMap[s.PlacementType]) //Order elevation before angle
 			//.OrderBy(s => s.MinRange)                //Order lower ranges 
 			//.OrderBy(s => s.IsMinHeight)             //Order min height first
 			.ToList();
 
 			for (int i = 0; i < SplatSettings.Count; i++) {
-				SplatData splat = ordered[i];
+				SplatInfo splat = ordered[i];
 
 				float min = splat.IsMinHeight ? float.MinValue : splat.MinRange;
 				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxRange;
 
 				switch (splat.PlacementType) {
-					case PlacementType.Angle:
+					case TerraSettings.DetailData.PlacementType.Angle:
 						if (angle > splat.AngleMin && angle < splat.AngleMax) {
 							float factor = Mathf.Clamp01(((angle - splat.AngleMin) ) / splat.Blend);
 							weights[i] = factor;
 						}
 
 						break;
-					case PlacementType.ElevationRange:
+					case TerraSettings.DetailData.PlacementType.ElevationRange:
 						if (height > min && height < max) {
 							if (i > 0) { //Can blend up
 								float factor = Mathf.Clamp01((splat.Blend - (height - min)) / splat.Blend);
@@ -235,7 +232,7 @@ namespace Terra.Terrain {
 		/// <param name="index">Splat index to apply material to (0 - 3)</param>
 		/// <param name="splat"></param>
 		/// <param name="mat">Material to apply</param>
-		void SetMaterialForSplatIndex(int index, SplatData splat, Material mat) {
+		void SetMaterialForSplatIndex(int index, SplatInfo splat, Material mat) {
 			//Main Texture
 			mat.SetTexture("_Splat" + index, splat.Diffuse);
 			mat.SetTextureScale("_Splat" + index, splat.Tiling);

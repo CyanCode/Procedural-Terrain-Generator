@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Terra.CoherentNoise;
+using System.Threading;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -23,13 +24,15 @@ namespace Terra.Terrain {
 		/// Tile using this TileMesh
 		/// </summary>
 		private Tile _tile;
+
+		private readonly Object _asyncMeshLock = new Object();
 		
 		/// <summary>
 		/// Constructs a new TileMesh instance.
 		/// </summary>
 		/// <param name="tile">Tile to attach mesh to</param>
 		/// <param name="res">Resolution of the mesh (default 128)</param>
-		public TileMesh(Tile tile, Resolution res = Resolution.HIGH) {
+		public TileMesh(Tile tile, Resolution res = Resolution.High) {
 			_tile = tile;
 			MeshResolution = res;
 
@@ -52,9 +55,12 @@ namespace Terra.Terrain {
 				for (int z = 0; z < (int)MeshResolution; z++) {
 					Vector2 localXZ = PositionToLocal(x, z);
 					Vector2 worldXZ = LocalToWorld(localXZ.x, localXZ.y);
-					float y = HeightAt(worldXZ.x, worldXZ.y);
 
-					vertices[x + z * (int)MeshResolution] = new Vector3(worldXZ.x, y, worldXZ.y);
+					lock (_asyncMeshLock) {
+						float y = HeightAt(worldXZ.x, worldXZ.y);
+
+						vertices[x + z * (int)MeshResolution] = new Vector3(worldXZ.x, y, worldXZ.y);
+					}
 				}
 			}
 
@@ -66,8 +72,8 @@ namespace Terra.Terrain {
 			ComputedMeshes.Add((int)MeshResolution, md);
 
 			if (addToScene) {
-				var mf = _tile.AddMeshFilter();
-				_tile.AddMeshRenderer();
+				var mf = _tile.GetMeshFilter();
+				_tile.GetMeshRenderer();
 
 				mf.sharedMesh = md.Mesh;
 			}
@@ -85,8 +91,22 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="onComplete">Callback method that is executed once computation 
 		/// has finished. Called on the main thread.</param>
-		public void CreateMeshAsync(Func<MeshData> onComplete) {
-			
+		/// <param name="addToScene">Optionally disable adding the Mesh directly to the scene</param>
+		public void CreateMeshAsync(Action<MeshData> onComplete, bool addToScene = true) {
+			ThreadPool.QueueUserWorkItem(d => {
+				MeshData md = CreateMesh(false);
+
+				MTDispatch.Instance().Enqueue(() => { //Main Thread
+					if (addToScene) {
+						var mf = _tile.GetMeshFilter();
+						_tile.GetMeshRenderer();
+
+						mf.sharedMesh = md.Mesh;
+					}
+
+					onComplete(md);
+				});
+			});
 		}
 
 		/// <summary>
@@ -237,8 +257,8 @@ namespace Terra.Terrain {
 	/// each correspond to a different mesh resolution.
 	/// </summary>
 	public enum Resolution : int {
-		LOW = 32, 
-		MEDIUM = 64,
-		HIGH = 128
+		Low = 32, 
+		Medium = 64,
+		High = 128
 	}
 }

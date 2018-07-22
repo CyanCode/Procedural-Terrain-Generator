@@ -2,6 +2,7 @@
 using UnityEngine;
 using Terra.CoherentNoise;
 using Assets.Terra.Terrain.Util;
+using Terra.Data;
 
 namespace Terra.Terrain {
 	public class TerrainPreview : ScriptableObject {
@@ -133,7 +134,7 @@ namespace Terra.Terrain {
 		/// <returns>List of splat textures if SplatSettings is not null and 
 		/// more than 0 splats were generated. Null otherwise.</returns>
 		private List<Texture2D> CreateSplats() {
-			if (Settings.SplatData != null) {
+			if (Settings.Splat != null) {
 				if (Paint == null)
 					Paint = new TerrainPaint(Settings.gameObject);
 
@@ -167,7 +168,7 @@ namespace Terra.Terrain {
 					//Get cached or generated splatmaps
 					if (Splats != null && Splats.Count > 0) {
 						Paint.ApplySplatmapsToShaders(Splats);
-					} else if (Settings.SplatData != null) {
+					} else if (Settings.Splat != null) {
 						Splats = CreateSplats();
 
 						if (Splats != null) {

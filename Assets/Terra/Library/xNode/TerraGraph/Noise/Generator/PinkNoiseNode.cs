@@ -1,5 +1,6 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Fractal;
+using Terra.Data;
 using Terra.Terrain;
 using Terra.Graph.Noise.Generation;
 

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Terra.Data;
 using Terra.ReorderableList;
 using Terra.Terrain;
 using UnityEditor;
 using UnityEngine;
 
-public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
+public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 	private const float MAX_HEIGHT = 200f;
 
 	private TerraSettings _settings;
@@ -39,7 +40,7 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 
 		if (biome.Color == default(Color))
 			biome.Color = Random.ColorHSV();
-		biome.Color = EditorGUILayout.ColorField("Preview Color", biome.Color);
+		biome.Color = EditorGUILayout.ColorField(new GUIContent("Preview Color"), biome.Color, false, false, false, new ColorPickerHDRConfig(0, 1, 0, 1));
 
 		//Constraints
 		EditorGUILayout.Space();
@@ -50,7 +51,7 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 		biome.IsAngleConstrained = EditorGUILayout.Toggle("Angle", biome.IsAngleConstrained);
 		if (biome.IsAngleConstrained) {
 			EditorGUI.indentLevel++;
-			biome.AngleConstraint = DrawConstraintRange("Min/Max", biome.AngleConstraint, 0f, 90f);
+			biome.AngleConstraint = EditorGUIExtension.DrawConstraintRange("Min/Max", biome.AngleConstraint, 0f, 90f);
 			EditorGUI.indentLevel--;
 		}
 
@@ -58,7 +59,7 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 		biome.IsHeightConstrained = EditorGUILayout.Toggle("Height", biome.IsHeightConstrained);
 		if (biome.IsHeightConstrained) {
 			EditorGUI.indentLevel++;
-			biome.HeightConstraint = DrawConstraintRange("Min/Max", biome.HeightConstraint, 0f, 1f);
+			biome.HeightConstraint = EditorGUIExtension.DrawConstraintRange("Min/Max", biome.HeightConstraint, 0f, 1f);
 			EditorGUI.indentLevel--;
 		}
 
@@ -66,7 +67,7 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 		biome.IsTemperatureConstrained = EditorGUILayout.Toggle("Temperature", biome.IsTemperatureConstrained);
 		if (biome.IsTemperatureConstrained) {
 			EditorGUI.indentLevel++;
-			biome.TemperatureConstraint = DrawConstraintRange("Min/Max", biome.TemperatureConstraint, 0f, 1f);
+			biome.TemperatureConstraint = EditorGUIExtension.DrawConstraintRange("Min/Max", biome.TemperatureConstraint, 0f, 1f);
 			EditorGUI.indentLevel--;
 		}
 
@@ -74,7 +75,7 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 		biome.IsMoistureConstrained = EditorGUILayout.Toggle("Moisture", biome.IsMoistureConstrained);
 		if (biome.IsMoistureConstrained) {
 			EditorGUI.indentLevel++;
-			biome.MoistureConstraint = DrawConstraintRange("Min/Max", biome.MoistureConstraint, 0f, 1f);
+			biome.MoistureConstraint = EditorGUIExtension.DrawConstraintRange("Min/Max", biome.MoistureConstraint, 0f, 1f);
 			EditorGUI.indentLevel--;
 		}
 
@@ -96,7 +97,7 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 		return EditorGUIUtility.singleLineHeight * controlCount;
 	}
 
-	private void DrawColorBox(TerraSettings.BiomeData biome) {
+	private void DrawColorBox(BiomeData biome) {
 		if (biome.Color == default(Color)) {
 			biome.Color = Random.ColorHSV();
 		}
@@ -112,33 +113,5 @@ public class ReorderableBiomeList: GenericListAdaptor<TerraSettings.BiomeData> {
 		GUILayout.Box("", style, GUILayout.MinWidth(15), GUILayout.MaxHeight(15));
 	}
 
-	private TerraSettings.BiomeData.Constraint DrawConstraint(string text, TerraSettings.BiomeData.Constraint constraint) {
-		Vector2 result = new Vector2(constraint.Min, constraint.Max);
 
-		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("Min/Max", GUILayout.MaxWidth(EditorGUIUtility.labelWidth), GUILayout.MinWidth(60));
-		
-		EditorGUILayout.BeginVertical();
-		result.x = EditorGUILayout.FloatField(result.x, GUILayout.ExpandWidth(true));
-		result.y = EditorGUILayout.FloatField(result.y, GUILayout.ExpandWidth(true));
-		EditorGUILayout.EndVertical();
-		EditorGUILayout.EndHorizontal();
-
-		return new TerraSettings.BiomeData.Constraint { Min = result.x, Max = result.y };
-	}
-
-	/// <summary>
-	/// Draws the UI for a constraint using a range slider between the 
-	/// passed min and max values
-	/// </summary>
-	private TerraSettings.BiomeData.Constraint DrawConstraintRange(string text, TerraSettings.BiomeData.Constraint constraint, float min, float max) {
-		float minConst = constraint.Min;
-		float maxConst = constraint.Max;
-		EditorGUILayout.MinMaxSlider(text, ref minConst, ref maxConst, min, max, GUILayout.ExpandWidth(true));
-		
-		GUIStyle style = new GUIStyle {alignment = TextAnchor.MiddleRight};
-		EditorGUILayout.LabelField("[" + constraint.Min.ToString("F1") + "," + constraint.Max.ToString("F1") + "]", style);
-
-		return new TerraSettings.BiomeData.Constraint(minConst, maxConst);
-	}
 }

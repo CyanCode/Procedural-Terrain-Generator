@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using Terra.CoherentNoise;
-using System.Threading;
+using Terra.Data;
 
 namespace Terra.Terrain {
 	/// <summary>

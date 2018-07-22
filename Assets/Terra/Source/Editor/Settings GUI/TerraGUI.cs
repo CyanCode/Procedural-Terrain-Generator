@@ -5,6 +5,7 @@ using Terra.ReorderableList;
 using Terra.Terrain;
 using Terra.Terrain.Util;
 using System.Linq;
+using Terra.Data;
 using Terra.ReorderableList.Internal;
 using TextureArrayInspector;
 using UnityEngine;
@@ -215,7 +216,7 @@ namespace UnityEditor.Terra {
 				rect.width = texWidth;
 				if (GUI.Button(rect, "Update Preview")) {
 					Settings.EditorState.BiomePreview =
-						TerraSettings.BiomeData.GetPreviewTexture((int)texWidth, (int)texWidth / 2, Settings.EditorState.BiomePreviewZoom);
+						BiomeData.GetPreviewTexture((int)texWidth, (int)texWidth / 2, Settings.EditorState.BiomePreviewZoom);
 				}
 			}
 
@@ -250,6 +251,17 @@ namespace UnityEditor.Terra {
 		public void Details() {
 			const string description = "Apply details to your biomes. These include textures, objects, and grass.";
 			Header("Details", description);
+
+			EditorGUIExtension.BeginBlockArea();
+
+			foreach (var biome in Settings.BiomesData) {
+				var titleStyle = EditorGUIExtension.TerraStyle.TextTitle;
+
+				EditorGUILayout.ColorField(null, Color.black, false, false, false, new ColorPickerHDRConfig(0, 1, 0, 1));
+				//EditorGUILayout.LabelField();
+			}
+
+			EditorGUIExtension.EndBlockArea();
 		}
 
 		/// <summary>
@@ -267,7 +279,7 @@ namespace UnityEditor.Terra {
 			}
 
 			//Use textures
-			if (Settings.SplatData != null) {
+			if (Settings.Splat != null) {
 				//Display material list editor
 				ReorderableListGUI.ListField(_matList);
 
@@ -340,10 +352,10 @@ namespace UnityEditor.Terra {
 			}
 
 			if (GUILayout.Button("Add Material")) {
-				if (Settings.SplatData == null)
-					Settings.SplatData = new List<TerrainPaint.SplatInfo>();
-
-				Settings.SplatData.Add(new TerrainPaint.SplatInfo());
+//				if (Settings.Splat == null)
+//					Settings.Splat = new List<TerrainPaint.SplatInfo>();
+//
+//				Settings.Splat.Add(new TerrainPaint.SplatInfo());
 			}
 		}
 

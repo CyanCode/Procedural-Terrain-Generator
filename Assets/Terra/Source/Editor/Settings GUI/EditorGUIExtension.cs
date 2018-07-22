@@ -1,12 +1,26 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using Terra.Data;
 using Terra.ReorderableList;
 using Terra.ReorderableList.Internal;
-using TextureArrayInspector;
-using UnityEditor.PostProcessing;
+using Terra.Terrain;
 
 public static class EditorGUIExtension {
+	public static GUIStyle StyleButtonToggled {
+		get {
+			BuildStyle();
+			return _toggledStyle;
+		}
+	}
+
+	public static GUIStyle StyleLabelText {
+		get {
+			BuildStyle();
+			return _labelTextStyle;
+		}
+	}
+
 	/// <summary>
 	/// Creates a min/max element that doesn't allow the min 
 	/// to be greater than the max OR the max to be smaller than 
@@ -106,8 +120,8 @@ public static class EditorGUIExtension {
 	/// Creates a toolbar that is filled in from an Enum. Useful for setting tool modes.
 	/// </summary>
 	public static Enum EnumToolbar(Enum selected) {
-		string[] toolbar = System.Enum.GetNames(selected.GetType());
-		Array values = System.Enum.GetValues(selected.GetType());
+		string[] toolbar = Enum.GetNames(selected.GetType());
+		Array values = Enum.GetValues(selected.GetType());
 
 		for (int i = 0; i < toolbar.Length; i++) {
 			string toolname = toolbar[i];
@@ -164,14 +178,14 @@ public static class EditorGUIExtension {
 		bool out_bool = false;
 
 		if (state)
-			out_bool = GUILayout.Button(label, toggled_style);
+			out_bool = GUILayout.Button(label, _toggledStyle);
 		else
 			out_bool = GUILayout.Button(label);
 
 		if (out_bool)
 			return !state;
-		else
-			return state;
+		
+		return state;
 	}
 
 	private static readonly Color BlockAreaColor = new Color(0.83f, 0.83f, 0.83f);
@@ -199,6 +213,36 @@ public static class EditorGUIExtension {
 		EditorGUILayout.EndVertical();
 	}
 
+	public static Constraint DrawConstraint(string text, Constraint constraint) {
+		Vector2 result = new Vector2(constraint.Min, constraint.Max);
+
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Min/Max", GUILayout.MaxWidth(EditorGUIUtility.labelWidth), GUILayout.MinWidth(60));
+
+		EditorGUILayout.BeginVertical();
+		result.x = EditorGUILayout.FloatField(result.x, GUILayout.ExpandWidth(true));
+		result.y = EditorGUILayout.FloatField(result.y, GUILayout.ExpandWidth(true));
+		EditorGUILayout.EndVertical();
+		EditorGUILayout.EndHorizontal();
+
+		return new Constraint { Min = result.x, Max = result.y };
+	}
+
+	/// <summary>
+	/// Draws the UI for a constraint using a range slider between the 
+	/// passed min and max values
+	/// </summary>
+	public static Constraint DrawConstraintRange(string text, Constraint constraint, float min, float max) {
+		float minConst = constraint.Min;
+		float maxConst = constraint.Max;
+		EditorGUILayout.MinMaxSlider(text, ref minConst, ref maxConst, min, max, GUILayout.ExpandWidth(true));
+
+		GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
+		EditorGUILayout.LabelField("[" + constraint.Min.ToString("F1") + "," + constraint.Max.ToString("F1") + "]", style);
+
+		return new Constraint(minConst, maxConst);
+	}
+
 	public struct TerraStyle {
 		public const int TITLE_FONT_SIZE = 12;
 
@@ -207,7 +251,7 @@ public static class EditorGUIExtension {
 	}
 
 	public class ModalPopupWindow: EditorWindow {
-		public event System.Action<bool> OnChosen;
+		public event Action<bool> OnChosen;
 		string popText = "";
 		string trueText = "Yes";
 		string falseText = "No";
@@ -237,41 +281,20 @@ public static class EditorGUIExtension {
 		}
 	}
 
-	//	public static bool ModalPopup(string text, string trueText, string falseText)
-	//	{
-	//		ModalPopupWindow popwindow = (ModalPopupWindow) EditorWindow.GetWindow(typeof(EditorGUIExtension.ModalPopupWindow));
-	//		popwindow.title = "Modal";
-	//		popwindow.SetValue(text, trueText, falseText);
-	//		popwindow.OnChosen += delegate(bool retValue) {
-	//			return retValue;
-	//		};
-	//	}
+	static GUIStyle _toggledStyle;
 
-	static GUIStyle toggled_style;
-	public static GUIStyle StyleButtonToggled {
-		get {
-			BuildStyle();
-			return toggled_style;
-		}
-	}
-
-	static GUIStyle labelText_style;
-	public static GUIStyle StyleLabelText {
-		get {
-			BuildStyle();
-			return labelText_style;
-		}
-	}
+	static GUIStyle _labelTextStyle;
 
 	private static void BuildStyle() {
-		if (toggled_style == null) {
-			toggled_style = new GUIStyle(GUI.skin.button);
-			toggled_style.normal.background = toggled_style.onActive.background;
-			toggled_style.normal.textColor = toggled_style.onActive.textColor;
+		if (_toggledStyle == null) {
+			_toggledStyle = new GUIStyle(GUI.skin.button);
+			_toggledStyle.normal.background = _toggledStyle.onActive.background;
+			_toggledStyle.normal.textColor = _toggledStyle.onActive.textColor;
 		}
-		if (labelText_style == null) {
-			labelText_style = new GUIStyle(EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).textField);
-			labelText_style.normal = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).button.onNormal;
+		if (_labelTextStyle == null) {
+			_labelTextStyle = new GUIStyle(EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).textField);
+			_labelTextStyle.normal = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector).button.onNormal;
 		}
 	}
 }
+

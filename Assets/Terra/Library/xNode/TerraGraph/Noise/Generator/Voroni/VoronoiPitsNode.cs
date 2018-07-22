@@ -1,5 +1,6 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Voronoi;
+using Terra.Data;
 using Terra.Terrain;
 
 namespace Terra.Nodes.Generation {

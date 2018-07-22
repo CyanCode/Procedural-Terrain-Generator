@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using Terra.CoherentNoise;
+using Terra.Data;
 using Terra.Terrain.Detail;
 
 namespace Terra.Terrain {

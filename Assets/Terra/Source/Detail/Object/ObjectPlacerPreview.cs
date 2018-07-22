@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using Terra.Data;
 using Terra.Terrain.Detail;
-
+using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

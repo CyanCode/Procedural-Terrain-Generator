@@ -1,11 +1,12 @@
-﻿using UnityEditor;
+﻿using Terra.Data;
+using UnityEditor;
 using UnityEngine;
 
 namespace Terra.Terrain {
 	public class AddTextureWindow: EditorWindow {
-		private TerrainPaint.SplatInfo Splat;
+		private SplatData Splat;
 
-		public static AddTextureWindow Init(ref TerrainPaint.SplatInfo splat) {
+		public static AddTextureWindow Init(ref SplatData splat) {
 			AddTextureWindow win = CreateInstance<AddTextureWindow>();
 			win.titleContent = new GUIContent("Add Splat Material");
 			win.maxSize = new Vector2(200, 280);

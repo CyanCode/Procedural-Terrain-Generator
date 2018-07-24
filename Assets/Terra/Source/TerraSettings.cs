@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
 using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation;
 using Terra.CoherentNoise.Generation.Fractal;
 using Terra.Graph.Noise;
 using Terra.Terrain;
-using UnityEditor;
-using UnityEngine;
 using Random = UnityEngine.Random;
-
 
 namespace Terra.Data {
 	[Serializable, ExecuteInEditMode]
@@ -31,7 +30,7 @@ namespace Terra.Data {
 		//Detail
 		public List<BiomeData> BiomesData; 
 		public List<SplatData> Splat; //TODO factor into details
-		public List<BiomeData.DetailData> Details;
+		public List<DetailData> Details;
 		public List<ObjectPlacementData> ObjectData;
 		public Material CustomMaterial = null;
 
@@ -68,7 +67,8 @@ namespace Terra.Data {
 			 
 			if (Generator == null) Generator = new GenerationData();
 			if (BiomesData == null) BiomesData = new List<BiomeData>();
-			if (Details == null) Details = new List<BiomeData.DetailData>();
+			if (Splat == null) Splat = new List<SplatData>();
+			if (Details == null) Details = new List<DetailData>();
 			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 			if (MoistureMapData == null) MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
@@ -233,8 +233,6 @@ namespace Terra.Data {
 			public bool UseCustomMaterial = false;
 			public bool DisplayPreview = false;
 			public bool IsAdvancedFoldout = false;
-			public bool IsMaxHeightSelected = false;
-			public bool IsMinHeightSelected = false;
 
 			//Biomes
 			public bool ShowBiomePreview = false;
@@ -324,8 +322,8 @@ namespace Terra.Data {
 		public float AngleMin = 5f;
 		public float AngleMax = 25f;
 
-		public float MinRange;
-		public float MaxRange;
+		public float MinHeight = 0.25f;
+		public float MaxHeight = 0.75f;
 		public bool IsMaxHeight;
 		public bool IsMinHeight;
 	}
@@ -352,11 +350,6 @@ namespace Terra.Data {
 	/// </summary>
 	[Serializable]
 	public class BiomeData {
-		[Serializable]
-		public class DetailData {
-				
-		}
-
 		/// <summary>
 		/// Detail information for this biome
 		/// </summary>
@@ -440,6 +433,26 @@ namespace Terra.Data {
 
 			tex.Apply();
 			return tex;
+		}
+	}
+
+	[Serializable]
+	public class DetailData {
+		public bool ShowMaterialFoldout = false;
+		public bool ShowObjectFoldout = false;
+		public bool ShowGrassFoldout = false;
+
+		public bool IsMaxHeightSelected = false;
+		public bool IsMinHeightSelected = false;
+
+		public List<SplatData> SplatsData;
+		public List<ObjectPlacementData> ObjectData;
+
+		public DetailData() {
+			if (SplatsData == null)
+				SplatsData = new List<SplatData>();
+			if (ObjectData == null)
+				ObjectData = new List<ObjectPlacementData>();
 		}
 	}
 

@@ -41,7 +41,7 @@ namespace UnityEditor.Terra {
 
 					break;
 				case TerraSettings.ToolbarOptions.Details:
-					gui.ObjectPlacement();
+					gui.Details();
 
 					break;
 			}

@@ -117,8 +117,8 @@ namespace Terra.Terrain {
 			for (int i = 0; i < SplatSettings.Count; i++) {
 				SplatData splat = ordered[i];
 
-				float min = splat.IsMinHeight ? float.MinValue : splat.MinRange;
-				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxRange;
+				float min = splat.IsMinHeight ? float.MinValue : splat.MinHeight;
+				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxHeight;
 
 				switch (splat.PlacementType) {
 					case TerraSettings.PlacementType.Angle:

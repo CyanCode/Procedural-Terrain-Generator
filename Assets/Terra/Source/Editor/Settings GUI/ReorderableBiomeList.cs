@@ -3,17 +3,51 @@ using Terra.Data;
 using Terra.ReorderableList;
 using Terra.Terrain;
 using UnityEditor;
+using UnityEditor.Terra;
 using UnityEngine;
+using System.Linq;
 
 public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 	private const float MAX_HEIGHT = 200f;
+
+	private List<KeyValuePair<BiomeData, ReorderableMaterialList>> _materialList;
+	private List<KeyValuePair<BiomeData, ReorderableObjectList>> _objectList;
 
 	private TerraSettings _settings;
 	private Dictionary<int, Rect> _positions; //Cached positions at last repaint
 
 	public ReorderableBiomeList(TerraSettings settings) : base(settings.BiomesData, null, MAX_HEIGHT) {
 		_settings = settings;
+
 		_positions = new Dictionary<int, Rect>();
+		_materialList = new List<KeyValuePair<BiomeData, ReorderableMaterialList>>();
+		_objectList = new List<KeyValuePair<BiomeData, ReorderableObjectList>>();
+	}
+
+	/// <summary>
+	/// Gets the material list associated with the passed biome
+	/// </summary>
+	/// <returns>Material list if found, null otherwise</returns>
+	public ReorderableMaterialList GetMaterialList(BiomeData biome) {
+		foreach (var kv in _materialList) {
+			if (kv.Key == biome)
+				return kv.Value;
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Gets the object list associated with the passed biome
+	/// </summary>
+	/// <returns>Object list if found, null otherwise</returns>
+	public ReorderableObjectList GetObjectList(BiomeData biome) {
+		foreach (var kv in _objectList) {
+			if (kv.Key == biome)
+				return kv.Value;
+		}
+
+		return null;
 	}
 
 	public override void DrawItem(Rect position, int index) {
@@ -32,6 +66,12 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		var biome = this[index];
 		if (biome == null) 
 			return;
+
+		//Init sublists for biome if they don't exist yet
+		if (GetMaterialList(biome) == null)
+			_materialList.Add(new KeyValuePair<BiomeData, ReorderableMaterialList>(biome, new ReorderableMaterialList(_settings, biome.Details)));
+		if (GetObjectList(biome) == null)
+			_objectList.Add(new KeyValuePair<BiomeData, ReorderableObjectList>(biome, new ReorderableObjectList(_settings, biome.Details)));
 
 		GUILayout.BeginArea(areaPos);
 
@@ -97,21 +137,13 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		return EditorGUIUtility.singleLineHeight * controlCount;
 	}
 
-	private void DrawColorBox(BiomeData biome) {
-		if (biome.Color == default(Color)) {
-			biome.Color = Random.ColorHSV();
-		}
+	public override void Remove(int index) {
+		//Remove from material and object lists first
+		if (GetMaterialList(this[index]) != null)
+			_materialList.RemoveAt(index);
+		if (GetObjectList(this[index]) != null)
+			_objectList.RemoveAt(index);
 
-		var tex = new Texture2D(1, 1);
-		tex.SetPixel(1, 1, biome.Color);
-		tex.Apply();
-
-		var style = new GUIStyle();
-		style.normal.background = tex;
-		style.margin.top = 2;
-
-		GUILayout.Box("", style, GUILayout.MinWidth(15), GUILayout.MaxHeight(15));
+		base.Remove(index);
 	}
-
-
 }

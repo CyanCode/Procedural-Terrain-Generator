@@ -6,7 +6,8 @@ using UnityEngine;
 
 namespace UnityEditor.Terra {
 	public class ReorderableMaterialList: GenericListAdaptor<SplatData> {
-		private TerraSettings Settings;
+		private TerraSettings _settings;
+		private DetailData _detail;
 
 		const float MAX_HEIGHT = 200f;
 		const int PADDING = 8;
@@ -15,17 +16,15 @@ namespace UnityEditor.Terra {
 		const int TEX_HEIGHT = 60;
 		const int TEX_CAPTION_HEIGHT = 16;
 
-		public ReorderableMaterialList(TerraSettings settings) : base(settings.Splat, null, MAX_HEIGHT) {
-			Settings = settings;
+		public ReorderableMaterialList(TerraSettings settings, DetailData detail) : base(detail.SplatsData, null, MAX_HEIGHT) {
+			_settings = settings;
+			_detail = detail;
 		}
 
 		public override void DrawItem(Rect position, int index) {
 			//To-be modified original-- caching original position
 			Rect pos = position;
-			var splat = Settings.Splat[index];
-			
-			//Set the title
-			//ReorderableListGUI.Title("Elevation Material " + (index + 1));
+			var splat = this[index];
 
 			//Insert top padding & set height
 			pos.y += 8f;
@@ -87,32 +86,39 @@ namespace UnityEditor.Terra {
 
 					break;
 				case TerraSettings.PlacementType.ElevationRange:
-					if (!splat.IsMaxHeight) {
-						splat.MaxRange = EditorGUI.FloatField(pos, "Max Height", splat.MaxRange);
-						pos.y += CTRL_HEIGHT + PADDING_SM;
-					}
-					if (!splat.IsMinHeight) {
-						splat.MinRange = EditorGUI.FloatField(pos, "Min Height", splat.MinRange);
-						pos.y += CTRL_HEIGHT + PADDING_SM;
-					}
+					float displayMin = splat.IsMinHeight ? 0f : splat.MinHeight;
+					float displayMax = splat.IsMaxHeight ? 1f : splat.MaxHeight;
+
+					EditorGUI.MinMaxSlider(pos, ref displayMin, ref displayMax, 0f, 1f);
+
+					if (!splat.IsMinHeight)
+						splat.MinHeight = displayMin;
+					if (!splat.IsMaxHeight)
+						splat.MaxHeight = displayMax;
+
+					pos.y += CTRL_HEIGHT + PADDING_SM;
+					EditorGUI.LabelField(pos, "Min Height", displayMin.ToString("0.00"));
+					pos.y += CTRL_HEIGHT + PADDING_SM;
+					EditorGUI.LabelField(pos, "Max Height", displayMax.ToString("0.00"));
+					pos.y += CTRL_HEIGHT + PADDING_SM;
 
 					//Checkboxes for infinity & -infinity heights
 					EditorGUI.BeginChangeCheck();
-					if (splat.IsMaxHeight || !Settings.EditorState.IsMaxHeightSelected) {
+					if (splat.IsMaxHeight || !_detail.IsMaxHeightSelected) {
 						splat.IsMaxHeight = EditorGUI.Toggle(pos, "Is Highest Material", splat.IsMaxHeight);
 						pos.y += CTRL_HEIGHT + PADDING_SM;
 					}
 					if (EditorGUI.EndChangeCheck()) {
-						Settings.EditorState.IsMaxHeightSelected = splat.IsMaxHeight;
+						_detail.IsMaxHeightSelected = splat.IsMaxHeight;
 					}
 
 					EditorGUI.BeginChangeCheck();
-					if (splat.IsMinHeight || !Settings.EditorState.IsMinHeightSelected) {
+					if (splat.IsMinHeight || !_detail.IsMinHeightSelected) {
 						splat.IsMinHeight = EditorGUI.Toggle(pos, "Is Lowest Material", splat.IsMinHeight);
 						pos.y += CTRL_HEIGHT + PADDING_SM;
 					}
 					if (EditorGUI.EndChangeCheck()) {
-						Settings.EditorState.IsMinHeightSelected = splat.IsMinHeight;
+						_detail.IsMinHeightSelected = splat.IsMinHeight;
 					}
 
 					break;
@@ -121,12 +127,13 @@ namespace UnityEditor.Terra {
 
 		public override void Remove(int index) {
 			//Remove max / min height bools if necessary
-			var ss = Settings.Splat[index];
+			var ss = this[index];
+
 			if (ss.IsMaxHeight) {
-				Settings.EditorState.IsMaxHeightSelected = false;
+				_detail.IsMaxHeightSelected = false;
 			} 
 			if (ss.IsMinHeight) {
-				Settings.EditorState.IsMinHeightSelected = false;
+				_detail.IsMinHeightSelected = false;
 			}
 
 			base.Remove(index);
@@ -134,7 +141,7 @@ namespace UnityEditor.Terra {
 
 		public override float GetItemHeight(int index) {
 			const int minHeight = (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
-			var splat = Settings.Splat[index];
+			var splat = this[index];
 
 			float height = minHeight;
 
@@ -151,13 +158,20 @@ namespace UnityEditor.Terra {
 					height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
 					break;
 				case TerraSettings.PlacementType.ElevationRange:
-					if (Settings.EditorState.IsMaxHeightSelected && Settings.EditorState.IsMinHeightSelected) { //Both selected
-						height += (CTRL_HEIGHT * 2) + (PADDING_SM * 2);
-					} else if (Settings.EditorState.IsMaxHeightSelected || Settings.EditorState.IsMinHeightSelected) { //One selected
-						height += (CTRL_HEIGHT * 3) + (PADDING_SM * 3);
+					if (_detail.IsMaxHeightSelected && _detail.IsMinHeightSelected) { //Both selected
+						height += (CTRL_HEIGHT * 3) + (PADDING_SM * 2);
+					} else if (_detail.IsMaxHeightSelected || _detail.IsMinHeightSelected) { //One selected
+						height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
 					} else { //None selected
-						height += (CTRL_HEIGHT * 4) + (PADDING_SM * 4);
+						height += (CTRL_HEIGHT * 5) + (PADDING_SM * 4);
 					}
+
+					if (splat.IsMaxHeight) {
+						height += (CTRL_HEIGHT * 1) + (PADDING_SM * 2);
+					} if (splat.IsMinHeight) {
+						height += (CTRL_HEIGHT * 1) + (PADDING_SM * 2);
+					}
+
 					break;
 			}
 

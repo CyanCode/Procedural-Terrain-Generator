@@ -5,7 +5,7 @@ using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
-	public class ReorderableDetailList : GenericListAdaptor<BiomeData.DetailData> {
+	public class ReorderableDetailList : GenericListAdaptor<DetailData> {
 		private TerraSettings _settings;
 		private Dictionary<int, Rect> _positions; //Cached positions at last repaint
 

@@ -28,7 +28,7 @@ namespace Terra.Terrain {
 		/// Returns the cached tile if it exists in the cache. If the tile
 		/// is not cached, returns null.
 		/// </returns>
-		public Tile GetCachedTileAtPosition(Vector2 position) {
+		public Tile GetCachedTileAtPosition(Position position) {
 			LinkedListNode<Tile> node = CachedTiles.First;
 
 			while (node != null) {
@@ -51,7 +51,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="position">Position to look for</param>
 		/// <returns>True if tile at position was found, false otherwise</returns>
-		public bool TileActiveAtPosition(Vector2 position) {
+		public bool TileActiveAtPosition(Position position) {
 			foreach (Tile t in ActiveTiles) {
 				if (t.Position == position)
 					return true;
@@ -66,10 +66,10 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="positions">Positions to compare</param>
 		/// <returns>New positions to add</returns>
-		public List<Vector2> GetNewTilePositions(List<Vector2> positions) {
-			List<Vector2> newPositions = new List<Vector2>(ActiveTiles.Count);
+		public List<Position> GetNewTilePositions(List<Position> positions) {
+			List<Position> newPositions = new List<Position>(ActiveTiles.Count);
 
-			foreach (Vector2 position in positions) {
+			foreach (Position position in positions) {
 				bool matched = false;
 
 				foreach (Tile t in ActiveTiles) {

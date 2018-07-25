@@ -100,11 +100,11 @@ namespace UnityEditor.Terra {
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
-			_settings.EditorState.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _settings.EditorState.GenerateOnStart);
+			_settings.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _settings.Generator.GenerateOnStart);
 			_settings.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", _settings.Generator.GenerationRadius);
-			if (!_settings.EditorState.UseRandomSeed)
+			if (!_settings.Generator.UseRandomSeed)
 				TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
-			_settings.EditorState.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", _settings.EditorState.UseRandomSeed);
+			_settings.Generator.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", _settings.Generator.UseRandomSeed);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
@@ -130,7 +130,7 @@ namespace UnityEditor.Terra {
 				}
 			}
 
-			_settings.EditorState.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", _settings.EditorState.UseMultithreading);
+			_settings.Generator.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", _settings.Generator.UseMultithreading);
 		}
 
 		/// <summary>

@@ -22,6 +22,21 @@ namespace Terra.Terrain {
 		public SortedList<int, MeshData> ComputedMeshes { get; private set; }
 
 		/// <summary>
+		/// The mesh that corresponds with the set <see cref="MeshResolution"/> if 
+		/// it has already been computed. Call <see cref="CreateMesh"/> to create or 
+		/// <see cref="HasCreatedMeshAtResolution"/> to check if it has already been created.
+		/// </summary>
+		public Mesh ActiveMesh {
+			get {
+				if (ComputedMeshes.ContainsKey((int)MeshResolution)) {
+					return ComputedMeshes[(int)MeshResolution].Mesh;
+				}
+
+				return null;
+			}
+		}
+
+		/// <summary>
 		/// Tile using this TileMesh
 		/// </summary>
 		private Tile _tile;
@@ -115,7 +130,7 @@ namespace Terra.Terrain {
 		/// with the passed resolution.
 		/// </summary>
 		/// <param name="res">resolution to check</param>
-		public bool HasComputedResolution(Resolution res) {
+		public bool HasCreatedMeshAtResolution(Resolution res) {
 			return ComputedMeshes.ContainsKey((int)res);
 		}
 
@@ -181,8 +196,8 @@ namespace Terra.Terrain {
 		/// <param name="localZ">Local z coordinate on mesh</param>
 		/// <returns>World X and Z coordinates</returns>
 		public Vector2 LocalToWorld(float localX, float localZ) {
-			float worldX = localX + (_tile.Position.x * (int)MeshResolution);
-			float worldZ = localZ + (_tile.Position.y * (int)MeshResolution);
+			float worldX = localX + (_tile.Position.X * (int)MeshResolution);
+			float worldZ = localZ + (_tile.Position.Z * (int)MeshResolution);
 
 			return new Vector2(worldX, worldZ);
 		}

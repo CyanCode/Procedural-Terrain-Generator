@@ -69,7 +69,7 @@ namespace Terra.Terrain {
 				Tile tile = TerrainObject.GetComponent<Tile>();
 
 				string tileName = tile != null ?
-					"Tile[" + tile.Position.x + "_" + tile.Position.y + "]" :
+					"Tile[" + tile.Position.X + "_" + tile.Position.Z + "]" :
 					"Tile[0_0]";
 				string folderPath = Application.dataPath + "/SplatImages/";
 				if (!Directory.Exists(folderPath))

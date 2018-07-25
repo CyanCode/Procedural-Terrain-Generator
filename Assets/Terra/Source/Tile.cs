@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using Terra.Data;
-using Terra.Terrain.Detail;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -10,18 +9,32 @@ namespace Terra.Terrain {
 	///	position, and texture application.
 	/// </summary>
 	public class Tile: MonoBehaviour {
-		[HideInInspector]
-		public bool IsColliderDirty = false;
-		public Mesh Terrain { get; private set; }
-		public Vector2 Position { get; private set; }
-
-		public TileMesh Mesh;
-		public TilePaint Painter;
-		
 		private TerraSettings _settings;
 
-		void OnEnable() {
-			Mesh = new TileMesh(this);
+		[HideInInspector]
+		public bool IsColliderDirty = false;
+
+		/// <summary>
+		/// Position of this Tile in the grid of Tiles
+		/// </summary>
+		public Position Position { get; private set; }
+
+		/// <summary>
+		/// Create and manage mesh(es) attached to this Tile. This 
+		/// provides an interface for creating and showing meshes of 
+		/// varying resolutions.
+		/// </summary>
+		public TileMesh MeshManager;
+
+		/// <summary>
+		/// Handles "painting" of this Tile through a splatmap that is 
+		/// applied to each MeshRenderer.
+		/// </summary>
+		public TilePaint Painter;
+		
+
+		void Awake() {
+			MeshManager = new TileMesh(this);
 			Painter = new TilePaint(this);
 
 			_settings = TerraSettings.Instance;
@@ -41,7 +54,7 @@ namespace Terra.Terrain {
 			GameObject go = new GameObject(name);
 			Tile tt = go.AddComponent<Tile>();
 
-			//Perform initilization before OnEnable
+			//Link TerraSettings before Awake
 			if (tt._settings == null) tt._settings = TerraSettings.Instance;
 			if (tt._settings == null) {
 				Debug.LogError("Cannot find a TerraSettings object in the scene");
@@ -57,13 +70,12 @@ namespace Terra.Terrain {
 		/// By default, calculating heights is done off of the main thread but 
 		/// can be disabled.
 		/// </summary>
-		/// <param name="onComplete">If <see cref="async"/> is true, <see cref="onComplete"/> 
-		/// is called after all calculations have completed. onComplete can be null if the result 
-		/// is not needed.</param>
+		/// <param name="onComplete">Called after all calculations have completed. 
+		/// <see cref="onComplete"/> can be null if the result is not needed.</param>
 		/// <param name="async">Perform mesh computation asynchronously</param>
 		public void Generate(Action onComplete, bool async = true) {
 			if (async) {
-				Mesh.CreateMeshAsync(md => {
+				MeshManager.CreateMeshAsync(md => {
 					PostCreateMeshGenerate();
 
 					if (onComplete != null) {
@@ -72,6 +84,10 @@ namespace Terra.Terrain {
 				});
 			} else {
 				PostCreateMeshGenerate();
+
+				if (onComplete != null) {
+					onComplete();
+				}
 			}
 		}
 
@@ -81,10 +97,10 @@ namespace Terra.Terrain {
 		/// are multiplied by the Length of the mesh specified in TerraSettings
 		/// </summary>
 		/// <param name="position">Position to set the Tile to (ie [1,0])</param>
-		public void UpdatePosition(Vector2 position) {
+		public void UpdatePosition(Position position) {
 			Position = position;
 			int len = _settings.Generator.Length;
-			transform.position = new Vector3(position.x * len, 0f, position.y * len);
+			transform.position = new Vector3(position.X * len, 0f, position.Z * len);
 		}
 
 		/// <summary>
@@ -94,7 +110,7 @@ namespace Terra.Terrain {
 		public void GenerateCollider() {
 			if (gameObject.GetComponent<MeshCollider>() == null || IsColliderDirty) {
 				MeshCollider collider = gameObject.AddComponent<MeshCollider>();
-				collider.sharedMesh = Terrain;
+				collider.sharedMesh = MeshManager.ActiveMesh;
 
 				TerraEvent.TriggerOnMeshColliderDidForm(gameObject, collider);
 			}

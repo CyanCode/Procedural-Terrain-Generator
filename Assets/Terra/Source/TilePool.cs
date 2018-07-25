@@ -1,16 +1,45 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using Terra.CoherentNoise;
 using Terra.Data;
+using Object = UnityEngine.Object;
 
 namespace Terra.Terrain {
+	/// <summary>
+	/// Represents a position in the grid of <see cref="Tile"/>s
+	/// </summary>
+	public struct Position {
+		public int X;
+		public int Z;
+
+		public Position(int x, int z) {
+			X = x;
+			Z = z;
+		}
+
+		public static bool operator ==(Position p1, Position p2) {
+			return p1.X == p2.X && p1.Z == p2.Z;
+		}
+
+		public static bool operator !=(Position p1, Position p2) {
+			return !(p1 == p2);
+		}
+	}
+
 	/// <summary>
 	/// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
 	/// using a thread pool.
 	/// </summary>
 	public class TilePool {
-		public TerraSettings Settings;
+		private const int CACHE_SIZE = 30;
+		private TileCache _cache = new TileCache(CACHE_SIZE);
+		
+		private int _queuedTiles = 0;
+		private bool _isGeneratingTile = false;
+
+		private TerraSettings _settings;
 
 		/// <summary>
 		/// Returns the amount of tiles that are currently set as 
@@ -18,11 +47,11 @@ namespace Terra.Terrain {
 		/// </summary>
 		public int ActiveTileCount {
 			get {
-				if (Cache == null) {
+				if (_cache == null) {
 					return 0;
 				}
 
-				return Cache.ActiveTiles.Count;
+				return _cache.ActiveTiles.Count;
 			}
 		}
 
@@ -32,24 +61,27 @@ namespace Terra.Terrain {
 		/// </summary>
 		public List<Tile> ActiveTiles {
 			get {
-				return Cache.ActiveTiles;
+				return _cache.ActiveTiles;
 			}
 		}
 
-		private TileCache Cache = new TileCache(CACHE_SIZE);
-		private int queuedTiles = 0;
-		private Object pollLock = new Object();
-		private const int CACHE_SIZE = 30;
-		private const float ADD_TILE_DELAY = 0.5f;
-		
-		private struct ThreadData {
-			public Tile tile;
-			public Generator gen;
+		public static List<Position> GetTilePositionsFromRadius(int radius, Vector3 position, int length) {
+			int xPos = Mathf.RoundToInt(position.x / length);
+			int zPos = Mathf.RoundToInt(position.z / length);
+			List<Position> result = new List<Position>(25);
+
+			for (var zCircle = -radius; zCircle <= radius; zCircle++) {
+				for (var xCircle = -radius; xCircle <= radius; xCircle++) {
+					if (xCircle * xCircle + zCircle * zCircle < radius * radius)
+						result.Add(new Position(xPos + xCircle, zPos + zCircle));
+				}
+			}
+
+			return result;
 		}
 
 		public TilePool() {
-			Settings = TerraSettings.Instance;
-
+			_settings = TerraSettings.Instance;
 		}
 
 		/// <summary>
@@ -57,26 +89,35 @@ namespace Terra.Terrain {
 		/// has finished generating.
 		/// </summary>
 		public void Update() {
-			if (queuedTiles < 1) {
-				Settings.StartCoroutine(UpdateTiles());
+			if (_queuedTiles < 1) {
+				_settings.StartCoroutine(UpdateTiles());
 			}
 
-			Settings.StartCoroutine(UpdateColliders(0.5f));
+			_settings.StartCoroutine(UpdateColliders(0.5f));
 		}
 
-		public static List<Vector2> GetTilePositionsFromRadius(int radius, Vector3 position, int length) {
-			int xPos = Mathf.RoundToInt(position.x / length);
-			int zPos = Mathf.RoundToInt(position.z / length);
-			List<Vector2> result = new List<Vector2>(25);
+		/// <summary>
+		/// Manually add (and activate) the passed Tile to the TilePool. This does not modify 
+		/// <see cref="t"/>. To automatically create a Tile according to 
+		/// <see cref="TerraSettings"/> call <see cref="AddTileAt"/> instead.
+		/// </summary>
+		/// <param name="t">Tile to add</param>
+		public void AddTile(Tile t) {
+			_cache.AddActiveTile(t);
+		}
 
-			for (var zCircle = -radius; zCircle <= radius; zCircle++) {
-				for (var xCircle = -radius; xCircle <= radius; xCircle++) {
-					if (xCircle * xCircle + zCircle * zCircle < radius * radius)
-						result.Add(new Vector2(xPos + xCircle, zPos + zCircle));
-				}
-			}
+		/// <summary>
+		/// Creates a Tile at the passed grid position, activates it, 
+		/// and places it in the scene.
+		/// This method calls <see cref="Tile.Generate"/>.
+		/// </summary>
+		/// <param name="p">position in grid to add tile at.</param>
+		/// <param name="onComplete">called when the Tile has finished generating.</param>
+		public void AddTileAt(Position p, Action<Tile> onComplete) {
+			Tile t = Tile.CreateTileGameobject("Tile [" + p.X + ", " + p.Z + "]");
+			t.UpdatePosition(p);
 
-			return result;
+			t.Generate(() => onComplete(t), _settings.Generator.UseMultithreading);
 		}
 
 		/// <summary>
@@ -88,9 +129,9 @@ namespace Terra.Terrain {
 		/// <returns>Found, overlapping, Tile instances</returns>
 		public List<Tile> GetTilesInExtent(Vector3 trackedPos, float extent) {
 			//TODO Remove params
-			List<Tile> tiles = new List<Tile>(Cache.ActiveTiles.Count);
+			List<Tile> tiles = new List<Tile>(_cache.ActiveTiles.Count);
 
-			foreach (Tile t in Cache.ActiveTiles) {
+			foreach (Tile t in _cache.ActiveTiles) {
 				MeshRenderer renderer = t.GetComponent<MeshRenderer>();
 
 				if (renderer != null) {
@@ -107,43 +148,51 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// Updates tiles that are surrounding the tracked GameObject 
-		/// asynchronously
+		/// asynchronously. When calling this method using 
+		/// <see cref="MonoBehaviour.StartCoroutine(System.Collections.IEnumerator)"/>, 
+		/// tiles are generated once per frame
 		/// </summary>
 		public IEnumerator UpdateTiles() {
-			List<Vector2> nearbyPositions = GetTilePositionsFromRadius();
-			List<Vector2> newPositions = Cache.GetNewTilePositions(nearbyPositions);
+			List<Position> nearbyPositions = GetTilePositionsFromRadius();
+			List<Position> newPositions = _cache.GetNewTilePositions(nearbyPositions);
 
 			//Remove old positions
-			for (int i = 0; i < Cache.ActiveTiles.Count; i++) {
+			for (int i = 0; i < _cache.ActiveTiles.Count; i++) {
 				bool found = false;
 
-				foreach (Vector2 nearby in nearbyPositions) {
-					if (Cache.ActiveTiles[i].Position == nearby) { //Position found, ignore
+				foreach (Position nearby in nearbyPositions) {
+					if (_cache.ActiveTiles[i].Position == nearby) { //Position found, ignore
 						found = true;
 						break;
 					}
 				}
 
 				if (!found) {
-					Cache.CacheTile(Cache.ActiveTiles[i]);
-					Cache.ActiveTiles.RemoveAt(i);
+					_cache.CacheTile(_cache.ActiveTiles[i]);
+					_cache.ActiveTiles.RemoveAt(i);
 					i--;
 				}
 			}
 
 			//Add new positions
-			foreach (Vector2 pos in newPositions) {
-				Tile cached = Cache.GetCachedTileAtPosition(pos);
+			foreach (Position pos in newPositions) {
+				Tile cached = _cache.GetCachedTileAtPosition(pos);
 
 				//Attempt to pull from cache, generate if not available
 				if (cached != null) {
-					Cache.AddActiveTile(cached);
+					AddTile(cached);
 				} else {
-					//yield return AddTileAsync(pos);
+					//Wait for tile to finish generating before starting a new one
+					while (_isGeneratingTile)
+						yield return null;
+
+					_isGeneratingTile = true;
+					AddTileAt(pos, tile => { 
+						AddTile(tile);
+						_isGeneratingTile = false;
+					});
 				}
 			}
-
-			yield return null;
 		}
 
 		/// <summary>
@@ -155,8 +204,8 @@ namespace Terra.Terrain {
 		private IEnumerator UpdateColliders(float delay) {
 			//If we're generating all colliders the extent of collision generation is 
 			//technically infinity (max value works just as well though)
-			float extent = Settings.Generator.GenAllColliders ? float.MaxValue : Settings.Generator.ColliderGenerationExtent;
-			List<Tile> tiles = GetTilesInExtent(Settings.Generator.TrackedObject.transform.position, extent);
+			float extent = _settings.Generator.GenAllColliders ? float.MaxValue : _settings.Generator.ColliderGenerationExtent;
+			List<Tile> tiles = GetTilesInExtent(_settings.Generator.TrackedObject.transform.position, extent);
 
 			foreach (Tile t in tiles) {
 				t.GenerateCollider();
@@ -170,8 +219,8 @@ namespace Terra.Terrain {
 		/// Takes the passed chunk position and returns all other chunk positions in <code>generationRadius</code>
 		/// </summary>
 		/// <returns>Tile x & z positions to add to world</returns>
-		private List<Vector2> GetTilePositionsFromRadius() {
-			return GetTilePositionsFromRadius(Settings.Generator.GenerationRadius, Settings.Generator.TrackedObject.transform.position, Settings.Generator.Length);
+		private List<Position> GetTilePositionsFromRadius() {
+			return GetTilePositionsFromRadius(_settings.Generator.GenerationRadius, _settings.Generator.TrackedObject.transform.position, _settings.Generator.Length);
 		}
 	}
 }

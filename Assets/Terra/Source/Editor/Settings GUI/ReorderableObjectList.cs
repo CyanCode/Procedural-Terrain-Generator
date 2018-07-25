@@ -28,7 +28,7 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 		areaPos.y += 8;
 		areaPos.width -= 6;
 
-		//Cache biome instance
+		//Cache object instance
 		var obj = this[index];
 		if (obj == null)
 			return;
@@ -49,10 +49,7 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 		if (obj.ConstrainHeight) {
 			EditorGUI.indentLevel = 1;
 
-			obj.MinHeight = EditorGUILayout.FloatField("Min Height", obj.MinHeight);
-			obj.MaxHeight = EditorGUILayout.FloatField("Max Height", obj.MaxHeight);
-
-			FitMinMax(ref obj.MinHeight, ref obj.MaxHeight);
+			obj.HeightConstraint = EditorGUIExtension.DrawConstraintRange("Height", obj.HeightConstraint, 0, 1);
 
 			EditorGUILayout.BeginHorizontal();
 			obj.HeightProbCurve = EditorGUILayout.CurveField("Probability", obj.HeightProbCurve, Color.green, new Rect(0, 0, 1, 1));
@@ -73,16 +70,13 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 		if (obj.ConstrainAngle) {
 			EditorGUI.indentLevel = 1;
 
-			obj.MinAngle = EditorGUILayout.FloatField("Min Angle", obj.MinAngle);
-			obj.MaxAngle = EditorGUILayout.FloatField("Max Angle", obj.MaxAngle);
-
-			FitMinMax(ref obj.MinAngle, ref obj.MaxAngle);
+			obj.AngleConstraint = EditorGUIExtension.DrawConstraintRange("Angle", obj.AngleConstraint, 0, 90);
 
 			EditorGUILayout.BeginHorizontal();
-			obj.AngleProbCurve = EditorGUILayout.CurveField("Probability", obj.AngleProbCurve, Color.green, new Rect(0, 0, 180, 1));
+			obj.AngleProbCurve = EditorGUILayout.CurveField("Probability", obj.AngleProbCurve, Color.green, new Rect(0, 0, 90, 1));
 			if (GUILayout.Button("?", GUILayout.Width(25))) {
 				const string msg = "This is the angle probability curve. The X axis represents " +
-									"0 to 180 degrees and the Y axis represents the probability an " +
+									"0 to 90 degrees and the Y axis represents the probability an " +
 									"object will spawn. By default, the curve is set to a 100% probability " +
 									"meaning all objects will spawn.";
 				EditorUtility.DisplayDialog("Help - Angle Probability", msg, "Close");
@@ -208,6 +202,10 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 		}
 
 		return EditorGUIUtility.singleLineHeight * controlCount;
+	}
+
+	public override void Add() {
+		List.Add(new ObjectPlacementData(TerraSettings.GenerationSeed));
 	}
 
 	/// <summary>

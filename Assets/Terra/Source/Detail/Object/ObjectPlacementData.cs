@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using Terra.Data;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 [System.Serializable]
 public class ObjectPlacementData {
@@ -79,53 +82,41 @@ public class ObjectPlacementData {
 	}
 
 	/// <summary>
-	/// Maximum height to evaluate to when placing objects.
+	/// Minimum and maxiumum heights to place object(s) at
 	/// </summary>
-	public float MaxHeight;
+	public Constraint HeightConstraint;
 
 	/// <summary>
-	/// Minimum height to evaluate when placing objects.
+	/// Minimum and maximum angles to place object(s) at
 	/// </summary>
-	public float MinHeight;
+	public Constraint AngleConstraint;
 
 	/// <summary>
 	/// Optionally constrain at which height the objects will 
 	/// show up
 	/// </summary>
-	public bool ConstrainHeight;
+	public bool ConstrainHeight = false;
+
+	/// <summary>
+	/// Optionally constrain at which angle the objects will 
+	/// show up.
+	/// </summary>
+	public bool ConstrainAngle = false;
 
 	/// <summary>
 	/// Height curve to evaluate when procedurally placing 
 	/// objects. Top of curve = 100% chance of placing the object,
 	/// bottom of curve = 0% chance of placing the object.
 	/// </summary>
-	public AnimationCurve HeightProbCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-
-	/// <summary>
-	/// Maximum angle to evaluate to when placing objects. 
-	/// Cannot exceed at 180 degrees.
-	/// </summary>
-	public float MaxAngle;
-
-	/// <summary>
-	/// Minimum angle to evaluate when placing objects.
-	/// Cannot drop below 0 degrees
-	/// </summary>
-	public float MinAngle;
-
-	/// <summary>
-	/// Optionally constrain at which angle the objects will 
-	/// show up.
-	/// </summary>
-	public bool ConstrainAngle;
+	public AnimationCurve HeightProbCurve;
 
 	/// <summary>
 	/// Angle curve to evaluate when procedurally placing 
 	/// objects. Top of curve = 100% chance of placing the object,
 	/// bottom of curve = 0% chance of placing the object.
-	/// Evaluates from 0 - 180 degrees.
+	/// Evaluates from 0 - 90 degrees.
 	/// </summary>
-	public AnimationCurve AngleProbCurve = AnimationCurve.Linear(0f, 1f, 180f, 1f);
+	public AnimationCurve AngleProbCurve;
 
 	/// <summary>
 	/// Specifies how the object will be evaluated.
@@ -218,6 +209,14 @@ public class ObjectPlacementData {
 		Seed = seed;
 		InitRNG();
 
+		//Default probability curve ranges
+		HeightProbCurve = AnimationCurve.Linear(0, 1, 1, 1);
+		AngleProbCurve = AnimationCurve.Linear(0, 1, 90, 1);
+
+		//Default constraints
+		HeightConstraint = new Constraint(0, 1);
+		AngleConstraint = new Constraint(0, 90);
+
 		//Set transformation defaults
 		RandomRotationExtents = new RandomTransformExtent();
 		RandomRotationExtents.Max = new Vector3(0, 360, 0);
@@ -240,10 +239,10 @@ public class ObjectPlacementData {
 	/// <returns></returns>
 	public bool ShouldPlaceAt(float height, float angle) {
 		//Fails height or angle check
-		if (ConstrainHeight && !IsInHeightExtents(height)) {
+		if (ConstrainHeight && !HeightConstraint.Fits(height)) {
 			return false;
 		}
-		if (ConstrainAngle && !IsInAngleExtents(angle)) {
+		if (ConstrainAngle && !AngleConstraint.Fits(angle)) {
 			return false;
 		}
 
@@ -253,7 +252,7 @@ public class ObjectPlacementData {
 		}
 
 		//Place probability check
-		if (PlacementProbability != 100f) {
+		if (Math.Abs(PlacementProbability - 100f) > 0.01f) {
 			if (Rand == null) {
 				InitRNG();
 			}
@@ -263,24 +262,6 @@ public class ObjectPlacementData {
 		}
 
 		return true;
-	}
-
-	/// <summary>
-	/// Whether or not the passed height fits within the 
-	/// specified max and min.
-	/// </summary>
-	/// <param name="height">height to check</param>
-	public bool IsInHeightExtents(float height) {
-		return height < MaxHeight && height > MinHeight;
-	}
-
-	/// <summary>
-	/// Whether or not the passed angle fits within the 
-	/// specified max and min.
-	/// </summary>
-	/// <param name="angle">angle to check</param>
-	public bool IsInAngleExtents(float angle) {
-		return angle < MaxAngle && angle > MinAngle;
 	}
 
 	/// <summary>
@@ -296,8 +277,8 @@ public class ObjectPlacementData {
 		float probability = 1f;
 
 		if (ConstrainHeight) {
-			float totalHeight = MaxHeight - MinHeight;
-			float sampleAt = (height + MaxHeight) / totalHeight;
+			float totalHeight = HeightConstraint.Max - HeightConstraint.Min;
+			float sampleAt = (height + HeightConstraint.Max) / totalHeight;
 
 			probability = HeightProbCurve.Evaluate(sampleAt);
 		} else {
@@ -326,8 +307,8 @@ public class ObjectPlacementData {
 		float probability = 1f;
 
 		if (ConstrainAngle) {
-			float totalAngle = MaxAngle - MinAngle;
-			float sampleAt = (angle + MaxAngle) / totalAngle;
+			float totalAngle = AngleConstraint.Max - AngleConstraint.Min;
+			float sampleAt = (angle + AngleConstraint.Max) / totalAngle;
 
 			probability = AngleProbCurve.Evaluate(sampleAt);
 		} else {

@@ -14,7 +14,6 @@ namespace Terra.Terrain {
 		public bool IsColliderDirty = false;
 		public Mesh Terrain { get; private set; }
 		public Vector2 Position { get; private set; }
-		public DetailManager Details { get; private set; }
 
 		public TileMesh Mesh;
 		public TilePaint Painter;
@@ -22,7 +21,6 @@ namespace Terra.Terrain {
 		private TerraSettings _settings;
 
 		void OnEnable() {
-			Details = new DetailManager(this);
 			Mesh = new TileMesh(this);
 			Painter = new TilePaint(this);
 

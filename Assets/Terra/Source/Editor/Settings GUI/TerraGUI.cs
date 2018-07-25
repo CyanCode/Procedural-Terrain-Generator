@@ -30,6 +30,10 @@ namespace UnityEditor.Terra {
 				return !x.Equals(y);
 			}
 
+			public override bool Equals(object obj) {
+				return obj is DetailSubList && Equals((DetailSubList)obj);
+			}
+
 			public bool Equals(DetailSubList other) {
 				return Equals(MaterialsList, other.MaterialsList) && Equals(ObjectsList, other.ObjectsList);
 			}

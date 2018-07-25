@@ -363,12 +363,12 @@ namespace Terra.Data {
 		/// <summary>
 		/// Height constraints if enabled
 		/// </summary>
-		public Constraint HeightConstraint = new Constraint();
+		public Constraint HeightConstraint = new Constraint(0, 1);
 
 		/// <summary>
 		/// Angle constraints if enabled
 		/// </summary>
-		public Constraint AngleConstraint = new Constraint();
+		public Constraint AngleConstraint = new Constraint(0, 90);
 
 		/// <summary>
 		/// Temperature constraint if enabled

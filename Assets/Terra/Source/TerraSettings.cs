@@ -93,7 +93,7 @@ namespace Terra.Data {
 				}
 			}
 #endif
-			if (EditorState.GenerateOnStart) {
+			if (Generator.GenerateOnStart) {
 				Generate();
 			}
 		}
@@ -106,7 +106,7 @@ namespace Terra.Data {
 				Preview = new TerrainPreview();
 			}
 #endif
-			if (Application.isPlaying && Generator.Pool != null && EditorState.GenerateOnStart) {
+			if (Application.isPlaying && Generator.Pool != null && Generator.GenerateOnStart) {
 				Generator.Pool.Update();
 			}
 		}
@@ -116,11 +116,11 @@ namespace Terra.Data {
 				return;
 
 			//On general tab selected: display mesh radius squares and collider radius
-			List<Vector2> positions = TilePool.GetTilePositionsFromRadius(Generator.GenerationRadius, transform.position, Generator.Length);
+			List<Position> positions = TilePool.GetTilePositionsFromRadius(Generator.GenerationRadius, transform.position, Generator.Length);
 
 			//Mesh radius squares
-			foreach (Vector2 pos in positions) {
-				Vector3 pos3d = new Vector3(pos.x * Generator.Length, 0, pos.y * Generator.Length);
+			foreach (Position pos in positions) {
+				Vector3 pos3d = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
 
 				Gizmos.color = Color.white;
 				Gizmos.DrawWireCube(pos3d, new Vector3(Generator.Length, 0, Generator.Length));
@@ -192,14 +192,14 @@ namespace Terra.Data {
 				}
 
 				//Set seed for RNG
-				if (!EditorState.UseRandomSeed)
+				if (!Generator.UseRandomSeed)
 					Random.InitState(GenerationSeed);
 				else
 					GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
 			}
 
 			//Allows for update to continue
-			EditorState.GenerateOnStart = true;
+			Generator.GenerateOnStart = true;
 		}
 
 
@@ -227,10 +227,6 @@ namespace Terra.Data {
 		public class EditorStateData {
 			public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
-			public bool GenerateOnStart = true;
-			public bool UseRandomSeed = false;
-			public bool UseMultithreading = true;
-			public bool UseCustomMaterial = false;
 			public bool DisplayPreview = false;
 			public bool IsAdvancedFoldout = false;
 
@@ -644,6 +640,11 @@ namespace Terra.Data {
 	public class GenerationData {
 		public GameObject TrackedObject;
 		public int GenerationRadius = 3;
+
+		public bool GenerateOnStart = true;
+		public bool UseRandomSeed = false;
+		public bool UseMultithreading = true;
+		public bool UseCustomMaterial = false;
 
 		public float ColliderGenerationExtent = 50f;
 		public bool GenAllColliders = false;

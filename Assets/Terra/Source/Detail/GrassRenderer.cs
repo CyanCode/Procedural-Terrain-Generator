@@ -217,7 +217,7 @@ public static class GrassRenderer {
 			float variation = TerraSettings.Instance.Grass.GrassVariation;
 
 			List<MeshData> data = new List<MeshData>();
-			Bounds bounds = Tile.Terrain.bounds;
+			Bounds bounds = Tile.MeshManager.ActiveMesh.bounds;
 			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
 			int res = TerraSettings.Instance.Generator.MeshResolution;

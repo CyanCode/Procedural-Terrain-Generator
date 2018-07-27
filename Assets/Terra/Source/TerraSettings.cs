@@ -26,20 +26,19 @@ namespace Terra.Data {
 		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
 		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
-
+		
 		//Detail
 		public List<BiomeData> BiomesData; 
-		public List<SplatData> Splat; //TODO factor into details
+		public List<SplatData> Splat; //TODO Remove
 		public List<DetailData> Details;
-		public List<ObjectPlacementData> ObjectData;
-		public Material CustomMaterial = null;
+		public List<ObjectPlacementData> ObjectData; //TODO Remove
 
 		public TessellationData Tessellation;
 		public GrassData Grass;
 
 		//Editor state information
 		public EditorStateData EditorState;
-		public TerrainPreview Preview;
+		public Previewer Previewer;
 		 
 		/// <summary>
 		/// Finds the active TerraSettings instance in this scene if one exists.
@@ -63,6 +62,7 @@ namespace Terra.Data {
 		/// post serialization.
 		/// </summary>
 		void OnEnable() {
+			_instance = this;
 			IsInitialized = true;
 			 
 			if (Generator == null) Generator = new GenerationData();
@@ -75,7 +75,7 @@ namespace Terra.Data {
 			if (Tessellation == null) Tessellation = new TessellationData();
 			if (Grass == null) Grass = new GrassData();
 			if (EditorState == null) EditorState = new EditorStateData();
-			if (Preview == null) Preview = new TerrainPreview();
+			if (Previewer == null) Previewer = new Previewer();
 		}
 
 		void Reset() {
@@ -86,12 +86,12 @@ namespace Terra.Data {
 			CreateMTD();
 
 #if UNITY_EDITOR
-			if (!Application.isPlaying && Application.isEditor) {
-				//Handle Previewing
-				if (Preview != null && Preview.CanPreview()) {
-					Preview.TriggerPreviewUpdate();
-				}
-			}
+			//if (!Application.isPlaying && Application.isEditor) {
+			//	//Handle Previewing
+			//	if (Preview != null && Preview.CanPreview()) {
+			//		Preview.TriggerPreviewUpdate();
+			//	}
+			//}
 #endif
 			if (Generator.GenerateOnStart) {
 				Generate();
@@ -102,9 +102,9 @@ namespace Terra.Data {
 			if (!IsInitialized) return;
 
 #if UNITY_EDITOR
-			if (Application.isEditor && !Application.isPlaying && Preview == null) {
-				Preview = new TerrainPreview();
-			}
+			//if (Application.isEditor && !Application.isPlaying && Preview == null) {
+			//	Preview = new TerrainPreview();
+			//}
 #endif
 			if (Application.isPlaying && Generator.Pool != null && Generator.GenerateOnStart) {
 				Generator.Pool.Update();
@@ -116,10 +116,10 @@ namespace Terra.Data {
 				return;
 
 			//On general tab selected: display mesh radius squares and collider radius
-			List<Position> positions = TilePool.GetTilePositionsFromRadius(Generator.GenerationRadius, transform.position, Generator.Length);
+			List<GridPosition> positions = TilePool.GetTilePositionsFromRadius(Generator.GenerationRadius, new GridPosition(transform), Generator.Length);
 
 			//Mesh radius squares
-			foreach (Position pos in positions) {
+			foreach (GridPosition pos in positions) {
 				Vector3 pos3d = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
 
 				Gizmos.color = Color.white;
@@ -134,6 +134,41 @@ namespace Terra.Data {
 				Gizmos.color = Color.blue;
 				Gizmos.DrawWireCube(extPos, new Vector3(Generator.ColliderGenerationExtent, 0, Generator.ColliderGenerationExtent));
 			}
+		}
+
+		private void CreateMTD() {
+			//Create MT Dispatch if not already there
+			if (FindObjectOfType<MTDispatch>() == null) {
+				GameObject mtd = new GameObject("Main Thread Dispatch");
+				mtd.AddComponent<MTDispatch>();
+				mtd.transform.parent = transform;
+			}
+		}
+
+		/// <summary>
+		/// Starts the generation process 
+		/// </summary>
+		public void Generate() {
+			CreateMTD();
+
+			if (Application.isPlaying) {
+				//Cleanup preview from edit mode
+				//Preview.Cleanup(); TODO Check
+
+				//Set default tracked object
+				if (Generator.TrackedObject == null) {
+					Generator.TrackedObject = Camera.main.gameObject;
+				}
+
+				//Set seed for RNG
+				if (!Generator.UseRandomSeed)
+					Random.InitState(GenerationSeed);
+				else
+					GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
+			}
+
+			//Allows for update to continue
+			Generator.GenerateOnStart = true;
 		}
 
 		/// <summary>
@@ -166,43 +201,6 @@ namespace Terra.Data {
 
 			return chosen;
 		}
-
-		private void CreateMTD() {
-			//Create MT Dispatch if not already there
-			if (FindObjectOfType<MTDispatch>() == null) {
-				GameObject mtd = new GameObject("Main Thread Dispatch");
-				mtd.AddComponent<MTDispatch>();
-				mtd.transform.parent = transform;
-			}
-		}
-
-		/// <summary>
-		/// Starts the generation process 
-		/// </summary>
-		public void Generate() {
-			CreateMTD();
-
-			if (Application.isPlaying) {
-				//Cleanup preview from edit mode
-				Preview.Cleanup();
-
-				//Set default tracked object
-				if (Generator.TrackedObject == null) {
-					Generator.TrackedObject = Camera.main.gameObject;
-				}
-
-				//Set seed for RNG
-				if (!Generator.UseRandomSeed)
-					Random.InitState(GenerationSeed);
-				else
-					GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
-			}
-
-			//Allows for update to continue
-			Generator.GenerateOnStart = true;
-		}
-
-
 
 		#region Terra Settings Related Structures
 
@@ -528,6 +526,18 @@ namespace Terra.Data {
 		public string Name = "";
 
 		/// <summary>
+		/// Value that the X & Z values are multiplied by when 
+		/// sampling <see cref="Generator"/>
+		/// </summary>
+		public float Spread = 50f;
+
+		/// <summary>
+		/// Value that the Y value is multiplied by when 
+		/// sampling <see cref="Generator"/>
+		/// </summary>
+		public float Amplitude = 100f;
+
+		/// <summary>
 		/// Internal <see cref="Generator"/>
 		/// </summary>
 		private Generator _generator;
@@ -561,7 +571,7 @@ namespace Terra.Data {
 				
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
-					float v = GetValue(x, y, TextureZoom);
+					float v = GetDefaultValue(x, y, TextureZoom);
 					Color c = Color.Lerp(c1, c2, v);
 
 					tex.SetPixel(x, y, c);
@@ -584,16 +594,33 @@ namespace Terra.Data {
 		}
 
 		/// <summary>
-		/// Calls GetValue on <see cref="gen"/> at the passed 
-		/// x / y coordinates. Normalizes value from [-1, 1] to [0, 1] 
-		/// before returning.
+		/// Calls GetValue on <see cref="Generator"/> at the passed 
+		/// x / y coordinates. Does not modify the sampled/returned 
+		/// value with <see cref="Amplitude"/> and <see cref="Spread"/>
 		/// </summary>
 		/// <param name="x">x coordinate</param>
 		/// <param name="z">z coordinate</param>
 		/// <param name="zoom">Optionally specify a zoom factor</param>
-		/// <returns></returns>
-		public float GetValue(float x, float z, float zoom = 1f) {
+		/// <returns>Polled value, 0 if <see cref="Generator"/> is null</returns>
+		public float GetDefaultValue(float x, float z, float zoom = 1f) {
+			if (Generator == null)
+				return 0f;
+
 			return (Generator.GetValue(x / zoom, 0, z / zoom) + 1) / 2;
+		}
+
+		/// <summary>
+		/// Calls GetValue on <see cref="Generator"/> at the passed 
+		/// x / y coordinates. Applies X/Z spread to GetValue.
+		/// </summary>
+		/// <param name="x">x coordinate</param>
+		/// <param name="z">z coordinate</param>
+		/// <returns>Polled value, 0 if <see cref="Generator"/> is null</returns>
+		public float GetValue(float x, float z) { //TODO Merge GetDefaultValue with this? 
+			if (Generator == null)
+				return 0f;
+
+			return Generator.GetValue(x * Spread, 0, z * Spread);
 		}
 
 		/// <summary>
@@ -644,7 +671,6 @@ namespace Terra.Data {
 		public bool GenerateOnStart = true;
 		public bool UseRandomSeed = false;
 		public bool UseMultithreading = true;
-		public bool UseCustomMaterial = false;
 
 		public float ColliderGenerationExtent = 50f;
 		public bool GenAllColliders = false;
@@ -654,7 +680,6 @@ namespace Terra.Data {
 		public float Spread = 100f;
 		public float Amplitude = 50f;
 
-		public NoiseGraph Graph;
 		public TilePool Pool;
 
 		public GenerationData() { 

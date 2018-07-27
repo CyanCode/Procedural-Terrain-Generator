@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -7,20 +8,23 @@ namespace Terra.Terrain {
 	/// handles the activation, deactivation, removal, and caching of 
 	/// TerrainTiles.
 	/// </summary>
+	[Serializable]
 	public class TileCache {
 		public List<Tile> ActiveTiles { get; private set; }
 
-		private int CacheCapacity;
-		private LinkedList<Tile> CachedTiles = new LinkedList<Tile>();
+		private int _cacheCapacity;
+		private LinkedList<Tile> _cachedTiles = new LinkedList<Tile>();
 
 		public TileCache(int cacheCapacity = 20) {
-			CacheCapacity = cacheCapacity;
-			ActiveTiles = new List<Tile>();
+			_cacheCapacity = cacheCapacity;
+
+			if (ActiveTiles == null)
+				ActiveTiles = new List<Tile>();
 		}
 
 		/// <summary>
 		/// Finds the tile at the passed position in the cache and returns it. 
-		/// Once found the tile is removed from the cache as cached tiles should 
+		/// Once found, the tile is removed from the cache as cached tiles should 
 		/// not be active in the scene.
 		/// </summary>
 		/// <param name="position">Position to search for</param>
@@ -28,14 +32,12 @@ namespace Terra.Terrain {
 		/// Returns the cached tile if it exists in the cache. If the tile
 		/// is not cached, returns null.
 		/// </returns>
-		public Tile GetCachedTileAtPosition(Position position) {
-			LinkedListNode<Tile> node = CachedTiles.First;
+		public Tile GetCachedTileAtPosition(GridPosition position) {
+			LinkedListNode<Tile> node = _cachedTiles.First;
 
 			while (node != null) {
-				LinkedListNode<Tile> next = node.Next;
-
-				if (node.Value.Position == position) { //Move Tile to front of cache
-					CachedTiles.Remove(node);
+				if (node.Value.GridPosition == position) { //Move Tile to front of cache
+					_cachedTiles.Remove(node);
 
 					return node.Value;
 				}
@@ -51,9 +53,9 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="position">Position to look for</param>
 		/// <returns>True if tile at position was found, false otherwise</returns>
-		public bool TileActiveAtPosition(Position position) {
+		public bool IsTileActiveAtPosition(GridPosition position) {
 			foreach (Tile t in ActiveTiles) {
-				if (t.Position == position)
+				if (t.GridPosition == position)
 					return true;
 			}
 
@@ -66,14 +68,14 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="positions">Positions to compare</param>
 		/// <returns>New positions to add</returns>
-		public List<Position> GetNewTilePositions(List<Position> positions) {
-			List<Position> newPositions = new List<Position>(ActiveTiles.Count);
+		public List<GridPosition> GetNewTilePositions(List<GridPosition> positions) {
+			List<GridPosition> newPositions = new List<GridPosition>(ActiveTiles.Count);
 
-			foreach (Position position in positions) {
+			foreach (GridPosition position in positions) {
 				bool matched = false;
 
 				foreach (Tile t in ActiveTiles) {
-					if (t.Position == position) {
+					if (t.GridPosition == position) {
 						matched = true;
 						break;
 					}
@@ -94,10 +96,27 @@ namespace Terra.Terrain {
 		/// <param name="tile">Tile to cache</param>
 		public void CacheTile(Tile tile) {
 			tile.gameObject.SetActive(false);
-			CachedTiles.AddFirst(tile);
+			_cachedTiles.AddFirst(tile);
 			EnforceCacheSize();
 
 			TerraEvent.TriggerOnTileDeactivated(tile);
+		}
+
+		/// <summary>
+		/// Removes the passed Tile from <see cref="ActiveTiles"/> 
+		/// (if it exists), and then calls <see cref="UnityEngine.Object.Destroy(UnityEngine.Object,float)"/>
+		/// </summary>
+		/// <param name="tile">Tile to remove and destroy</param>
+		public void RemoveTile(Tile tile) {
+			if (ActiveTiles.Contains(tile)) {
+				ActiveTiles.Remove(tile);
+
+#if UNITY_EDITOR
+				Object.DestroyImmediate(tile.gameObject);
+#else
+				Object.Destroy(tile.gameObject);
+#endif
+			}
 		}
 
 		/// <summary>
@@ -117,11 +136,15 @@ namespace Terra.Terrain {
 		/// nodes from the back of the linked list.
 		/// </summary>
 		private void EnforceCacheSize() {
-			int removalAmount = CachedTiles.Count - CacheCapacity;
+			int removalAmount = _cachedTiles.Count - _cacheCapacity;
 
 			while (removalAmount > 0) {
-				Object.Destroy(CachedTiles.Last.Value);
-				CachedTiles.RemoveLast();
+#if UNITY_EDITOR
+				Object.DestroyImmediate(_cachedTiles.Last.Value);
+#else
+				Object.Destroy(_cachedTiles.Last.Value);
+#endif
+				_cachedTiles.RemoveLast();
 				removalAmount--;
 			}
 		}

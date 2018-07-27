@@ -18,7 +18,7 @@ public class LandTex : MonoBehaviour {
 
 	void Start() {
 		TerraSettings t = FindObjectOfType<TerraSettings>();
-		m = t.CustomMaterial;
+		//m = t.CustomMaterial;
 	}
 
 	// Update is called once per frame

@@ -41,6 +41,11 @@ namespace Terra.Terrain {
 		/// </summary>
 		private Tile _tile;
 
+		/// <summary>
+		/// If this TileMesh needs to update its generator
+		/// </summary>
+		private bool _genNeedsUpdating = true;
+
 		private readonly Object _asyncMeshLock = new Object();
 		
 		/// <summary>
@@ -181,7 +186,6 @@ namespace Terra.Terrain {
 		/// <returns></returns>
 		public Vector2 PositionToLocal(int x, int z) {
 			float length = TerraSettings.Instance.Generator.Length;
-
 			float xLocal = ((float)x / ((int)MeshResolution - 1) - .5f) * length;
 			float zLocal = ((float)z / ((int)MeshResolution - 1) - .5f) * length;
 
@@ -196,8 +200,9 @@ namespace Terra.Terrain {
 		/// <param name="localZ">Local z coordinate on mesh</param>
 		/// <returns>World X and Z coordinates</returns>
 		public Vector2 LocalToWorld(float localX, float localZ) {
-			float worldX = localX + (_tile.GridPosition.X * (int)MeshResolution);
-			float worldZ = localZ + (_tile.GridPosition.Z * (int)MeshResolution);
+			int length = TerraSettings.Instance.Generator.Length;
+			float worldX = localX + (_tile.GridPosition.X * length);
+			float worldZ = localZ + (_tile.GridPosition.Z * length);
 
 			return new Vector2(worldX, worldZ);
 		}
@@ -214,10 +219,13 @@ namespace Terra.Terrain {
 			var sett = TerraSettings.Instance;
 			var amp = sett.Generator.Amplitude;
 			var spread = sett.Generator.Spread;
-			var gen = sett.HeightMapData.Generator;
 		
-			//CoherentNoise considers Z to be up & down
-			return gen.GetValue(worldX / spread, worldZ / spread, 0) * amp;
+			if (_genNeedsUpdating) {
+				sett.HeightMapData.UpdateGenerator();
+				_genNeedsUpdating = false;
+			}
+
+			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
 		}
 
 		/// <summary>

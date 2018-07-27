@@ -243,6 +243,7 @@ namespace Terra.Data {
 			}
 		}
 
+		[Serializable]
 		public enum PlacementType {
 			ElevationRange,
 			Angle
@@ -550,6 +551,7 @@ namespace Terra.Data {
 		/// <summary>
 		/// Internal <see cref="MapType"/>
 		/// </summary>
+		[SerializeField]
 		private TerraSettings.MapGeneratorType _mapType;
 
 		public TileMapData() {
@@ -571,7 +573,7 @@ namespace Terra.Data {
 				
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
-					float v = GetDefaultValue(x, y, TextureZoom);
+					float v = GetValue(x, y, TextureZoom);
 					Color c = Color.Lerp(c1, c2, v);
 
 					tex.SetPixel(x, y, c);
@@ -595,32 +597,17 @@ namespace Terra.Data {
 
 		/// <summary>
 		/// Calls GetValue on <see cref="Generator"/> at the passed 
-		/// x / y coordinates. Does not modify the sampled/returned 
-		/// value with <see cref="Amplitude"/> and <see cref="Spread"/>
+		/// x / z coordinates. Applies X/Z spread to GetValue.
 		/// </summary>
 		/// <param name="x">x coordinate</param>
 		/// <param name="z">z coordinate</param>
-		/// <param name="zoom">Optionally specify a zoom factor</param>
+		/// <param name="zoom">Optionally specify a zoom amount that scales the generator polling horizontally</param>
 		/// <returns>Polled value, 0 if <see cref="Generator"/> is null</returns>
-		public float GetDefaultValue(float x, float z, float zoom = 1f) {
+		public float GetValue(float x, float z, float zoom = 1f) {
 			if (Generator == null)
 				return 0f;
 
-			return (Generator.GetValue(x / zoom, 0, z / zoom) + 1) / 2;
-		}
-
-		/// <summary>
-		/// Calls GetValue on <see cref="Generator"/> at the passed 
-		/// x / y coordinates. Applies X/Z spread to GetValue.
-		/// </summary>
-		/// <param name="x">x coordinate</param>
-		/// <param name="z">z coordinate</param>
-		/// <returns>Polled value, 0 if <see cref="Generator"/> is null</returns>
-		public float GetValue(float x, float z) { //TODO Merge GetDefaultValue with this? 
-			if (Generator == null)
-				return 0f;
-
-			return Generator.GetValue(x * Spread, 0, z * Spread);
+			return Generator.GetValue(x / zoom, z / zoom, 0);
 		}
 
 		/// <summary>

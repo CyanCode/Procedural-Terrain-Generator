@@ -44,8 +44,6 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="applySplats">When true, the generated splat is automatically applied to the terrain. 
 		/// Otherwise, it can be applied by calling ApplySplatmapsToShader</param>
-		/// <param name="debug">When true, the generated alpha maps are saved to the disk. 
-		/// They're located at [Your project's root dir]/SplatImages/</param>
 		/// <returns>Created alphamap textures</returns>
 		public List<Texture2D> GenerateSplatmaps(bool applySplats = true) {
 			//Ensure correct shader is set
@@ -123,7 +121,7 @@ namespace Terra.Terrain {
 				switch (splat.PlacementType) {
 					case TerraSettings.PlacementType.Angle:
 						if (angle > splat.AngleMin && angle < splat.AngleMax) {
-							float factor = Mathf.Clamp01(((angle - splat.AngleMin) ) / splat.Blend);
+							float factor = Mathf.Clamp01((angle - splat.AngleMin) / splat.Blend);
 							weights[i] = factor;
 						}
 

@@ -118,18 +118,6 @@ namespace UnityEditor.Terra {
 			if (!_settings.Generator.GenAllColliders)
 				_settings.Generator.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", _settings.Generator.ColliderGenerationExtent);
 			_settings.Generator.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", _settings.Generator.GenAllColliders);
-
-			EditorGUILayout.Space();
-			EditorGUI.BeginChangeCheck();
-			_settings.EditorState.DisplayPreview = EditorGUILayout.Toggle("Display Preview", _settings.EditorState.DisplayPreview);
-			if (EditorGUI.EndChangeCheck()) {
-				if (_settings.EditorState.DisplayPreview) {
-					_settings.Preview.TriggerPreviewUpdate();
-				} else {
-					_settings.Preview.RemoveComponents();
-				}
-			}
-
 			_settings.Generator.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", _settings.Generator.UseMultithreading);
 		}
 
@@ -341,12 +329,25 @@ namespace UnityEditor.Terra {
 		}
 
 		/// <summary>
+		/// Display GUI for updating the preview shown in the editor
+		/// </summary>
+		public void PreviewUpdate() {
+			EditorGUILayout.Space();
+			EditorGUILayout.Separator();
+			EditorGUILayout.Space();
+
+			if (GUILayout.Button("Update Preview")) {
+				_settings.Previewer.UpdatePreview();
+			}
+		}
+
+		/// <summary>
 		/// Displays GUI elements for the "Textures" foldout under 
 		/// the detail tab
 		/// </summary>
 		private void Detail_Texture(BiomeData biome) {
 			//Use textures
-			if (_settings.Splat != null) {
+			if (_settings.Details != null) {
 				var detailSubList = AddSubListIfNeeded(biome);
 				ReorderableListGUI.ListField(detailSubList.MaterialsList);
 			}

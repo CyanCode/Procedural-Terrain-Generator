@@ -5,11 +5,12 @@ using Terra.Data;
 namespace Terra.Terrain {
 	/// <summary>
 	///	Tile represents a Terrain gameobject in the scene. 
-	///	This class handles the instantiation of Terrain, noise application, 
-	///	position, and texture application.
+	///	This class handles the instantiation of Terrain, noise, 
+	///	position, texture, and detail application.
 	/// </summary>
+	[ExecuteInEditMode]
 	public class Tile: MonoBehaviour {
-		private TerraSettings _settings;
+		private TerraSettings _settings { get { return TerraSettings.Instance; } }
 
 		[HideInInspector]
 		public bool IsColliderDirty = false;
@@ -17,7 +18,7 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Position of this Tile in the grid of Tiles
 		/// </summary>
-		public Position Position { get; private set; }
+		public GridPosition GridPosition { get; private set; }
 
 		/// <summary>
 		/// Create and manage mesh(es) attached to this Tile. This 
@@ -32,15 +33,9 @@ namespace Terra.Terrain {
 		/// </summary>
 		public TilePaint Painter;
 		
-
 		void Awake() {
 			MeshManager = new TileMesh(this);
 			Painter = new TilePaint(this);
-
-			_settings = TerraSettings.Instance;
-			if (_settings == null) {
-				Debug.LogError("Cannot find a TerraSettings object in the scene");
-			}
 		}
 
 		/// <summary>
@@ -54,12 +49,6 @@ namespace Terra.Terrain {
 			GameObject go = new GameObject(name);
 			Tile tt = go.AddComponent<Tile>();
 
-			//Link TerraSettings before Awake
-			if (tt._settings == null) tt._settings = TerraSettings.Instance;
-			if (tt._settings == null) {
-				Debug.LogError("Cannot find a TerraSettings object in the scene");
-			}
-
 			return tt;
 		}
 
@@ -71,7 +60,7 @@ namespace Terra.Terrain {
 		/// can be disabled.
 		/// </summary>
 		/// <param name="onComplete">Called after all calculations have completed. 
-		/// <see cref="onComplete"/> can be null if the result is not needed.</param>
+		/// <see cref="onComplete"/>Can be null if the result is not needed.</param>
 		/// <param name="async">Perform mesh computation asynchronously</param>
 		public void Generate(Action onComplete, bool async = true) {
 			if (async) {
@@ -83,6 +72,7 @@ namespace Terra.Terrain {
 					}
 				});
 			} else {
+				MeshManager.CreateMesh();
 				PostCreateMeshGenerate();
 
 				if (onComplete != null) {
@@ -97,8 +87,8 @@ namespace Terra.Terrain {
 		/// are multiplied by the Length of the mesh specified in TerraSettings
 		/// </summary>
 		/// <param name="position">Position to set the Tile to (ie [1,0])</param>
-		public void UpdatePosition(Position position) {
-			Position = position;
+		public void UpdatePosition(GridPosition position) {
+			GridPosition = position;
 			int len = _settings.Generator.Length;
 			transform.position = new Vector3(position.X * len, 0f, position.Z * len);
 		}
@@ -114,18 +104,6 @@ namespace Terra.Terrain {
 
 				TerraEvent.TriggerOnMeshColliderDidForm(gameObject, collider);
 			}
-		}
-
-		/// <summary>
-		/// Applies the custom material specified in TerraSettings to the associated TerrainObject.
-		/// </summary>
-		/// <param name="mat">Custom material to apply</param>
-		public void ApplyCustomMaterial() {
-			TerraEvent.TriggerOnCustomMaterialWillApply(gameObject);
-
-			MeshRenderer mr = GetComponent<MeshRenderer>();
-			mr.sharedMaterial = _settings.CustomMaterial;
-			TerraEvent.TriggerOnCustomMaterialDidApply(gameObject);
 		}
 
 		/// <summary>
@@ -180,25 +158,57 @@ namespace Terra.Terrain {
 	/// copies of its' parameters.
 	/// </summary>
 	public struct MeshData {
-		public Vector3[] Vertices;
-		public Vector3[] Normals;
-		public Vector2[] Uvs;
-		public int[] Triangles;
+		public Vector3[] Vertices { 
+			get { return _vertices; }
+			set {
+				_vertices = value;
+				_meshDirty = true;
+			}
+		}
+		public Vector3[] Normals {
+			get { return _normals; }
+			set {
+				_normals = value;
+				_meshDirty = true;
+			}
+		}
+		public Vector2[] Uvs {
+			get { return _uvs; }
+			set {
+				_uvs = value;
+				_meshDirty = true;
+			}
+		}
+		public int[] Triangles {
+			get { return _triangles; }
+			set {
+				_triangles = value;
+				_meshDirty = true;
+			}
+		}
+
+		//Private instances of public variables for 
+		//allowing mesh reconstruction on value change
+		private Vector3[] _vertices;
+		private Vector3[] _normals;
+		private Vector2[] _uvs;
+		private int[] _triangles;
 
 		/// <summary>
 		/// The <see cref="Mesh"/> class representation of this MeshData. 
-		/// Internally, the construction of this Mesh instance is only done 
-		/// once as the result is cached after the first construction.
+		/// Internally, the construction of this Mesh instance is done upon 
+		/// access if any of the instance variables have changed.
 		/// </summary>
 		public Mesh Mesh {
 			get {
-				if (_mesh == null) {
+				if (_mesh == null || _meshDirty) {
 					_mesh = new Mesh {
 						vertices = Vertices,
 						normals = Normals,
 						uv = Uvs,
 						triangles = Triangles
 					};
+					_meshDirty = false;
 				}
 
 				return _mesh;
@@ -206,5 +216,6 @@ namespace Terra.Terrain {
 		}
 
 		private Mesh _mesh;
+		private bool _meshDirty;
 	}
 }

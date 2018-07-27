@@ -45,6 +45,9 @@ namespace UnityEditor.Terra {
 
 					break;
 			}
+
+			//Preview button
+			gui.PreviewUpdate();
 		}
 	}
 }

@@ -13,7 +13,7 @@ public class LandMatEditor : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		TerraSettings settings = FindObjectOfType<TerraSettings>();
-		m = settings.CustomMaterial;
+		//m = settings.CustomMaterial;
 	}
 	
 	// Update is called once per frame

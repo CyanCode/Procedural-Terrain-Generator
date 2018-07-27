@@ -75,7 +75,7 @@ namespace Terra.Terrain {
 					lock (_asyncMeshLock) {
 						float y = HeightAt(worldXZ.x, worldXZ.y);
 
-						vertices[x + z * (int)MeshResolution] = new Vector3(worldXZ.x, y, worldXZ.y);
+						vertices[x + z * (int)MeshResolution] = new Vector3(localXZ.x, y, localXZ.y);
 					}
 				}
 			}
@@ -109,7 +109,7 @@ namespace Terra.Terrain {
 		/// has finished. Called on the main thread.</param>
 		/// <param name="addToScene">Optionally disable adding the Mesh directly to the scene</param>
 		public void CreateMeshAsync(Action<MeshData> onComplete, bool addToScene = true) {
-			ThreadPool.QueueUserWorkItem(d => {
+			ThreadPool.QueueUserWorkItem(d => { //Worker thread
 				MeshData md = CreateMesh(false);
 
 				MTDispatch.Instance().Enqueue(() => { //Main Thread
@@ -196,8 +196,8 @@ namespace Terra.Terrain {
 		/// <param name="localZ">Local z coordinate on mesh</param>
 		/// <returns>World X and Z coordinates</returns>
 		public Vector2 LocalToWorld(float localX, float localZ) {
-			float worldX = localX + (_tile.Position.X * (int)MeshResolution);
-			float worldZ = localZ + (_tile.Position.Z * (int)MeshResolution);
+			float worldX = localX + (_tile.GridPosition.X * (int)MeshResolution);
+			float worldZ = localZ + (_tile.GridPosition.Z * (int)MeshResolution);
 
 			return new Vector2(worldX, worldZ);
 		}
@@ -217,7 +217,7 @@ namespace Terra.Terrain {
 			var gen = sett.HeightMapData.Generator;
 		
 			//CoherentNoise considers Z to be up & down
-			return gen.GetValue(worldX * spread, worldZ * spread, 0) * amp;
+			return gen.GetValue(worldX / spread, worldZ / spread, 0) * amp;
 		}
 
 		/// <summary>

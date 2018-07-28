@@ -102,9 +102,9 @@ namespace Terra.Terrain {
 			float angle = sample.Angle;
 			float[] weights = new float[SplatSettings.Count];
 
-			var orderMap = new Dictionary<TerraSettings.PlacementType, int>() {
-				{ TerraSettings.PlacementType.ElevationRange, 0 },
-				{ TerraSettings.PlacementType.Angle, 1 }
+			var orderMap = new Dictionary<PlacementType, int>() {
+				{ PlacementType.ElevationRange, 0 },
+				{ PlacementType.Angle, 1 }
 			};
 			List<SplatData> ordered = SplatSettings
 			.OrderBy(s => orderMap[s.PlacementType]) //Order elevation before angle
@@ -119,14 +119,14 @@ namespace Terra.Terrain {
 				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxHeight;
 
 				switch (splat.PlacementType) {
-					case TerraSettings.PlacementType.Angle:
+					case PlacementType.Angle:
 						if (angle > splat.AngleMin && angle < splat.AngleMax) {
 							float factor = Mathf.Clamp01((angle - splat.AngleMin) / splat.Blend);
 							weights[i] = factor;
 						}
 
 						break;
-					case TerraSettings.PlacementType.ElevationRange:
+					case PlacementType.ElevationRange:
 						if (height > min && height < max) {
 							if (i > 0) { //Can blend up
 								float factor = Mathf.Clamp01((splat.Blend - (height - min)) / splat.Blend);

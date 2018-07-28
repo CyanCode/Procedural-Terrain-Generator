@@ -70,11 +70,11 @@ namespace UnityEditor.Terra {
 			pos.y += CTRL_HEIGHT + PADDING_SM;
 
 			//GUI for different placement types
-			splat.PlacementType = (TerraSettings.PlacementType)EditorGUI.EnumPopup(pos, "Placement Type", splat.PlacementType);
+			splat.PlacementType = (PlacementType)EditorGUI.EnumPopup(pos, "Placement Type", splat.PlacementType);
 			pos.y += CTRL_HEIGHT + PADDING_SM;
 
 			switch (splat.PlacementType) {
-				case TerraSettings.PlacementType.Angle:
+				case PlacementType.Angle:
 					EditorGUI.LabelField(pos, "Min Angle", splat.AngleMin.ToString("0") + " deg");
 					pos.y += CTRL_HEIGHT + PADDING_SM;
 
@@ -85,7 +85,7 @@ namespace UnityEditor.Terra {
 					pos.y += CTRL_HEIGHT + PADDING_SM;
 
 					break;
-				case TerraSettings.PlacementType.ElevationRange:
+				case PlacementType.ElevationRange:
 					float displayMin = splat.IsMinHeight ? 0f : splat.MinHeight;
 					float displayMax = splat.IsMaxHeight ? 1f : splat.MaxHeight;
 
@@ -154,10 +154,10 @@ namespace UnityEditor.Terra {
 
 			//Placement type specific heights
 			switch (splat.PlacementType) {
-				case TerraSettings.PlacementType.Angle:
+				case PlacementType.Angle:
 					height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
 					break;
-				case TerraSettings.PlacementType.ElevationRange:
+				case PlacementType.ElevationRange:
 					if (_detail.IsMaxHeightSelected && _detail.IsMinHeightSelected) { //Both selected
 						height += (CTRL_HEIGHT * 3) + (PADDING_SM * 2);
 					} else if (_detail.IsMaxHeightSelected || _detail.IsMinHeightSelected) { //One selected

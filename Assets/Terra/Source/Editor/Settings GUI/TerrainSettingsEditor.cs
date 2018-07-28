@@ -28,19 +28,19 @@ namespace UnityEditor.Terra {
 			gui.Toolbar();
 
 			switch (Settings.EditorState.ToolbarSelection) {
-				case TerraSettings.ToolbarOptions.General:
+				case ToolbarOptions.General:
 					gui.General();
 
 					break;
-				case TerraSettings.ToolbarOptions.Maps:
+				case ToolbarOptions.Maps:
 					gui.Maps();
 
 					break;
-				case TerraSettings.ToolbarOptions.Biomes:
+				case ToolbarOptions.Biomes:
 					gui.Biomes();
 
 					break;
-				case TerraSettings.ToolbarOptions.Details:
+				case ToolbarOptions.Details:
 					gui.Details();
 
 					break;

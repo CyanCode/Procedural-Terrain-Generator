@@ -82,7 +82,7 @@ namespace UnityEditor.Terra {
 				};
 			}
 
-			_settings.EditorState.ToolbarSelection = (TerraSettings.ToolbarOptions)EditorGUIExtension.EnumToolbar(_settings.EditorState.ToolbarSelection, _toolbarImages);
+			_settings.EditorState.ToolbarSelection = (ToolbarOptions)EditorGUIExtension.EnumToolbar(_settings.EditorState.ToolbarSelection, _toolbarImages);
 		}
 
 		/// <summary>
@@ -153,7 +153,7 @@ namespace UnityEditor.Terra {
 				EditorGUILayout.LabelField(md.Name, bold);
 
 				EditorGUI.indentLevel++; //Indent following controls
-				md.MapType = (TerraSettings.MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
+				md.MapType = (MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
 				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
 				EditorGUILayout.Space();
 

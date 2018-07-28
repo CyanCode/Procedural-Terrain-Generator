@@ -597,7 +597,7 @@ namespace Terra.Data {
 
 		/// <summary>
 		/// Calls GetValue on <see cref="Generator"/> at the passed 
-		/// x / z coordinates. Applies X/Z spread to GetValue.
+		/// x / z coordinates. The value returned is between 0 and 1.
 		/// </summary>
 		/// <param name="x">x coordinate</param>
 		/// <param name="z">z coordinate</param>
@@ -616,29 +616,28 @@ namespace Terra.Data {
 		/// </summary>
 		/// <returns>Generator if set, null if <see cref="TerraSettings.MapGeneratorType.Custom"/> 
 		/// is set and no <see cref="CustomGenerator"/> is specified</returns>
-		public Generator UpdateGenerator() {
+		public void UpdateGenerator() {
 			int seed = TerraSettings.GenerationSeed;
 			Generator gen;
 
 			switch (MapType) {
 				case TerraSettings.MapGeneratorType.Perlin:
-					gen = new GradientNoise(seed);
+					gen = new GradientNoise(seed).ScaleShift(0.5f, 0.5f);
 					break;
 				case TerraSettings.MapGeneratorType.Fractal:
-					gen = new PinkNoise(seed);
+					gen = new PinkNoise(seed).ScaleShift(0.5f, 0.5f);
 					break;
 				case TerraSettings.MapGeneratorType.Billow:
-					gen = new BillowNoise(seed);
+					gen = new BillowNoise(seed).ScaleShift(0.5f, 0.5f);
 					break;
 				case TerraSettings.MapGeneratorType.Custom:
 					gen = CustomGenerator;
 					break;
 				default:
-					return null;
+					return;
 			}
 
 			_generator = gen;
-			return gen;
 		}
 
 		/// <summary>

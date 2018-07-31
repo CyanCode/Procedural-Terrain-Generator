@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace UnityEditor.Terra {
 	public class ReorderableMaterialList: GenericListAdaptor<SplatData> {
-		private TerraSettings _settings;
 		private DetailData _detail;
 
 		const float MAX_HEIGHT = 200f;
@@ -17,7 +16,6 @@ namespace UnityEditor.Terra {
 		const int TEX_CAPTION_HEIGHT = 16;
 
 		public ReorderableMaterialList(TerraSettings settings, DetailData detail) : base(detail.SplatsData, null, MAX_HEIGHT) {
-			_settings = settings;
 			_detail = detail;
 		}
 

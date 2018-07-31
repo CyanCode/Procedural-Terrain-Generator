@@ -12,11 +12,6 @@ namespace Terra.Terrain {
 	public class Tile: MonoBehaviour {
 		private TerraSettings _settings { get { return TerraSettings.Instance; } }
 
-		/// <summary>
-		/// Is this Tile used for in-editor previewing?
-		/// </summary>
-		internal bool IsPreviewTile = false;
-
 		[HideInInspector]
 		public bool IsColliderDirty = false;
 
@@ -92,7 +87,7 @@ namespace Terra.Terrain {
 		/// Updates this TerrainTiles position by taking a Vector2 where 
 		/// the x and y values are integers on a grid. Internally the x and y values 
 		/// are multiplied by the Length of the mesh specified in TerraSettings
-		/// </summary>
+		/// </summary> 
 		/// <param name="position">Position to set the Tile to (ie [1,0])</param>
 		public void UpdatePosition(GridPosition position) {
 			GridPosition = position;
@@ -160,7 +155,7 @@ namespace Terra.Terrain {
 		/// the logic afterwards is the same.
 		/// </summary>
 		private void PostCreateMeshGenerate() {
-
+			Painter.Paint();
 		}
 
 		/// <summary>

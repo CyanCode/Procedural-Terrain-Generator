@@ -12,6 +12,11 @@ namespace Terra.Terrain {
 	public class Tile: MonoBehaviour {
 		private TerraSettings _settings { get { return TerraSettings.Instance; } }
 
+		/// <summary>
+		/// Is this Tile used for in-editor previewing?
+		/// </summary>
+		internal bool IsPreviewTile = false;
+
 		[HideInInspector]
 		public bool IsColliderDirty = false;
 
@@ -32,9 +37,9 @@ namespace Terra.Terrain {
 		/// applied to each MeshRenderer.
 		/// </summary>
 		public TilePaint Painter;
-		
+
 		void Awake() {
-			MeshManager = new TileMesh(this);
+			MeshManager = new TileMesh(this, GetLodLevel());
 			Painter = new TilePaint(this);
 		}
 
@@ -64,7 +69,8 @@ namespace Terra.Terrain {
 		/// <param name="async">Perform mesh computation asynchronously</param>
 		public void Generate(Action onComplete, bool async = true) {
 			if (async) {
-				MeshManager.CreateMeshAsync(md => {
+				MeshManager.CreateHeightmapAsync(() => {
+					MeshManager.CreateMesh();
 					PostCreateMeshGenerate();
 
 					if (onComplete != null) {
@@ -72,6 +78,7 @@ namespace Terra.Terrain {
 					}
 				});
 			} else {
+				MeshManager.CreateHeightmap();
 				MeshManager.CreateMesh();
 				PostCreateMeshGenerate();
 
@@ -89,9 +96,13 @@ namespace Terra.Terrain {
 		/// <param name="position">Position to set the Tile to (ie [1,0])</param>
 		public void UpdatePosition(GridPosition position) {
 			GridPosition = position;
+
+			//Update TileMesh LOD level
+			MeshManager.LodLevel = GetLodLevel();
+
 			int len = _settings.Generator.Length;
 			transform.position = new Vector3(position.X * len, 0f, position.Z * len);
-		}
+		} 
 
 		/// <summary>
 		/// Generates and applies new MeshCollider for the tile if no collider 
@@ -150,6 +161,15 @@ namespace Terra.Terrain {
 		/// </summary>
 		private void PostCreateMeshGenerate() {
 
+		}
+
+		/// <summary>
+		/// Gets the LOD level for this tile based off of its <see cref="GridPosition"/>.
+		/// </summary>
+		/// <returns>LOD level</returns>
+		private LodData.LodLevel GetLodLevel() {
+			int radius = (int)GridPosition.Distance(new GridPosition(0, 0));
+			return _settings.Generator.Lod.GetLevelForRadius(radius);
 		}
 	}
 
@@ -213,6 +233,15 @@ namespace Terra.Terrain {
 
 				return _mesh;
 			}
+		}
+
+		public static bool operator ==(MeshData lhs, MeshData rhs) {
+			return lhs._vertices == rhs._vertices && lhs._normals == rhs._normals &&
+				lhs._uvs == rhs._uvs && lhs._triangles == rhs._triangles;
+		}
+
+		public static bool operator !=(MeshData lhs, MeshData rhs) {
+			return !(lhs == rhs);
 		}
 
 		private Mesh _mesh;

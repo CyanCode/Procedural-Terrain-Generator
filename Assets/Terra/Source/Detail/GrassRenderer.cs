@@ -220,7 +220,8 @@ public static class GrassRenderer {
 			Bounds bounds = Tile.MeshManager.ActiveMesh.bounds;
 			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
-			int res = TerraSettings.Instance.Generator.MeshResolution;
+			//int res = TerraSettings.Instance.Generator.MeshResolution;
+			int res = 128;
 			float rayHeight = worldBounds.max.y + 5;
 			float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
 

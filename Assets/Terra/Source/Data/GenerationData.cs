@@ -15,7 +15,7 @@ namespace Terra.Data {
 		public float ColliderGenerationExtent = 50f;
 		public bool GenAllColliders = false;
 
-		public int MeshResolution = 128;
+		public LodData Lod;
 		public int Length = 500;
 		public float Spread = 100f;
 		public float Amplitude = 50f;
@@ -24,6 +24,7 @@ namespace Terra.Data {
 
 		public GenerationData() {
 			if (Pool == null) Pool = new TilePool();
+			if (Lod == null) Lod = new LodData();
 		}
 	}
 }

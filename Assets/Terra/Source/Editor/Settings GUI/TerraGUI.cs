@@ -95,9 +95,6 @@ namespace UnityEditor.Terra {
 			_settings.Generator.TrackedObject = (GameObject)EditorGUILayout.ObjectField(_settings.Generator.TrackedObject, typeof(GameObject), true);
 
 			//Terrain settings
-			string[] stringResOptions = { "32", "64", "128" };
-			int[] resOptions = { 32, 64, 128 };
-
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
 			_settings.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _settings.Generator.GenerateOnStart);
@@ -108,7 +105,29 @@ namespace UnityEditor.Terra {
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
-			_settings.Generator.MeshResolution = EditorGUILayout.IntPopup("Mesh Resolution", _settings.Generator.MeshResolution, stringResOptions, resOptions);
+
+			//Show LOD info
+			_settings.EditorState.IsLodFoldout = EditorGUILayout.Foldout(_settings.EditorState.IsLodFoldout, "Level of Detail");
+			if (_settings.EditorState.IsLodFoldout) {
+				EditorGUI.indentLevel++;
+
+				EditorGUILayout.BeginHorizontal(new GUIStyle { margin = new RectOffset(12, 0, 0, 0)});
+				var lod = _settings.Generator.Lod;
+				lod.UseHighLodLevel = GUILayout.Toggle(lod.UseHighLodLevel, "High");
+				lod.UseMediumLodLevel = GUILayout.Toggle(lod.UseMediumLodLevel, "Med");
+				lod.UseLowLodLevel = GUILayout.Toggle(lod.UseLowLodLevel, "Low");
+				EditorGUILayout.EndHorizontal();
+
+				if (lod.UseHighLodLevel)
+					lod.High = General_LodFoldout("High", lod.High);
+				if (lod.UseMediumLodLevel)
+					lod.Medium = General_LodFoldout("Medium", lod.Medium);
+				if (lod.UseLowLodLevel)
+					lod.Low = General_LodFoldout("Low", lod.Low);
+
+				EditorGUI.indentLevel--;
+			}
+
 			_settings.Generator.Length = EditorGUILayout.IntField("Length", _settings.Generator.Length);
 			_settings.Generator.Spread = EditorGUILayout.FloatField("Spread", _settings.Generator.Spread);
 			_settings.Generator.Amplitude = EditorGUILayout.FloatField("Amplitude", _settings.Generator.Amplitude);
@@ -336,9 +355,43 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Separator();
 			EditorGUILayout.Space();
 
+			EditorGUI.BeginChangeCheck();
+			_settings.EditorState.PreviewRadius = 
+				EditorGUILayout.IntField("Preview Radius", _settings.EditorState.PreviewRadius);
+			if (EditorGUI.EndChangeCheck()) {
+				int rad = _settings.EditorState.PreviewRadius;
+				int genRad = _settings.Generator.GenerationRadius;
+				_settings.EditorState.PreviewRadius = rad > genRad ? genRad : rad;
+			}
+
 			if (GUILayout.Button("Update Preview")) {
 				_settings.Previewer.UpdatePreview();
 			}
+		}
+
+		/// <summary>
+		/// Displays a GUI for the passed <see cref="LodData.LodLevel"/> 
+		/// and modifies its values.
+		/// </summary>
+		/// <param name="name">String name to display on the foldout</param>
+		/// <param name="level">LodLevel to modify</param>
+		private LodData.LodLevel General_LodFoldout(string name, LodData.LodLevel level) {
+			EditorGUILayout.Foldout(true, name);
+			EditorGUI.indentLevel++;
+
+			string[] strMeshResOpts = { "32", "64", "128" };
+			string[] strMapResOpts = { "32", "64", "128", "256" };
+
+			int[] meshResOpts = { 32, 64, 128 };
+			int[] mapResOpts = { 32, 64, 128, 256 };
+
+			level.StartRadius = EditorGUILayout.IntField("Start Radius", level.StartRadius);
+			level.MapResolution = EditorGUILayout.IntPopup("Map Res", level.MapResolution, strMapResOpts, mapResOpts);
+			level.SplatmapResolution = EditorGUILayout.IntPopup("Splat Res", level.SplatmapResolution, strMapResOpts, mapResOpts);
+			level.MeshResolution = EditorGUILayout.IntPopup("Mesh Res", level.MeshResolution, strMeshResOpts, meshResOpts);
+			EditorGUI.indentLevel--;
+
+			return level;
 		}
 
 		/// <summary>

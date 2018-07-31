@@ -10,8 +10,8 @@ namespace Terra.Data {
 	public class EditorStateData {
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
-		public bool DisplayPreview = false;
-		public bool IsAdvancedFoldout = false;
+		public int PreviewRadius = 1;
+		public bool IsLodFoldout = false;
 
 		//Biomes
 		public bool ShowBiomePreview = false;
@@ -20,12 +20,6 @@ namespace Terra.Data {
 		public bool ShowWhittakerInfo = false;
 
 		public float InspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
-
-		private float lastInspectorWidth = 0f;
-
-		public bool DidResize(float currentWidth) {
-			return Math.Abs(lastInspectorWidth - currentWidth) > 0.1f;
-		}
 	}
 
 	[Serializable]

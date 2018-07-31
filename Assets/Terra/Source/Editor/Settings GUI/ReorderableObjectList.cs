@@ -8,11 +8,9 @@ using UnityEngine;
 public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 	private const float MAX_HEIGHT = 200f;
 
-	private TerraSettings _settings;
 	private Dictionary<int, Rect> _positions; //Cached positions at last repaint
 
 	public ReorderableObjectList(TerraSettings settings, DetailData detail) : base(detail.ObjectData, null, MAX_HEIGHT) {
-		_settings = settings;
 		_positions = new Dictionary<int, Rect>();
 	}
 

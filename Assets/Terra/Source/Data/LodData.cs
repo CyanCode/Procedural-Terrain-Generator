@@ -20,8 +20,11 @@ namespace Terra.Data {
 		/// </summary>
 		[Serializable]
 		public class LodLevel {
+			[SerializeField]
 			private int _mapRes;
+			[SerializeField]
 			private int _splatmapRes;
+			[SerializeField]
 			private int _meshRes;
 
 			/// <summary>

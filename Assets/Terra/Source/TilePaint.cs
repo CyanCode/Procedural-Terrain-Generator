@@ -15,7 +15,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		public Texture2D[] Splats;
 
-		private Tile _tile;
+		private readonly Tile _tile;
 
 		public TilePaint(Tile tile) {
 			_tile = tile;
@@ -25,7 +25,7 @@ namespace Terra.Terrain {
 		/// TODO Summary
 		/// </summary>
 		public void Paint() {
-			
+			ApplyDefaultMaterial();
 		}
 
 		/// <summary>
@@ -35,6 +35,24 @@ namespace Terra.Terrain {
 		public void UpdateTextures() {
 			//use TileMesh to pull preexisting mesh information
 			//where to store heightmap..
+		}
+
+		/// <summary>
+		/// Applies the Unity default material to the terrain if one is not 
+		/// already applied.
+		/// </summary>
+		private void ApplyDefaultMaterial() {
+			if (_tile.GetMeshRenderer() == null || _tile.GetMeshRenderer().sharedMaterial != null)
+				return;
+
+			Shader s = Shader.Find("Diffuse");
+			if (s == null) {
+				Debug.Log("Failed to find default shader when creating terrain");
+				return;
+			}
+
+			Material material = new Material(s);
+			_tile.GetMeshRenderer().sharedMaterial = material;
 		}
 	}
 }

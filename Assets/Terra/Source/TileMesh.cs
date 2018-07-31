@@ -152,8 +152,6 @@ namespace Terra.Terrain {
 			Vector3[] vertices = new Vector3[(int)MeshResolution * (int)MeshResolution];
 			int increment = HeightmapResolution / (int)MeshResolution;
 
-			int vx, vz;
-			vx = vz = 0;
 			for (int x = 0; x < (int)MeshResolution; x += increment) {
 				for (int z = 0; z < (int)MeshResolution; z += increment) {
 					Vector2 localXZ = PositionToLocal(x, z, (int)MeshResolution);
@@ -162,9 +160,7 @@ namespace Terra.Terrain {
 						float y = Heightmap[x, z];
 						vertices[x / increment + z / increment * (int)MeshResolution] = new Vector3(localXZ.x, y, localXZ.y);
 					}
-					vz++;
 				}
-				vx++;
 			}
 
 			MeshData md = MeshDataFromVertices(vertices);
@@ -236,8 +232,8 @@ namespace Terra.Terrain {
 		/// <returns></returns>
 		public Vector2 PositionToLocal(int x, int z, int resolution) {
 			float length = TerraSettings.Instance.Generator.Length;
-			float xLocal = ((float)x / ((int)MeshResolution - 1) - .5f) * length;
-			float zLocal = ((float)z / ((int)MeshResolution - 1) - .5f) * length;
+			float xLocal = ((float)x / (resolution - 1) - .5f) * length;
+			float zLocal = ((float)z / (resolution - 1) - .5f) * length;
 
 			return new Vector2(xLocal, zLocal);
 		}

@@ -156,7 +156,7 @@ namespace Terra.Data {
 
 			if (Application.isPlaying) {
 				//Cleanup preview from edit mode
-				//Preview.Cleanup(); TODO Check
+				Previewer.RemoveExistingTiles();
 
 				//Set default tracked object
 				if (Generator.TrackedObject == null) {

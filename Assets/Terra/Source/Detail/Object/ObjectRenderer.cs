@@ -70,7 +70,7 @@ namespace Terra.Terrain.Detail {
 		/// <param name="objectPlacementData">object placement type to sample</param>
 		/// <returns>List of vectors within the grid and sample constraints</returns>
 		public List<Vector3> GetFilteredGrid(Mesh m, ObjectPlacementData objectPlacementData) {
-			MeshSampler sampler = new MeshSampler(m, Settings.Generator.MeshResolution);
+			MeshSampler sampler = /**new MeshSampler(m, Settings.Generator.MeshResolution);*/ new MeshSampler(m, 128); //TODO Resolution from TerraSettings
 			List<Vector2> grid = GetPoissonGrid(objectPlacementData.Spread / 10);
 			List<Vector3> toAdd = new List<Vector3>();
 

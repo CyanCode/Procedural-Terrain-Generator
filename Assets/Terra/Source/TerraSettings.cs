@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Terra.CoherentNoise;
-using Terra.CoherentNoise.Generation;
-using Terra.CoherentNoise.Generation.Fractal;
-using Terra.Graph.Noise;
 using Terra.Terrain;
 using Random = UnityEngine.Random;
 
 namespace Terra.Data {
 	[Serializable, ExecuteInEditMode]
-	public partial class TerraSettings: MonoBehaviour {
-		public static bool IsInitialized = false;
+	public class TerraSettings: MonoBehaviour {
+		public static bool IsInitialized;
 
 		/// <summary>
 		/// Internal TerraSettings instance to avoid finding when its not needed
@@ -119,10 +115,18 @@ namespace Terra.Data {
 
 			//Mesh radius squares
 			foreach (GridPosition pos in positions) {
-				Vector3 pos3d = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
+				Vector3 pos3D = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
+ 
+				//Draw LOD squares
+				Gizmos.color = GetLodPreviewColor(pos);
+				bool isPreviewTile = Previewer.GetPreviewingPositions().Contains(pos);
+				if (Gizmos.color != Color.white && !isPreviewTile)
+					Gizmos.DrawCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
 
+				//Draw overlayed grid
 				Gizmos.color = Color.white;
-				Gizmos.DrawWireCube(pos3d, new Vector3(Generator.Length, 0, Generator.Length));
+				pos3D.y += 0.1f;
+				Gizmos.DrawWireCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
 			}
 
 			//Generation radius
@@ -199,6 +203,30 @@ namespace Terra.Data {
 			}
 
 			return chosen;
+		}
+
+		/// <summary>
+		/// Gets the grid square preview color based on which LOD 
+		/// level it falls within.
+		/// </summary>
+		/// <returns></returns>
+		private Color GetLodPreviewColor(GridPosition position) {
+			if (Generator == null || Generator.Lod == null)
+				return Color.white;
+
+			var lod = Generator.Lod;
+			var lvlType = lod.GetLevelTypeForRadius((int)position.Distance(new GridPosition(0, 0)));
+			
+			switch (lvlType) {
+				case LodData.LodLevelType.High:
+					return Color.green;
+				case LodData.LodLevelType.Medium:
+					return Color.yellow;
+				case LodData.LodLevelType.Low:
+					return Color.red;
+			}
+
+			return Color.white;
 		}
 		
 		/// <summary>

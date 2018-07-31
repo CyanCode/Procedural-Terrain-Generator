@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Terra.Data;
 using UnityEngine;
+using System.Linq;
 using Object = System.Object;
 
 namespace Terra.Terrain {
@@ -16,10 +17,15 @@ namespace Terra.Terrain {
 		public Resolution MeshResolution { get; private set; }
 
 		/// <summary>
-		/// List of meshes that have already been computed. Sorted by 
+		/// Resolution of the heightmap
+		/// </summary>
+		public int HeightmapResolution { get; private set; }
+
+		/// <summary>
+		/// List of meshes that have already been computed and
 		/// their resolutions.
 		/// </summary>
-		public SortedList<int, MeshData> ComputedMeshes { get; private set; }
+		public List<KeyValuePair<int, MeshData>> ComputedMeshes { get; private set; }
 
 		/// <summary>
 		/// The mesh that corresponds with the set <see cref="MeshResolution"/> if 
@@ -28,13 +34,35 @@ namespace Terra.Terrain {
 		/// </summary>
 		public Mesh ActiveMesh {
 			get {
-				if (ComputedMeshes.ContainsKey((int)MeshResolution)) {
-					return ComputedMeshes[(int)MeshResolution].Mesh;
+				if (ComputedMeshes.Exists(kvp => kvp.Key == (int)MeshResolution)) {
+					return ComputedMeshes.Find(kvp => kvp.Key == (int)MeshResolution).Value.Mesh;
 				}
 
 				return null;
 			}
 		}
+
+		public LodData.LodLevel LodLevel { 
+			get { return _lodLevel; }
+			set {
+				_lodLevel = value;
+				HeightmapResolution = value.MapResolution;
+				MeshResolution = (Resolution)value.MeshResolution;
+			}
+		}
+
+		/// <summary>
+		/// The heightmap that is used when creating a mesh. Updating 
+		/// <see cref="LodLevel"/> does not update <see cref="Heightmap"/>. 
+		/// Call <see cref="CreateHeightmap"/> or <see cref="CreateHeightmapAsync"/> 
+		/// instead.
+		/// </summary>
+		public float[,] Heightmap { get; private set; }
+
+		/// <summary>
+		/// Internal <see cref="LodLevel"/>
+		/// </summary>
+		private LodData.LodLevel _lodLevel;
 
 		/// <summary>
 		/// Tile using this TileMesh
@@ -46,51 +74,101 @@ namespace Terra.Terrain {
 		/// </summary>
 		private bool _genNeedsUpdating = true;
 
-		private readonly Object _asyncMeshLock = new Object();
+		private readonly object _asyncMeshLock = new object();
 		
 		/// <summary>
-		/// Constructs a new TileMesh instance.
+		/// Constructs a new TileMesh instance
 		/// </summary>
 		/// <param name="tile">Tile to attach mesh to</param>
-		/// <param name="res">Resolution of the mesh (default 128)</param>
-		public TileMesh(Tile tile, Resolution res = Resolution.High) {
+		/// <param name="lodLevel">LOD level to reference when creating heightmap and mesh</param>
+		public TileMesh(Tile tile, LodData.LodLevel lodLevel) {
 			_tile = tile;
-			MeshResolution = res;
+			_lodLevel = lodLevel; 
 
-			ComputedMeshes = new SortedList<int, MeshData>(3);
+			ComputedMeshes = new List<KeyValuePair<int, MeshData>>(3);
 		}
 
 		/// <summary>
-		/// Creates a mesh of resolution <see cref="MeshResolution"/> 
-		/// The result of this method is cached in <see cref="ComputedMeshes"/> 
-		/// and overwrites the old mesh if one is already cached.
-		/// 
-		/// This method can only be called asynchronously when 
-		/// <see cref="addToScene"/> is false. See <see cref="CreateMeshAsync"/>
+		/// Creates a heightmap of resolution <see cref="HeightmapResolution"/>. If a 
+		/// <see cref="Heightmap"/> of the same resolution or higher has already been 
+		/// created, this method does nothing.
+		/// A heightmap is 2D array of floats that represents the Y values (or heights) 
+		/// of to-be created vertices in 3D space.
 		/// </summary>
-		/// <param name="addToScene">Optionally disable adding the Mesh directly to the scene</param>
-		public MeshData CreateMesh(bool addToScene = true) {
-			Vector3[] vertices = new Vector3[(int)MeshResolution * (int)MeshResolution];
+		public void CreateHeightmap() {
+			if (Heightmap != null && Heightmap.Length >= HeightmapResolution)
+				return;
 
-			for (int x = 0; x < (int)MeshResolution; x++) {
-				for (int z = 0; z < (int)MeshResolution; z++) {
-					Vector2 localXZ = PositionToLocal(x, z);
+			Heightmap = new float[HeightmapResolution, HeightmapResolution];
+			for (int x = 0; x < HeightmapResolution; x++) {
+				for (int z = 0; z < HeightmapResolution; z++) {
+					Vector2 localXZ = PositionToLocal(x, z, HeightmapResolution);
 					Vector2 worldXZ = LocalToWorld(localXZ.x, localXZ.y);
 
 					lock (_asyncMeshLock) {
-						float y = HeightAt(worldXZ.x, worldXZ.y);
-
-						vertices[x + z * (int)MeshResolution] = new Vector3(localXZ.x, y, localXZ.y);
+						Heightmap[x, z] = HeightAt(worldXZ.x, worldXZ.y);
 					}
 				}
 			}
+		}
 
-			MeshData md = MeshDataFromVertices(vertices);
-			if (ComputedMeshes.ContainsKey((int)MeshResolution)) {
-				ComputedMeshes.Remove((int)MeshResolution);
+		/// <summary>
+		/// Creates a heightmap of resolution <see cref="HeightmapResolution"/> asynchronously. 
+		/// If a <see cref="Heightmap"/> of the same resolution or higher has already been 
+		/// created, this method does nothing.
+		/// A heightmap is 2D array of floats that represents the Y values (or heights) 
+		/// of to-be created vertices in 3D space.
+		/// </summary>
+		/// <param name="onComplete">Called when the heightmap has been created</param>
+		public void CreateHeightmapAsync(Action onComplete) {
+			ThreadPool.QueueUserWorkItem(d => { //Worker thread
+				CreateHeightmap();
+
+				MTDispatch.Instance().Enqueue(onComplete);
+			});
+		}
+
+		/// <summary>
+		/// Sets <see cref="Heightmap"/> to null.
+		/// </summary>
+		public void ClearHeightmap() {
+			Heightmap = null;
+		}
+
+		/// <summary>
+		/// Creates a mesh by reading the <see cref="Heightmap"/> and 
+		/// caches the result. If a mesh of the same resolution has already 
+		/// been created, it is returned and (optionally) added to the scene. 
+		/// In order to construct a mesh, the <see cref="HeightmapResolution"/> 
+		/// must be greater than or equal to the <see cref="MeshResolution"/>.
+		/// </summary>
+		/// <param name="addToScene">Optionally disable adding the Mesh directly to the scene</param>
+		public MeshData CreateMesh(bool addToScene = true) {
+			MeshData computed = FindComputedForResolution((int)MeshResolution);
+			if (computed != default(MeshData)) {
+				return computed;
 			}
 
-			ComputedMeshes.Add((int)MeshResolution, md);
+			Vector3[] vertices = new Vector3[(int)MeshResolution * (int)MeshResolution];
+			int increment = HeightmapResolution / (int)MeshResolution;
+
+			int vx, vz;
+			vx = vz = 0;
+			for (int x = 0; x < (int)MeshResolution; x += increment) {
+				for (int z = 0; z < (int)MeshResolution; z += increment) {
+					Vector2 localXZ = PositionToLocal(x, z, (int)MeshResolution);
+
+					lock (_asyncMeshLock) {
+						float y = Heightmap[x, z];
+						vertices[x / increment + z / increment * (int)MeshResolution] = new Vector3(localXZ.x, y, localXZ.y);
+					}
+					vz++;
+				}
+				vx++;
+			}
+
+			MeshData md = MeshDataFromVertices(vertices);
+			ComputedMeshes.Add(new KeyValuePair<int, MeshData>((int)MeshResolution, md));
 
 			if (addToScene) {
 				var mf = _tile.GetMeshFilter();
@@ -103,40 +181,12 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Creates a mesh of resolution <see cref="MeshResolution"/> 
-		/// The result of this method is cached in <see cref="ComputedMeshes"/> 
-		/// and overwrites the old mesh if one is already cached.
-		/// 
-		/// The mesh is computed asynchronously in this method. To create the mesh 
-		/// on the main thread call <see cref="CreateMesh"/> instead.
-		/// </summary>
-		/// <param name="onComplete">Callback method that is executed once computation 
-		/// has finished. Called on the main thread.</param>
-		/// <param name="addToScene">Optionally disable adding the Mesh directly to the scene</param>
-		public void CreateMeshAsync(Action<MeshData> onComplete, bool addToScene = true) {
-			ThreadPool.QueueUserWorkItem(d => { //Worker thread
-				MeshData md = CreateMesh(false);
-
-				MTDispatch.Instance().Enqueue(() => { //Main Thread
-					if (addToScene) {
-						var mf = _tile.GetMeshFilter();
-						_tile.GetMeshRenderer();
-
-						mf.sharedMesh = md.Mesh;
-					}
-
-					onComplete(md);
-				});
-			});
-		}
-
-		/// <summary>
 		/// Whether this TileMesh has already computed a mesh 
 		/// with the passed resolution.
 		/// </summary>
 		/// <param name="res">resolution to check</param>
 		public bool HasCreatedMeshAtResolution(Resolution res) {
-			return ComputedMeshes.ContainsKey((int)res);
+			return ComputedMeshes.Exists(kvp => kvp.Key == (int)res);
 		}
 
 		/// <summary>
@@ -147,7 +197,7 @@ namespace Terra.Terrain {
 		/// <param name="verts">vertices of mesh</param>
 		/// <param name="normals">normals array to fill</param>
 		/// <param name="tris">triangles from mesh</param>
-		public static void CalculateNormalsManaged(Vector3[] verts, ref Vector3[] normals, int[] tris) {
+		public void CalculateNormalsManaged(Vector3[] verts, ref Vector3[] normals, int[] tris) {
 			for (int i = 0; i < tris.Length; i += 3) {
 				int tri0 = tris[i];
 				int tri1 = tris[i + 1];
@@ -178,13 +228,13 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Transforms the passed x and z incrementors into local coordinates 
-		/// of a Mesh plane.
+		/// Transforms the passed x and z incrementors into local coordinates.
 		/// </summary>
 		/// <param name="x">x position to transform</param>
 		/// <param name="z">z position to transform</param>
+		/// <param name="resolution">resolution of structure (mesh or heightmap)</param>
 		/// <returns></returns>
-		public Vector2 PositionToLocal(int x, int z) {
+		public Vector2 PositionToLocal(int x, int z, int resolution) {
 			float length = TerraSettings.Instance.Generator.Length;
 			float xLocal = ((float)x / ((int)MeshResolution - 1) - .5f) * length;
 			float zLocal = ((float)z / ((int)MeshResolution - 1) - .5f) * length;
@@ -230,7 +280,7 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// Creates the rest of the mesh by referencing the passed vertices 
-		/// for normals, UVS, and triangles.
+		/// for normals, UVs, and triangles.
 		/// </summary>
 		/// <param name="vertices">Vertices of mesh</param>
 		/// <returns>Filled MeshData</returns>
@@ -273,6 +323,16 @@ namespace Terra.Terrain {
 
 			return md;
 		}
+
+		/// <summary>
+		/// Find the <see cref="ComputedMeshes"/> that has the passed 
+		/// resolution as a key.
+		/// </summary>
+		/// <param name="resolution">Resolution to search for</param>
+		/// <returns>MeshData if found, default(MeshData) otherwise</returns>
+		private MeshData FindComputedForResolution(int resolution) {
+			return ComputedMeshes.Find(kvp => kvp.Key == resolution).Value;
+		}
 	}
 
 	/// <summary>
@@ -285,4 +345,6 @@ namespace Terra.Terrain {
 		Medium = 64,
 		High = 128
 	}
+
+
 }

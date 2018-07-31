@@ -10,6 +10,7 @@ namespace Terra.Terrain {
 	/// <summary>
 	/// Represents a position in the grid of <see cref="Tile"/>s
 	/// </summary>
+	[Serializable]
 	public struct GridPosition {
 		public int X;
 		public int Z;
@@ -55,6 +56,10 @@ namespace Terra.Terrain {
 			unchecked {
 				return (X * 397) ^ Z;
 			}
+		}
+
+		public override string ToString() {
+			return "[" + X + ", " + Z + "]";
 		}
 	}
 

@@ -10,7 +10,6 @@ namespace Terra.Data {
 	public class EditorStateData {
 		public ToolbarOptions ToolbarSelection = ToolbarOptions.General;
 
-		public int PreviewRadius = 1;
 		public bool IsLodFoldout = false;
 
 		//Biomes

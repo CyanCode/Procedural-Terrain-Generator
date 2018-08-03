@@ -8,62 +8,6 @@ using Object = UnityEngine.Object;
 
 namespace Terra.Terrain {
 	/// <summary>
-	/// Represents a position in the grid of <see cref="Tile"/>s
-	/// </summary>
-	[Serializable]
-	public struct GridPosition {
-		public int X;
-		public int Z;
-
-		public GridPosition(int x, int z) {
-			X = x;
-			Z = z;
-		}
-
-		public GridPosition(Transform transf) {
-			X = (int)transf.position.x;
-			Z = (int)transf.position.z;
-		}
-
-		/// <summary>
-		/// The distance between <see cref="p"/> and this <see cref="GridPosition"/>
-		/// </summary>
-		public float Distance(GridPosition p) {
-			float x = this.X - p.X;
-			float z = this.Z - p.Z;
-
-			return Mathf.Sqrt((x * x) + (z * z));
-		}
-
-		public static bool operator ==(GridPosition p1, GridPosition p2) {
-			return p1.X == p2.X && p1.Z == p2.Z;
-		}
-
-		public static bool operator !=(GridPosition p1, GridPosition p2) {
-			return !(p1 == p2);
-		}
-
-		public bool Equals(GridPosition other) {
-			return X == other.X && Z == other.Z;
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) return false;
-			return obj is GridPosition && Equals((GridPosition)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (X * 397) ^ Z;
-			}
-		}
-
-		public override string ToString() {
-			return "[" + X + ", " + Z + "]";
-		}
-	}
-
-	/// <summary>
 	/// Contains a pool of Tiles that are can be placed and removed in the world asynchronously 
 	/// using a thread pool.
 	/// </summary>
@@ -71,7 +15,9 @@ namespace Terra.Terrain {
 	public class TilePool {
 		private const int CACHE_SIZE = 30;
 		
+		[SerializeField]
 		private int _queuedTiles = 0;
+		[SerializeField]
 		private bool _isGeneratingTile = false;
 
 		private TerraSettings _settings {
@@ -148,6 +94,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void Update() {
 			if (_queuedTiles < 1) {
+				Cache.PurgeDestroyedTiles();
 				_settings.StartCoroutine(UpdateTiles());
 			}
 
@@ -183,6 +130,16 @@ namespace Terra.Terrain {
 				AddTile(t);
 				onComplete(t);
 			}, _settings.Generator.UseMultithreading);
+		}
+
+		/// <summary>
+		/// Remove all active Tiles from the scene. Skips caching.
+		/// </summary>
+		public void RemoveAll() {
+			for (int i = 0; i < ActiveTileCount; i++) {
+				Cache.RemoveTile(ActiveTiles[i]);
+				i--;
+			}
 		}
 
 		/// <summary>
@@ -289,6 +246,62 @@ namespace Terra.Terrain {
 		private List<GridPosition> GetTilePositionsFromRadius() {
 			return GetTilePositionsFromRadius(_settings.Generator.GenerationRadius,
 				new GridPosition(_settings.Generator.TrackedObject.transform), _settings.Generator.Length);
+		}
+	}
+
+	/// <summary>
+	/// Represents a position in the grid of <see cref="Tile"/>s
+	/// </summary>
+	[Serializable]
+	public struct GridPosition {
+		public int X;
+		public int Z;
+
+		public GridPosition(int x, int z) {
+			X = x;
+			Z = z;
+		}
+
+		public GridPosition(Transform transf) {
+			X = (int)transf.position.x;
+			Z = (int)transf.position.z;
+		}
+
+		/// <summary>
+		/// The distance between <see cref="p"/> and this <see cref="Terra.Terrain.GridPosition"/>
+		/// </summary>
+		public float Distance(GridPosition p) {
+			float x = this.X - p.X;
+			float z = this.Z - p.Z;
+
+			return Mathf.Sqrt((x * x) + (z * z));
+		}
+
+		public static bool operator ==(GridPosition p1, GridPosition p2) {
+			return p1.X == p2.X && p1.Z == p2.Z;
+		}
+
+		public static bool operator !=(GridPosition p1, GridPosition p2) {
+			return !(p1 == p2);
+		}
+
+		public bool Equals(GridPosition other) {
+			return X == other.X && Z == other.Z;
+		}
+
+		public override bool Equals(object obj) {
+			if (ReferenceEquals(null, obj)) return false;
+			return obj is GridPosition && Equals((GridPosition)obj);
+		}
+
+		public override int GetHashCode() {
+			unchecked {
+				return (X * 397) ^ Z;
+			}
+		}
+
+		public override string ToString() {
+			return "[" + X + ", " + Z + "]";
 		}
 	}
 }

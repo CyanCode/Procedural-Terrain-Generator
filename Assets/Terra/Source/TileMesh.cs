@@ -4,13 +4,15 @@ using System.Threading;
 using Terra.Data;
 using UnityEngine;
 using System.Linq;
+using System.Xml.XPath;
 using Object = System.Object;
 
 namespace Terra.Terrain {
 	/// <summary>
 	/// Represents the terrain mesh attached to a Tile
 	/// </summary>
-	public class TileMesh {
+	[Serializable]
+	public class TileMesh: ISerializationCallbackReceiver {
 		/// <summary>
 		/// Resolution of this mesh
 		/// </summary>
@@ -28,6 +30,23 @@ namespace Terra.Terrain {
 		public List<KeyValuePair<int, MeshData>> ComputedMeshes { get; private set; }
 
 		/// <summary>
+		/// The heightmap that is used when creating a mesh. Updating 
+		/// <see cref="LodLevel"/> does not update <see cref="Heightmap"/>. 
+		/// Call <see cref="CreateHeightmap"/> or <see cref="CreateHeightmapAsync"/> 
+		/// instead.
+		/// </summary>
+		public float[,] Heightmap { get; private set; }
+
+		public LodData.LodLevel LodLevel { 
+			get { return _lodLevel; }
+			set {
+				_lodLevel = value;
+				HeightmapResolution = value.MapResolution;
+				MeshResolution = (Resolution)value.MeshResolution;
+			}
+		}
+
+		/// <summary>
 		/// The mesh that corresponds with the set <see cref="MeshResolution"/> if 
 		/// it has already been computed. Call <see cref="CreateMesh"/> to create or 
 		/// <see cref="HasCreatedMeshAtResolution"/> to check if it has already been created.
@@ -42,31 +61,16 @@ namespace Terra.Terrain {
 			}
 		}
 
-		public LodData.LodLevel LodLevel { 
-			get { return _lodLevel; }
-			set {
-				_lodLevel = value;
-				HeightmapResolution = value.MapResolution;
-				MeshResolution = (Resolution)value.MeshResolution;
-			}
-		}
-
-		/// <summary>
-		/// The heightmap that is used when creating a mesh. Updating 
-		/// <see cref="LodLevel"/> does not update <see cref="Heightmap"/>. 
-		/// Call <see cref="CreateHeightmap"/> or <see cref="CreateHeightmapAsync"/> 
-		/// instead.
-		/// </summary>
-		public float[,] Heightmap { get; private set; }
-
 		/// <summary>
 		/// Internal <see cref="LodLevel"/>
 		/// </summary>
+		[SerializeField]
 		private LodData.LodLevel _lodLevel;
 
 		/// <summary>
 		/// Tile using this TileMesh
 		/// </summary>
+		[SerializeField]
 		private Tile _tile;
 
 		/// <summary>
@@ -86,6 +90,27 @@ namespace Terra.Terrain {
 			_lodLevel = lodLevel; 
 
 			ComputedMeshes = new List<KeyValuePair<int, MeshData>>(3);
+		}
+
+		/// <summary>
+		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
+		/// returns the height value found at [x, 0, z]. This method applies the 
+		/// amplitude and spread from <see cref="TerraSettings"/> to the result.
+		/// </summary>
+		/// <param name="worldX">World x coordinate</param>
+		/// <param name="worldZ">World z coordinate</param>
+		/// <returns>height</returns>
+		public float HeightAt(float worldX, float worldZ) {
+			var sett = TerraSettings.Instance;
+			var amp = sett.Generator.Amplitude;
+			var spread = sett.Generator.Spread;
+		
+			if (_genNeedsUpdating) {
+				sett.HeightMapData.UpdateGenerator();
+				_genNeedsUpdating = false;
+			}
+
+			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
 		}
 
 		/// <summary>
@@ -126,6 +151,16 @@ namespace Terra.Terrain {
 
 				MTDispatch.Instance().Enqueue(onComplete);
 			});
+		}
+
+		/// <summary>
+		/// Check if the <see cref="Heightmap"/> has been created and if 
+		/// the resolution is equal to or a lower square of the passed 
+		/// <see cref="resolution"/>.
+		/// </summary>
+		/// <param name="resolution">Resolution to check</param>
+		public bool HasHeightmapForResolution(int resolution) {
+			return Heightmap != null && Heightmap.Length <= resolution;
 		}
 
 		/// <summary>
@@ -254,27 +289,6 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
-		/// returns the height value found at [x, 0, z]. This method applies the 
-		/// amplitude and spread from <see cref="TerraSettings"/> to the result.
-		/// </summary>
-		/// <param name="worldX">World x coordinate</param>
-		/// <param name="worldZ">World z coordinate</param>
-		/// <returns>height</returns>
-		public float HeightAt(float worldX, float worldZ) {
-			var sett = TerraSettings.Instance;
-			var amp = sett.Generator.Amplitude;
-			var spread = sett.Generator.Spread;
-		
-			if (_genNeedsUpdating) {
-				sett.HeightMapData.UpdateGenerator();
-				_genNeedsUpdating = false;
-			}
-
-			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
-		}
-
-		/// <summary>
 		/// Creates the rest of the mesh by referencing the passed vertices 
 		/// for normals, UVs, and triangles.
 		/// </summary>
@@ -329,6 +343,72 @@ namespace Terra.Terrain {
 		private MeshData FindComputedForResolution(int resolution) {
 			return ComputedMeshes.Find(kvp => kvp.Key == resolution).Value;
 		}
+
+		#region Serialization
+
+		/// <summary>
+		/// One dimensional representation of the heightmap that 
+		/// Unity can serialize.
+		/// </summary>
+		[SerializeField, HideInInspector]
+		private float[] _serializedHeightmap;
+
+		[SerializeField, HideInInspector]
+		private int[] _serializedMeshResolutions;
+
+		[SerializeField, HideInInspector]
+		private MeshData[] _serializedMeshData;
+
+		public void OnBeforeSerialize() {
+			//Heightmap
+			if (Heightmap != null) {
+				_serializedHeightmap = new float[HeightmapResolution * HeightmapResolution];
+
+				for (int x = 0; x < HeightmapResolution; x++) {
+					for (int z = 0; z < HeightmapResolution; z++) {
+						_serializedHeightmap[x + z * HeightmapResolution] = Heightmap[x, z];
+					}
+				}
+			}
+
+			//ComputedMeshes
+			if (ComputedMeshes != null) {
+				_serializedMeshResolutions = new int[ComputedMeshes.Count];
+				_serializedMeshData = new MeshData[ComputedMeshes.Count];
+
+				for (int i = 0; i < ComputedMeshes.Count; i++) {
+					_serializedMeshResolutions[i] = ComputedMeshes[i].Key;
+					_serializedMeshData[i] = ComputedMeshes[i].Value;
+				}
+			}
+		}
+
+		public void OnAfterDeserialize() {
+			//Heightmap
+			if (_serializedHeightmap != null) {
+				Heightmap = new float[HeightmapResolution, HeightmapResolution];
+
+				for (int x = 0; x < HeightmapResolution; x++) {
+					for (int z = 0; z < HeightmapResolution; z++) {
+						Heightmap[x, z] = _serializedHeightmap[x + z * HeightmapResolution];
+					}
+				}
+			}
+
+			//ComputedMeshes
+			if (_serializedMeshResolutions != null && _serializedMeshData != null) {
+				ComputedMeshes = new List<KeyValuePair<int, MeshData>>();
+				
+				for (int i = 0; i < _serializedMeshResolutions.Length; i++) {
+					int key = _serializedMeshResolutions[i];
+					MeshData value = _serializedMeshData[i];
+
+					ComputedMeshes.Add(new KeyValuePair<int, MeshData>(key, value));
+				}
+			}
+		}
+
+		#endregion
 	}
 
 	/// <summary>
@@ -336,11 +416,10 @@ namespace Terra.Terrain {
 	/// a TileMesh can have. Low, medium, and high which 
 	/// each correspond to a different mesh resolution.
 	/// </summary>
+	[Serializable]
 	public enum Resolution : int {
 		Low = 32, 
 		Medium = 64,
 		High = 128
 	}
-
-
 }

@@ -33,7 +33,6 @@ namespace Terra.Data {
 
 		//Editor state information
 		public EditorStateData EditorState;
-		public Previewer Previewer;
 		 
 		/// <summary>
 		/// Finds the active TerraSettings instance in this scene if one exists.
@@ -70,24 +69,11 @@ namespace Terra.Data {
 			if (Tessellation == null) Tessellation = new TessellationData();
 			if (Grass == null) Grass = new GrassData();
 			if (EditorState == null) EditorState = new EditorStateData();
-			if (Previewer == null) Previewer = new Previewer();
-		}
-
-		void Reset() {
-			OnEnable(); //Initialize default values
 		}
 
 		void Start() {
 			CreateMTD();
 
-#if UNITY_EDITOR
-			//if (!Application.isPlaying && Application.isEditor) {
-			//	//Handle Previewing
-			//	if (Preview != null && Preview.CanPreview()) {
-			//		Preview.TriggerPreviewUpdate();
-			//	}
-			//}
-#endif
 			if (Generator.GenerateOnStart) {
 				Generate();
 			}
@@ -96,82 +82,53 @@ namespace Terra.Data {
 		void Update() {
 			if (!IsInitialized) return;
 
-#if UNITY_EDITOR
-			//if (Application.isEditor && !Application.isPlaying && Preview == null) {
-			//	Preview = new TerrainPreview();
-			//}
-#endif
 			if (Application.isPlaying && Generator.Pool != null && Generator.GenerateOnStart) {
 				Generator.Pool.Update();
 			}
 		}
 
-		void OnDrawGizmosSelected() {
-			if (!IsInitialized)
-				return;
-
-			//On general tab selected: display mesh radius squares and collider radius
-			List<GridPosition> positions = TilePool.GetTilePositionsFromRadius(Generator.GenerationRadius, new GridPosition(transform), Generator.Length);
-
-			//Mesh radius squares
-			foreach (GridPosition pos in positions) {
-				Vector3 pos3D = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
- 
-				//Draw LOD squares
-				Gizmos.color = GetLodPreviewColor(pos);
-				bool isPreviewTile = Previewer.GetPreviewingPositions().Contains(pos);
-				if (Gizmos.color != Color.white && !isPreviewTile)
-					Gizmos.DrawCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
-
-				//Draw overlayed grid
-				Gizmos.color = Color.white;
-				pos3D.y += 0.1f;
-				Gizmos.DrawWireCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
-			}
-
-			//Generation radius
-			if (Generator.TrackedObject != null) {
-				var pos = Generator.TrackedObject.transform.position;
-				Vector3 extPos = new Vector3(pos.x, 0, pos.z);
-
-				Gizmos.color = Color.blue;
-				Gizmos.DrawWireCube(extPos, new Vector3(Generator.ColliderGenerationExtent, 0, Generator.ColliderGenerationExtent));
-			}
-		}
-
-		private void CreateMTD() {
-			//Create MT Dispatch if not already there
-			if (FindObjectOfType<MTDispatch>() == null) {
-				GameObject mtd = new GameObject("Main Thread Dispatch");
-				mtd.AddComponent<MTDispatch>();
-				mtd.transform.parent = transform;
-			}
+		void Reset() {
+			OnEnable(); //Initialize default values
 		}
 
 		/// <summary>
-		/// Starts the generation process 
+		/// Starts the generation process (for use in play mode)
 		/// </summary>
 		public void Generate() {
 			CreateMTD();
 
-			if (Application.isPlaying) {
-				//Cleanup preview from edit mode
-				Previewer.RemoveExistingTiles();
-
-				//Set default tracked object
-				if (Generator.TrackedObject == null) {
-					Generator.TrackedObject = Camera.main.gameObject;
-				}
-
-				//Set seed for RNG
-				if (!Generator.UseRandomSeed)
-					Random.InitState(GenerationSeed);
-				else
-					GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
+			//Set default tracked object
+			if (Generator.TrackedObject == null) {
+				Generator.TrackedObject = Camera.main.gameObject;
 			}
 
+			//Set seed for RNG
+			if (!Generator.UseRandomSeed)
+				Random.InitState(GenerationSeed);
+			else
+				GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
+			
 			//Allows for update to continue
 			Generator.GenerateOnStart = true;
+		}
+
+		/// <summary>
+		/// Starts the generation process tailored specifically 
+		/// to the editor.
+		/// </summary>
+		public void GenerateEditor() {
+			//Set default tracked object
+			if (Generator.TrackedObject == null) {
+				Generator.TrackedObject = Camera.main.gameObject;
+			}
+
+			//Set seed for RNG
+			if (!Generator.UseRandomSeed)
+				Random.InitState(GenerationSeed);
+			else
+				GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
+
+			Generator.Pool.Update();
 		}
 
 		/// <summary>
@@ -203,6 +160,48 @@ namespace Terra.Data {
 			}
 
 			return chosen;
+		}
+
+		void OnDrawGizmosSelected() {
+			if (!IsInitialized)
+				return;
+
+			//On general tab selected: display mesh radius squares and collider radius
+			List<GridPosition> positions = TilePool.GetTilePositionsFromRadius(Generator.GenerationRadius, new GridPosition(transform), Generator.Length);
+
+			//Mesh radius squares
+			foreach (GridPosition pos in positions) {
+				Vector3 pos3D = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
+ 
+				//Draw LOD squares
+				Gizmos.color = GetLodPreviewColor(pos);
+				//bool isPreviewTile = Previewer.GetPreviewingPositions().Contains(pos);
+				if (Gizmos.color != Color.white)
+					Gizmos.DrawCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
+
+				//Draw overlayed grid
+				Gizmos.color = Color.white;
+				pos3D.y += 0.1f;
+				Gizmos.DrawWireCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
+			}
+
+			//Generation radius
+			if (Generator.TrackedObject != null) {
+				var pos = Generator.TrackedObject.transform.position;
+				Vector3 extPos = new Vector3(pos.x, 0, pos.z);
+
+				Gizmos.color = Color.blue;
+				Gizmos.DrawWireCube(extPos, new Vector3(Generator.ColliderGenerationExtent, 0, Generator.ColliderGenerationExtent));
+			}
+		}
+
+		private void CreateMTD() {
+			//Create MT Dispatch if not already there
+			if (FindObjectOfType<MTDispatch>() == null) {
+				GameObject mtd = new GameObject("Main Thread Dispatch");
+				mtd.AddComponent<MTDispatch>();
+				mtd.transform.parent = transform;
+			}
 		}
 
 		/// <summary>

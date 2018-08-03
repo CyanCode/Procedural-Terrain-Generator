@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Terra.Terrain {
@@ -9,10 +10,12 @@ namespace Terra.Terrain {
 	/// TerrainTiles.
 	/// </summary>
 	[Serializable]
-	public class TileCache {
+	public class TileCache: ISerializationCallbackReceiver {
 		public List<Tile> ActiveTiles { get; private set; }
 
+		[SerializeField]
 		private int _cacheCapacity;
+		[SerializeField]
 		private LinkedList<Tile> _cachedTiles = new LinkedList<Tile>();
 
 		public TileCache(int cacheCapacity = 20) {
@@ -75,7 +78,7 @@ namespace Terra.Terrain {
 				bool matched = false;
 
 				foreach (Tile t in ActiveTiles) {
-					if (t.GridPosition == position) {
+					if (t != null && t.GridPosition == position) {
 						matched = true;
 						break;
 					}
@@ -108,14 +111,15 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="tile">Tile to remove and destroy</param>
 		public void RemoveTile(Tile tile) {
-			if (ActiveTiles.Contains(tile)) {
-				ActiveTiles.Remove(tile);
+			PurgeDestroyedTiles();
 
+			if (ActiveTiles.Contains(tile)) {
 #if UNITY_EDITOR
 				Object.DestroyImmediate(tile.gameObject);
 #else
 				Object.Destroy(tile.gameObject);
 #endif
+				PurgeDestroyedTiles();
 			}
 		}
 
@@ -129,6 +133,18 @@ namespace Terra.Terrain {
 			ActiveTiles.Add(tile);
 
 			TerraEvent.TriggerOnTileActivated(tile);
+		}
+
+		/// <summary>
+		/// Removes previously destroyed tiles from the cache.
+		/// </summary>
+		public void PurgeDestroyedTiles() {
+			for (var i = 0; i < ActiveTiles.Count; i++) {
+				if (ActiveTiles[i] == null) {
+					ActiveTiles.RemoveAt(i);
+					i--;
+				}
+			}
 		}
 
 		/// <summary>
@@ -148,5 +164,50 @@ namespace Terra.Terrain {
 				removalAmount--;
 			}
 		}
+
+		#region Serialization
+
+		[SerializeField]
+		private List<Tile> _serializedCachedTiles;
+		[SerializeField]
+		private List<Tile> _serializedActiveTiles;
+
+		public void OnBeforeSerialize() {
+			//Cached tiles
+			if (_cachedTiles != null) {
+				_serializedCachedTiles = new List<Tile>(_cachedTiles.Count);
+
+				LinkedList<Tile>.Enumerator enumerator = _cachedTiles.GetEnumerator();
+				while (enumerator.MoveNext()) {
+					_serializedCachedTiles.Add(enumerator.Current);
+				}
+				enumerator.Dispose();
+			}
+
+			//Active tiles
+			if (ActiveTiles != null) {
+				_serializedActiveTiles = new List<Tile>(ActiveTiles.Count);
+				_serializedActiveTiles.AddRange(ActiveTiles);
+			}
+		}
+
+		public void OnAfterDeserialize() {
+			//Cached tiles
+			if (_serializedCachedTiles != null) {
+				_cachedTiles = new LinkedList<Tile>();
+
+				foreach (Tile t in _cachedTiles) {
+					_cachedTiles.AddLast(t);
+				}
+			}
+
+			//Active tiles
+			if (_serializedActiveTiles != null) {
+				ActiveTiles = new List<Tile>(_serializedActiveTiles.Count);
+				ActiveTiles.AddRange(_serializedActiveTiles);
+			}
+		}
+
+		#endregion
 	}
 }

@@ -2,6 +2,7 @@
 using Terra.ReorderableList;
 using System.Linq;
 using Terra.Data;
+using Terra.Terrain;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
@@ -355,17 +356,24 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Separator();
 			EditorGUILayout.Space();
 
-			EditorGUI.BeginChangeCheck();
-			_settings.EditorState.PreviewRadius = 
-				EditorGUILayout.IntField("Preview Radius", _settings.EditorState.PreviewRadius);
-			if (EditorGUI.EndChangeCheck()) {
-				int rad = _settings.EditorState.PreviewRadius;
-				int genRad = _settings.Generator.GenerationRadius;
-				_settings.EditorState.PreviewRadius = rad > genRad ? genRad : rad;
+			if (GUILayout.Button("Generate")) {
+				if (_settings.Generator.GenerationRadius > 4) {
+					int amt = TilePool.GetTilePositionsFromRadius(
+						_settings.Generator.GenerationRadius, new GridPosition(0, 0), _settings.Generator.Length)
+						.Count;
+					string msg = "You are about to generate " + amt + " Tiles synchronously which " +
+									   "may take a while. Are you sure you want to continue?";
+					if (EditorUtility.DisplayDialog("Warning", msg, "Continue")) {
+						_settings.GenerateEditor();
+					}
+				} else {
+					_settings.GenerateEditor();
+				}
 			}
-
-			if (GUILayout.Button("Update Preview")) {
-				_settings.Previewer.UpdatePreview();
+			if (GUILayout.Button("Clear Tiles")) {
+				if (_settings.Generator != null && _settings.Generator.Pool != null) {
+					_settings.Generator.Pool.RemoveAll();
+				}
 			}
 		}
 

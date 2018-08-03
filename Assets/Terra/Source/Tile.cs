@@ -9,7 +9,7 @@ namespace Terra.Terrain {
 	///	position, texture, and detail application.
 	/// </summary>
 	[ExecuteInEditMode]
-	public class Tile: MonoBehaviour {
+	public class Tile: MonoBehaviour, ISerializationCallbackReceiver {
 		private TerraSettings _settings { get { return TerraSettings.Instance; } }
 
 		[HideInInspector]
@@ -32,6 +32,16 @@ namespace Terra.Terrain {
 		/// applied to each MeshRenderer.
 		/// </summary>
 		public TilePaint Painter;
+
+		/// <summary>
+		/// The LOD level for this Tile. This value can change if 
+		/// <see cref="GridPosition"/> is modified.
+		/// </summary>
+		public LodData.LodLevel LodLevel {
+			get {
+				return _settings.Generator.Lod.GetLevelForRadius((int)GridPosition.Distance(new GridPosition(0, 0)));
+			}
+		}
 
 		void Awake() {
 			MeshManager = new TileMesh(this, GetLodLevel());
@@ -149,6 +159,54 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Creates a map of biomes with the passed <see cref="resolution"/> and 
+		/// the heightmap created in <see cref="MeshManager"/>.
+		/// Points are polled along this <see cref="Tile"/> instance.
+		/// </summary>
+		/// <returns>BiomeData, null if no Heightmap has been created first</returns>
+		public BiomeData[,] GetBiomeMap(int resolution) {
+			if (MeshManager == null || !MeshManager.HasHeightmapForResolution(resolution)) {
+				Debug.LogWarning("Cannot create biome map without an available heightmap.");
+				return null;
+			}
+
+			BiomeData[,] map = new BiomeData[resolution,resolution];
+			int increment = MeshManager.HeightmapResolution / resolution;
+			
+			for (int x = 0; x < resolution; x += increment) {
+				for (int z = 0; z < resolution; z += increment) {
+					BiomeData chosen = null;
+					
+					foreach (BiomeData b in _settings.BiomesData) {
+						var tm = _settings.TemperatureMapData;
+						var mm = _settings.MoistureMapData;
+
+						if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
+						if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
+
+						var height = MeshManager.Heightmap[x, z];
+						var local = MeshManager.PositionToLocal(x, z, resolution);
+						var world = MeshManager.LocalToWorld(local.x, local.y);
+						var wx = world.x;
+						var wz = world.y;
+
+						bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height) || !b.IsHeightConstrained;
+						bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(wx, wz)) || !b.IsTemperatureConstrained;
+						bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(wx, wz)) || !b.IsMoistureConstrained;
+
+						if (passHeight && passTemp && passMoisture) {
+							chosen = b;
+						}
+					}
+
+					map[x / increment, z / increment] = chosen;
+				}
+			}
+
+			return map;
+		}
+
+		/// <summary>
 		/// Finishes the <see cref="Generate"/> method after the 
 		/// mesh has been created. This exists as a convenience as 
 		/// a mesh can be created asynchronously or synchronously but 
@@ -166,12 +224,30 @@ namespace Terra.Terrain {
 			int radius = (int)GridPosition.Distance(new GridPosition(0, 0));
 			return _settings.Generator.Lod.GetLevelForRadius(radius);
 		}
+
+		#region Serialization
+
+		[SerializeField]
+		private GridPosition _serializedGridPosition;
+
+		public void OnBeforeSerialize() {
+			//Grid Position
+			_serializedGridPosition = GridPosition;
+		}
+
+		public void OnAfterDeserialize() {
+			//Grid Position
+			GridPosition = _serializedGridPosition;
+		}
+
+		#endregion
 	}
 
 	/// <summary>
 	/// An implementation of <see cref="Mesh"/> that does not return 
 	/// copies of its' parameters.
 	/// </summary>
+	[Serializable]
 	public struct MeshData {
 		public Vector3[] Vertices { 
 			get { return _vertices; }
@@ -204,9 +280,13 @@ namespace Terra.Terrain {
 
 		//Private instances of public variables for 
 		//allowing mesh reconstruction on value change
+		[SerializeField]
 		private Vector3[] _vertices;
+		[SerializeField]
 		private Vector3[] _normals;
+		[SerializeField]
 		private Vector2[] _uvs;
+		[SerializeField]
 		private int[] _triangles;
 
 		/// <summary>

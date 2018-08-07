@@ -231,18 +231,25 @@ namespace Terra.Data {
 		/// <summary>
 		/// Toggles that can aid in debugging Terra.
 		/// </summary>
-		internal static class TerraDebug {
+		public static class TerraDebug {
 			/// <summary>
 			/// Sets components to display/hide in TerraSettings 
 			/// gameobject
 			/// </summary>
-			internal const bool HIDE_IN_INSPECTOR = true;
+			public const bool HIDE_IN_INSPECTOR = true;
 
 			/// <summary>
 			/// Writes splat control textures to the file system 
 			/// for debug purposes
 			/// </summary>
-			internal const bool WRITE_SPLAT_TEXTURES = false;
+			public const bool WRITE_SPLAT_TEXTURES = false;
+
+			/// <summary>
+			/// How many textures should be written to the file 
+			/// system when <see cref="WRITE_SPLAT_TEXTURES"/> is 
+			/// enabled?
+			/// </summary>
+			public static int MAX_TEXTURE_WRITE_COUNT = 1;
 		}
 	}
 

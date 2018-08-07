@@ -121,7 +121,7 @@ namespace Terra.Terrain {
 		/// of to-be created vertices in 3D space.
 		/// </summary>
 		public void CreateHeightmap() {
-			if (Heightmap != null && Heightmap.Length >= HeightmapResolution)
+			if (Heightmap != null && (int)Math.Sqrt(Heightmap.Length) >= HeightmapResolution)
 				return;
 
 			Heightmap = new float[HeightmapResolution, HeightmapResolution];
@@ -160,7 +160,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="resolution">Resolution to check</param>
 		public bool HasHeightmapForResolution(int resolution) {
-			return Heightmap != null && Heightmap.Length <= resolution;
+			return Heightmap != null && (int)Math.Sqrt(Heightmap.Length) <= resolution;
 		}
 
 		/// <summary>

@@ -93,8 +93,9 @@ namespace Terra.Terrain {
 		/// has finished generating.
 		/// </summary>
 		public void Update() {
-			if (_queuedTiles < 1) {
-				Cache.PurgeDestroyedTiles();
+			Cache.PurgeDestroyedTiles();
+
+			if (_queuedTiles < 1) {	
 				_settings.StartCoroutine(UpdateTiles());
 			}
 
@@ -136,6 +137,9 @@ namespace Terra.Terrain {
 		/// Remove all active Tiles from the scene. Skips caching.
 		/// </summary>
 		public void RemoveAll() {
+			_queuedTiles = 0;
+			_isGeneratingTile = false;
+
 			for (int i = 0; i < ActiveTileCount; i++) {
 				Cache.RemoveTile(ActiveTiles[i]);
 				i--;

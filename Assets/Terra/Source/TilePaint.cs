@@ -37,7 +37,14 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void Paint() {
 			CalculateBiomeMap();
-			ApplyDefaultMaterial();
+			if (BiomeMap == null) {
+				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
+				ApplyDefaultMaterial();
+				return;
+			}
+
+			GatherTextures();
+			AddControlMapsToShaders();
 		}
 
 		/// <summary>
@@ -60,78 +67,56 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Fills <see cref="Splats"/> with the splat data it needs to render 
-		/// terrain. Assumes <see cref="CalculateBiomeMap"/> has been called 
-		/// first.
+		/// Applies the passed splat textures to the terrain. Because only 4 alphamaps can be 
+		/// applied at one time, multiple splat textures must be passed at one time if the amount 
+		/// of supplied textures is > 4. The GenerateSplatmaps function takes care of this for you and 
+		/// its result can be passed as the splats parameter.
 		/// </summary>
-		private void SetSplatData() {
-			if (BiomeMap == null)
-				return;
+		public void AddControlMapsToShaders() {
+			SetFirstPassShader(true);
+			
+			int len = Splats.Length;
+			MeshRenderer mr = _tile.GetMeshRenderer();
+			Material toSet = mr.sharedMaterial;
 
-			//TODO measure speed 
-			List<SplatData> data = new List<SplatData>();
-			for (int x = 0; x < BiomeMap.Length; x++) {
-				for (int z = 0; z < BiomeMap.Length; z++) {
-					BiomeData biome = BiomeMap[x, z];
+			for (var i = 0; i < Controls.Length; i++) {
+				const int off = 4; //Offset for splat textures
 
-					foreach (SplatData sd in biome.Details.SplatsData) {
-						if (!data.Exists(t => t.Equals(sd))) {
-							data.Add(sd);
-						}
-					}
+				if (i != 0) { //Insert new Material/AddPass shader
+					const string fpLoc = "Hidden/TerrainEngine/Splatmap/Standard-AddPass";
+					Material mat = new Material(Shader.Find(fpLoc));
+					toSet = mat;
+
+					mr.sharedMaterials = mr.sharedMaterials.Concat(new[] { toSet }).ToArray();
 				}
-			}
 
-			Splats = data.ToArray();
+				toSet.SetTexture("_Control", Controls[i]);
+				toSet.SetTexture("_MainTex", Controls[0]);
+				toSet.SetColor("_Color", Color.black);
+
+				if (i * off < len) SetMaterialForSplatIndex(0, Splats[i * off], toSet);
+				if (i * off + 1 < len) SetMaterialForSplatIndex(1, Splats[i * off + 1], toSet);
+				if (i * off + 2 < len) SetMaterialForSplatIndex(2, Splats[i * off + 2], toSet);
+				if (i * off + 3 < len) SetMaterialForSplatIndex(3, Splats[i * off + 3], toSet);
+			}
 		}
 
 		/// <summary>
-		/// Fills <see cref="Controls"/> with the textures it needs to render 
-		/// terrain. Assumes <see cref="CalculateBiomeMap"/> has been called 
-		/// first.
+		/// Applies the Unity default material to the terrain if one is not 
+		/// already applied.
 		/// </summary>
-		private void SetControlTextures() {
-			//Ensure correct shader is set
-			SetFirstPassShader(true);
+		private void ApplyDefaultMaterial() {
+			if (_tile.GetMeshRenderer() == null || _tile.GetMeshRenderer().sharedMaterial != null)
+				return;
 
-			//Set amount of required maps
-			List<Texture2D> maps = new List<Texture2D>();
-			int splatRes = _tile.LodLevel.SplatmapResolution;
-
-			for (int i = 0; i < Mathf.CeilToInt(Splats.Length / 4f); i++)
-				maps.Add(new Texture2D(splatRes, splatRes));
-
-			//Sample weights and fill in textures
-			int incrementer = _tile.MeshManager.HeightmapResolution / splatRes;
-			for (int x = 0; x < splatRes; x += incrementer) {
-				for (int z = 0; z < splatRes; z += incrementer) {
-					float height = _tile.MeshManager.Heightmap[x, z];
-					float angle = GetSteepness(x, z) * 90;
-					
-					AddWeightsToTextures(CalculateWeights(height, angle), ref maps, x, z); //consider switching x & z
-				}
+			Shader s = Shader.Find("Diffuse");
+			if (s == null) {
+				Debug.Log("Failed to find default shader when creating terrain");
+				return;
 			}
-			
-			//Apply set pixel values to textures
-			maps.ForEach(t => t.Apply());
-		}
 
-		float GetSteepness(int x, int y) {
-			float[,] heightmap = _tile.MeshManager.Heightmap;
-			float height = heightmap[x, y];
-
-			//Ensure x & y fall within heightmap
-			if (x >= heightmap.Length - 1)
-				x = heightmap.Length - 2;
-			if (y >= heightmap.Length - 1)
-				y = heightmap.Length - 2;
-
-			// Compute the differentials by stepping over 1 in both directions.
-			float dx = heightmap[x + 1, y] - height;
-			float dy = heightmap[x, y + 1] - height;
-
-			// The "steepness" is the magnitude of the gradient vector
-			return Mathf.Sqrt(dx * dx + dy * dy);
+			Material material = new Material(s);
+			_tile.GetMeshRenderer().sharedMaterial = material;
 		}
 
 		/// <summary>
@@ -192,6 +177,89 @@ namespace Terra.Terrain {
 			return weights;
 		}
 
+		float GetSteepness(int x, int y) {
+			int res = _tile.MeshManager.HeightmapResolution;
+			float[,] heightmap = _tile.MeshManager.Heightmap;
+			float height = heightmap[x, y];
+
+			//Ensure x & y fall within heightmap
+			if (x >= res - 1)
+				x = res - 2;
+			if (y >= res - 1)
+				y = res - 2;
+
+			// Compute the differentials by stepping over 1 in both directions.
+			float dx = heightmap[x + 1, y] - height;
+			float dy = heightmap[x, y + 1] - height;
+
+			// The "steepness" is the magnitude of the gradient vector
+			return Mathf.Sqrt(dx * dx + dy * dy);
+		}
+
+		/// <summary>
+		/// Fills <see cref="Splats"/> with the splat data it needs to render 
+		/// terrain. Assumes <see cref="CalculateBiomeMap"/> has been called 
+		/// first.
+		/// </summary>
+		private void SetSplatData() {
+			if (BiomeMap == null)
+				return;
+
+			//TODO measure speed 
+			List<SplatData> data = new List<SplatData>();
+			int res = (int)Math.Sqrt(BiomeMap.Length);
+
+			for (int x = 0; x < res; x++) {
+				for (int z = 0; z < res; z++) {
+					BiomeData biome = BiomeMap[x, z];
+					if (biome == null)
+						continue; 
+
+					foreach (SplatData sd in biome.Details.SplatsData) {
+						if (!data.Exists(t => t.Equals(sd))) {
+							data.Add(sd);
+						}
+					}
+				}
+			}
+
+			Splats = data.ToArray();
+		}
+
+		/// <summary>
+		/// Fills <see cref="Controls"/> with the textures it needs to render 
+		/// terrain. Assumes <see cref="CalculateBiomeMap"/> has been called 
+		/// first.
+		/// </summary>
+		private void SetControlTextures() {
+			//Ensure correct shader is set
+			SetFirstPassShader(true);
+
+			//Set amount of required maps
+			List<Texture2D> maps = new List<Texture2D>();
+			int splatRes = _tile.LodLevel.SplatmapResolution;
+
+			for (int i = 0; i < Mathf.CeilToInt(Splats.Length / 4f); i++)
+				maps.Add(new Texture2D(splatRes, splatRes));
+
+			//Sample weights and fill in textures
+			int incrementer = _tile.MeshManager.HeightmapResolution / splatRes;
+			for (int x = 0; x < splatRes; x += incrementer) {
+				for (int z = 0; z < splatRes; z += incrementer) {
+					float height = _tile.MeshManager.Heightmap[x, z];
+					float angle = GetSteepness(x, z) * 90;
+					
+					AddWeightsToTextures(CalculateWeights(height, angle), ref maps, x, z); //consider switching x & z
+				}
+			}
+			
+			//Apply set pixel values to textures
+			maps.ForEach(t => t.Apply());
+			Controls = maps.ToArray();
+
+			WriteDebugTextures();
+		}
+
 		private void AddWeightsToTextures(float[] weights, ref List<Texture2D> textures, int x, int y) {
 			int len = weights.Length;
 
@@ -206,21 +274,25 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Applies the Unity default material to the terrain if one is not 
-		/// already applied.
+		/// Sets the terrain splat texture at the passed index to the same 
+		/// information provided in the passed material.
 		/// </summary>
-		private void ApplyDefaultMaterial() {
-			if (_tile.GetMeshRenderer() == null || _tile.GetMeshRenderer().sharedMaterial != null)
-				return;
+		/// <param name="index">Splat index to apply material to (0 - 3)</param>
+		/// <param name="splat"></param>
+		/// <param name="mat">Material to apply</param>
+		void SetMaterialForSplatIndex(int index, SplatData splat, Material mat) {
+			//Main Texture
+			mat.SetTexture("_Splat" + index, splat.Diffuse);
+			mat.SetTextureScale("_Splat" + index, splat.Tiling);
+			mat.SetTextureOffset("_Splat" + index, splat.Offset);
 
-			Shader s = Shader.Find("Diffuse");
-			if (s == null) {
-				Debug.Log("Failed to find default shader when creating terrain");
-				return;
-			}
+			//Normal Texture
+			mat.SetTexture("_Normal" + index, splat.Normal);
+			mat.SetTextureScale("_Normal" + index, splat.Tiling);
+			mat.SetTextureOffset("_Normal" + index, splat.Offset);
 
-			Material material = new Material(s);
-			_tile.GetMeshRenderer().sharedMaterial = material;
+			//Smoothness
+			mat.SetFloat("_Smoothness" + index, splat.Smoothness);
 		}
 
 		/// <summary>
@@ -233,8 +305,8 @@ namespace Terra.Terrain {
 			const string path = "Terra/TerrainFirstPass";
 			var mr = _tile.GetMeshRenderer();
 
-			if (mr.material == null || overwrite) {
-				mr.material = new Material(Shader.Find(path));
+			if (mr.sharedMaterial == null || overwrite) {
+				mr.sharedMaterial = new Material(Shader.Find(path));
 			}
 		}
 
@@ -253,7 +325,9 @@ namespace Terra.Terrain {
 				if (!Directory.Exists(folderPath))
 					Directory.CreateDirectory(folderPath);
 
-				for (var i = 0; i < Controls.Length; i++) {
+				int max = TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT;
+				int length = Controls.Length > max ? max : Controls.Length;
+				for (var i = 0; i < length; i++) {
 					byte[] bytes = Controls[i].EncodeToPNG();
 					string name = "Splat" + i + "_" + tileName + ".png";
 					File.WriteAllBytes(folderPath + name, bytes);
@@ -267,17 +341,18 @@ namespace Terra.Terrain {
 		[SerializeField, HideInInspector]
 		private int[] _serializedBiomePoints;
 
-		[SerializeField]
+		[SerializeField, HideInInspector]
 		private BiomeData[] _serializedBiomes;
 
 		public void OnBeforeSerialize() {
 			//Biome map
 			if (BiomeMap != null) {
-				_serializedBiomePoints = new int[BiomeMap.Length * BiomeMap.Length];
+				int res = (int)Math.Sqrt(BiomeMap.Length);
+				_serializedBiomePoints = new int[BiomeMap.Length];
 				List<BiomeData> biomeTypes = new List<BiomeData>();
-
-				for (int x = 0; x < BiomeMap.Length; x++) {
-					for (int z = 0; z < BiomeMap.Length; z++) {
+				
+				for (int x = 0; x < res; x++) {
+					for (int z = 0; z < res; z++) {
 						BiomeData b = BiomeMap[x, z];
 						int existIdx = biomeTypes.FindIndex(p => p == b);
 
@@ -286,7 +361,7 @@ namespace Terra.Terrain {
 							existIdx = biomeTypes.Count - 1;
 						}
 
-						_serializedBiomePoints[x + z * BiomeMap.Length] = existIdx;
+						_serializedBiomePoints[x + z * res] = existIdx;
 					}
 				}
 
@@ -299,8 +374,8 @@ namespace Terra.Terrain {
 				int length = (int)Math.Sqrt(_serializedBiomePoints.Length);
 				BiomeMap = new BiomeData[length, length];
 
-				for (int x = 0; x < BiomeMap.Length; x++) {
-					for (int z = 0; z < BiomeMap.Length; z++) {
+				for (int x = 0; x < length; x++) {
+					for (int z = 0; z < length; z++) {
 						int point = _serializedBiomePoints[x + z * length];
 						BiomeMap[x, z] = _serializedBiomes[point];
 					}

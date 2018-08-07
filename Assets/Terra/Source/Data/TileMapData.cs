@@ -2,6 +2,7 @@
 using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation;
 using Terra.CoherentNoise.Generation.Fractal;
+using Terra.Graph.Noise;
 using UnityEngine;
 
 namespace Terra.Data {
@@ -41,18 +42,10 @@ namespace Terra.Data {
 		}
 
 		/// <summary>
-		/// If <see cref="MapType"/> is set to Custom, this Generator 
-		/// is returned upon accessing <see cref="Generator"/>
+		/// The NoiseGraph attached to this map when using 
+		/// <see cref="MapGeneratorType.Custom"/>
 		/// </summary>
-		public Generator CustomGenerator {
-			get { return _customGenerator; }
-			set {
-				_customGenerator = value;
-				if (value != null) {
-					MapType = MapGeneratorType.Custom;
-				}
-			}
-		}
+		public NoiseGraph Graph;
 
 		/// <summary>
 		/// "Zoom" level applied to the preview texture
@@ -96,11 +89,6 @@ namespace Terra.Data {
 		/// Internal <see cref="Generator"/>
 		/// </summary>
 		private Generator _generator;
-
-		/// <summary>
-		/// Internal <see cref="CustomGenerator"/>
-		/// </summary>
-		private Generator _customGenerator;
 
 		/// <summary>
 		/// Internal <see cref="MapType"/>
@@ -185,7 +173,9 @@ namespace Terra.Data {
 					gen = new BillowNoise(seed).ScaleShift(0.5f, 0.5f);
 					break;
 				case MapGeneratorType.Custom:
-					gen = CustomGenerator;
+					if (Graph == null)
+						return;
+					gen = Graph.GetEndGenerator();
 					break;
 				default:
 					return;

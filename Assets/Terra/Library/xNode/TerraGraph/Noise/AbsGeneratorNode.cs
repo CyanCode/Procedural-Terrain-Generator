@@ -86,6 +86,19 @@ namespace Terra.Graph.Noise {
 		/// </summary>
 		/// <returns>Title in string form</returns>
 		public abstract string GetTitle();
+
+		/// <summary>
+		/// The maximum possible value that this Generator 
+		/// can produce.
+		/// </summary>
+		public abstract float GetMaxValue();
+
+		/// <summary>
+		/// The minimum possible value that this Generator 
+		/// can produce.
+		/// </summary>
+		/// <returns></returns>
+		public abstract float GetMinValue();
 	}
 }
  

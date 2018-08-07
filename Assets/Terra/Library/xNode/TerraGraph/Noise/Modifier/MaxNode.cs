@@ -1,4 +1,5 @@
-﻿using Terra.CoherentNoise;
+﻿using System;
+using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
 
 namespace Terra.Graph.Noise.Modifier {
@@ -14,6 +15,14 @@ namespace Terra.Graph.Noise.Modifier {
 
 		public override string GetTitle() {
 			return "Max";
+		}
+
+		public override float GetMaxValue() {
+			return Math.Max(Generator1.GetMaxValue(), Generator2.GetMaxValue());
+		}
+
+		public override float GetMinValue() {
+			return Math.Min(Generator1.GetMinValue(), Generator2.GetMinValue());
 		}
 	}
 }

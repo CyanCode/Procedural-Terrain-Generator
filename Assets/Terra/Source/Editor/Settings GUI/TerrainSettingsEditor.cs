@@ -48,6 +48,8 @@ namespace UnityEditor.Terra {
 
 			//Preview button
 			gui.PreviewUpdate();
+
+			gui.Debug();
 		}
 	}
 }

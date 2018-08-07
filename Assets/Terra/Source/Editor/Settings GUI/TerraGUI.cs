@@ -2,6 +2,7 @@
 using Terra.ReorderableList;
 using System.Linq;
 using Terra.Data;
+using Terra.Graph.Noise;
 using Terra.Terrain;
 using UnityEngine;
 
@@ -174,6 +175,11 @@ namespace UnityEditor.Terra {
 
 				EditorGUI.indentLevel++; //Indent following controls
 				md.MapType = (MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
+				if (md.MapType == MapGeneratorType.Custom) {
+					md.Graph = (NoiseGraph)EditorGUILayout.ObjectField("Noise Graph", md.Graph, typeof(NoiseGraph), false);
+					//TODO Add "Create new" button under graph
+				}
+				
 				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
 				EditorGUILayout.Space();
 
@@ -374,6 +380,16 @@ namespace UnityEditor.Terra {
 				if (_settings.Generator != null && _settings.Generator.Pool != null) {
 					_settings.Generator.Pool.RemoveAll();
 				}
+			}
+		}
+
+		/// <summary>
+		/// Displays information useful to debugging Terra
+		/// </summary>
+		public void Debug() {
+			if (TerraSettings.TerraDebug.WRITE_SPLAT_TEXTURES) {
+				TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT =
+					EditorGUILayout.IntField("Tex Count", TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT);
 			}
 		}
 

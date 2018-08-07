@@ -107,8 +107,8 @@ namespace Terra.Data {
 			set { _useHighLod = value; VerifyLodLevelEnabled(); }
 		}
 
-		public LodLevel Low = new LodLevel(3, 32, 32, 32);
-		public LodLevel Medium = new LodLevel(2, 64, 64, 64);
+		public LodLevel Low = new LodLevel(2, 32, 32, 32);
+		public LodLevel Medium = new LodLevel(1, 64, 64, 64);
 		public LodLevel High = new LodLevel(0, 512, 128, 512);
 
 		/// <summary>

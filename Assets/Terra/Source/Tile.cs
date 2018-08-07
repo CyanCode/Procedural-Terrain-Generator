@@ -44,8 +44,10 @@ namespace Terra.Terrain {
 		}
 
 		void Awake() {
-			MeshManager = new TileMesh(this, GetLodLevel());
-			Painter = new TilePaint(this);
+			if (MeshManager == null)
+				MeshManager = new TileMesh(this, GetLodLevel());
+			if (Painter == null)
+				Painter = new TilePaint(this);
 		}
 
 		/// <summary>

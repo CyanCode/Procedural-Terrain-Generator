@@ -5,5 +5,13 @@
 		[Input] public int OctaveCount = 6;
 
 		protected const string MENU_PARENT_NAME = "Terrain/Noise/";
+
+		public override float GetMaxValue() {
+			return 1;
+		}
+
+		public override float GetMinValue() {
+			return -1;
+		}
 	}
 }

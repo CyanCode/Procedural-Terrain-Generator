@@ -29,7 +29,7 @@ namespace Terra.Terrain {
 		public TerrainPaint(GameObject gameobject) {
 			TerrainObject = gameobject;
 			Settings = TerraSettings.Instance;
-			SplatSettings = Settings.Splat;
+			SplatSettings = null;
 			
 
 			SetFirstPassShader();

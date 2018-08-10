@@ -293,6 +293,12 @@ namespace Terra.Terrain {
 
 			//Smoothness
 			mat.SetFloat("_Smoothness" + index, splat.Smoothness);
+
+			//Distance blending
+			var sd = TerraSettings.Instance.ShaderData;
+			mat.SetFloat("_TransitionDistance", sd.TransitionStart);
+			mat.SetFloat("_TransitionFalloff", sd.TransitionFalloff);
+			mat.SetFloat("_TilingMultiplier", sd.FarScaleMultiplier);
 		}
 
 		/// <summary>

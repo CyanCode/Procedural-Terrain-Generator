@@ -349,9 +349,18 @@ namespace UnityEditor.Terra {
 				if (i < _settings.BiomesData.Count - 1)
 					EditorGUIExtension.AddBlockAreaSeperator();
 			}
-
+			
 			EditorGUIExtension.EndBlockArea();
 			EditorGUILayout.Space();
+
+			//Shader Settings
+			const string desc = "Scale up textures in the distance to hide texture tiling.";
+			Header("Distance Texture Scaling", desc);
+
+			ShaderData sd = _settings.ShaderData;
+			sd.FarScaleMultiplier = EditorGUILayout.FloatField("Far Tex Scale", sd.FarScaleMultiplier);
+			sd.TransitionStart = EditorGUILayout.FloatField("Blend Start", sd.TransitionStart);
+			sd.TransitionFalloff = EditorGUILayout.FloatField("Blend Falloff", sd.TransitionFalloff);
 		}
 
 		/// <summary>
@@ -480,8 +489,10 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.LabelField(title, EditorGUIExtension.TerraStyle.TextTitle);
 
 			//Description readonly text area
-			EditorStyles.label.wordWrap = true;
-			EditorGUILayout.LabelField(description, GUILayout.ExpandWidth(false));
+			if (!string.IsNullOrEmpty(description)) {
+				EditorStyles.label.wordWrap = true;
+				EditorGUILayout.LabelField(description, GUILayout.ExpandWidth(false));
+			}
 
 			EditorGUILayout.Space();
 		}

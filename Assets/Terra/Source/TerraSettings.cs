@@ -21,10 +21,10 @@ namespace Terra.Data {
 		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
 		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
 		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
-		
+
 		//Detail
-		public List<BiomeData> BiomesData; 
-		public List<SplatData> Splat; //TODO Remove
+		public ShaderData ShaderData;
+		public List<BiomeData> BiomesData;
 		public List<DetailData> Details;
 		public List<ObjectPlacementData> ObjectData; //TODO Remove
 
@@ -60,8 +60,8 @@ namespace Terra.Data {
 			IsInitialized = true;
 			 
 			if (Generator == null) Generator = new GenerationData();
+			if (ShaderData == null) ShaderData = new ShaderData(); 
 			if (BiomesData == null) BiomesData = new List<BiomeData>();
-			if (Splat == null) Splat = new List<SplatData>();
 			if (Details == null) Details = new List<DetailData>();
 			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
 			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };

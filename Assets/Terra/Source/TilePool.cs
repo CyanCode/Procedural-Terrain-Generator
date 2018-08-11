@@ -16,9 +16,12 @@ namespace Terra.Terrain {
 		private const int CACHE_SIZE = 30;
 		
 		[SerializeField]
-		private int _queuedTiles = 0;
-		[SerializeField]
 		private bool _isGeneratingTile = false;
+
+		//Keeps track of tiles that were queued for generation.
+		[SerializeField]
+		private int _queuedTiles = 0;
+		private Action<GridPosition[]> _queueCompletedAction;
 
 		private TerraSettings _settings {
 			get { return TerraSettings.Instance; }
@@ -93,9 +96,13 @@ namespace Terra.Terrain {
 		/// has finished generating.
 		/// </summary>
 		public void Update() {
+			if (_queueCompletedAction == null) {
+				_queueCompletedAction = UpdateNeighbors;
+			}
+
 			Cache.PurgeDestroyedTiles();
 
-			if (_queuedTiles < 1) {	
+			if (_queuedTiles < 1) {
 				_settings.StartCoroutine(UpdateTiles());
 			}
 
@@ -127,7 +134,7 @@ namespace Terra.Terrain {
 			Tile t = Tile.CreateTileGameobject("Tile [" + p.X + ", " + p.Z + "]");
 			t.UpdatePosition(p);
 
-			t.Generate(() => { 
+			t.Generate(() => {
 				AddTile(t);
 				onComplete(t);
 			}, _settings.Generator.UseMultithreading);
@@ -201,25 +208,60 @@ namespace Terra.Terrain {
 			}
 
 			//Add new positions
+			_queuedTiles = newPositions.Count;
 			foreach (GridPosition pos in newPositions) {
 				Tile cached = Cache.GetCachedTileAtPosition(pos);
 
 				//Attempt to pull from cache, generate if not available
 				if (cached != null) {
 					AddTile(cached);
+					_queuedTiles--;
 				} else {
-					//Wait for tile to finish generating before starting a new one
-					while (_isGeneratingTile)
-						yield return null;
+					//Generate one tile per frame
+					yield return null;
 
-					_queuedTiles++;
 					_isGeneratingTile = true;
 					AddTileAt(pos, tile => {
-						AddTile(tile);
 						_queuedTiles--;
 						_isGeneratingTile = false;
+
+						if (_queuedTiles == 0)
+							_queueCompletedAction(newPositions.ToArray());
 					});
 				}
+			}
+
+			//If tiles were updated synchronously, notify queue completion
+			if (newPositions.Count > 0 && _queuedTiles == 0) {
+				_queueCompletedAction(newPositions.ToArray());
+			}
+		}
+
+		/// <summary>
+		/// Updates the neighboring Tiles of the passed list of 
+		/// Tiles.
+		/// </summary>
+		public void UpdateNeighbors(GridPosition[] positions) {
+			if (positions == null)
+				return;
+
+			List<Tile> tiles = new List<Tile>(positions.Length);
+			foreach (var pos in positions)
+				foreach (var tile in Cache.ActiveTiles)
+					if (tile.GridPosition == pos)
+						tiles.Add(tile);
+
+			//Get neighboring tiles
+			foreach (Tile tile in tiles) {
+				GridPosition[] neighborPos = tile.GridPosition.Neighbors;
+				Tile[] neighborTiles = new Tile[4];
+
+				for (int i = 0; i < 4; i++) {
+					Tile found = Cache.ActiveTiles.Find(t => t.GridPosition == neighborPos[i]);
+					neighborTiles[i] = found;
+				}
+
+				tile.MeshManager.CalculateNeighboringNormals(new Neighborhood(neighborTiles));
 			}
 		}
 
@@ -236,7 +278,7 @@ namespace Terra.Terrain {
 			List<Tile> tiles = GetTilesInExtent(_settings.Generator.TrackedObject.transform.position, extent);
 
 			foreach (Tile t in tiles) {
-				t.GenerateCollider();
+				t.MeshManager.GenerateCollider();
 				yield return null;
 			}
 
@@ -260,6 +302,21 @@ namespace Terra.Terrain {
 	public struct GridPosition {
 		public int X;
 		public int Z;
+
+		/// <summary>
+		/// The list of neighboring <see cref="GridPosition"/>s ordered 
+		/// as Top, Right, Bottom, Left.
+		/// </summary>
+		public GridPosition[] Neighbors {
+			get {
+				return new[] {
+						new GridPosition(X, Z + 1),
+						new GridPosition(X + 1, Z),
+						new GridPosition(X, Z - 1),
+						new GridPosition(X - 1, Z)
+					};
+			}
+		}
 
 		public GridPosition(int x, int z) {
 			X = x;

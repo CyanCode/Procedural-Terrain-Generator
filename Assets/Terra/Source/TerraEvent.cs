@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Terra.Data;
 using UnityEngine;
 
 namespace Terra.Terrain {
@@ -27,6 +28,12 @@ namespace Terra.Terrain {
 		/// Called when a Tile is activated
 		/// </summary>
 		public static event TileEvent OnTileActivated;
+
+		/// <summary>
+		/// Called when the <see cref="TilePool"/> in <see cref="TerraSettings"/> 
+		/// has completed its queue of tiles to generate.
+		/// </summary>
+		public static event System.Action<GridPosition[]> OnTilePoolQueueCompleted;
 
 		public static void TriggerOnMeshWillForm(GameObject go) {
 			if (OnMeshWillForm != null) OnMeshWillForm(go);
@@ -58,6 +65,10 @@ namespace Terra.Terrain {
 
 		public static void TriggerOnTileActivated(Tile tile) {
 			if (OnTileActivated != null) OnTileActivated(tile);
+		}
+
+		public static void TriggerOnTilePoolQueueCompleted(GridPosition[] positions) {
+			if (OnTilePoolQueueCompleted != null) OnTilePoolQueueCompleted(positions);
 		}
 	}
 }

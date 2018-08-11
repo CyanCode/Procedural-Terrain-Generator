@@ -52,7 +52,7 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Checks if there is a tile active at the passed Vector2 position
+		/// Checks if there is a tile active at the passed <see cref="GridPosition"/> position
 		/// </summary>
 		/// <param name="position">Position to look for</param>
 		/// <returns>True if tile at position was found, false otherwise</returns>

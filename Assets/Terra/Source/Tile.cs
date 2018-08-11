@@ -112,29 +112,6 @@ namespace Terra.Terrain {
 		} 
 
 		/// <summary>
-		/// Generates and applies new MeshCollider for the tile if no collider 
-		/// exists currently or <code>IsColliderDirty</code> is true.
-		/// </summary>
-		public void GenerateCollider() {
-			if (gameObject.GetComponent<MeshCollider>() == null || IsColliderDirty) {
-				MeshCollider collider = gameObject.AddComponent<MeshCollider>();
-				collider.sharedMesh = MeshManager.ActiveMesh;
-
-				TerraEvent.TriggerOnMeshColliderDidForm(gameObject, collider);
-			}
-		}
-
-		/// <summary>
-		/// Applies the passed Material to this Tile by setting the 
-		/// material assigned to the MeshRenderer component.
-		/// </summary>
-		/// <param name="mat">Material to apply</param>
-		public void ApplyMaterial(Material mat) {
-			MeshRenderer mr = GetComponent<MeshRenderer>();
-			mr.sharedMaterial = mat;
-		}
-
-		/// <summary>
 		/// Get the MeshFilter attached to this gameobject. If one doesn't 
 		/// exist, it is added and returned.
 		/// </summary>

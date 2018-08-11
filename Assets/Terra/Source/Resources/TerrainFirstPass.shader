@@ -38,7 +38,7 @@ Shader "Terra/TerrainFirstPass"
 		#include "UnityShaderVariables.cginc"
 		#include "UnityPBSLighting.cginc"
 		#include "Lighting.cginc"
-		#pragma target 5.0
+		#pragma target 4.6
 		#pragma multi_compile_fog
 		#ifdef UNITY_PASS_SHADOWCASTER
 			#undef INTERNAL_DATA
@@ -171,7 +171,7 @@ Shader "Terra/TerrainFirstPass"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma target 5.0
+			#pragma target 4.6
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
@@ -247,24 +247,24 @@ Shader "Terra/TerrainFirstPass"
 }
 /*ASEBEGIN
 Version=14401
-412;101;989;645;426.2174;-58.23681;1.001938;False;False
-Node;AmplifyShaderEditor.RangedFloatNode;21;224.6535,185.03;Float;False;Property;_Metallic;Metallic;30;0;Create;True;0;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;61;-395.3986,462.9731;Float;False;Property;_TessMinDist;TessMinDist;1;0;Create;True;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.FunctionNode;109;-307.8469,34.60991;Float;False;Four Splats First Pass Terrain;4;;284;37452fdfb732e1443b7e39720d05b708;0;6;59;FLOAT4;0,0,0,0;False;60;FLOAT4;0,0,0,0;False;61;FLOAT3;0,0,0;False;57;FLOAT;0.0;False;58;FLOAT;0.0;False;62;FLOAT;0.0;False;7;FLOAT3;103;FLOAT4;0;FLOAT3;14;FLOAT;56;FLOAT;45;FLOAT;19;FLOAT;17
-Node;AmplifyShaderEditor.StaticSwitch;52;221.9597,411.0246;Float;False;Property;_Tessellate;Tessellate;3;0;Create;True;1;True;True;True;_Tessellate;Toggle;2;1;FLOAT4;0.0,0,0,0;False;0;FLOAT4;0,0,0,0;False;1;FLOAT4;0
-Node;AmplifyShaderEditor.DistanceBasedTessNode;53;-58.24039,416.3247;Float;False;3;0;FLOAT;0.0;False;1;FLOAT;0.0;False;2;FLOAT;0.0;False;1;FLOAT4;0
+205;100;1196;646;426.2174;-58.23681;1.001938;True;False
 Node;AmplifyShaderEditor.RangedFloatNode;58;21.01654,318.4829;Float;False;Constant;_Float0;Float 0;4;0;Create;True;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;62;-395.3986,545.9731;Float;False;Property;_TessMaxDist;TessMaxDist;2;0;Create;True;15;15;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.DistanceBasedTessNode;53;-58.24039,416.3247;Float;False;3;0;FLOAT;0.0;False;1;FLOAT;0.0;False;2;FLOAT;0.0;False;1;FLOAT4;0
 Node;AmplifyShaderEditor.RangedFloatNode;60;-396.1994,384.8511;Float;False;Property;_TessFactor;TessFactor;0;0;Create;True;1;1;1;32;0;1;FLOAT;0
-Node;AmplifyShaderEditor.StandardSurfaceOutputNode;0;657.0565,38.81808;Float;False;True;7;Float;ASEMaterialInspector;0;0;Standard;Terra/TerrainFirstPass;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Back;0;0;False;0;0;False;0;Opaque;0.5;True;True;-100;False;Opaque;;Geometry;All;True;True;True;False;True;True;True;True;True;True;True;True;True;True;True;True;True;False;0;255;255;0;0;0;0;0;0;0;0;False;0;4.5;10;40;False;0.5;True;0;Zero;Zero;0;Zero;Zero;OFF;OFF;0;False;0;0,0,0,0;VertexOffset;True;False;Cylindrical;False;Relative;0;Nature/Terrain/Diffuse;-1;-1;-1;-1;0;1;SplatCount=4;1;multi_compile_fog;False;1;BaseMapShader=ASESampleShaders/SimpleTerrainBase;0;16;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0.0;False;4;FLOAT;0.0;False;5;FLOAT;0.0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0.0;False;9;FLOAT;0.0;False;10;FLOAT;0.0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
-WireConnection;52;0;53;0
+Node;AmplifyShaderEditor.RangedFloatNode;62;-395.3986,545.9731;Float;False;Property;_TessMaxDist;TessMaxDist;2;0;Create;True;15;15;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;61;-395.3986,462.9731;Float;False;Property;_TessMinDist;TessMinDist;1;0;Create;True;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;21;224.6535,185.03;Float;False;Property;_Metallic;Metallic;30;0;Create;True;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.StaticSwitch;52;221.9597,411.0246;Float;False;Property;_Tessellate;Tessellate;3;0;Create;True;1;True;True;True;_Tessellate;Toggle;2;1;FLOAT4;0.0,0,0,0;False;0;FLOAT4;0,0,0,0;False;1;FLOAT4;0
+Node;AmplifyShaderEditor.FunctionNode;109;-307.8469,34.60991;Float;False;Four Splats First Pass Terrain;4;;284;37452fdfb732e1443b7e39720d05b708;0;6;59;FLOAT4;0,0,0,0;False;60;FLOAT4;0,0,0,0;False;61;FLOAT3;0,0,0;False;57;FLOAT;0.0;False;58;FLOAT;0.0;False;62;FLOAT;0.0;False;7;FLOAT3;103;FLOAT4;0;FLOAT3;14;FLOAT;56;FLOAT;45;FLOAT;19;FLOAT;17
+Node;AmplifyShaderEditor.StandardSurfaceOutputNode;0;657.0565,38.81808;Float;False;True;6;Float;ASEMaterialInspector;0;0;Standard;Terra/TerrainFirstPass;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Back;0;0;False;0;0;False;0;Opaque;0.5;True;True;-100;False;Opaque;;Geometry;All;True;True;True;False;True;True;True;True;True;True;True;True;True;True;True;True;True;False;0;255;255;0;0;0;0;0;0;0;0;False;0;4.5;10;40;False;0.5;True;0;Zero;Zero;0;Zero;Zero;OFF;OFF;0;False;0;0,0,0,0;VertexOffset;True;False;Cylindrical;False;Relative;0;Nature/Terrain/Diffuse;-1;-1;-1;-1;0;1;SplatCount=4;1;multi_compile_fog;False;1;BaseMapShader=ASESampleShaders/SimpleTerrainBase;0;16;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0.0;False;4;FLOAT;0.0;False;5;FLOAT;0.0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0.0;False;9;FLOAT;0.0;False;10;FLOAT;0.0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
 WireConnection;53;0;60;0
 WireConnection;53;1;61;0
 WireConnection;53;2;62;0
+WireConnection;52;0;53;0
 WireConnection;0;0;109;0
 WireConnection;0;1;109;14
 WireConnection;0;3;21;0
 WireConnection;0;4;109;45
 WireConnection;0;11;109;17
 ASEEND*/
-//CHKSM=8085A5414DCAC861353F34A9FD8301873651B446
+//CHKSM=DE062B33A112B06BD587ABB0716B8A967886CE79

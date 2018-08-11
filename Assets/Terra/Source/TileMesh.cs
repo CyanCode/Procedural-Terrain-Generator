@@ -37,7 +37,14 @@ namespace Terra.Terrain {
 		/// </summary>
 		public float[,] Heightmap { get; private set; }
 
-		public LodData.LodLevel LodLevel { 
+		/// <summary>
+		/// Current structure of neighboring tiles and the resolutions that they 
+		/// had at time of creation. This structure stores the neighbors from 
+		/// <see cref="CalculateNeighboringNormals"/>.
+		/// </summary>
+		public KeyValuePair<Neighborhood, int> NeighborResolutions { get; private set; }
+
+		public LodData.LodLevel LodLevel {
 			get { return _lodLevel; }
 			set {
 				_lodLevel = value;
@@ -47,17 +54,13 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// The mesh that corresponds with the set <see cref="MeshResolution"/> if 
-		/// it has already been computed. Call <see cref="CreateMesh"/> to create or 
-		/// <see cref="HasCreatedMeshAtResolution"/> to check if it has already been created.
+		/// The mesh that is currently active in the scene and attached to this 
+		/// <see cref="Tile"/>s <see cref="MeshFilter"/>. If the mesh doesn't exist, 
+		/// null is returned.
 		/// </summary>
 		public Mesh ActiveMesh {
 			get {
-				if (ComputedMeshes.Exists(kvp => kvp.Key == (int)MeshResolution)) {
-					return ComputedMeshes.Find(kvp => kvp.Key == (int)MeshResolution).Value.Mesh;
-				}
-
-				return null;
+				return _tile.GetMeshFilter().sharedMesh;
 			}
 		}
 
@@ -79,7 +82,7 @@ namespace Terra.Terrain {
 		private bool _genNeedsUpdating = true;
 
 		private readonly object _asyncMeshLock = new object();
-		
+
 		/// <summary>
 		/// Constructs a new TileMesh instance
 		/// </summary>
@@ -87,30 +90,9 @@ namespace Terra.Terrain {
 		/// <param name="lodLevel">LOD level to reference when creating heightmap and mesh</param>
 		public TileMesh(Tile tile, LodData.LodLevel lodLevel) {
 			_tile = tile;
-			_lodLevel = lodLevel; 
+			_lodLevel = lodLevel;
 
 			ComputedMeshes = new List<KeyValuePair<int, MeshData>>(3);
-		}
-
-		/// <summary>
-		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
-		/// returns the height value found at [x, 0, z]. This method applies the 
-		/// amplitude and spread from <see cref="TerraSettings"/> to the result.
-		/// </summary>
-		/// <param name="worldX">World x coordinate</param>
-		/// <param name="worldZ">World z coordinate</param>
-		/// <returns>height</returns>
-		public float HeightAt(float worldX, float worldZ) {
-			var sett = TerraSettings.Instance;
-			var amp = sett.Generator.Amplitude;
-			var spread = sett.Generator.Spread;
-		
-			if (_genNeedsUpdating) {
-				sett.HeightMapData.UpdateGenerator();
-				_genNeedsUpdating = false;
-			}
-
-			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
 		}
 
 		/// <summary>
@@ -151,16 +133,6 @@ namespace Terra.Terrain {
 
 				MTDispatch.Instance().Enqueue(onComplete);
 			});
-		}
-
-		/// <summary>
-		/// Check if the <see cref="Heightmap"/> has been created and if 
-		/// the resolution is equal to or a lower square of the passed 
-		/// <see cref="resolution"/>.
-		/// </summary>
-		/// <param name="resolution">Resolution to check</param>
-		public bool HasHeightmapForResolution(int resolution) {
-			return Heightmap != null && (int)Math.Sqrt(Heightmap.Length) <= resolution;
 		}
 
 		/// <summary>
@@ -212,12 +184,16 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Whether this TileMesh has already computed a mesh 
-		/// with the passed resolution.
+		/// Generates and applies new MeshCollider for the tile if no collider 
+		/// exists currently or <code>IsColliderDirty</code> is true.
 		/// </summary>
-		/// <param name="res">resolution to check</param>
-		public bool HasCreatedMeshAtResolution(Resolution res) {
-			return ComputedMeshes.Exists(kvp => kvp.Key == (int)res);
+		public void GenerateCollider() {
+			if (_tile.GetComponent<MeshCollider>() == null || _tile.IsColliderDirty) {
+				MeshCollider collider = _tile.gameObject.AddComponent<MeshCollider>();
+				collider.sharedMesh = ActiveMesh;
+
+				TerraEvent.TriggerOnMeshColliderDidForm(_tile.gameObject, collider);
+			}
 		}
 
 		/// <summary>
@@ -259,6 +235,53 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Updates the normals on this <see cref="TileMesh"/> so that they align 
+		/// with the passed neighboring <see cref="Tile"/>s. Each Tile's MeshManager 
+		/// must have a non-null ActiveTile.
+		/// </summary>
+		public void CalculateNeighboringNormals(Neighborhood neighbors) {
+			Neighborhood n = neighbors;
+
+			if (n.Up != null) {
+				//incr x, z[res]
+				AverageNormalsWith(n.Up.MeshManager, Orientation.Up);
+			} 
+			if (n.Right != null) {
+				//x[res], incr z
+				AverageNormalsWith(n.Right.MeshManager, Orientation.Right);
+			}
+			if (n.Down != null) {
+				//incr x, z[0]
+				AverageNormalsWith(n.Down.MeshManager, Orientation.Down);
+			}
+			if (n.Left != null) {
+				//x[0], incr z
+				AverageNormalsWith(n.Left.MeshManager, Orientation.Left);
+			}
+		}
+
+		/// <summary>
+		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
+		/// returns the height value found at [x, 0, z]. This method applies the 
+		/// amplitude and spread from <see cref="TerraSettings"/> to the result.
+		/// </summary>
+		/// <param name="worldX">World x coordinate</param>
+		/// <param name="worldZ">World z coordinate</param>
+		/// <returns>height</returns>
+		public float HeightAt(float worldX, float worldZ) {
+			var sett = TerraSettings.Instance;
+			var amp = sett.Generator.Amplitude;
+			var spread = sett.Generator.Spread;
+
+			if (_genNeedsUpdating) {
+				sett.HeightMapData.UpdateGenerator();
+				_genNeedsUpdating = false;
+			}
+
+			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
+		}
+
+		/// <summary>
 		/// Transforms the passed x and z incrementors into local coordinates.
 		/// </summary>
 		/// <param name="x">x position to transform</param>
@@ -286,6 +309,90 @@ namespace Terra.Terrain {
 			float worldZ = localZ + (_tile.GridPosition.Z * length);
 
 			return new Vector2(worldX, worldZ);
+		}
+
+		/// <summary>
+		/// Check if the <see cref="Heightmap"/> has been created and if 
+		/// the resolution is equal to or a lower square of the passed 
+		/// <see cref="resolution"/>.
+		/// </summary>
+		/// <param name="resolution">Resolution to check</param>
+		public bool HasHeightmapForResolution(int resolution) {
+			return Heightmap != null && (int)Math.Sqrt(Heightmap.Length) <= resolution;
+		}
+
+		/// <summary>
+		/// Whether this TileMesh has already computed a mesh 
+		/// with the passed resolution.
+		/// </summary>
+		/// <param name="res">resolution to check</param>
+		public bool HasMeshAtResolution(Resolution res) {
+			return ComputedMeshes.Exists(kvp => kvp.Key == (int)res);
+		}
+
+		/// <summary>
+		/// Averages the normals of the passed TileMesh with this TileMesh's ActiveMesh. 
+		/// </summary>
+		/// <param name="tm">Mesh to average normals with</param>
+		/// <param name="orientation">Orientation of the passed mesh in relation to this one.</param>
+		private void AverageNormalsWith(TileMesh tm, Orientation orientation) {
+			int res = HeightmapResolution;
+			int tmRes = tm.HeightmapResolution;
+
+			bool incrX = false;
+			int x1Start, x2Start, z1Start, z2Start;
+			x1Start = x2Start = z1Start = z2Start = 0;
+
+			switch (orientation) {
+				case Orientation.Up:
+					z1Start = res - 1;
+					incrX = true;
+					break;
+				case Orientation.Right:
+					x1Start = res - 1;
+					break;
+				case Orientation.Down:
+					z2Start = tmRes - 1;
+					incrX = true;
+					break;
+				case Orientation.Left:
+					x2Start = tmRes - 1;
+					break;
+			}
+
+			Vector3[] norms1 = ActiveMesh.normals;
+			Vector3[] norms2 = tm.ActiveMesh.normals;
+			
+			//Since meshes can be different resolutions, x an z 
+			//vector components across both meshes are 
+			//incremented independently
+			int incrAmt1 = 1;
+			int incrAmt2 = 1;
+			if (res > tm.HeightmapResolution) {
+				incrAmt1 = res / tm.HeightmapResolution;
+			} else {
+				incrAmt2 = tm.HeightmapResolution / res;
+			}
+		
+			for (int i = 0; i < Math.Min(res, tm.HeightmapResolution); i++) {
+				Vector3 average = (norms1[x1Start + z1Start * HeightmapResolution] + 
+					norms2[x2Start + z2Start * tm.HeightmapResolution]) / 2;
+				average = average.normalized;
+				
+				norms1[x1Start + z1Start * HeightmapResolution] = average;
+				norms2[x2Start + z2Start * tm.HeightmapResolution] = average;
+
+				if (incrX) {
+					x1Start += incrAmt1;
+					x2Start += incrAmt2;
+				} else {
+					z1Start += incrAmt1;
+					z2Start += incrAmt2;
+				}
+			}
+
+			ActiveMesh.normals = norms1;
+			tm.ActiveMesh.normals = norms2;
 		}
 
 		/// <summary>
@@ -342,6 +449,10 @@ namespace Terra.Terrain {
 		/// <returns>MeshData if found, default(MeshData) otherwise</returns>
 		private MeshData FindComputedForResolution(int resolution) {
 			return ComputedMeshes.Find(kvp => kvp.Key == resolution).Value;
+		}
+
+		private enum Orientation {
+			Up, Left, Down, Right
 		}
 
 		#region Serialization
@@ -421,5 +532,35 @@ namespace Terra.Terrain {
 		Low = 32, 
 		Medium = 64,
 		High = 128
+	}
+
+	public struct Neighborhood {
+		public Tile Up;
+		public Tile Right;
+		public Tile Down;
+		public Tile Left;
+
+		public Neighborhood(Tile up, Tile right, Tile down, Tile left) {
+			Up = up;
+			Right = right;
+			Down = down;
+			Left = left;
+		}
+
+		/// <summary>
+		/// Creates a <see cref="Neighborhood"/> with the passed array of Tiles 
+		/// representing up, right, down, and left in that order.
+		/// </summary>
+		/// <param name="tiles"></param>
+		public Neighborhood(Tile[] tiles) {
+			if (tiles.Length != 4) {
+				throw new ArgumentException("A neighborhood can only be created with an array of length 4.");
+			}
+
+			Up = tiles[0];
+			Right = tiles[1];
+			Down = tiles[2];
+			Left = tiles[3];
+		}
 	}
 }

@@ -44,7 +44,7 @@ namespace Terra.Terrain {
 			}
 
 			GatherTextures();
-			AddControlMapsToShaders();
+			ApplyControlMapsToShaders();
 		}
 
 		/// <summary>
@@ -72,7 +72,7 @@ namespace Terra.Terrain {
 		/// of supplied textures is > 4. The GenerateSplatmaps function takes care of this for you and 
 		/// its result can be passed as the splats parameter.
 		/// </summary>
-		public void AddControlMapsToShaders() {
+		public void ApplyControlMapsToShaders() {
 			SetFirstPassShader(true);
 			
 			int len = Splats.Length;

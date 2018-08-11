@@ -396,10 +396,13 @@ namespace UnityEditor.Terra {
 		/// Displays information useful to debugging Terra
 		/// </summary>
 		public void Debug() {
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+#pragma warning disable 162 //Unreachable Code
 			if (TerraSettings.TerraDebug.WRITE_SPLAT_TEXTURES) {
 				TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT =
 					EditorGUILayout.IntField("Tex Count", TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT);
 			}
+#pragma warning restore 162
 		}
 
 		/// <summary>

@@ -193,7 +193,7 @@ namespace Terra.Terrain {
 			float dy = heightmap[x, y + 1] - height;
 
 			// The "steepness" is the magnitude of the gradient vector
-			return Mathf.Sqrt(dx * dx + dy * dy);
+			return 0.5f * Mathf.Sqrt(dx * dx + dy * dy);
 		}
 
 		/// <summary>
@@ -352,6 +352,7 @@ namespace Terra.Terrain {
 
 		public void OnBeforeSerialize() {
 			//Biome map
+			//TODO Write test for biome serialization
 			if (BiomeMap != null) {
 				int res = (int)Math.Sqrt(BiomeMap.Length);
 				_serializedBiomePoints = new int[BiomeMap.Length];

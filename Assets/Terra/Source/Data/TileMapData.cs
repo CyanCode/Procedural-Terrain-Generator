@@ -83,7 +83,7 @@ namespace Terra.Data {
 		/// Value that the Y value is multiplied by when 
 		/// sampling <see cref="Generator"/>
 		/// </summary>
-		public float Amplitude = 100f;
+		public float Amplitude = 100f; //TODO Remove? Why is there an amp here and in settings
 
 		/// <summary>
 		/// Internal <see cref="Generator"/>

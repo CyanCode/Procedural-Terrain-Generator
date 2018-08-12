@@ -30,19 +30,12 @@ namespace Terra.Terrain {
 		public List<KeyValuePair<int, MeshData>> ComputedMeshes { get; private set; }
 
 		/// <summary>
-		/// The heightmap that is used when creating a mesh. Updating 
-		/// <see cref="LodLevel"/> does not update <see cref="Heightmap"/>. 
+		/// The heightmap attached to this Tile with values in range [0, 1].
+		/// Updating <see cref="LodLevel"/> does not update <see cref="Heightmap"/>. 
 		/// Call <see cref="CreateHeightmap"/> or <see cref="CreateHeightmapAsync"/> 
 		/// instead.
 		/// </summary>
 		public float[,] Heightmap { get; private set; }
-
-		/// <summary>
-		/// Current structure of neighboring tiles and the resolutions that they 
-		/// had at time of creation. This structure stores the neighbors from 
-		/// <see cref="CalculateNeighboringNormals"/>.
-		/// </summary>
-		public KeyValuePair<Neighborhood, int> NeighborResolutions { get; private set; }
 
 		public LodData.LodLevel LodLevel {
 			get { return _lodLevel; }
@@ -96,6 +89,15 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Indexes <see cref="Heightmap"/> at the passed x and z
+		/// indicies and applies the amplify value from 
+		/// <see cref="TerraSettings"/> to the result.
+		/// </summary>
+		public float GetHeightAmplifiedAt(int x, int z) {
+			return Heightmap[x, z] * TerraSettings.Instance.Generator.Amplitude;
+		}
+
+		/// <summary>
 		/// Creates a heightmap of resolution <see cref="HeightmapResolution"/>. If a 
 		/// <see cref="Heightmap"/> of the same resolution or higher has already been 
 		/// created, this method does nothing.
@@ -113,7 +115,7 @@ namespace Terra.Terrain {
 					Vector2 worldXZ = LocalToWorld(localXZ.x, localXZ.y);
 
 					lock (_asyncMeshLock) {
-						Heightmap[x, z] = HeightAt(worldXZ.x, worldXZ.y);
+						Heightmap[x, z] = HeightAt(worldXZ.x, worldXZ.y, false);
 					}
 				}
 			}
@@ -164,7 +166,7 @@ namespace Terra.Terrain {
 					Vector2 localXZ = PositionToLocal(x, z, (int)MeshResolution);
 
 					lock (_asyncMeshLock) {
-						float y = Heightmap[x, z];
+						float y = GetHeightAmplifiedAt(x, z);
 						vertices[x / increment + z / increment * (int)MeshResolution] = new Vector3(localXZ.x, y, localXZ.y);
 					}
 				}
@@ -184,10 +186,10 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Generates and applies new MeshCollider for the tile if no collider 
+		/// Calculates and applies a new MeshCollider for the tile if no collider 
 		/// exists currently or <code>IsColliderDirty</code> is true.
 		/// </summary>
-		public void GenerateCollider() {
+		public void CalculateCollider() {
 			if (_tile.GetComponent<MeshCollider>() == null || _tile.IsColliderDirty) {
 				MeshCollider collider = _tile.gameObject.AddComponent<MeshCollider>();
 				collider.sharedMesh = ActiveMesh;
@@ -261,27 +263,6 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
-		/// returns the height value found at [x, 0, z]. This method applies the 
-		/// amplitude and spread from <see cref="TerraSettings"/> to the result.
-		/// </summary>
-		/// <param name="worldX">World x coordinate</param>
-		/// <param name="worldZ">World z coordinate</param>
-		/// <returns>height</returns>
-		public float HeightAt(float worldX, float worldZ) {
-			var sett = TerraSettings.Instance;
-			var amp = sett.Generator.Amplitude;
-			var spread = sett.Generator.Spread;
-
-			if (_genNeedsUpdating) {
-				sett.HeightMapData.UpdateGenerator();
-				_genNeedsUpdating = false;
-			}
-
-			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
-		}
-
-		/// <summary>
 		/// Transforms the passed x and z incrementors into local coordinates.
 		/// </summary>
 		/// <param name="x">x position to transform</param>
@@ -328,6 +309,28 @@ namespace Terra.Terrain {
 		/// <param name="res">resolution to check</param>
 		public bool HasMeshAtResolution(Resolution res) {
 			return ComputedMeshes.Exists(kvp => kvp.Key == (int)res);
+		}
+
+		/// <summary>
+		/// Polls the Generator from <see cref="TerraSettings.HeightMapData"/> and 
+		/// returns the height value found at [x, 0, z]. This method applies the 
+		/// spread and (optionally) from <see cref="TerraSettings"/> to the result.
+		/// </summary>
+		/// <param name="worldX">World x coordinate</param>
+		/// <param name="worldZ">World z coordinate</param>
+		/// <param name="applyAmplitude">Optionally apply amplitude from <see cref="TerraSettings"/> to the result</param>
+		/// <returns>height</returns>
+		internal float HeightAt(float worldX, float worldZ, bool applyAmplitude) {
+			var sett = TerraSettings.Instance;
+			var spread = sett.Generator.Spread;
+
+			if (_genNeedsUpdating) {
+				sett.HeightMapData.UpdateGenerator();
+				_genNeedsUpdating = false;
+			}
+
+			float amp = applyAmplitude ? sett.Generator.Amplitude : 1f;
+			return sett.HeightMapData.GetValue(worldX / spread, worldZ / spread) * amp;
 		}
 
 		/// <summary>

@@ -110,6 +110,13 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Halts the generation of tiles by resetting the queued tile count.
+		/// </summary>
+		public void ResetQueue() {
+			_queuedTiles = 0;
+		}
+
+		/// <summary>
 		/// Manually add (and activate) the passed Tile to the TilePool. This does not modify 
 		/// <see cref="t"/>. To automatically create a Tile according to 
 		/// <see cref="TerraSettings"/> call <see cref="AddTileAt"/> instead.
@@ -218,7 +225,8 @@ namespace Terra.Terrain {
 					_queuedTiles--;
 				} else {
 					//Generate one tile per frame
-					yield return null;
+					if (Application.isPlaying)
+						yield return null;
 
 					_isGeneratingTile = true;
 					AddTileAt(pos, tile => {
@@ -278,7 +286,7 @@ namespace Terra.Terrain {
 			List<Tile> tiles = GetTilesInExtent(_settings.Generator.TrackedObject.transform.position, extent);
 
 			foreach (Tile t in tiles) {
-				t.MeshManager.GenerateCollider();
+				t.MeshManager.CalculateCollider();
 				yield return null;
 			}
 

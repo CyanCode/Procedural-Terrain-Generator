@@ -140,7 +140,7 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Creates a map of biomes with the passed <see cref="resolution"/> and 
 		/// the heightmap created in <see cref="MeshManager"/>.
-		/// Points are polled along this <see cref="Tile"/> instance.
+		/// Points are polled along this <see cref="Tile"/>.
 		/// </summary>
 		/// <returns>BiomeData, null if no Heightmap has been created first</returns>
 		public BiomeData[,] GetBiomeMap(int resolution) {

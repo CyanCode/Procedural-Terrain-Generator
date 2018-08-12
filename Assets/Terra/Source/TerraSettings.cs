@@ -83,6 +83,7 @@ namespace Terra.Data {
 			if (!IsInitialized) return;
 
 			if (Application.isPlaying && Generator.Pool != null && Generator.GenerateOnStart) {
+				Generator.Pool.ResetQueue();
 				Generator.Pool.Update();
 			}
 		}
@@ -128,6 +129,7 @@ namespace Terra.Data {
 			else
 				GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
 
+			Generator.Pool.ResetQueue(); 
 			Generator.Pool.Update();
 		}
 
@@ -137,7 +139,7 @@ namespace Terra.Data {
 		/// <param name="x">world space x coordinate</param>
 		/// <param name="z">world space z coordinate</param>
 		/// <returns>Found <see cref="BiomeData"/> instance, null if nothing was found.</returns>
-		public BiomeData GetBiomeAt(float x, float z) {
+		public BiomeData GetBiomeAt(float x, float z) { //TODO moev to biomedata?
 			BiomeData chosen = null;
 			var settings = Instance;
 

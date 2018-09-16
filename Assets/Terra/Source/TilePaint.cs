@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Assets.Terra.Source;
 using Terra.Data;
 using Terra.Terrain.Util;
 using UnityEngine;
@@ -9,7 +10,7 @@ using UnityEngine.Profiling;
 
 namespace Terra.Terrain {
 	[Serializable]
-	public class TilePaint: ISerializationCallbackReceiver {
+	public class TilePaint {
 		/// <summary>
 		/// List of control texture maps. 1 control map holds placement 
 		/// information for up to 4 splat maps. This is a cached result 
@@ -23,23 +24,31 @@ namespace Terra.Terrain {
 		/// </summary>
 		public SplatData[] Splats;
 
-		public BiomeData[,] BiomeMap;
+		public readonly WeightedBiomeMap BiomeMap;
 
 		[SerializeField]
 		private readonly Tile _tile;
 
 		public TilePaint(Tile tile) {
 			_tile = tile;
+			BiomeMap = new WeightedBiomeMap(tile, _tile.LodLevel.SplatmapResolution);
 		}
 
 		/// <summary>
 		/// TODO Summary
 		/// </summary>
 		public void Paint() {
-			CalculateBiomeMap();
+			BiomeMap.CreateMap();
+
 			if (BiomeMap == null) {
 				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
 				ApplyDefaultMaterial();
+				return;
+			}
+
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+			if (TerraSettings.TerraDebug.SHOW_BIOME_DEBUG_TEXTURE) {
+				ApplyDebugBiomeMap();
 				return;
 			}
 
@@ -52,18 +61,8 @@ namespace Terra.Terrain {
 		/// These includes <see cref="Controls"/> and <see cref="Splats"/>.
 		/// </summary>
 		public void GatherTextures() {
-			SetSplatData();
+			SetSplats();
 			SetControlTextures();
-		}
-
-		/// <summary>
-		/// Calculates <see cref="BiomeMap"/> if it is null.
-		/// </summary>
-		public void CalculateBiomeMap() {
-			if (BiomeMap != null)
-				return;
-
-			BiomeMap = _tile.GetBiomeMap(_tile.LodLevel.SplatmapResolution);
 		}
 
 		/// <summary>
@@ -120,51 +119,60 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Calculates the weights that can be used to create a splatmap 
-		/// based on the passed sample and splats.
+		/// Calculates the weights of each splat texture within this 
+		/// <see cref="BiomeMap"/>. 
 		/// </summary>
-		/// <param name="height">Sampled height</param>
-		/// <param name="angle">Sampled angle</param>
-		/// <returns>Weight values in the same order of the </returns>
-		float[] CalculateWeights(float height, float angle) {
-			float[] weights = new float[Splats.Length];
+		/// <param name="biomes">List of biomes at some point on the Tile</param>
+		/// <param name="biomeWeights">List of weights associated with the passed biomes</param>
+		/// <param name="height">Height at some point on the Tile</param>
+		/// <param name="angle">Angle at some point on the Tile</param>
+		/// <returns>Weight of each texture in the order they appear in <see cref="BiomeMap"/></returns>
+		float[] GetTextureWeights(BiomeData[] biomes, float[] biomeWeights, float height, float angle) {
+			int totalSplatCount = Splats.Length;
+			float[] weights = new float[totalSplatCount];
+			
+			for (int bi = 0; bi < biomes.Length; bi++) {
+				BiomeData b = biomes[bi];
+				float biomeWeight = biomeWeights[bi];
 
-			var orderMap = new Dictionary<PlacementType, int>() {
-				{ PlacementType.ElevationRange, 0 },
-				{ PlacementType.Angle, 1 }
-			};
-			List<SplatData> ordered = Splats
-				.OrderBy(s => orderMap[s.PlacementType]) //Order elevation before angle
-				//.OrderBy(s => s.MinRange)                //Order lower ranges 
-				//.OrderBy(s => s.IsMinHeight)             //Order min height first
-				.ToList();
+				//Length of SplatData in previous biomes
+				int prevBiomeSplatCount = 0;
+				for (int i = 0; i < bi; i++) {
+					prevBiomeSplatCount += biomes[i].Details.SplatsData.Count;
+				}
+				
+				//Calculate individual "splat weight"
+				for (int si = 0; si < b.Details.SplatsData.Count; si++) {
+					int weightIndex = prevBiomeSplatCount + si;
+					SplatData splat = b.Details.SplatsData[si];
 
-			for (int i = 0; i < Splats.Length; i++) {
-				SplatData splat = ordered[i];
+					bool passHeight = splat.ConstrainHeight && splat.HeightConstraint.Fits(height) || !splat.ConstrainHeight;
+					bool passAngle = splat.ConstrainAngle && splat.AngleConstraint.Fits(angle) || !splat.ConstrainAngle;
 
-				float min = splat.IsMinHeight ? float.MinValue : splat.MinHeight;
-				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxHeight;
+					if (!passHeight && !passAngle) {
+						continue;
+					}
 
-				switch (splat.PlacementType) {
-					case PlacementType.Angle:
-						if (angle > splat.AngleMin && angle < splat.AngleMax) {
-							float factor = Mathf.Clamp01((angle - splat.AngleMin) / splat.Blend);
-							weights[i] = factor;
-						}
+					float weight = 0;
+					int count = 0;
+					if (passHeight) {
+						weight += splat.HeightConstraint.Weight(height, splat.Blend);
+						count++;
+					}
+					if (passAngle) {
+						weight += splat.AngleConstraint.Weight(angle, splat.Blend);
+						count++;
+					}
 
-						break;
-					case PlacementType.ElevationRange:
-						if (height > min && height < max) {
-							if (i > 0) { //Can blend up
-								float factor = Mathf.Clamp01((splat.Blend - (height - min)) / splat.Blend);
-								weights[i - 1] = factor;
-								weights[i] = 1 - factor;
-							} else {
-								weights[i] = 1f;
-							}
-						}
+					weight /= count;
+					weight *= biomeWeight;
 
-						break;
+					if (weightIndex > 0) {
+						weights[weightIndex - 1] = 1 - weight;
+						weights[weightIndex] = weight;
+					} else {
+						weights[weightIndex] = 1f;
+					}
 				}
 			}
 
@@ -177,6 +185,12 @@ namespace Terra.Terrain {
 			return weights;
 		}
 
+		/// <summary>
+		/// TODO Summary
+		/// </summary>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <returns></returns>
 		float GetSteepness(int x, int y) {
 			int res = _tile.MeshManager.HeightmapResolution;
 			float[,] heightmap = _tile.MeshManager.Heightmap;
@@ -198,61 +212,45 @@ namespace Terra.Terrain {
 
 		/// <summary>
 		/// Fills <see cref="Splats"/> with the splat data it needs to render 
-		/// terrain. Assumes <see cref="CalculateBiomeMap"/> has been called 
+		/// terrain. Assumes <see cref="BiomeMap"/> has been calculated
 		/// first.
 		/// </summary>
-		private void SetSplatData() {
+		private void SetSplats() {
 			if (BiomeMap == null)
 				return;
 
-			//TODO measure speed 
-			List<SplatData> data = new List<SplatData>();
-			int res = (int)Math.Sqrt(BiomeMap.Length);
-
-			for (int x = 0; x < res; x++) {
-				for (int z = 0; z < res; z++) {
-					BiomeData biome = BiomeMap[x, z];
-					if (biome == null)
-						continue; 
-
-					foreach (SplatData sd in biome.Details.SplatsData) {
-						if (!data.Exists(t => t.Equals(sd))) {
-							data.Add(sd);
-						}
-					}
-				}
-			}
-
-			Splats = data.ToArray();
+			Splats = BiomeMap.WeightedBiomeSet.SelectMany(b => b.Details.SplatsData).ToArray();
 		}
 
 		/// <summary>
 		/// Fills <see cref="Controls"/> with the textures it needs to render 
-		/// terrain. Assumes <see cref="CalculateBiomeMap"/> has been called 
-		/// first.
+		/// terrain.
 		/// </summary>
 		private void SetControlTextures() {
 			//Ensure correct shader is set
 			SetFirstPassShader(true);
-
-			//Set amount of required maps
+			
+			//Non-duplicate list of biomes in this map
 			List<Texture2D> maps = new List<Texture2D>();
 			int splatRes = _tile.LodLevel.SplatmapResolution;
-
-			for (int i = 0; i < Mathf.CeilToInt(Splats.Length / 4f); i++)
+			for (int i = 0; i < Mathf.CeilToInt(Splats.Length / 4f); i++) {
 				maps.Add(new Texture2D(splatRes, splatRes));
+			}
 
 			//Sample weights and fill in textures
 			int incrementer = _tile.MeshManager.HeightmapResolution / splatRes;
 			for (int x = 0; x < splatRes; x += incrementer) {
 				for (int z = 0; z < splatRes; z += incrementer) {
+					BiomeData[] biomesAt = BiomeMap.BiomesAt(x, z);
+					float[] weightsAt = BiomeMap.WeightsAt(x, z);
 					float height = _tile.MeshManager.Heightmap[x, z];
 					float angle = GetSteepness(x, z) * 90;
-					
-					AddWeightsToTextures(CalculateWeights(height, angle), ref maps, x, z); //consider switching x & z
+
+					float[] weights = GetTextureWeights(biomesAt, weightsAt, height, angle);
+					AddWeightsToTextures(weights, ref maps, x, z); //consider switching x & z
 				}
 			}
-			
+
 			//Apply set pixel values to textures
 			maps.ForEach(t => t.Apply());
 			Controls = maps.ToArray();
@@ -342,54 +340,17 @@ namespace Terra.Terrain {
 #pragma warning restore CS0162 // Unreachable code detected
 		}
 
-		#region Serialization
+		/// <summary>
+		/// Applies a texture representing the weighted biome map onto 
+		/// the <see cref="Tile"/>. Assumes <see cref="BiomeMap"/> has 
+		/// already been created.
+		/// </summary>
+		private void ApplyDebugBiomeMap() {
+			Texture2D preview = BiomeMap.GetPreviewTexture();
+			Material m = new Material(Shader.Find("Standard"));
+			m.SetTexture("_MainTex", preview);
 
-		[SerializeField, HideInInspector]
-		private int[] _serializedBiomePoints;
-
-		[SerializeField, HideInInspector]
-		private BiomeData[] _serializedBiomes;
-
-		public void OnBeforeSerialize() {
-			//Biome map
-			//TODO Write test for biome serialization
-			if (BiomeMap != null) {
-				int res = (int)Math.Sqrt(BiomeMap.Length);
-				_serializedBiomePoints = new int[BiomeMap.Length];
-				List<BiomeData> biomeTypes = new List<BiomeData>();
-				
-				for (int x = 0; x < res; x++) {
-					for (int z = 0; z < res; z++) {
-						BiomeData b = BiomeMap[x, z];
-						int existIdx = biomeTypes.FindIndex(p => p == b);
-
-						if (existIdx == -1) { //Does not exist, add
-							biomeTypes.Add(b);
-							existIdx = biomeTypes.Count - 1;
-						}
-
-						_serializedBiomePoints[x + z * res] = existIdx;
-					}
-				}
-
-				_serializedBiomes = biomeTypes.ToArray();
-			}
+			_tile.GetMeshRenderer().material = m;
 		}
-
-		public void OnAfterDeserialize() {
-			if (_serializedBiomePoints != null && _serializedBiomes != null) {
-				int length = (int)Math.Sqrt(_serializedBiomePoints.Length);
-				BiomeMap = new BiomeData[length, length];
-
-				for (int x = 0; x < length; x++) {
-					for (int z = 0; z < length; z++) {
-						int point = _serializedBiomePoints[x + z * length];
-						BiomeMap[x, z] = _serializedBiomes[point];
-					}
-				}
-			}
-		}
-
-		#endregion
 	}
 }

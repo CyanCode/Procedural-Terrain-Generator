@@ -20,6 +20,8 @@ namespace Terra.Data {
 		public float Spread = 100f;
 		public float Amplitude = 50f;
 
+		public float BiomeBlendAmount = 1f;
+
 		public TilePool Pool;
 
 		public GenerationData() {

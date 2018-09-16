@@ -1,4 +1,5 @@
 ﻿using System;
+using Terra.Terrain;
 using UnityEngine;
 
 namespace Terra.Data {
@@ -23,11 +24,6 @@ namespace Terra.Data {
 		public Constraint HeightConstraint = new Constraint(0, 1);
 
 		/// <summary>
-		/// Angle constraints if enabled
-		/// </summary>
-		public Constraint AngleConstraint = new Constraint(0, 90);
-
-		/// <summary>
 		/// Temperature constraint if enabled
 		/// </summary>
 		public Constraint TemperatureConstraint = new Constraint(0, 1f);
@@ -42,12 +38,6 @@ namespace Terra.Data {
 		/// heights?
 		/// </summary>
 		public bool IsHeightConstrained = false;
-
-		/// <summary>
-		/// Will this biome only appear between constrained 
-		/// angles?
-		/// </summary>
-		public bool IsAngleConstrained = false;
 
 		/// <summary>
 		/// Is this biome constrained by the temperature map?
@@ -73,6 +63,37 @@ namespace Terra.Data {
 		/// "Color" assigned to this biome. Used for editor previewing
 		/// </summary>
 		public Color Color = default(Color);
+
+		/// <summary>
+		/// Does the passed <see cref="Tile"/> pass all of the constraints 
+		/// for this biome? 
+		/// </summary>
+		/// <param name="t">Tile to compare with</param>
+		/// <param name="x">X coordinate of the heightmap</param>
+		/// <param name="z">Z coordinate of the heightmap</param>
+		/// <returns></returns>
+		//public bool TileFitsConstraints(Tile t, int resolution, int x, int z) {
+		//	var tm = _settings.TemperatureMapData;
+		//	var mm = _settings.MoistureMapData;
+
+		//	if (IsTemperatureConstrained && !tm.HasGenerator()) return false;
+		//	if (IsMoistureConstrained && !mm.HasGenerator()) return false;
+
+		//	var height = t.MeshManager.Heightmap[x, z];
+		//	var local = t.MeshManager.PositionToLocal(x, z, _res);
+		//	var world = t.MeshManager.LocalToWorld(local.x, local.y);
+		//	var wx = world.x;
+		//	var wz = world.y;
+
+		//	bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height) || !b.IsHeightConstrained;
+		//	bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(wx, wz)) || !b.IsTemperatureConstrained;
+		//	bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(wx, wz)) || !b.IsMoistureConstrained;
+
+		//	if (passHeight && passTemp && passMoisture) {
+		//		chosen = b;
+		//	}
+		//}
+		//TODO remove ^
 
 		/// <summary>
 		/// Create a preview texture for the passed list of biomes by 

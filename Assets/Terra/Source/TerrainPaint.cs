@@ -102,42 +102,38 @@ namespace Terra.Terrain {
 			float angle = sample.Angle;
 			float[] weights = new float[SplatSettings.Count];
 
-			var orderMap = new Dictionary<PlacementType, int>() {
-				{ PlacementType.ElevationRange, 0 },
-				{ PlacementType.Angle, 1 }
-			};
-			List<SplatData> ordered = SplatSettings
-			.OrderBy(s => orderMap[s.PlacementType]) //Order elevation before angle
-			//.OrderBy(s => s.MinRange)                //Order lower ranges 
-			//.OrderBy(s => s.IsMinHeight)             //Order min height first
-			.ToList();
+			height = height > 1f ? 1 : height;
 
 			for (int i = 0; i < SplatSettings.Count; i++) {
-				SplatData splat = ordered[i];
+				SplatData splat = SplatSettings[i];
 
-				float min = splat.IsMinHeight ? float.MinValue : splat.MinHeight;
-				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxHeight;
+				//				float min = splat.IsMinHeight ? float.MinValue : splat.MinHeight;
+				//				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxHeight;
 
-				switch (splat.PlacementType) {
-					case PlacementType.Angle:
-						if (angle > splat.AngleMin && angle < splat.AngleMax) {
-							float factor = Mathf.Clamp01((angle - splat.AngleMin) / splat.Blend);
-							weights[i] = factor;
-						}
+				bool passHeight = splat.ConstrainHeight && splat.HeightConstraint.Fits(height);
+				bool passAngle = splat.ConstrainAngle && splat.AngleConstraint.Fits(angle);
 
-						break;
-					case PlacementType.ElevationRange:
-						if (height > min && height < max) {
-							if (i > 0) { //Can blend up
-								float factor = Mathf.Clamp01((splat.Blend - (height - min)) / splat.Blend);
-								weights[i - 1] = factor;
-								weights[i] = 1 - factor;
-							} else {
-								weights[i] = 1f;
-							}
-						}
+				if (!passHeight && !passAngle) {
+					continue;
+				}
 
-						break;
+				float weight = 0;
+				int count = 0;
+				if (passHeight) {
+					weight += splat.HeightConstraint.Weight(height, splat.Blend);
+					count++;
+				}
+				if (passAngle) {
+					weight += splat.AngleConstraint.Weight(angle, splat.Blend);
+				}
+
+				weight /= count;
+
+				if (i > 0) {
+					weights[i - 1] = weight;
+					weights[i] = 1 - weight;
+				} else {
+					weights[i] = 1f;
 				}
 			}
 

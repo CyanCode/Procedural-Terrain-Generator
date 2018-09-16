@@ -67,59 +67,48 @@ namespace UnityEditor.Terra {
 			splat.Blend = EditorGUI.FloatField(pos, "Blend Amount", splat.Blend);
 			pos.y += CTRL_HEIGHT + PADDING_SM;
 
-			//GUI for different placement types
-			splat.PlacementType = (PlacementType)EditorGUI.EnumPopup(pos, "Placement Type", splat.PlacementType);
+			//Constrain Height
+			splat.ConstrainHeight = EditorGUI.Toggle(pos, "Constrain Height", splat.ConstrainHeight);
 			pos.y += CTRL_HEIGHT + PADDING_SM;
+			if (splat.ConstrainHeight) {
+				EditorGUI.indentLevel++;
+				splat.HeightConstraint = EditorGUIExtension.DrawConstraintRange(pos, "Height", splat.HeightConstraint, 0, 1);
 
-			switch (splat.PlacementType) {
-				case PlacementType.Angle:
-					EditorGUI.LabelField(pos, "Min Angle", splat.AngleMin.ToString("0") + " deg");
+				pos.y += (CTRL_HEIGHT + PADDING_SM) * 2;
+
+				float startX = pos.x;
+				pos.x = EditorGUI.IndentedRect(pos).x;
+				EditorGUI.indentLevel--;
+
+				//Checkboxes for infinity & -infinity heights
+				EditorGUI.BeginChangeCheck();
+				if (splat.IsMaxHeight || !_detail.IsMaxHeightSelected) {
+					splat.IsMaxHeight = EditorGUI.Toggle(pos, "Is Highest Material", splat.IsMaxHeight);
 					pos.y += CTRL_HEIGHT + PADDING_SM;
+				}
+				if (EditorGUI.EndChangeCheck()) {
+					_detail.IsMaxHeightSelected = splat.IsMaxHeight;
+				}
 
-					EditorGUI.LabelField(pos, "Max Angle", splat.AngleMax.ToString("0") + " deg");
+				EditorGUI.BeginChangeCheck();
+				if (splat.IsMinHeight || !_detail.IsMinHeightSelected) {
+					splat.IsMinHeight = EditorGUI.Toggle(pos, "Is Lowest Material", splat.IsMinHeight);
 					pos.y += CTRL_HEIGHT + PADDING_SM;
+				}
+				if (EditorGUI.EndChangeCheck()) {
+					_detail.IsMinHeightSelected = splat.IsMinHeight;
+				}
 
-					EditorGUI.MinMaxSlider(pos, ref splat.AngleMin, ref splat.AngleMax, 0f, 90f);
-					pos.y += CTRL_HEIGHT + PADDING_SM;
+				pos.x = startX;
+			}
 
-					break;
-				case PlacementType.ElevationRange:
-					float displayMin = splat.IsMinHeight ? 0f : splat.MinHeight;
-					float displayMax = splat.IsMaxHeight ? 1f : splat.MaxHeight;
-
-					EditorGUI.MinMaxSlider(pos, ref displayMin, ref displayMax, 0f, 1f);
-
-					if (!splat.IsMinHeight)
-						splat.MinHeight = displayMin;
-					if (!splat.IsMaxHeight)
-						splat.MaxHeight = displayMax;
-
-					pos.y += CTRL_HEIGHT + PADDING_SM;
-					EditorGUI.LabelField(pos, "Min Height", displayMin.ToString("0.00"));
-					pos.y += CTRL_HEIGHT + PADDING_SM;
-					EditorGUI.LabelField(pos, "Max Height", displayMax.ToString("0.00"));
-					pos.y += CTRL_HEIGHT + PADDING_SM;
-
-					//Checkboxes for infinity & -infinity heights
-					EditorGUI.BeginChangeCheck();
-					if (splat.IsMaxHeight || !_detail.IsMaxHeightSelected) {
-						splat.IsMaxHeight = EditorGUI.Toggle(pos, "Is Highest Material", splat.IsMaxHeight);
-						pos.y += CTRL_HEIGHT + PADDING_SM;
-					}
-					if (EditorGUI.EndChangeCheck()) {
-						_detail.IsMaxHeightSelected = splat.IsMaxHeight;
-					}
-
-					EditorGUI.BeginChangeCheck();
-					if (splat.IsMinHeight || !_detail.IsMinHeightSelected) {
-						splat.IsMinHeight = EditorGUI.Toggle(pos, "Is Lowest Material", splat.IsMinHeight);
-						pos.y += CTRL_HEIGHT + PADDING_SM;
-					}
-					if (EditorGUI.EndChangeCheck()) {
-						_detail.IsMinHeightSelected = splat.IsMinHeight;
-					}
-
-					break;
+			//Constrain Angle
+			splat.ConstrainAngle = EditorGUI.Toggle(pos, "Constrain Angle", splat.ConstrainAngle);
+			pos.y += CTRL_HEIGHT + PADDING_SM;
+			if (splat.ConstrainAngle) {
+				EditorGUI.indentLevel++;
+				splat.AngleConstraint = EditorGUIExtension.DrawConstraintRange(pos, "Angle", splat.AngleConstraint, 0, 90);
+				EditorGUI.indentLevel--;
 			}
 		}
 
@@ -138,7 +127,7 @@ namespace UnityEditor.Terra {
 		}
 
 		public override float GetItemHeight(int index) {
-			const int minHeight = (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
+			const int minHeight = (CTRL_HEIGHT * 5) + (PADDING_SM * 4);
 			var splat = this[index];
 
 			float height = minHeight;
@@ -150,29 +139,13 @@ namespace UnityEditor.Terra {
 				height += CTRL_HEIGHT * 2.5f + PADDING_SM;
 			}
 
-			//Placement type specific heights
-			switch (splat.PlacementType) {
-				case PlacementType.Angle:
-					height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
-					break;
-				case PlacementType.ElevationRange:
-					if (_detail.IsMaxHeightSelected && _detail.IsMinHeightSelected) { //Both selected
-						height += (CTRL_HEIGHT * 3) + (PADDING_SM * 2);
-					} else if (_detail.IsMaxHeightSelected || _detail.IsMinHeightSelected) { //One selected
-						height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
-					} else { //None selected
-						height += (CTRL_HEIGHT * 5) + (PADDING_SM * 4);
-					}
-
-					if (splat.IsMaxHeight) {
-						height += (CTRL_HEIGHT * 1) + (PADDING_SM * 2);
-					} if (splat.IsMinHeight) {
-						height += (CTRL_HEIGHT * 1) + (PADDING_SM * 2);
-					}
-
-					break;
+			if (splat.ConstrainHeight) {
+				height += (CTRL_HEIGHT * 4) + (PADDING_SM * 3);
 			}
-
+			if (splat.ConstrainAngle) {
+				height += (CTRL_HEIGHT * 2) + (PADDING_SM * 2);
+			}
+			
 			return height;
 		}
 

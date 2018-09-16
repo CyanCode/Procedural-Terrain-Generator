@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace Terra.Data {
 	[Serializable, ExecuteInEditMode]
-	public class TerraSettings: MonoBehaviour {
+	public class TerraSettings: MonoBehaviour { //TODO rename to TerraConfig
 		public static bool IsInitialized;
 
 		/// <summary>
@@ -251,7 +251,12 @@ namespace Terra.Data {
 			/// system when <see cref="WRITE_SPLAT_TEXTURES"/> is 
 			/// enabled?
 			/// </summary>
-			public static int MAX_TEXTURE_WRITE_COUNT = 1;
+			public static int MAX_TEXTURE_WRITE_COUNT = 10;
+
+			/// <summary>
+			/// Displays the weighted biome map on created terrain
+			/// </summary>
+			public const bool SHOW_BIOME_DEBUG_TEXTURE = false;
 		}
 	}
 
@@ -275,6 +280,23 @@ namespace Terra.Data {
 		/// <param name="val">Value to check</param>
 		public bool Fits(float val) {
 			return val > Min && val < Max;
+		}
+
+		/// <summary>
+		/// Calculates the "weight" of the passed value by finding
+		/// the passed value's smaller distance between the min & max 
+		/// and dividing the value by <see cref="blend"/>. The result is 
+		/// then raised to the power of <see cref="falloff"/>.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="blend"></param>
+		/// <param name="falloff"></param>
+		/// <returns>A weight in the range of 0 and 1</returns>
+		public float Weight(float value, float blend) {
+			float range = Max - Min;
+			float weight = (range - Mathf.Abs(value - Max)) * blend;
+
+			return Mathf.Clamp01(weight);
 		}
 	}
 }

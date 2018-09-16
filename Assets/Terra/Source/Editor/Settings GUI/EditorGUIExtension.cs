@@ -213,21 +213,6 @@ public static class EditorGUIExtension {
 		EditorGUILayout.EndVertical();
 	}
 
-	public static Constraint DrawConstraint(string text, Constraint constraint) {
-		Vector2 result = new Vector2(constraint.Min, constraint.Max);
-
-		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("Min/Max", GUILayout.MaxWidth(EditorGUIUtility.labelWidth), GUILayout.MinWidth(60));
-
-		EditorGUILayout.BeginVertical();
-		result.x = EditorGUILayout.FloatField(result.x, GUILayout.ExpandWidth(true));
-		result.y = EditorGUILayout.FloatField(result.y, GUILayout.ExpandWidth(true));
-		EditorGUILayout.EndVertical();
-		EditorGUILayout.EndHorizontal();
-
-		return new Constraint { Min = result.x, Max = result.y };
-	}
-
 	/// <summary>
 	/// Draws the UI for a constraint using a range slider between the 
 	/// passed min and max values
@@ -239,6 +224,26 @@ public static class EditorGUIExtension {
 
 		GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
 		EditorGUILayout.LabelField("[" + constraint.Min.ToString("F1") + "," + constraint.Max.ToString("F1") + "]", style);
+
+		return new Constraint(minConst, maxConst);
+	}
+
+	/// <summary>
+	/// Draws the UI for a constraint using a range slider between the 
+	/// passed min and max values
+	/// </summary>
+	public static Constraint DrawConstraintRange(Rect pos, string text, Constraint constraint, float min, float max) {
+		float minConst = constraint.Min;
+		float maxConst = constraint.Max;
+		EditorGUI.MinMaxSlider(pos, text, ref minConst, ref maxConst, min, max);
+
+		EditorGUI.indentLevel++; 
+		Rect indented = EditorGUI.IndentedRect(pos);
+		indented.y += EditorGUIUtility.singleLineHeight;
+		EditorGUI.indentLevel--;
+
+		GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
+		EditorGUI.LabelField(indented, "[" + constraint.Min.ToString("F1") + "," + constraint.Max.ToString("F1") + "]", style);
 
 		return new Constraint(minConst, maxConst);
 	}

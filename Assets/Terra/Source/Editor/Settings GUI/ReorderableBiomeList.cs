@@ -87,14 +87,6 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		EditorGUILayout.LabelField("Constraints", EditorGUIExtension.TerraStyle.TextBold);
 		GUILayout.Space(-2);
 
-		//angle
-		biome.IsAngleConstrained = EditorGUILayout.Toggle("Angle", biome.IsAngleConstrained);
-		if (biome.IsAngleConstrained) {
-			EditorGUI.indentLevel++;
-			biome.AngleConstraint = EditorGUIExtension.DrawConstraintRange("Min/Max", biome.AngleConstraint, 0f, 90f);
-			EditorGUI.indentLevel--;
-		}
-
 		//height
 		biome.IsHeightConstrained = EditorGUILayout.Toggle("Height", biome.IsHeightConstrained);
 		if (biome.IsHeightConstrained) {
@@ -126,10 +118,9 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		var biome = this[index];
 		int controlCount = 0;
 
-		//Space, Name, Color, Constraints label, Angle, Height, Temperature, Moisture
-		controlCount += 10;
+		//Space, Name, Color, Constraints label, Height, Temperature, Moisture
+		controlCount += 8;
 
-		if (biome.IsAngleConstrained) controlCount += 2;
 		if (biome.IsHeightConstrained) controlCount += 2;
 		if (biome.IsTemperatureConstrained) controlCount += 2;
 		if (biome.IsMoistureConstrained) controlCount += 2;

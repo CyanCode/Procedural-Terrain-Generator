@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Terra.Data;
 using UnityEngine;
-using System.Linq;
-using System.Xml.XPath;
-using Object = System.Object;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -13,6 +10,8 @@ namespace Terra.Terrain {
 	/// </summary>
 	[Serializable]
 	public class TileMesh: ISerializationCallbackReceiver {
+
+
 		/// <summary>
 		/// Resolution of this mesh
 		/// </summary>
@@ -83,7 +82,7 @@ namespace Terra.Terrain {
 		/// <param name="lodLevel">LOD level to reference when creating heightmap and mesh</param>
 		public TileMesh(Tile tile, LodData.LodLevel lodLevel) {
 			_tile = tile;
-			_lodLevel = lodLevel;
+			LodLevel = lodLevel;
 
 			ComputedMeshes = new List<KeyValuePair<int, MeshData>>(3);
 		}
@@ -104,7 +103,8 @@ namespace Terra.Terrain {
 		/// A heightmap is 2D array of floats that represents the Y values (or heights) 
 		/// of to-be created vertices in 3D space.
 		/// </summary>
-		public void CreateHeightmap() {
+		/// <param name="gridPos">Optionally override the GridPosition from the referenced Tile</param>
+		public void CreateHeightmap(GridPosition? gridPos = null) {
 			if (Heightmap != null && (int)Math.Sqrt(Heightmap.Length) >= HeightmapResolution)
 				return;
 
@@ -112,7 +112,7 @@ namespace Terra.Terrain {
 			for (int x = 0; x < HeightmapResolution; x++) {
 				for (int z = 0; z < HeightmapResolution; z++) {
 					Vector2 localXZ = PositionToLocal(x, z, HeightmapResolution);
-					Vector2 worldXZ = LocalToWorld(localXZ.x, localXZ.y);
+					Vector2 worldXZ = LocalToWorld(gridPos == null ? _tile.GridPosition : new GridPosition(), localXZ.x, localXZ.y);
 
 					lock (_asyncMeshLock) {
 						Heightmap[x, z] = HeightAt(worldXZ.x, worldXZ.y, false);
@@ -269,7 +269,7 @@ namespace Terra.Terrain {
 		/// <param name="z">z position to transform</param>
 		/// <param name="resolution">resolution of structure (mesh or heightmap)</param>
 		/// <returns></returns>
-		public Vector2 PositionToLocal(int x, int z, int resolution) {
+		public static Vector2 PositionToLocal(int x, int z, int resolution) {
 			float length = TerraSettings.Instance.Generator.Length;
 			float xLocal = ((float)x / (resolution - 1) - .5f) * length;
 			float zLocal = ((float)z / (resolution - 1) - .5f) * length;
@@ -281,13 +281,14 @@ namespace Terra.Terrain {
 		/// Converts local X and Z coordinates to <see cref="Tile"/> world 
 		/// coordinates.
 		/// </summary>
+		/// <param name="gridPos">Position of the Tile in the grid</param>
 		/// <param name="localX">Local x coordinate on mesh</param>
 		/// <param name="localZ">Local z coordinate on mesh</param>
 		/// <returns>World X and Z coordinates</returns>
-		public Vector2 LocalToWorld(float localX, float localZ) {
+		public static Vector2 LocalToWorld(GridPosition gridPos, float localX, float localZ) {
 			int length = TerraSettings.Instance.Generator.Length;
-			float worldX = localX + (_tile.GridPosition.X * length);
-			float worldZ = localZ + (_tile.GridPosition.Z * length);
+			float worldX = localX + (gridPos.X * length);
+			float worldZ = localZ + (gridPos.Z * length);
 
 			return new Vector2(worldX, worldZ);
 		}

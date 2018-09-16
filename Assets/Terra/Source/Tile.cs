@@ -12,6 +12,11 @@ namespace Terra.Terrain {
 	public class Tile: MonoBehaviour, ISerializationCallbackReceiver {
 		private TerraSettings _settings { get { return TerraSettings.Instance; } }
 
+		[SerializeField]
+		private TilePaint _painter;
+		[SerializeField]
+		private TileMesh _meshManager;
+
 		[HideInInspector]
 		public bool IsColliderDirty = false;
 
@@ -25,13 +30,35 @@ namespace Terra.Terrain {
 		/// provides an interface for creating and showing meshes of 
 		/// varying resolutions.
 		/// </summary>
-		public TileMesh MeshManager;
+		public TileMesh MeshManager {
+			get {
+				if (_meshManager == null) {
+					_meshManager = new TileMesh(this, GetLodLevel());
+				}
+
+				return _meshManager;
+			}
+			set {
+				_meshManager = value;
+			}
+		}
 
 		/// <summary>
 		/// Handles "painting" of this Tile through a splatmap that is 
 		/// applied to each MeshRenderer.
 		/// </summary>
-		public TilePaint Painter;
+		public TilePaint Painter {
+			get {
+				if (_painter == null) {
+					_painter = new TilePaint(this);
+				}
+
+				return _painter;
+			}
+			set {
+				_painter = value;
+			}
+		}
 
 		/// <summary>
 		/// The LOD level for this Tile. This value can change if 
@@ -41,13 +68,6 @@ namespace Terra.Terrain {
 			get {
 				return _settings.Generator.Lod.GetLevelForRadius((int)GridPosition.Distance(new GridPosition(0, 0)));
 			}
-		}
-
-		void Awake() {
-			if (MeshManager == null)
-				MeshManager = new TileMesh(this, GetLodLevel());
-			if (Painter == null)
-				Painter = new TilePaint(this);
 		}
 
 		/// <summary>
@@ -101,14 +121,17 @@ namespace Terra.Terrain {
 		/// are multiplied by the Length of the mesh specified in TerraSettings
 		/// </summary> 
 		/// <param name="position">Position to set the Tile to (ie [1,0])</param>
-		public void UpdatePosition(GridPosition position) {
+		/// <param name="transformInScene">Move this Tile's gameobject to match position change?</param>
+		public void UpdatePosition(GridPosition position, bool transformInScene = true) {
 			GridPosition = position;
 
 			//Update TileMesh LOD level
 			MeshManager.LodLevel = GetLodLevel();
 
-			int len = _settings.Generator.Length;
-			transform.position = new Vector3(position.X * len, 0f, position.Z * len);
+			if (transformInScene) {
+				int len = _settings.Generator.Length;
+				transform.position = new Vector3(position.X * len, 0f, position.Z * len);
+			}
 		} 
 
 		/// <summary>
@@ -143,47 +166,47 @@ namespace Terra.Terrain {
 		/// Points are polled along this <see cref="Tile"/>.
 		/// </summary>
 		/// <returns>BiomeData, null if no Heightmap has been created first</returns>
-		public BiomeData[,] GetBiomeMap(int resolution) {
-			if (MeshManager == null || !MeshManager.HasHeightmapForResolution(resolution)) {
-				Debug.LogWarning("Cannot create biome map without an available heightmap.");
-				return null;
-			}
+		//public BiomeData[,] GetBiomeMap(int resolution) {
+		//	if (MeshManager == null || !MeshManager.HasHeightmapForResolution(resolution)) {
+		//		Debug.LogWarning("Cannot create biome map without an available heightmap.");
+		//		return null;
+		//	}
 
-			BiomeData[,] map = new BiomeData[resolution,resolution];
-			int increment = MeshManager.HeightmapResolution / resolution;
+		//	BiomeData[,] map = new BiomeData[resolution,resolution];
+		//	int increment = MeshManager.HeightmapResolution / resolution;
 			
-			for (int x = 0; x < resolution; x += increment) {
-				for (int z = 0; z < resolution; z += increment) {
-					BiomeData chosen = null;
+		//	for (int x = 0; x < resolution; x += increment) {
+		//		for (int z = 0; z < resolution; z += increment) {
+		//			BiomeData chosen = null;
 					
-					foreach (BiomeData b in _settings.BiomesData) {
-						var tm = _settings.TemperatureMapData;
-						var mm = _settings.MoistureMapData;
+		//			foreach (BiomeData b in _settings.BiomesData) {
+		//				var tm = _settings.TemperatureMapData;
+		//				var mm = _settings.MoistureMapData;
 
-						if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
-						if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
+		//				if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
+		//				if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
 
-						var height = MeshManager.Heightmap[x, z];
-						var local = MeshManager.PositionToLocal(x, z, resolution);
-						var world = MeshManager.LocalToWorld(local.x, local.y);
-						var wx = world.x;
-						var wz = world.y;
+		//				var height = MeshManager.Heightmap[x, z];
+		//				var local = MeshManager.PositionToLocal(x, z, resolution);
+		//				var world = MeshManager.LocalToWorld(local.x, local.y);
+		//				var wx = world.x;
+		//				var wz = world.y;
 
-						bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height) || !b.IsHeightConstrained;
-						bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(wx, wz)) || !b.IsTemperatureConstrained;
-						bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(wx, wz)) || !b.IsMoistureConstrained;
+		//				bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height) || !b.IsHeightConstrained;
+		//				bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(wx, wz)) || !b.IsTemperatureConstrained;
+		//				bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(wx, wz)) || !b.IsMoistureConstrained;
 
-						if (passHeight && passTemp && passMoisture) {
-							chosen = b;
-						}
-					}
+		//				if (passHeight && passTemp && passMoisture) {
+		//					chosen = b;
+		//				}
+		//			}
 
-					map[x / increment, z / increment] = chosen;
-				}
-			}
+		//			map[x / increment, z / increment] = chosen;
+		//		}
+		//	}
 
-			return map;
-		}
+		//	return map;
+		//}
 
 		/// <summary>
 		/// Finishes the <see cref="Generate"/> method after the 

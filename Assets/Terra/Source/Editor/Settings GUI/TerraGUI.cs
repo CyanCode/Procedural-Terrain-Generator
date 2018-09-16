@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Terra.ReorderableList;
 using System.Linq;
+using Assets.Terra.Source;
 using Terra.Data;
 using Terra.Graph.Noise;
 using Terra.Terrain;
@@ -228,13 +229,16 @@ namespace UnityEditor.Terra {
 			const string description = "Create biomes by building a list of constraints that define when a biome should appear.";
 			Header("Biomes", description);
 
+			//Blend between biomes amount
+			_settings.Generator.BiomeBlendAmount = 
+				EditorGUILayout.Slider("Biome Blend", _settings.Generator.BiomeBlendAmount, 0f, 30f);
+
 			//Display material list editor
 			ReorderableListGUI.ListField(_biomeList);
 
 			//Calculate texture preview size
-			const float texMaxWidth = 188;
-			float texWidth = _settings.EditorState.InspectorWidth;
-			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
+			const float texWidth = 128;
+			float inspectorWidth = _settings.EditorState.InspectorWidth;
 
 			//Previewing
 			EditorGUILayout.Space();
@@ -242,7 +246,7 @@ namespace UnityEditor.Terra {
 			_settings.EditorState.ShowBiomePreview = EditorGUILayout.Foldout(_settings.EditorState.ShowBiomePreview, "Show Preview");
 			if (_settings.EditorState.ShowBiomePreview) {
 				if (_settings.EditorState.BiomePreview != null) {
-					var ctr = EditorGUILayout.GetControlRect(false, texWidth / 2);
+					var ctr = EditorGUILayout.GetControlRect(false, texWidth);
 					ctr.width = texWidth;
 					ctr.x += 17;
 
@@ -251,13 +255,14 @@ namespace UnityEditor.Terra {
 
 				//Zoom slider
 				var margin = new GUIStyle { margin = new RectOffset(25, 0, 0, 0) };
-				EditorGUILayout.BeginHorizontal(margin, GUILayout.MaxWidth(texWidth));
+				GUILayout.BeginHorizontal(margin);
 				
-				GUILayout.Label("Zoom");
-				_settings.EditorState.BiomePreviewZoom = 
-					GUILayout.HorizontalSlider(_settings.EditorState.BiomePreviewZoom, 10f, 50f, GUILayout.MaxWidth(EditorGUIUtility.fieldWidth));
-				
-				EditorGUILayout.EndHorizontal();
+				GUILayout.Label("Zoom", GUILayout.ExpandWidth(false));
+				float labelWidth = GUI.skin.label.CalcSize(new GUIContent("Zoom")).x;
+				_settings.EditorState.BiomePreviewZoom =
+					GUILayout.HorizontalSlider(_settings.EditorState.BiomePreviewZoom, 10f, 75f, GUILayout.MaxWidth(texWidth - labelWidth));
+
+				GUILayout.EndHorizontal();
 
 				//Update preview button
 				var rect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
@@ -265,8 +270,17 @@ namespace UnityEditor.Terra {
 				rect.y += 2;
 				rect.width = texWidth;
 				if (GUI.Button(rect, "Update Preview")) {
-					_settings.EditorState.BiomePreview =
-						BiomeData.GetPreviewTexture((int)texWidth, (int)texWidth / 2, _settings.EditorState.BiomePreviewZoom);
+					float startSpread = _settings.Generator.Spread;
+					_settings.Generator.Spread = _settings.EditorState.BiomePreviewZoom;
+
+					TileMesh tm = new TileMesh(null, new LodData.LodLevel(0, 64, 64, 64));
+					tm.CreateHeightmap(new GridPosition());
+
+					WeightedBiomeMap map = new WeightedBiomeMap(tm, 64);
+					map.CreateMap();
+					_settings.EditorState.BiomePreview = map.GetPreviewTexture();
+
+					_settings.Generator.Spread = startSpread;
 				}
 			}
 

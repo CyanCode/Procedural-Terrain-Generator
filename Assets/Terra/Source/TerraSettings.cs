@@ -83,7 +83,7 @@ namespace Terra.Data {
 			if (!IsInitialized) return;
 
 			if (Application.isPlaying && Generator.Pool != null && Generator.GenerateOnStart) {
-				Generator.Pool.ResetQueue();
+				//Generator.Pool.ResetQueue();
 				Generator.Pool.Update();
 			}
 		}

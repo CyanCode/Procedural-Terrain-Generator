@@ -114,11 +114,12 @@ namespace Terra.Terrain {
 			PurgeDestroyedTiles();
 
 			if (ActiveTiles.Contains(tile)) {
-#if UNITY_EDITOR
-				Object.DestroyImmediate(tile.gameObject);
-#else
-				Object.Destroy(tile.gameObject);
-#endif
+				if (Application.isPlaying) { //Play mode
+					Object.Destroy(tile.gameObject);
+				} else if (Application.isEditor) { //Edit mode
+					Object.DestroyImmediate(tile.gameObject);
+				}
+
 				PurgeDestroyedTiles();
 			}
 		}
@@ -155,11 +156,12 @@ namespace Terra.Terrain {
 			int removalAmount = _cachedTiles.Count - _cacheCapacity;
 
 			while (removalAmount > 0) {
-#if UNITY_EDITOR
-				Object.DestroyImmediate(_cachedTiles.Last.Value);
-#else
-				Object.Destroy(_cachedTiles.Last.Value);
-#endif
+				if (Application.isPlaying) { //Play mode
+					Object.Destroy(_cachedTiles.Last.Value.gameObject);
+				} else if (Application.isEditor) { //Edit mode
+					Object.DestroyImmediate(_cachedTiles.Last.Value.gameObject);
+				}
+
 				_cachedTiles.RemoveLast();
 				removalAmount--;
 			}

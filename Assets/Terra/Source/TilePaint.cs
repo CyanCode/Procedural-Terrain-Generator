@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Assets.Terra.Source;
 using Terra.Data;
-using Terra.Terrain.Util;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Terra.Terrain {
 	[Serializable]

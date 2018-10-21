@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Terra.Data;
-using Terra.Terrain;
 
-namespace Assets.Terra.Source {
+namespace Terra.Terrain {
 	/// <summary>
 	/// Represents a 2D structure of biomes within a <see cref="Tile"/>
 	/// </summary>

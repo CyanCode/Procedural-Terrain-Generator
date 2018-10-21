@@ -6,6 +6,7 @@ using Terra.Data;
 using Terra.Graph.Noise;
 using Terra.Terrain;
 using UnityEngine;
+using XNodeEditor;
 
 namespace UnityEditor.Terra {
 	/// <summary>
@@ -178,7 +179,24 @@ namespace UnityEditor.Terra {
 				md.MapType = (MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
 				if (md.MapType == MapGeneratorType.Custom) {
 					md.Graph = (NoiseGraph)EditorGUILayout.ObjectField("Noise Graph", md.Graph, typeof(NoiseGraph), false);
-					//TODO Add "Create new" button under graph
+
+					//If graph is unlinked or has no end node
+					string error = null;
+					if (md.Graph == null) {
+						error = "Create new noise graph asset by right-clicking in project: Create > Terra > Noise Graph";
+					} else if (md.Graph.GetEndGenerator() == null) {
+						error = "The selected noise graph does not have a valid End Node.";
+					} 
+					if (error != null) {
+						EditorGUILayout.HelpBox(error, MessageType.Error);
+					}
+
+					Rect ctrlRect = EditorGUILayout.GetControlRect(false, 20);
+					ctrlRect.x += 15;
+					ctrlRect.width -= 15;
+					if (GUI.Button(ctrlRect, "Open Graph Editor")) {
+						NodeEditorWindow.TryOpen(md.Graph);
+					}
 				}
 				
 				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);

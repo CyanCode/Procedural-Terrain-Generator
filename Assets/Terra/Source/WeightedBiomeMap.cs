@@ -139,14 +139,19 @@ namespace Assets.Terra.Source {
 			z *= offset;
 
 			//Calculate height and world x/z positions
-			var height = _heightmap[x, z];
 			var local = TileMesh.PositionToLocal(x, z, _resolution);
 			var world = TileMesh.LocalToWorld(_tile == null ? new GridPosition() : _tile.GridPosition, local.x, local.y);
 			var wx = world.x;
 			var wz = world.y;
 
+			//Establish and clamp sampled values between 1 & 0
+			var height = _heightmap[x, z];
 			var temp = tm.GetValue(wx, wz);
 			var moisture = mm.GetValue(wx, wz);
+
+			height = Mathf.Clamp01(height);
+			temp = Mathf.Clamp01(temp);
+			moisture = Mathf.Clamp01(moisture);
 
 			//If no constraints return 1f
 			if (!b.IsHeightConstrained && !b.IsTemperatureConstrained && !b.IsMoistureConstrained) {
@@ -154,9 +159,9 @@ namespace Assets.Terra.Source {
 			}
 
 			//Which map constraints fit the passed value
-			bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height);
-			bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(temp);
-			bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(moisture);
+			bool passHeight = b.IsHeightConstrained && (b.HeightConstraint.Fits(height) || b.HeightConstraint.FitsMinMax(height));
+			bool passTemp = b.IsTemperatureConstrained && (b.TemperatureConstraint.Fits(temp) || b.TemperatureConstraint.FitsMinMax(temp));
+			bool passMoisture = b.IsMoistureConstrained && (b.MoistureConstraint.Fits(moisture) || b.MoistureConstraint.FitsMinMax(moisture));
 
 			float blend = _settings.Generator.BiomeBlendAmount;
 

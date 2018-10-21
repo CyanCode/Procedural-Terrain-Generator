@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 
 
-/// Poisson-disc sampling using Bridson's algorithm.
-/// Adapted from Mike Bostock's Javascript source: http://bl.ocks.org/mbostock/19168c663618b7f07158
-///
-/// See here for more information about this algorithm:
-///   http://devmag.org.za/2009/05/03/poisson-disk-sampling/
-///   http://bl.ocks.org/mbostock/dbb02448b0f93e4c82c3
-///
-/// Usage:
-///   PoissonDiscSampler sampler = new PoissonDiscSampler(10, 5, 0.3f);
-///   foreach (Vector2 sample in sampler.Samples()) {
-///       // ... do something, like instantiate an object at (sample.x, sample.y) for example:
-///       Instantiate(someObject, new Vector3(sample.x, 0, sample.y), Quaternion.identity);
-///   }
-///
-/// Author: Gregory Schlomoff (gregory.schlomoff@gmail.com)
-/// Released in the public domain
+
 namespace Terra.Terrain.Util {
+	/// Poisson-disc sampling using Bridson's algorithm.
+	/// Adapted from Mike Bostock's Javascript source: http://bl.ocks.org/mbostock/19168c663618b7f07158
+	///
+	/// See here for more information about this algorithm:
+	///   http://devmag.org.za/2009/05/03/poisson-disk-sampling/
+	///   http://bl.ocks.org/mbostock/dbb02448b0f93e4c82c3
+	///
+	/// Usage:
+	///   PoissonDiscSampler sampler = new PoissonDiscSampler(10, 5, 0.3f);
+	///   foreach (Vector2 sample in sampler.Samples()) {
+	///       // ... do something, like instantiate an object at (sample.x, sample.y) for example:
+	///       Instantiate(someObject, new Vector3(sample.x, 0, sample.y), Quaternion.identity);
+	///   }
+	///
+	/// Author: Gregory Schlomoff (gregory.schlomoff@gmail.com)
+	/// Released in the public domain
 	public class PoissonDiscSampler {
 		private const int k = 30;  // Maximum number of attempts before marking a sample as inactive.
 

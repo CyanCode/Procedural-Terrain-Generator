@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Terra.Data {
+﻿namespace Terra.Data {
 	/// <summary>
 	/// Stores information relating to how shaders are applied 
 	/// to Tiles.

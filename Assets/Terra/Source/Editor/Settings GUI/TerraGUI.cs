@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Terra.ReorderableList;
 using System.Linq;
-using Assets.Terra.Source;
 using Terra.Data;
 using Terra.Graph.Noise;
 using Terra.Terrain;

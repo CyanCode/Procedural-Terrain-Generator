@@ -343,6 +343,12 @@ namespace Terra.Terrain {
 			int res = HeightmapResolution;
 			int tmRes = tm.HeightmapResolution;
 
+			if (tmRes == 0 || res == 0) {
+				//One or more of the referenced tiles hasn't been 
+				//generated yet. Skip.
+				return;
+			}
+
 			bool incrX = false;
 			int x1Start, x2Start, z1Start, z2Start;
 			x1Start = x2Start = z1Start = z2Start = 0;

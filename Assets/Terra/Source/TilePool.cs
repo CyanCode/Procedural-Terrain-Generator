@@ -2,9 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-using Terra.CoherentNoise;
 using Terra.Data;
-using Object = UnityEngine.Object;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -13,7 +11,7 @@ namespace Terra.Terrain {
 	/// </summary>
 	[Serializable]
 	public class TilePool {
-		private const int CACHE_SIZE = 30;
+		private const int CACHE_SIZE = 50;
 		
 		[SerializeField]
 		private bool _isGeneratingTile = false;

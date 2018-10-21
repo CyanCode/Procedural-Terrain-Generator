@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Terra.Data;
+﻿using Terra.Data;
 using UnityEngine;
 
 namespace Terra.Terrain {

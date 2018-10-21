@@ -106,10 +106,8 @@ namespace Terra.Terrain {
 
 			for (int i = 0; i < SplatSettings.Count; i++) {
 				SplatData splat = SplatSettings[i];
-
-				//				float min = splat.IsMinHeight ? float.MinValue : splat.MinHeight;
-				//				float max = splat.IsMaxHeight ? float.MaxValue : splat.MaxHeight;
-
+				
+				//Check whether this SplatSetting fits required height and angle constraints
 				bool passHeight = splat.ConstrainHeight && splat.HeightConstraint.Fits(height);
 				bool passAngle = splat.ConstrainAngle && splat.AngleConstraint.Fits(angle);
 
@@ -117,6 +115,7 @@ namespace Terra.Terrain {
 					continue;
 				}
 
+				//If it passes height or angle constraints what are the texturing weights
 				float weight = 0;
 				int count = 0;
 				if (passHeight) {
@@ -129,12 +128,16 @@ namespace Terra.Terrain {
 
 				weight /= count;
 
+				//Blend the bottom with the top
 				if (i > 0) {
 					weights[i - 1] = weight;
 					weights[i] = 1 - weight;
 				} else {
 					weights[i] = 1f;
 				}
+
+				//Need to determine which splat settings are the highest/lowest and
+				//steepest/shortest
 			}
 
 			//Normalize weights

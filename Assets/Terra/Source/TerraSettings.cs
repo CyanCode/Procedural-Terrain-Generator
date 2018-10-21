@@ -283,6 +283,17 @@ namespace Terra.Data {
 		}
 
 		/// <summary>
+		/// Checks whether:
+		/// val >= max 
+		/// OR 
+		/// val <= min
+		/// </summary>
+		/// <param name="val">Value to check</param>
+		public bool FitsMinMax(float val) {
+			return val >= Max || val <= Min;
+		}
+
+		/// <summary>
 		/// Calculates the "weight" of the passed value by finding
 		/// the passed value's smaller distance between the min & max 
 		/// and dividing the value by <see cref="blend"/>. The result is 

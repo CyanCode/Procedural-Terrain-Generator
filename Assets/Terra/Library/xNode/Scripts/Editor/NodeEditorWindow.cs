@@ -28,7 +28,7 @@ namespace XNodeEditor {
         /// <summary> Create editor window </summary>
         public static NodeEditorWindow Init() {
             NodeEditorWindow w = CreateInstance<NodeEditorWindow>();
-            w.titleContent = new GUIContent("xNode");
+            w.titleContent = new GUIContent("Node Editor");
             w.wantsMouseMove = true;
             w.Show();
             return w;
@@ -95,13 +95,22 @@ namespace XNodeEditor {
         public static bool OnOpen(int instanceID, int line) {
             XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
             if (nodeGraph != null) {
-                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "Node Editor", true) as NodeEditorWindow;
                 w.wantsMouseMove = true;
                 w.graph = nodeGraph;
                 return true;
             }
             return false;
         }
+
+		public static void TryOpen(XNode.NodeGraph graph) {
+			NodeEditorWindow w = Init();
+			w.wantsMouseMove = true;
+			
+			if (graph != null) {
+				w.graph = graph;
+			}
+		}
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>
         public static void RepaintAll() {

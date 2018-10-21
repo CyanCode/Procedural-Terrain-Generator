@@ -131,6 +131,8 @@ namespace Terra.Terrain {
 			int totalSplatCount = Splats.Length;
 			float[] weights = new float[totalSplatCount];
 			
+			height = Mathf.Clamp01(height);
+
 			for (int bi = 0; bi < biomes.Length; bi++) {
 				BiomeData b = biomes[bi];
 				float biomeWeight = biomeWeights[bi];
@@ -146,6 +148,7 @@ namespace Terra.Terrain {
 					int weightIndex = prevBiomeSplatCount + si;
 					SplatData splat = b.Details.SplatsData[si];
 
+					//Check whether this SplatData fits required height and angle constraints
 					bool passHeight = splat.ConstrainHeight && splat.HeightConstraint.Fits(height) || !splat.ConstrainHeight;
 					bool passAngle = splat.ConstrainAngle && splat.AngleConstraint.Fits(angle) || !splat.ConstrainAngle;
 
@@ -153,6 +156,7 @@ namespace Terra.Terrain {
 						continue;
 					}
 
+					//If it passes height or angle constraints what are the texturing weights
 					float weight = 0;
 					int count = 0;
 					if (passHeight) {
@@ -167,12 +171,15 @@ namespace Terra.Terrain {
 					weight /= count;
 					weight *= biomeWeight;
 
+					//Blend the bottom with the top
 					if (weightIndex > 0) {
 						weights[weightIndex - 1] = 1 - weight;
 						weights[weightIndex] = weight;
 					} else {
 						weights[weightIndex] = 1f;
 					}
+
+					
 				}
 			}
 

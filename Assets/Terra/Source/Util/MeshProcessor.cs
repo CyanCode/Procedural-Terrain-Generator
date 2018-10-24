@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Terra.Terrain.Util {
+namespace Terra.Util {
 	class MeshProcessor {
 		public static Mesh Process(Mesh mesh) {
 			// cache data for speed

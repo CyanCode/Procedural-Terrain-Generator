@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-
-
-namespace Terra.Terrain.Util {
+namespace Terra.Util {
 	/// Poisson-disc sampling using Bridson's algorithm.
 	/// Adapted from Mike Bostock's Javascript source: http://bl.ocks.org/mbostock/19168c663618b7f07158
 	///

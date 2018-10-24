@@ -1,4 +1,5 @@
-﻿using Terra.Data;
+﻿using Terra;
+using Terra.Structure;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -12,7 +13,7 @@ public class LandMatEditor : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		TerraSettings settings = FindObjectOfType<TerraSettings>();
+		TerraConfig config = FindObjectOfType<TerraConfig>();
 		//m = settings.CustomMaterial;
 	}
 	

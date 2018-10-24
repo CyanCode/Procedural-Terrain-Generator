@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Terra.Data;
-using Terra.Terrain.Util;
+using Terra.Structure;
+using Terra.Util;
 using UnityEngine;
 
 namespace Terra.Terrain.Detail {
 	[Serializable]
 	public class ObjectRenderer {
-		private TerraSettings Settings;
+		private TerraConfig _config;
 		private ObjectPool Pool;
 		private bool ObserveTiles;
 
@@ -26,9 +26,9 @@ namespace Terra.Terrain.Detail {
 		/// </summary>
 		/// <param name="observeTiles">Observe Tile events?</param>
 		public ObjectRenderer(bool observeTiles = true) {
-			Settings = TerraSettings.Instance;
+			_config = TerraConfig.Instance;
 			ObserveTiles = observeTiles;
-			ObjectsToPlace = Settings.ObjectData;
+			ObjectsToPlace = _config.ObjectData;
 			Pool = new ObjectPool(this);
 
 			if (ObserveTiles) {
@@ -256,9 +256,9 @@ namespace Terra.Terrain.Detail {
 			/// </summary>
 			public void PlaceObjects() {
 				//Get TerraSettings instance
-				TerraSettings settings = UnityEngine.Object.FindObjectOfType<TerraSettings>();
+				TerraConfig config = UnityEngine.Object.FindObjectOfType<TerraConfig>();
 
-				if (Positions != null && settings != null) {
+				if (Positions != null && config != null) {
 					foreach (PositionsContainer p in Positions) {
 						ObjectContainer container = GetContainerForType(p.ObjectPlacementData);
 						Transform parent = GetParent();
@@ -266,7 +266,7 @@ namespace Terra.Terrain.Detail {
 						if (container != null) {
 							foreach (Vector3 pos in p.Positions) {
 								GameObject go = container.GetObject(parent);
-								p.ObjectPlacementData.TransformGameObject(go, pos, settings.Generator.Length, Tile.transform.position);
+								p.ObjectPlacementData.TransformGameObject(go, pos, config.Generator.Length, Tile.transform.position);
 
 								PlacedObjects.Add(go);
 							}

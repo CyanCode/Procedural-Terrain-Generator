@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using Terra.Data;
+using Terra;
+using Terra.Structure;
 using Terra.ReorderableList;
 using Terra.Terrain;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace UnityEditor.Terra {
 		const int TEX_HEIGHT = 60;
 		const int TEX_CAPTION_HEIGHT = 16;
 
-		public ReorderableMaterialList(TerraSettings settings, DetailData detail) : base(detail.SplatsData, null, MAX_HEIGHT) {
+		public ReorderableMaterialList(TerraConfig config, DetailData detail) : base(detail.SplatsData, null, MAX_HEIGHT) {
 			_detail = detail;
 		}
 

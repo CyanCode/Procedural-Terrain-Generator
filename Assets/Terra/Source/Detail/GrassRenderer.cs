@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Terra.Data;
+using Terra;
+using Terra.Structure;
 using Terra.Terrain;
 using UnityEngine;
 
@@ -38,7 +39,7 @@ public static class GrassRenderer {
 		TerraEvent.OnMeshColliderDidForm += (go, mc) => {
 			Tile t = go.GetComponent<Tile>();
 
-			if (TerraSettings.Instance.Grass.PlaceGrass && !CachedMeshData.ContainsKey(t) && !GenerationQueue.Contains(t)) {
+			if (TerraConfig.Instance.Grass.PlaceGrass && !CachedMeshData.ContainsKey(t) && !GenerationQueue.Contains(t)) {
 				GenerationQueue.AddFirst(t);
 			}
 		};
@@ -75,7 +76,7 @@ public static class GrassRenderer {
 	/// mesh and then waits for the next frame before continuing to the next.
 	/// </summary>
 	public static void CalculateGrassMeshes(Tile tile) {
-		GrassTile gt = new GrassTile(tile, TerraSettings.Instance.Grass.GrassStepLength);
+		GrassTile gt = new GrassTile(tile, TerraConfig.Instance.Grass.GrassStepLength);
 		CalculatingTile = true;
 
 		tile.StartCoroutine(gt.CalculateCells((data) => {
@@ -138,7 +139,7 @@ public static class GrassRenderer {
 		Shader grassShader = Shader.Find(GRASS_SHADER_LOC);
 		Material mat = new Material(grassShader);
 
-		var sett = TerraSettings.Instance;
+		var sett = TerraConfig.Instance;
 		mat.SetTexture("_MainTex", sett.Grass.GrassTexture);
 		mat.SetFloat("_BillboardDistance", sett.Grass.BillboardDistance);
 		mat.SetFloat("_GrassHeight", sett.Grass.GrassHeight);
@@ -153,7 +154,7 @@ public static class GrassRenderer {
 	/// </summary>
 	private static void UpdateMaterialData() {
 		if (Material != null) {
-			var sett = TerraSettings.Instance;
+			var sett = TerraConfig.Instance;
 			Material.SetTexture("_MainTex", sett.Grass.GrassTexture);
 			Material.SetFloat("_BillboardDistance", sett.Grass.BillboardDistance);
 			Material.SetFloat("_GrassHeight", sett.Grass.GrassHeight);
@@ -213,8 +214,8 @@ public static class GrassRenderer {
 		/// <param name="onCalculated">Callback delegate when operations have finished</param>
 		/// 
 		public IEnumerator CalculateCells(CalcFinished onCalculated) {
-			Random.InitState(TerraSettings.GenerationSeed);
-			float variation = TerraSettings.Instance.Grass.GrassVariation;
+			Random.InitState(TerraConfig.GenerationSeed);
+			float variation = TerraConfig.Instance.Grass.GrassVariation;
 
 			List<MeshData> data = new List<MeshData>();
 			Bounds bounds = Tile.MeshManager.ActiveMesh.bounds;
@@ -293,7 +294,7 @@ public static class GrassRenderer {
 		private bool CanPlaceAt(RaycastHit hit) {
 			float height = hit.point.y;
 			float angle = Vector3.Angle(Vector3.up, hit.normal);
-			TerraSettings set = TerraSettings.Instance;
+			TerraConfig set = TerraConfig.Instance;
 
 			bool passesHeight = height >= set.Grass.GrassMinHeight && height <= set.Grass.GrassMaxHeight;
 			bool passesAngle = angle >= set.Grass.GrassAngleMin && angle <= set.Grass.GrassAngleMax;

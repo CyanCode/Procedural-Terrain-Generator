@@ -1,5 +1,5 @@
 ﻿using System;
-using Terra.Data;
+using Terra.Structure;
 using UnityEngine;
 using Random = UnityEngine.Random;
 

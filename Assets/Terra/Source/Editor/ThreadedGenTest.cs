@@ -7,7 +7,7 @@ using System.Threading;
 using Terra.CoherentNoise.Generation.Fractal;
 using Terra.CoherentNoise.Generation.Combination;
 using Terra.CoherentNoise;
-using Terra.Terrain.Util;
+using Terra.Util;
 using System.Collections.Generic;
 
 public class GenerationTests {

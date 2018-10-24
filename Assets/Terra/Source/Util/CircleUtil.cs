@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Terra.Terrain.Util {
+namespace Terra.Util {
 	public static class CircleUtil {
 		/// <summary>
 		/// Calculates a set of Vector2 positions that form a 

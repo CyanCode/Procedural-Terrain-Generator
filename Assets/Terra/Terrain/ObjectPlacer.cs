@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using Terra.Data;
-using Terra.Terrain.Util;
+using Terra.Structure;
+using Terra.Util;
 using UnityEngine;
 
 namespace Terra.Terrain {
 	[Serializable]
 	public class ObjectPlacer {
 		public float GridSize;
-		public TerraSettings Settings;
+		public TerraConfig Config;
 
 		private List<ObjectPlacementType> ObjectsToPlace;
 
-		public ObjectPlacer(TerraSettings settings) {
-			Settings = settings;
+		public ObjectPlacer(TerraConfig config) {
+			Config = config;
 			//ObjectsToPlace = Settings.ObjectData;
 		}
 

@@ -1,4 +1,5 @@
-﻿using Terra.Data;
+﻿using Terra;
+using Terra.Structure;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -17,7 +18,7 @@ public class LandTex : MonoBehaviour {
 	Material m;
 
 	void Start() {
-		TerraSettings t = FindObjectOfType<TerraSettings>();
+		TerraConfig t = FindObjectOfType<TerraConfig>();
 		//m = t.CustomMaterial;
 	}
 

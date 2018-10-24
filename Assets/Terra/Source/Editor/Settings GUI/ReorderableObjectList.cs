@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using Terra.Data;
+using Terra;
+using Terra.Structure;
 using Terra.ReorderableList;
 using Terra.Terrain;
 using UnityEditor;
@@ -10,7 +11,7 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 
 	private Dictionary<int, Rect> _positions; //Cached positions at last repaint
 
-	public ReorderableObjectList(TerraSettings settings, DetailData detail) : base(detail.ObjectData, null, MAX_HEIGHT) {
+	public ReorderableObjectList(TerraConfig config, DetailData detail) : base(detail.ObjectData, null, MAX_HEIGHT) {
 		_positions = new Dictionary<int, Rect>();
 	}
 
@@ -203,7 +204,7 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 	}
 
 	public override void Add() {
-		List.Add(new ObjectPlacementData(TerraSettings.GenerationSeed));
+		List.Add(new ObjectPlacementData(TerraConfig.GenerationSeed));
 	}
 
 	/// <summary>

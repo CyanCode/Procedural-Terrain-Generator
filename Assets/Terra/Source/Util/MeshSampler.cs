@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Terra.Terrain.Util {
+namespace Terra.Util {
 	class MeshSampler {
 		public class MeshSample {
 			public readonly float Height;

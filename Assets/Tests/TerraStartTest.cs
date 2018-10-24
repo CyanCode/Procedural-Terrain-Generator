@@ -1,9 +1,10 @@
-﻿using Terra.Data;
+﻿using Terra;
+using Terra.Structure;
 using Terra.Terrain;
 using UnityEngine;
 
 public class TerraStartTest : MonoBehaviour {
-	public TerraSettings Settings;
+	public TerraConfig Config;
 	public GameObject FPSController;
 
 	bool Started = false;
@@ -21,8 +22,8 @@ public class TerraStartTest : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0)) {
 			Started = true;
 
-			if (!Settings.Generator.GenerateOnStart)
-				Settings.Generate();
+			if (!Config.Generator.GenerateOnStart)
+				Config.Generate();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Fractal;
-using Terra.Data;
+using Terra.Structure;
 using Terra.Terrain;
 using Terra.Graph.Noise.Generation;
 
@@ -10,7 +10,7 @@ namespace Terra.Graph.Noise.Generation {
 		[Input] public float Persistence = 1f;
 
 		public override Generator GetGenerator() {
-			PinkNoise noise = new PinkNoise(TerraSettings.GenerationSeed);
+			PinkNoise noise = new PinkNoise(TerraConfig.GenerationSeed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;

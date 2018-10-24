@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Terra.Data;
+using Terra.Structure;
 using Terra.Terrain.Detail;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -13,7 +13,7 @@ namespace Terra.Terrain {
 	/// placement previews in the editor
 	/// </summary>
 	class ObjectPlacerPreview {
-		private TerraSettings Settings;
+		private TerraConfig _config;
 		private Mesh PreviewMesh;
 		private GameObject Parent;
 		private ObjectRenderer Placer;
@@ -25,10 +25,10 @@ namespace Terra.Terrain {
 		/// TerraSettings (for sampling different placement settings) and 
 		/// a Mesh to place the objects on.
 		/// </summary>
-		/// <param name="settings">TerraSettings</param>
+		/// <param name="config">TerraSettings</param>
 		/// <param name="m">A preview mesh to draw on top of</param>
-		public ObjectPlacerPreview(TerraSettings settings, Mesh m) {
-			Settings = settings;
+		public ObjectPlacerPreview(TerraConfig config, Mesh m) {
+			_config = config;
 			PreviewMesh = m;
 			Placer = new ObjectRenderer();
 			CreateParentGO();
@@ -38,7 +38,7 @@ namespace Terra.Terrain {
 			//Clear existing objects if any
 			ClearExistingObjects();
 
-			foreach (ObjectPlacementData type in Settings.ObjectData) {
+			foreach (ObjectPlacementData type in _config.ObjectData) {
 				List<Vector3> positions = Placer.GetFilteredGrid(PreviewMesh, type);
 				
 				//Don't exceed max objects count
@@ -51,7 +51,7 @@ namespace Terra.Terrain {
 
 						//Calculate correct positioning
 						obj.transform.parent = Parent.transform;
-						type.TransformGameObject(obj, positions[i], Settings.Generator.Length, Vector3.zero);
+						type.TransformGameObject(obj, positions[i], _config.Generator.Length, Vector3.zero);
 						#endif
 					}
 				}
@@ -64,13 +64,13 @@ namespace Terra.Terrain {
 		/// </summary>
 		void CreateParentGO() {
 			if (Parent == null) {
-				var comps = Settings.GetComponentsInChildren<Transform>().Where(t => t.gameObject.name == OBJ_PREVIEW_NAME);
+				var comps = _config.GetComponentsInChildren<Transform>().Where(t => t.gameObject.name == OBJ_PREVIEW_NAME);
 
 				if (comps.Count() > 0) {
 					Parent = comps.ToArray()[0].gameObject;
 				} else {
 					GameObject go = new GameObject(OBJ_PREVIEW_NAME);
-					go.transform.parent = Settings.gameObject.transform;
+					go.transform.parent = _config.gameObject.transform;
 					Parent = go;
 				}
 			}

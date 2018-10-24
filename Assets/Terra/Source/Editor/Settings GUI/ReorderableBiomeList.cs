@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Terra.Data;
+using Terra.Structure;
 using Terra.ReorderableList;
-using Terra.Terrain;
 using UnityEditor;
 using UnityEditor.Terra;
 using UnityEngine;
-using System.Linq;
+using Terra;
 
 public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 	private const float MAX_HEIGHT = 200f;
@@ -13,11 +12,11 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 	private List<KeyValuePair<BiomeData, ReorderableMaterialList>> _materialList;
 	private List<KeyValuePair<BiomeData, ReorderableObjectList>> _objectList;
 
-	private TerraSettings _settings;
+	private TerraConfig _config;
 	private Dictionary<int, Rect> _positions; //Cached positions at last repaint
 
-	public ReorderableBiomeList(TerraSettings settings) : base(settings.BiomesData, null, MAX_HEIGHT) {
-		_settings = settings;
+	public ReorderableBiomeList(TerraConfig config) : base(config.BiomesData, null, MAX_HEIGHT) {
+		_config = config;
 
 		_positions = new Dictionary<int, Rect>();
 		_materialList = new List<KeyValuePair<BiomeData, ReorderableMaterialList>>();
@@ -69,9 +68,9 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 
 		//Init sublists for biome if they don't exist yet
 		if (GetMaterialList(biome) == null)
-			_materialList.Add(new KeyValuePair<BiomeData, ReorderableMaterialList>(biome, new ReorderableMaterialList(_settings, biome.Details)));
+			_materialList.Add(new KeyValuePair<BiomeData, ReorderableMaterialList>(biome, new ReorderableMaterialList(_config, biome.Details)));
 		if (GetObjectList(biome) == null)
-			_objectList.Add(new KeyValuePair<BiomeData, ReorderableObjectList>(biome, new ReorderableObjectList(_settings, biome.Details)));
+			_objectList.Add(new KeyValuePair<BiomeData, ReorderableObjectList>(biome, new ReorderableObjectList(_config, biome.Details)));
 
 		GUILayout.BeginArea(areaPos);
 
@@ -86,6 +85,8 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		EditorGUILayout.Space();
 		EditorGUILayout.LabelField("Constraints", EditorGUIExtension.TerraStyle.TextBold);
 		GUILayout.Space(-2);
+
+		biome.MixMethod = (BiomeData.ConstraintMixMethod)EditorGUIExtension.EnumToolbar(biome.MixMethod);
 
 		//height
 		biome.IsHeightConstrained = EditorGUILayout.Toggle("Height", biome.IsHeightConstrained);
@@ -119,7 +120,7 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		int controlCount = 0;
 
 		//Space, Name, Color, Constraints label, Height, Temperature, Moisture
-		controlCount += 8;
+		controlCount += 10;
 
 		if (biome.IsHeightConstrained) controlCount += 2;
 		if (biome.IsTemperatureConstrained) controlCount += 2;

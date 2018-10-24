@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Terra.ReorderableList;
 using System.Linq;
-using Terra.Data;
+using Terra;
+using Terra.Structure;
 using Terra.Graph.Noise;
 using Terra.Terrain;
 using UnityEngine;
@@ -20,9 +21,9 @@ namespace UnityEditor.Terra {
 			public ReorderableMaterialList MaterialsList;
 			public ReorderableObjectList ObjectsList;
 
-			public DetailSubList(TerraSettings settings, DetailData details) {
-				ObjectsList = new ReorderableObjectList(settings, details);
-				MaterialsList = new ReorderableMaterialList(settings, details);
+			public DetailSubList(TerraConfig config, DetailData details) {
+				ObjectsList = new ReorderableObjectList(config, details);
+				MaterialsList = new ReorderableMaterialList(config, details);
 			}
 
 			public static bool operator ==(DetailSubList x, DetailSubList y) {
@@ -48,7 +49,7 @@ namespace UnityEditor.Terra {
 			}
 		}
 	
-		private TerraSettings _settings;
+		private TerraConfig _config;
 		private Texture[] _toolbarImages;
 
 		private ReorderableBiomeList _biomeList;
@@ -61,10 +62,10 @@ namespace UnityEditor.Terra {
 		private List<KeyValuePair<BiomeData, DetailSubList>> _biomeDetails;
 
 
-		public TerraGUI(TerraSettings settings) {
-			this._settings = settings;
+		public TerraGUI(TerraConfig config) {
+			this._config = config;
 
-			_biomeList = new ReorderableBiomeList(settings);
+			_biomeList = new ReorderableBiomeList(config);
 			_biomeDetails = new List<KeyValuePair<BiomeData, DetailSubList>>();
 		}
 
@@ -85,7 +86,7 @@ namespace UnityEditor.Terra {
 				};
 			}
 
-			_settings.EditorState.ToolbarSelection = (ToolbarOptions)EditorGUIExtension.EnumToolbar(_settings.EditorState.ToolbarSelection, _toolbarImages);
+			_config.EditorState.ToolbarSelection = (ToolbarOptions)EditorGUIExtension.EnumToolbar(_config.EditorState.ToolbarSelection, _toolbarImages);
 		}
 
 		/// <summary>
@@ -95,27 +96,27 @@ namespace UnityEditor.Terra {
 			//Tracked gameobject
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Tracked GameObject", EditorStyles.boldLabel);
-			_settings.Generator.TrackedObject = (GameObject)EditorGUILayout.ObjectField(_settings.Generator.TrackedObject, typeof(GameObject), true);
+			_config.Generator.TrackedObject = (GameObject)EditorGUILayout.ObjectField(_config.Generator.TrackedObject, typeof(GameObject), true);
 
 			//Terrain settings
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
-			_settings.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _settings.Generator.GenerateOnStart);
-			_settings.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", _settings.Generator.GenerationRadius);
-			if (!_settings.Generator.UseRandomSeed)
-				TerraSettings.GenerationSeed = EditorGUILayout.IntField("Seed", TerraSettings.GenerationSeed);
-			_settings.Generator.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", _settings.Generator.UseRandomSeed);
+			_config.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _config.Generator.GenerateOnStart);
+			_config.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", _config.Generator.GenerationRadius);
+			if (!_config.Generator.UseRandomSeed)
+				TerraConfig.GenerationSeed = EditorGUILayout.IntField("Seed", TerraConfig.GenerationSeed);
+			_config.Generator.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", _config.Generator.UseRandomSeed);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
 
 			//Show LOD info
-			_settings.EditorState.IsLodFoldout = EditorGUILayout.Foldout(_settings.EditorState.IsLodFoldout, "Level of Detail");
-			if (_settings.EditorState.IsLodFoldout) {
+			_config.EditorState.IsLodFoldout = EditorGUILayout.Foldout(_config.EditorState.IsLodFoldout, "Level of Detail");
+			if (_config.EditorState.IsLodFoldout) {
 				EditorGUI.indentLevel++;
 
 				EditorGUILayout.BeginHorizontal(new GUIStyle { margin = new RectOffset(12, 0, 0, 0)});
-				var lod = _settings.Generator.Lod;
+				var lod = _config.Generator.Lod;
 				lod.UseHighLodLevel = GUILayout.Toggle(lod.UseHighLodLevel, "High");
 				lod.UseMediumLodLevel = GUILayout.Toggle(lod.UseMediumLodLevel, "Med");
 				lod.UseLowLodLevel = GUILayout.Toggle(lod.UseLowLodLevel, "Low");
@@ -131,16 +132,15 @@ namespace UnityEditor.Terra {
 				EditorGUI.indentLevel--;
 			}
 
-			_settings.Generator.Length = EditorGUILayout.IntField("Length", _settings.Generator.Length);
-			_settings.Generator.Spread = EditorGUILayout.FloatField("Spread", _settings.Generator.Spread);
-			_settings.Generator.Amplitude = EditorGUILayout.FloatField("Amplitude", _settings.Generator.Amplitude);
+			_config.Generator.Length = EditorGUILayout.IntField("Length", _config.Generator.Length);
+			_config.Generator.Amplitude = EditorGUILayout.FloatField("Amplitude", _config.Generator.Amplitude);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);
-			if (!_settings.Generator.GenAllColliders)
-				_settings.Generator.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", _settings.Generator.ColliderGenerationExtent);
-			_settings.Generator.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", _settings.Generator.GenAllColliders);
-			_settings.Generator.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", _settings.Generator.UseMultithreading);
+			if (!_config.Generator.GenAllColliders)
+				_config.Generator.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", _config.Generator.ColliderGenerationExtent);
+			_config.Generator.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", _config.Generator.GenAllColliders);
+			_config.Generator.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", _config.Generator.UseMultithreading);
 		}
 
 		/// <summary>
@@ -154,10 +154,10 @@ namespace UnityEditor.Terra {
 			const int texMinZoom = 20;
 			const int texMaxZoom = 100;
 
-			var mapTypes = new[] { _settings.HeightMapData, _settings.MoistureMapData, _settings.TemperatureMapData };
+			var mapTypes = new[] { _config.HeightMapData, _config.MoistureMapData, _config.TemperatureMapData };
 			bool updateTextures = mapTypes.Any(m => m.PreviewTexture == null);
 
-			float texWidth = _settings.EditorState.InspectorWidth;
+			float texWidth = _config.EditorState.InspectorWidth;
 			texWidth = texWidth >= texMaxWidth ? texMaxWidth : texWidth;
 
 			//GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1));
@@ -198,6 +198,7 @@ namespace UnityEditor.Terra {
 					}
 				}
 				
+				md.Spread = EditorGUILayout.FloatField("Spread", md.Spread);
 				md.TextureZoom = EditorGUILayout.Slider("Zoom", md.TextureZoom, texMinZoom, texMaxZoom);
 				EditorGUILayout.Space();
 
@@ -247,27 +248,29 @@ namespace UnityEditor.Terra {
 			Header("Biomes", description);
 
 			//Blend between biomes amount
-			_settings.Generator.BiomeBlendAmount = 
-				EditorGUILayout.Slider("Biome Blend", _settings.Generator.BiomeBlendAmount, 0f, 30f);
+			_config.Generator.BiomeBlendAmount = 
+				EditorGUILayout.Slider("Biome Blend", _config.Generator.BiomeBlendAmount, 0f, 30f);
+			_config.Generator.BiomeFalloff = 
+				EditorGUILayout.FloatField("Falloff", _config.Generator.BiomeFalloff);
 
 			//Display material list editor
 			ReorderableListGUI.ListField(_biomeList);
 
 			//Calculate texture preview size
 			const float texWidth = 128;
-			float inspectorWidth = _settings.EditorState.InspectorWidth;
+			float inspectorWidth = _config.EditorState.InspectorWidth;
 
 			//Previewing
 			EditorGUILayout.Space();
 			EditorGUI.indentLevel++;
-			_settings.EditorState.ShowBiomePreview = EditorGUILayout.Foldout(_settings.EditorState.ShowBiomePreview, "Show Preview");
-			if (_settings.EditorState.ShowBiomePreview) {
-				if (_settings.EditorState.BiomePreview != null) {
+			_config.EditorState.ShowBiomePreview = EditorGUILayout.Foldout(_config.EditorState.ShowBiomePreview, "Show Preview");
+			if (_config.EditorState.ShowBiomePreview) {
+				if (_config.EditorState.BiomePreview != null) {
 					var ctr = EditorGUILayout.GetControlRect(false, texWidth);
 					ctr.width = texWidth;
 					ctr.x += 17;
 
-					EditorGUI.DrawPreviewTexture(ctr, _settings.EditorState.BiomePreview);
+					EditorGUI.DrawPreviewTexture(ctr, _config.EditorState.BiomePreview);
 				}
 
 				//Zoom slider
@@ -276,8 +279,8 @@ namespace UnityEditor.Terra {
 				
 				GUILayout.Label("Zoom", GUILayout.ExpandWidth(false));
 				float labelWidth = GUI.skin.label.CalcSize(new GUIContent("Zoom")).x;
-				_settings.EditorState.BiomePreviewZoom =
-					GUILayout.HorizontalSlider(_settings.EditorState.BiomePreviewZoom, 10f, 75f, GUILayout.MaxWidth(texWidth - labelWidth));
+				_config.EditorState.BiomePreviewZoom =
+					GUILayout.HorizontalSlider(_config.EditorState.BiomePreviewZoom, 75f, 5f, GUILayout.MaxWidth(texWidth - labelWidth));
 
 				GUILayout.EndHorizontal();
 
@@ -287,23 +290,30 @@ namespace UnityEditor.Terra {
 				rect.y += 2;
 				rect.width = texWidth;
 				if (GUI.Button(rect, "Update Preview")) {
-					float startSpread = _settings.Generator.Spread;
-					_settings.Generator.Spread = _settings.EditorState.BiomePreviewZoom;
+					float startHmSpread = _config.HeightMapData.Spread;
+					float startTmpSpread = _config.TemperatureMapData.Spread;
+					float startMstSpread = _config.MoistureMapData.Spread;
+
+					_config.HeightMapData.Spread /= _config.EditorState.BiomePreviewZoom;
+					_config.TemperatureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
+					_config.MoistureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
 
 					TileMesh tm = new TileMesh(null, new LodData.LodLevel(0, 64, 64, 64));
 					tm.CreateHeightmap(new GridPosition());
 
 					WeightedBiomeMap map = new WeightedBiomeMap(tm, 64);
 					map.CreateMap();
-					_settings.EditorState.BiomePreview = map.GetPreviewTexture();
+					_config.EditorState.BiomePreview = map.GetPreviewTexture();
 
-					_settings.Generator.Spread = startSpread;
+					_config.HeightMapData.Spread = startHmSpread;
+					_config.TemperatureMapData.Spread = startTmpSpread;
+					_config.MoistureMapData.Spread = startMstSpread;
 				}
 			}
 
 			//Whittaker diagram
-			_settings.EditorState.ShowWhittakerInfo = EditorGUILayout.Foldout(_settings.EditorState.ShowWhittakerInfo, "Whittaker Diagram");
-			if (_settings.EditorState.ShowWhittakerInfo) {
+			_config.EditorState.ShowWhittakerInfo = EditorGUILayout.Foldout(_config.EditorState.ShowWhittakerInfo, "Whittaker Diagram");
+			if (_config.EditorState.ShowWhittakerInfo) {
 				const string text = "Terra's biomes are based off of Whittaker's biome classification system. " +
 									"You can read more below.";
 				var linkStyle = new GUIStyle(GUI.skin.label) {
@@ -335,8 +345,8 @@ namespace UnityEditor.Terra {
 
 			EditorGUIExtension.BeginBlockArea();
 
-			for (var i = 0; i < _settings.BiomesData.Count; i++) {
-				var biome = _settings.BiomesData[i];
+			for (var i = 0; i < _config.BiomesData.Count; i++) {
+				var biome = _config.BiomesData[i];
 				var detail = biome.Details;
 
 				EditorGUILayout.BeginHorizontal();
@@ -377,7 +387,7 @@ namespace UnityEditor.Terra {
 				detail.ShowGrassFoldout = EditorGUILayout.Foldout(detail.ShowGrassFoldout, "Grass");
 				EditorGUI.indentLevel--;
 
-				if (i < _settings.BiomesData.Count - 1)
+				if (i < _config.BiomesData.Count - 1)
 					EditorGUIExtension.AddBlockAreaSeperator();
 			}
 			
@@ -388,7 +398,7 @@ namespace UnityEditor.Terra {
 			const string desc = "Scale up textures in the distance to hide texture tiling.";
 			Header("Distance Texture Scaling", desc);
 
-			ShaderData sd = _settings.ShaderData;
+			ShaderData sd = _config.ShaderData;
 			sd.FarScaleMultiplier = EditorGUILayout.FloatField("Far Tex Scale", sd.FarScaleMultiplier);
 			sd.TransitionStart = EditorGUILayout.FloatField("Blend Start", sd.TransitionStart);
 			sd.TransitionFalloff = EditorGUILayout.FloatField("Blend Falloff", sd.TransitionFalloff);
@@ -403,22 +413,22 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 
 			if (GUILayout.Button("Generate")) {
-				if (_settings.Generator.GenerationRadius > 4) {
+				if (_config.Generator.GenerationRadius > 4) {
 					int amt = TilePool.GetTilePositionsFromRadius(
-						_settings.Generator.GenerationRadius, new GridPosition(0, 0), _settings.Generator.Length)
+						_config.Generator.GenerationRadius, new Vector2(0, 0), _config.Generator.Length)
 						.Count;
 					string msg = "You are about to generate " + amt + " Tiles synchronously which " +
 									   "may take a while. Are you sure you want to continue?";
 					if (EditorUtility.DisplayDialog("Warning", msg, "Continue")) {
-						_settings.GenerateEditor();
+						_config.GenerateEditor();
 					}
 				} else {
-					_settings.GenerateEditor();
+					_config.GenerateEditor();
 				}
 			}
 			if (GUILayout.Button("Clear Tiles")) {
-				if (_settings.Generator != null && _settings.Generator.Pool != null) {
-					_settings.Generator.Pool.RemoveAll();
+				if (_config.Generator != null && _config.Generator.Pool != null) {
+					_config.Generator.Pool.RemoveAll();
 				}
 			}
 		}
@@ -429,9 +439,9 @@ namespace UnityEditor.Terra {
 		public void Debug() {
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 #pragma warning disable 162 //Unreachable Code
-			if (TerraSettings.TerraDebug.WRITE_SPLAT_TEXTURES) {
-				TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT =
-					EditorGUILayout.IntField("Tex Count", TerraSettings.TerraDebug.MAX_TEXTURE_WRITE_COUNT);
+			if (TerraConfig.TerraDebug.WRITE_SPLAT_TEXTURES) {
+				TerraConfig.TerraDebug.MAX_TEXTURE_WRITE_COUNT =
+					EditorGUILayout.IntField("Tex Count", TerraConfig.TerraDebug.MAX_TEXTURE_WRITE_COUNT);
 			}
 #pragma warning restore 162
 		}
@@ -467,7 +477,7 @@ namespace UnityEditor.Terra {
 		/// </summary>
 		private void Detail_Texture(BiomeData biome) {
 			//Use textures
-			if (_settings.Details != null) {
+			if (_config.Details != null) {
 				var detailSubList = AddSubListIfNeeded(biome);
 				ReorderableListGUI.ListField(detailSubList.MaterialsList);
 			}
@@ -478,7 +488,7 @@ namespace UnityEditor.Terra {
 		/// </summary>
 		private void Detail_Object(BiomeData biome) {
 			//Use objects list
-			if (_settings.Details != null) {
+			if (_config.Details != null) {
 				var detailSubList = AddSubListIfNeeded(biome);
 				ReorderableListGUI.ListField(detailSubList.ObjectsList);
 			}
@@ -506,7 +516,7 @@ namespace UnityEditor.Terra {
 		private DetailSubList AddSubListIfNeeded(BiomeData biome) {
 			var subList = GetDetailListsFor(biome);
 			if (subList.Equals(default(DetailSubList))) {
-				subList = new DetailSubList(_settings, biome.Details);
+				subList = new DetailSubList(_config, biome.Details);
 				_biomeDetails.Add(new KeyValuePair<BiomeData, DetailSubList>(biome, subList));
 			}
 

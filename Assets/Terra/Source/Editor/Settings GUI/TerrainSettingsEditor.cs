@@ -1,55 +1,55 @@
 ﻿using System;
-using Terra.Data;
-using Terra.Terrain;
+using Terra;
+using Terra.Structure;
 using UnityEngine;
 
 namespace UnityEditor.Terra {
-	[ExecuteInEditMode, CustomEditor(typeof(TerraSettings)), Serializable]
+	[ExecuteInEditMode, CustomEditor(typeof(TerraConfig)), Serializable]
 	public class TerrainSettingsEditor: Editor {
-		internal TerraSettings Settings {
+		private TerraConfig Config {
 			get {
-				return (TerraSettings)target;
+				return target as TerraConfig;
 			}
 		}
 
-		private TerraGUI gui;
+		private TerraGUI _gui;
 
 		void OnEnable() {
-			if (gui == null) {
-				gui = new TerraGUI(Settings);
+			if (_gui == null) {
+				_gui = new TerraGUI(Config);
 			}
 		}
 
 		public override void OnInspectorGUI() {
-			if (!TerraSettings.IsInitialized)
+			if (!TerraConfig.IsInitialized)
 				return;
 
 			//Options toolbar
-			gui.Toolbar();
+			_gui.Toolbar();
 
-			switch (Settings.EditorState.ToolbarSelection) {
+			switch (Config.EditorState.ToolbarSelection) {
 				case ToolbarOptions.General:
-					gui.General();
+					_gui.General();
 
 					break;
 				case ToolbarOptions.Maps:
-					gui.Maps();
+					_gui.Maps();
 
 					break;
 				case ToolbarOptions.Biomes:
-					gui.Biomes();
+					_gui.Biomes();
 
 					break;
 				case ToolbarOptions.Details:
-					gui.Details();
+					_gui.Details();
 
 					break;
 			}
 
 			//Preview button
-			gui.PreviewUpdate();
+			_gui.PreviewUpdate();
 
-			gui.Debug();
+			_gui.Debug();
 		}
 	}
 }

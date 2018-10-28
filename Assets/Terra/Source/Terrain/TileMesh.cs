@@ -13,16 +13,6 @@ namespace Terra.Terrain {
 	[Serializable]
 	public class TileMesh: ISerializationCallbackReceiver {
 		/// <summary>
-		/// Resolution of this mesh
-		/// </summary>
-		public Resolution MeshResolution { get; private set; }
-
-		/// <summary>
-		/// Resolution of the heightmap
-		/// </summary>
-		public int HeightmapResolution { get; private set; }
-
-		/// <summary>
 		/// Maximum height of the most recently calculated heightmap.
 		/// Default value is 1.
 		/// </summary>
@@ -33,6 +23,11 @@ namespace Terra.Terrain {
 		/// Default value is 0.
 		/// </summary>
 		public float HeightmapMinHeight = 0;
+
+		/// <summary>
+		/// Resolution of the heightmap
+		/// </summary>
+		public int HeightmapResolution { get; private set; }
 
 		/// <summary>
 		/// The last heightmap computed after calling <see cref="CalculateHeightmapAsync"/> or 
@@ -110,6 +105,32 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Adds a <see cref="UnityEngine.Terrain"/> component to this <see cref="Tile"/>'s 
+		/// gameobject and sets it up according to <see cref="TerraConfig"/>. 
+		/// Overwrites <see cref="ActiveTerrain"/> if it already exists.
+		/// </summary>
+		public void AddTerrainComponent() {
+			//Destory current Terrain instance if it exists
+			if (ActiveTerrain != null) {
+#if UNITY_EDITOR
+				UnityEngine.Object.DestroyImmediate(ActiveTerrain);
+#else
+				UnityEngine.Object.Destroy(ActiveTerrain);
+#endif
+			}
+
+			TerraConfig conf = TerraConfig.Instance;
+			int length = conf.Generator.Length;
+			UnityEngine.Terrain t = _tile.gameObject.AddComponent<UnityEngine.Terrain>();
+
+			t.terrainData = new TerrainData();
+			t.terrainData.size = new Vector3(length, conf.Generator.Amplitude, length);
+
+			TerrainCollider tc = _tile.gameObject.AddComponent<TerrainCollider>();
+			tc.terrainData = t.terrainData;
+		}
+
+		/// <summary>
 		/// Creates a heightmap of resolution <see cref="HeightmapResolution"/>. If a 
 		/// <see cref="Heightmap"/> of the same resolution or higher has already been 
 		/// created, this method does nothing.
@@ -174,29 +195,16 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Adds a <see cref="UnityEngine.Terrain"/> component to this <see cref="Tile"/>'s 
-		/// gameobject and sets it up according to <see cref="TerraConfig"/>. 
-		/// Overwrites <see cref="ActiveTerrain"/> if it already exists.
+		/// Remaps each value in the heightmap to the new min and max.
 		/// </summary>
-		public void AddTerrainComponent() {
-			//Destory current Terrain instance if it exists
-			if (ActiveTerrain != null) {
-#if UNITY_EDITOR
-				UnityEngine.Object.DestroyImmediate(ActiveTerrain);
-#else
-				UnityEngine.Object.Destroy(ActiveTerrain);
-#endif
+		public void RemapHeightmap(float min, float max, float newMin, float newMax) {
+			for (int x = 0; x < HeightmapResolution; x++) {
+				for (int z = 0; z < HeightmapResolution; z++) {
+					//NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+					float val = Heightmap[x, z];
+					Heightmap[x, z] = ((val - min) * (newMax - newMin) / (max - min)) + newMin;
+				}
 			}
-
-			TerraConfig conf = TerraConfig.Instance;
-			int length = conf.Generator.Length;
-			UnityEngine.Terrain t = _tile.gameObject.AddComponent<UnityEngine.Terrain>();
-
-			t.terrainData = new TerrainData();
-			t.terrainData.size = new Vector3(length, conf.Generator.Amplitude, length);
-
-			TerrainCollider tc = _tile.gameObject.AddComponent<TerrainCollider>();
-			tc.terrainData = t.terrainData;
 		}
 
 		/// <summary>
@@ -245,19 +253,6 @@ namespace Terra.Terrain {
 			td.heightmapResolution = HeightmapResolution;
 			td.SetHeights(0, 0, hm);
 			td.size = new Vector3(length, conf.Generator.Amplitude, length);
-		}
-
-		/// <summary>
-		/// Remaps each value in the heightmap to the new min and max.
-		/// </summary>
-		public void RemapHeightmap(float min, float max, float newMin, float newMax) {
-			for (int x = 0; x < HeightmapResolution; x++) {
-				for (int z = 0; z < HeightmapResolution; z++) {
-					//NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-					float val = Heightmap[x, z];
-					Heightmap[x, z] = ((val - min) * (newMax - newMin) / (max - min)) + newMin;
-				}
-			}
 		}
 
 		/// <summary>

@@ -102,6 +102,18 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
 			_config.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _config.Generator.GenerateOnStart);
+
+			EditorGUILayout.BeginHorizontal();
+			_config.Generator.PrecalculateMaxHeight = EditorGUILayout.Toggle("Calc HM Transform", _config.Generator.PrecalculateMaxHeight);
+			if (GUILayout.Button("?", GUILayout.Width(25))) {
+				const string msg = "Heightmaps contain values in the range of 0 to 1. Because " +
+								   "noise functions can fall outside of this range, each retrieved value must " +
+								   "be normalized. Enabling this computes the linear transformation to apply " +
+								   "to the heightmap. This should be checked in almost all cases.";
+				EditorUtility.DisplayDialog("Help - Calculate Heightmap Transformation", msg, "Close");
+			}
+			EditorGUILayout.EndHorizontal();
+			
 			_config.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", _config.Generator.GenerationRadius);
 			if (!_config.Generator.UseRandomSeed)
 				TerraConfig.GenerationSeed = EditorGUILayout.IntField("Seed", TerraConfig.GenerationSeed);
@@ -298,8 +310,8 @@ namespace UnityEditor.Terra {
 					_config.TemperatureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
 					_config.MoistureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
 
-					TileMesh tm = new TileMesh(null, new LodData.LodLevel(0, 64, 64, 64));
-					tm.CreateHeightmap(new GridPosition());
+					TileMesh tm = new TileMesh(null, new LodData.LodLevel(0, 64, 64));
+					tm.CalculateHeightmap(new GridPosition());
 
 					WeightedBiomeMap map = new WeightedBiomeMap(tm, 64);
 					map.CreateMap();
@@ -456,16 +468,14 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Foldout(true, name);
 			EditorGUI.indentLevel++;
 
-			string[] strMeshResOpts = { "32", "64", "128" };
-			string[] strMapResOpts = { "32", "64", "128", "256" };
+			string[] strResOpts = { "32", "64", "128", "256", "512" };
 
-			int[] meshResOpts = { 32, 64, 128 };
-			int[] mapResOpts = { 32, 64, 128, 256 };
+			int[] mapResOpts = { 32, 64, 128, 256, 512 };
+			int[] heightmapResOpts = { 33, 65, 129, 257, 513 };
 
 			level.StartRadius = EditorGUILayout.IntField("Start Radius", level.StartRadius);
-			level.MapResolution = EditorGUILayout.IntPopup("Map Res", level.MapResolution, strMapResOpts, mapResOpts);
-			level.SplatmapResolution = EditorGUILayout.IntPopup("Splat Res", level.SplatmapResolution, strMapResOpts, mapResOpts);
-			level.MeshResolution = EditorGUILayout.IntPopup("Mesh Res", level.MeshResolution, strMeshResOpts, meshResOpts);
+			level.MapResolution = EditorGUILayout.IntPopup("Map Res", level.MapResolution, strResOpts, heightmapResOpts);
+			level.SplatmapResolution = EditorGUILayout.IntPopup("Splat Res", level.SplatmapResolution, strResOpts, mapResOpts);
 			EditorGUI.indentLevel--;
 
 			return level;

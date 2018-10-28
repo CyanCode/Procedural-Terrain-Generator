@@ -24,8 +24,6 @@ namespace Terra.Structure {
 			private int _mapRes;
 			[SerializeField]
 			private int _splatmapRes;
-			[SerializeField]
-			private int _meshRes;
 
 			/// <summary>
 			/// Where on the circular grid does this LOD level start to appear?
@@ -71,35 +69,20 @@ namespace Terra.Structure {
 				}
 			}
 
-			/// <summary>
-			/// Resolution of to-be created mesh for tiles of this <see cref="LodLevel"/>
-			/// </summary>
-			public int MeshResolution {
-				get { return _meshRes; }
-				set {
-					_meshRes = value;
-					VerifyResolutions();
-				}
-			}
-
-			public LodLevel(int startRadius, int mapRes, int splatmapRes, int meshRes) {
+			public LodLevel(int startRadius, int mapRes, int splatmapRes) {
 				StartRadius = startRadius;
 				_mapRes = mapRes;
 				_splatmapRes = splatmapRes;
-				_meshRes = meshRes;
 
 				VerifyResolutions();
 			}
 
 			private void VerifyResolutions() {
-				_mapRes = Mathf.ClosestPowerOfTwo(_mapRes);
+				_mapRes = Mathf.ClosestPowerOfTwo(_mapRes) + 1;
 				_splatmapRes = Mathf.ClosestPowerOfTwo(_splatmapRes);
-				_meshRes = Mathf.ClosestPowerOfTwo(_meshRes);
 			
 				if (SplatmapResolution > MapResolution)
 					_splatmapRes = MapResolution;
-				if (MeshResolution > MapResolution)
-					_meshRes = MapResolution;
 			}
 		}
 
@@ -123,9 +106,9 @@ namespace Terra.Structure {
 			set { _useHighLod = value; VerifyLodLevelEnabled(); }
 		}
 
-		public LodLevel Low = new LodLevel(2, 32, 32, 32);
-		public LodLevel Medium = new LodLevel(1, 64, 64, 64);
-		public LodLevel High = new LodLevel(0, 512, 128, 512);
+		public LodLevel Low = new LodLevel(2, 32, 32);
+		public LodLevel Medium = new LodLevel(1, 64, 64);
+		public LodLevel High = new LodLevel(0, 512, 128);
 
 		/// <summary>
 		/// Get the LodLevel associated with the passed radius. If 

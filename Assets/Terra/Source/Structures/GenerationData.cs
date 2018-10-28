@@ -7,6 +7,9 @@ namespace Terra.Structure {
 	public class GenerationData {
 		public GameObject TrackedObject;
 		public int GenerationRadius = 3;
+		public bool PrecalculateMaxHeight = true;
+		public float LinearTransformTValue = 1f;
+		public float LinearTransformOffset = 0.1f;
 
 		public bool GenerateOnStart = true;
 		public bool UseRandomSeed = false;

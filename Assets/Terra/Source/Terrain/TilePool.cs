@@ -2,7 +2,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System.Diagnostics;
+using System.Linq;
 using Terra.Structure;
+using Debug = UnityEngine.Debug;
 
 namespace Terra.Terrain {
 	/// <summary>
@@ -20,6 +23,19 @@ namespace Terra.Terrain {
 		[SerializeField]
 		private int _queuedTiles = 0;
 		private Action<GridPosition[]> _queueCompletedAction;
+		private Action _queueFirstCompletionAction;
+
+		/// <summary>
+		/// Used for computing heightmap transformation.
+		/// </summary>
+		[SerializeField]
+		private bool _isFirstQueue = true;
+
+		[SerializeField]
+		private float remapMin = 0;
+
+		[SerializeField]
+		private float remapMax = 1;
 
 		private TerraConfig Config {
 			get { return TerraConfig.Instance; }
@@ -97,6 +113,9 @@ namespace Terra.Terrain {
 			if (_queueCompletedAction == null) {
 				_queueCompletedAction = UpdateNeighbors;
 			}
+			if (_queueFirstCompletionAction == null) {
+				_queueFirstCompletionAction = DidCompleteFirstQueue;
+			}
 
 			Cache.PurgeDestroyedTiles();
 
@@ -104,7 +123,7 @@ namespace Terra.Terrain {
 				Config.StartCoroutine(UpdateTiles());
 			}
 
-			Config.StartCoroutine(UpdateColliders(0.5f));
+			//Config.StartCoroutine(UpdateColliders(0.5f)); //todo remove
 		}
 
 		/// <summary>
@@ -112,6 +131,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void ResetQueue() {
 			_queuedTiles = 0;
+			_isFirstQueue = true;
 		}
 
 		/// <summary>
@@ -129,7 +149,7 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Creates a Tile at the passed grid position, activates it, 
+		/// Creates a Tile at the passed grid position, activates it, //todo update docs
 		/// and places it in the scene.
 		/// This method calls <see cref="Tile.Generate"/>.
 		/// </summary>
@@ -139,10 +159,16 @@ namespace Terra.Terrain {
 			Tile t = Tile.CreateTileGameobject("Tile [" + p.X + ", " + p.Z + "]");
 			t.UpdatePosition(p);
 
-			t.Generate(() => {
-				AddTile(t);
+			if (Config.Generator.UseMultithreading) {
+				t.MeshManager.CalculateHeightmapAsync(() => {
+					PostTileCalculateHeightmap(t);
+					onComplete(t);
+				});
+			} else {
+				t.MeshManager.CalculateHeightmap();
+				PostTileCalculateHeightmap(t);
 				onComplete(t);
-			}, Config.Generator.UseMultithreading);
+			}
 		}
 
 		/// <summary>
@@ -195,31 +221,7 @@ namespace Terra.Terrain {
 			List<GridPosition> newPositions = Cache.GetNewTilePositions(nearbyPositions);
 			List<Tile> needRegenerating = new List<Tile>();
 
-			//Remove old positions
-			for (int i = 0; i < Cache.ActiveTiles.Count; i++) {
-				bool found = false;
-
-				foreach (GridPosition nearby in nearbyPositions) {
-					Tile t = Cache.ActiveTiles[i];
-
-					if (t.GridPosition == nearby) { //Position found in ActiveTiles
-						if (t.IsHeightmapLodValid()) { //Correct heightmap, ignore
-							found = true;
-							break;
-						}
-
-						//Invalid heightmap, mark for regeneration
-						found = true;
-						needRegenerating.Add(t);
-					}
-				}
-
-				if (!found) {
-					Cache.CacheTile(Cache.ActiveTiles[i]);
-					Cache.ActiveTiles.RemoveAt(i);
-					i--;
-				}
-			}
+			RemoveOldPositions(ref nearbyPositions, ref needRegenerating);
 
 			//Add new positions
 			_queuedTiles = newPositions.Count + needRegenerating.Count;
@@ -236,8 +238,8 @@ namespace Terra.Terrain {
 					} 
 					
 					//Cached tile has too low lod, mark for regeneration
-					Debug.Log("Cached tile " + cached + " has heightmap res=" + cached.MeshManager.MeshResolution + 
-						". requested res=" + cached.LodLevel.MeshResolution + ". Regenerating.");
+					Debug.Log("Cached tile " + cached + " has heightmap res=" + cached.MeshManager.HeightmapResolution + 
+						". requested res=" + cached.LodLevel.MapResolution + ". Regenerating.");
 					//Cache.RemoveCachedTile(cached);
 					needRegenerating.Add(cached);
 					Cache.AddActiveTile(cached);
@@ -261,8 +263,8 @@ namespace Terra.Terrain {
 			//Regenerate tiles with outdated positions
 			for (int i = 0; i < needRegenerating.Count; i++) {
 				Tile t = needRegenerating[i];
-				Debug.Log("Active tile " + t + " has heightmap res=" + t.MeshManager.MeshResolution +
-				          ". requested res=" + t.LodLevel.MeshResolution + ". Regenerating.");
+				Debug.Log("Active tile " + t + " has heightmap res=" + t.MeshManager.HeightmapResolution +
+				          ". requested res=" + t.LodLevel.MapResolution + ". Regenerating.");
 
 				//Generate one tile per frame
 				if (Application.isPlaying)
@@ -285,6 +287,12 @@ namespace Terra.Terrain {
 			//If tiles were updated synchronously, notify queue completion
 			if (newPositions.Count > 0 && _queuedTiles == 0) {
 				_queueCompletedAction(newPositions.ToArray());
+
+				//If first completion of queue, notify
+				if (_isFirstQueue) {
+					_isFirstQueue = false;
+					_queueFirstCompletionAction();
+				}
 			}
 		}
 
@@ -312,9 +320,149 @@ namespace Terra.Terrain {
 					neighborTiles[i] = found;
 				}
 
-				tile.MeshManager.CalculateNeighboringNormals(new Neighborhood(neighborTiles));
+				tile.MeshManager.SetNeighboringTiles(new Neighborhood(neighborTiles));
 			}
 		}
+
+		/// <summary>
+		/// Continuation of <see cref="AddTileAt"/>'s async and synchronous logic
+		/// </summary>
+		private void PostTileCalculateHeightmap(Tile t) {
+			if (!_isFirstQueue && remapMin != 0f && remapMax != 1f) {
+				float offset = Config.Generator.LinearTransformOffset;
+				t.MeshManager.RemapHeightmap(remapMin, remapMax, offset, 1 - offset);
+			}
+			if (!_isFirstQueue) {
+				t.MeshManager.SetTerrainHeightmap();
+			}
+
+			Cache.AddActiveTile(t);
+		}
+
+		/// <summary>
+		/// Removes old unneeded positions from the passed nearbyPositions list.
+		/// </summary>
+		/// <param name="nearbyPositions"></param>
+		/// <param name="needRegenerating"></param>
+		private void RemoveOldPositions(ref List<GridPosition> nearbyPositions, ref List<Tile> needRegenerating) {
+			for (int i = 0; i < Cache.ActiveTiles.Count; i++) {
+				bool found = false;
+
+				foreach (GridPosition nearby in nearbyPositions) {
+					Tile t = Cache.ActiveTiles[i];
+
+					if (t.GridPosition == nearby) { //Position found in ActiveTiles
+						if (t.IsHeightmapLodValid()) { //Correct heightmap, ignore
+							found = true;
+							break;
+						}
+
+						//Invalid heightmap, mark for regeneration
+						found = true;
+						needRegenerating.Add(t);
+					}
+				}
+
+				if (!found) {
+					Cache.CacheTile(Cache.ActiveTiles[i]);
+					Cache.ActiveTiles.RemoveAt(i);
+					i--;
+				}
+			}
+		}
+
+		private void DidCompleteFirstQueue() {
+			//Remap all tiles to loweset min and biggest max from tiles
+			float min = float.PositiveInfinity;
+			float max = float.NegativeInfinity;
+
+			foreach (Tile t in ActiveTiles) {
+				float tMin = t.MeshManager.HeightmapMinHeight;
+				float tMax = t.MeshManager.HeightmapMaxHeight;
+
+				if (tMin < min) {
+					min = tMin;
+				}
+				if (tMax > max) {
+					max = tMax;
+				}
+			}
+
+			//Set remap values for instance
+			remapMin = min;
+			remapMax = max;
+
+			//Remap and set heightmap for terrain
+			List<GridPosition> gps = new List<GridPosition>(ActiveTileCount);
+			float offset = Config.Generator.LinearTransformOffset;
+			foreach (Tile t in ActiveTiles) {
+				t.MeshManager.RemapHeightmap(min, max, offset, 1 - offset);
+				t.MeshManager.SetTerrainHeightmap(); //todo make coroutine?
+			}
+
+			UpdateNeighbors(gps.ToArray());
+		}
+
+		///// <summary>
+		///// Checks each heightmap in <see cref="ActiveTiles"/> and finds the maximum height 
+		///// out of all. 
+		///// <remarks>If <see cref="GenerationData.PrecalculateMaxHeight"/> is false or the first 
+		///// queue has completed, this method does nothing.</remarks>
+		///// </summary>
+		//private void CalculateHeightmapTransform(GridPosition[] positions) {
+		//	if (!Config.Generator.PrecalculateMaxHeight || !_isFirstQueue) {
+		//		return;
+		//	}
+
+		//	_isFirstQueue = false;
+		//	Stopwatch sw = new Stopwatch();
+		//	sw.Start();
+		//	//Determine max
+		//	float max = float.NegativeInfinity;
+		//	foreach (Tile t in ActiveTiles) {
+		//		if (t.MeshManager == null || t.MeshManager.Heightmap == null) {
+		//			continue;
+		//		}
+
+		//		float[,] hm = t.MeshManager.Heightmap;
+		//		int res = t.MeshManager.HeightmapResolution;
+
+		//		for (int x = 0; x < res; x++) {
+		//			for (int z = 0; z < res; z++) {
+		//				float val = hm[x, z];
+
+		//				if (val > max) {
+		//					max = val;
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//	//Calculate linear transformation t value
+		//	//transf = v * t + k
+		//	float halfOffset = Config.Generator.LinearTransformOffset / 2;
+		//	Config.Generator.LinearTransformTValue = 1 / (max + halfOffset);
+
+		//	//Apply transformation to ActiveTiles
+		//	foreach (Tile t in ActiveTiles) {
+		//		if (t.MeshManager == null || t.MeshManager.Heightmap == null) {
+		//			continue;
+		//		}
+
+		//		float[,] hm = t.MeshManager.Heightmap;
+		//		int res = t.MeshManager.HeightmapResolution;
+
+		//		for (int x = 0; x < res; x++) {
+		//			for (int z = 0; z < res; z++) {
+		//				float val = hm[x, z];
+		//				hm[x, z] = val * Config.Generator.LinearTransformTValue;
+		//			}
+		//		}
+		//	}
+
+		//	sw.Stop();
+		//	Debug.Log("Took " + sw.Elapsed.Seconds + " seconds");
+		//}
 
 		/// <summary>
 		/// Updates colliders that match the Settings specified collider 
@@ -322,19 +470,19 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="delay">Delay in seconds before checking colliders again</param>
 		/// <returns>IEnumerator for use in a Coroutine</returns>
-		private IEnumerator UpdateColliders(float delay) {
-			//If we're generating all colliders the extent of collision generation is 
-			//technically infinity (max value works just as well though)
-			float extent = Config.Generator.GenAllColliders ? float.MaxValue : Config.Generator.ColliderGenerationExtent;
-			List<Tile> tiles = GetTilesInExtent(Config.Generator.TrackedObject.transform.position, extent);
+		//private IEnumerator UpdateColliders(float delay) { //todo remove
+		//	//If we're generating all colliders the extent of collision generation is 
+		//	//technically infinity (max value works just as well though)
+		//	float extent = Config.Generator.GenAllColliders ? float.MaxValue : Config.Generator.ColliderGenerationExtent;
+		//	List<Tile> tiles = GetTilesInExtent(Config.Generator.TrackedObject.transform.position, extent);
 
-			foreach (Tile t in tiles) {
-				t.MeshManager.CalculateCollider();
-				yield return null;
-			}
+		//	foreach (Tile t in tiles) {
+		//		t.MeshManager.CalculateCollider();
+		//		yield return null;
+		//	}
 
-			yield return new WaitForSeconds(delay);
-		}
+		//	yield return new WaitForSeconds(delay);
+		//}
 
 		/// <summary>
 		/// Takes the passed chunk position and returns all other chunk positions in <see cref="TerraConfig.Generator.GenerationRadius"/>

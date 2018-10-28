@@ -39,7 +39,7 @@ namespace Terra.Terrain {
 
 			if (BiomeMap == null) {
 				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
-				ApplyDefaultMaterial();
+				//ApplyDefaultMaterial();
 				return;
 			}
 
@@ -50,7 +50,7 @@ namespace Terra.Terrain {
 			}
 
 			GatherTextures();
-			ApplyControlMapsToShaders();
+			//ApplyControlMapsToShaders();
 		}
 
 		/// <summary>
@@ -68,52 +68,52 @@ namespace Terra.Terrain {
 		/// of supplied textures is > 4. The GenerateSplatmaps function takes care of this for you and 
 		/// its result can be passed as the splats parameter.
 		/// </summary>
-		public void ApplyControlMapsToShaders() {
-			SetFirstPassShader(true);
+		//public void ApplyControlMapsToShaders() {
+		//	//SetFirstPassShader(true);
 			
-			int len = Splats.Length;
-			MeshRenderer mr = _tile.GetMeshRenderer();
-			Material toSet = mr.sharedMaterial;
+		//	int len = Splats.Length;
+		//	MeshRenderer mr = _tile.GetMeshRenderer();
+		//	Material toSet = mr.sharedMaterial;
 
-			for (var i = 0; i < Controls.Length; i++) {
-				const int off = 4; //Offset for splat textures
+		//	for (var i = 0; i < Controls.Length; i++) {
+		//		const int off = 4; //Offset for splat textures
 
-				if (i != 0) { //Insert new Material/AddPass shader
-					const string fpLoc = "Hidden/TerrainEngine/Splatmap/Standard-AddPass";
-					Material mat = new Material(Shader.Find(fpLoc));
-					toSet = mat;
+		//		if (i != 0) { //Insert new Material/AddPass shader
+		//			const string fpLoc = "Hidden/TerrainEngine/Splatmap/Standard-AddPass";
+		//			Material mat = new Material(Shader.Find(fpLoc));
+		//			toSet = mat;
 
-					mr.sharedMaterials = mr.sharedMaterials.Concat(new[] { toSet }).ToArray();
-				}
+		//			mr.sharedMaterials = mr.sharedMaterials.Concat(new[] { toSet }).ToArray();
+		//		}
 
-				toSet.SetTexture("_Control", Controls[i]);
-				toSet.SetTexture("_MainTex", Controls[0]);
-				toSet.SetColor("_Color", Color.black);
+		//		toSet.SetTexture("_Control", Controls[i]);
+		//		toSet.SetTexture("_MainTex", Controls[0]);
+		//		toSet.SetColor("_Color", Color.black);
 
-				if (i * off < len) SetMaterialForSplatIndex(0, Splats[i * off], toSet);
-				if (i * off + 1 < len) SetMaterialForSplatIndex(1, Splats[i * off + 1], toSet);
-				if (i * off + 2 < len) SetMaterialForSplatIndex(2, Splats[i * off + 2], toSet);
-				if (i * off + 3 < len) SetMaterialForSplatIndex(3, Splats[i * off + 3], toSet);
-			}
-		}
+		//		if (i * off < len) SetMaterialForSplatIndex(0, Splats[i * off], toSet);
+		//		if (i * off + 1 < len) SetMaterialForSplatIndex(1, Splats[i * off + 1], toSet);
+		//		if (i * off + 2 < len) SetMaterialForSplatIndex(2, Splats[i * off + 2], toSet);
+		//		if (i * off + 3 < len) SetMaterialForSplatIndex(3, Splats[i * off + 3], toSet);
+		//	}
+		//}
 
 		/// <summary>
 		/// Applies the Unity default material to the terrain if one is not 
 		/// already applied.
 		/// </summary>
-		private void ApplyDefaultMaterial() {
-			if (_tile.GetMeshRenderer() == null || _tile.GetMeshRenderer().sharedMaterial != null)
-				return;
+		//private void ApplyDefaultMaterial() {
+		//	if (_tile.GetMeshRenderer() == null || _tile.GetMeshRenderer().sharedMaterial != null)
+		//		return;
 
-			Shader s = Shader.Find("Diffuse");
-			if (s == null) {
-				Debug.Log("Failed to find default shader when creating terrain");
-				return;
-			}
+		//	Shader s = Shader.Find("Diffuse");
+		//	if (s == null) {
+		//		Debug.Log("Failed to find default shader when creating terrain");
+		//		return;
+		//	}
 
-			Material material = new Material(s);
-			_tile.GetMeshRenderer().sharedMaterial = material;
-		}
+		//	Material material = new Material(s);
+		//	_tile.GetMeshRenderer().sharedMaterial = material;
+		//}
 
 		/// <summary>
 		/// Calculates the weights of each splat texture within this 
@@ -232,7 +232,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		private void SetControlTextures() {
 			//Ensure correct shader is set
-			SetFirstPassShader(true);
+			//SetFirstPassShader(true);
 			
 			//Non-duplicate list of biomes in this map
 			List<Texture2D> maps = new List<Texture2D>();
@@ -309,14 +309,14 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="overwrite">When enabled, the correct first pass shader is 
 		/// applied to a material regardless of whether or not one is already set.</param>
-		private void SetFirstPassShader(bool overwrite = false) {
-			const string path = "Terra/TerrainFirstPass";
-			var mr = _tile.GetMeshRenderer();
+		//private void SetFirstPassShader(bool overwrite = false) {
+		//	const string path = "Terra/TerrainFirstPass";
+		//	var mr = _tile.GetMeshRenderer();
 
-			if (mr.sharedMaterial == null || overwrite) {
-				mr.sharedMaterial = new Material(Shader.Find(path));
-			}
-		}
+		//	if (mr.sharedMaterial == null || overwrite) {
+		//		mr.sharedMaterial = new Material(Shader.Find(path));
+		//	}
+		//}
 
 		/// <summary>
 		/// Writes debug textures to the file system if 
@@ -354,7 +354,7 @@ namespace Terra.Terrain {
 			Material m = new Material(Shader.Find("Standard"));
 			m.SetTexture("_MainTex", preview);
 
-			_tile.GetMeshRenderer().material = m;
+			//_tile.GetMeshRenderer().material = m;
 		}
 	}
 }

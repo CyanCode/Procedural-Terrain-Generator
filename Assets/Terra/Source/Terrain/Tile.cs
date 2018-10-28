@@ -16,8 +16,7 @@ namespace Terra.Terrain {
 		private TilePaint _painter;
 		[SerializeField]
 		private TileMesh _meshManager;
-		[SerializeField]
-		private LodData.LodLevel _lastGeneratedLodLevel;
+	
 
 		[HideInInspector]
 		public bool IsColliderDirty = false;
@@ -73,16 +72,6 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// The LOD level of this mesh during the last call to <see cref="Generate"/>. If 
-		/// <see cref="Generate"/> hasn't been called this value is null.
-		/// </summary>
-		public LodData.LodLevel LastGeneratedLodLevel {
-			get {
-				return _lastGeneratedLodLevel;
-			}
-		}
-
-		/// <summary>
 		/// Creates a gameobject with an attached Tile component and 
 		/// places it in the scene. This is a convienence method and is not required 
 		/// for correct tile creation.
@@ -108,22 +97,19 @@ namespace Terra.Terrain {
 		/// <param name="async">Perform mesh computation asynchronously</param>
 		public void Generate(Action onComplete, bool async = true) {
 			//Cache current LOD
-			_lastGeneratedLodLevel = GetLodLevel();
-			MeshManager.LodLevel = _lastGeneratedLodLevel;
+			
 
 			if (async) {
-				MeshManager.CreateHeightmapAsync(() => {
-					MeshManager.CreateMesh();
-					PostCreateMeshGenerate();
+				MeshManager.CalculateHeightmapAsync(() => {
+					PostGenerateCalcHeightmap();
 
 					if (onComplete != null) {
 						onComplete();
 					}
 				});
 			} else {
-				MeshManager.CreateHeightmap();
-				MeshManager.CreateMesh();
-				PostCreateMeshGenerate();
+				MeshManager.CalculateHeightmap();
+				PostGenerateCalcHeightmap();
 
 				if (onComplete != null) {
 					onComplete();
@@ -146,42 +132,17 @@ namespace Terra.Terrain {
 
 			if (transformInScene) {
 				int len = Config.Generator.Length;
-				transform.position = new Vector3(position.X * len, 0f, position.Z * len);
+				int halfLen = len / 2;
+				transform.position = new Vector3((position.X * len) - halfLen, 0f, (position.Z * len) - halfLen);
 			}
 		} 
-
-		/// <summary>
-		/// Get the MeshFilter attached to this gameobject. If one doesn't 
-		/// exist, it is added and returned.
-		/// </summary>
-		public MeshFilter GetMeshFilter() {
-			MeshFilter mf = GetComponent<MeshFilter>();
-			if (mf == null) {
-				mf = gameObject.AddComponent<MeshFilter>();
-			}
-
-			return mf;
-		}
-
-		/// <summary>
-		/// Get the MeshRenderer attached to this gameobject. If one doesn't 
-		/// exist, it is added and returned.
-		/// </summary>
-		public MeshRenderer GetMeshRenderer() {
-			MeshRenderer mr = GetComponent<MeshRenderer>();
-			if (mr == null) {
-				mr = gameObject.AddComponent<MeshRenderer>();
-			}
-
-			return mr;
-		}
 
 		/// <summary>
 		/// Checks whether this Tile's heightmap matches its set level of detail.
 		/// </summary>
 		/// <returns>true if heightmap matches lod, false otherwise</returns>
 		public bool IsHeightmapLodValid() {
-			return LastGeneratedLodLevel >= GetLodLevel();
+			return MeshManager.LastGeneratedLodLevel >= GetLodLevel();
 		}
 
 		/// <summary>
@@ -190,7 +151,14 @@ namespace Terra.Terrain {
 		/// a mesh can be created asynchronously or synchronously but 
 		/// the logic afterwards is the same.
 		/// </summary>
-		private void PostCreateMeshGenerate() {
+		internal void PostGenerateCalcHeightmap() {
+			//Remap heightmap to [offset, 1 - offset]
+			float offset = Config.Generator.LinearTransformOffset;
+			float currentMax = MeshManager.HeightmapMaxHeight;
+			float currentMin = MeshManager.HeightmapMinHeight;
+			MeshManager.RemapHeightmap(currentMin, currentMax, offset, 1 - offset);
+
+			MeshManager.SetTerrainHeightmap();
 			Painter.Paint();
 		}
 
@@ -202,7 +170,7 @@ namespace Terra.Terrain {
 		/// since initialization.
 		/// </summary>
 		/// <returns>LOD level</returns>
-		private LodData.LodLevel GetLodLevel() { //todo change to reflect description
+		public LodData.LodLevel GetLodLevel() { //todo change to reflect description
 			GameObject tracked = Config.Generator.TrackedObject;
 
 			if (tracked == null) {

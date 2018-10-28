@@ -56,7 +56,7 @@ public static class GrassRenderer {
 			Tile t = GenerationQueue.Last.Value;
 			GenerationQueue.RemoveLast();
 
-			CalculateGrassMeshes(t);
+			//CalculateGrassMeshes(t);
 		}
 	}
 
@@ -75,38 +75,38 @@ public static class GrassRenderer {
 	/// This method calculates grass meshes via a coroutine which calculates a 
 	/// mesh and then waits for the next frame before continuing to the next.
 	/// </summary>
-	public static void CalculateGrassMeshes(Tile tile) {
-		GrassTile gt = new GrassTile(tile, TerraConfig.Instance.Grass.GrassStepLength);
-		CalculatingTile = true;
+	//public static void CalculateGrassMeshes(Tile tile) { //todo remove
+	//	GrassTile gt = new GrassTile(tile, TerraConfig.Instance.Grass.GrassStepLength);
+	//	CalculatingTile = true;
 
-		tile.StartCoroutine(gt.CalculateCells((data) => {
-			List<GameObject> createdGos = new List<GameObject>(data.Count);
-			GameObject parent = SetupGrassParent(tile);
+	//	tile.StartCoroutine(gt.CalculateCells((data) => {
+	//		List<GameObject> createdGos = new List<GameObject>(data.Count);
+	//		GameObject parent = SetupGrassParent(tile);
 
-			foreach (GrassTile.MeshData md in data) { 
-				//Apply material to each Mesh
-				if (md.vertices != null) {
-					GameObject grassGO = new GameObject("Grass");
-					grassGO.transform.parent = parent.transform;
-					createdGos.Add(grassGO);
+	//		foreach (GrassTile.MeshData md in data) { 
+	//			//Apply material to each Mesh
+	//			if (md.vertices != null) {
+	//				GameObject grassGO = new GameObject("Grass");
+	//				grassGO.transform.parent = parent.transform;
+	//				createdGos.Add(grassGO);
 
-					var mf = grassGO.AddComponent<MeshFilter>();
-					var mr = grassGO.AddComponent<MeshRenderer>();
-					mr.material = Material;
+	//				var mf = grassGO.AddComponent<MeshFilter>();
+	//				var mr = grassGO.AddComponent<MeshRenderer>();
+	//				mr.material = Material;
 
-					Mesh m = new Mesh();
-					m.SetVertices(md.vertices);
-					m.SetNormals(md.normals);
-					m.SetIndices(md.indicies.ToArray(), MeshTopology.Points, 0);
+	//				Mesh m = new Mesh();
+	//				m.SetVertices(md.vertices);
+	//				m.SetNormals(md.normals);
+	//				m.SetIndices(md.indicies.ToArray(), MeshTopology.Points, 0);
 
-					mf.mesh = m;
-				}
-			}
+	//				mf.mesh = m;
+	//			}
+	//		}
 
-			CachedMeshData.Add(tile, createdGos);
-			CalculatingTile = false;
-		}));
-	}
+	//		CachedMeshData.Add(tile, createdGos);
+	//		CalculatingTile = false;
+	//	}));
+	//}
 
 	/// <summary>
 	/// Sets up the container that will contain all grass mesh 
@@ -213,75 +213,75 @@ public static class GrassRenderer {
 		/// </summary>
 		/// <param name="onCalculated">Callback delegate when operations have finished</param>
 		/// 
-		public IEnumerator CalculateCells(CalcFinished onCalculated) {
-			Random.InitState(TerraConfig.GenerationSeed);
-			float variation = TerraConfig.Instance.Grass.GrassVariation;
+		//public IEnumerator CalculateCells(CalcFinished onCalculated) { //todo remove?
+		//	Random.InitState(TerraConfig.GenerationSeed);
+		//	float variation = TerraConfig.Instance.Grass.GrassVariation;
 
-			List<MeshData> data = new List<MeshData>();
-			Bounds bounds = Tile.MeshManager.ActiveMesh.bounds;
-			Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
+		//	List<MeshData> data = new List<MeshData>();
+		//	Bounds bounds = Tile.MeshManager.ActiveMesh.bounds;
+		//	Bounds worldBounds = Tile.GetComponent<MeshRenderer>().bounds;
 
-			//int res = TerraSettings.Instance.Generator.MeshResolution;
-			int res = 128;
-			float rayHeight = worldBounds.max.y + 5;
-			float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
+		//	//int res = TerraSettings.Instance.Generator.MeshResolution;
+		//	int res = 128;
+		//	float rayHeight = worldBounds.max.y + 5;
+		//	float rayMaxLength = rayHeight - (worldBounds.min.y - 5);
 
-			List<Vector3> verts = new List<Vector3>(MAX_VERTS_PER_MESH);
-			List<Vector3> norms = new List<Vector3>(MAX_VERTS_PER_MESH);
-			List<int> indicies = new List<int>(MAX_VERTS_PER_MESH);
+		//	List<Vector3> verts = new List<Vector3>(MAX_VERTS_PER_MESH);
+		//	List<Vector3> norms = new List<Vector3>(MAX_VERTS_PER_MESH);
+		//	List<int> indicies = new List<int>(MAX_VERTS_PER_MESH);
 
-			int idx = 0;
-			int iterationCount = 0; //Tracks when to wait for next frame
-			for (float x = worldBounds.min.x; x < worldBounds.max.x; x += StepLength) {
-				for (float z = worldBounds.min.z; z < worldBounds.max.z; z += StepLength) {
-					float varX = x + Random.Range(-variation, variation);
-					float varZ = z + Random.Range(-variation, variation);
+		//	int idx = 0;
+		//	int iterationCount = 0; //Tracks when to wait for next frame
+		//	for (float x = worldBounds.min.x; x < worldBounds.max.x; x += StepLength) {
+		//		for (float z = worldBounds.min.z; z < worldBounds.max.z; z += StepLength) {
+		//			float varX = x + Random.Range(-variation, variation);
+		//			float varZ = z + Random.Range(-variation, variation);
 
-					Ray r = new Ray(new Vector3(varX, rayHeight, varZ), Vector3.down);
-					RaycastHit hit;
+		//			Ray r = new Ray(new Vector3(varX, rayHeight, varZ), Vector3.down);
+		//			RaycastHit hit;
 
-					if (MeshCollider.Raycast(r, out hit, rayMaxLength) && CanPlaceAt(hit))  {
-						verts.Add(new Vector3(varX, hit.point.y, varZ));
-						norms.Add(hit.normal);
-						indicies.Add(idx);
-						idx++;
-					}
+		//			if (MeshCollider.Raycast(r, out hit, rayMaxLength) && CanPlaceAt(hit))  {
+		//				verts.Add(new Vector3(varX, hit.point.y, varZ));
+		//				norms.Add(hit.normal);
+		//				indicies.Add(idx);
+		//				idx++;
+		//			}
 
-					//If max verts met, flush to MeshData list
-					if (verts.Count >= MAX_VERTS_PER_MESH) {
-						MeshData d = new MeshData();
-						d.vertices = verts;
-						d.normals = norms;
-						d.indicies = indicies;
-						data.Add(d);
+		//			//If max verts met, flush to MeshData list
+		//			if (verts.Count >= MAX_VERTS_PER_MESH) {
+		//				MeshData d = new MeshData();
+		//				d.vertices = verts;
+		//				d.normals = norms;
+		//				d.indicies = indicies;
+		//				data.Add(d);
 
-						//Clear existing data
-						verts = new List<Vector3>();
-						norms = new List<Vector3>();
-						indicies = new List<int>();
-						idx = 0;
-					}
+		//				//Clear existing data
+		//				verts = new List<Vector3>();
+		//				norms = new List<Vector3>();
+		//				indicies = new List<int>();
+		//				idx = 0;
+		//			}
 
-					//Possibly wait for next frame
-					iterationCount++;
-					if (iterationCount > MAX_ITERATIONS_PER_FRAME) {
-						iterationCount = 0;
-						yield return null; //Wait for next frame
-					}
-				}
-			}
+		//			//Possibly wait for next frame
+		//			iterationCount++;
+		//			if (iterationCount > MAX_ITERATIONS_PER_FRAME) {
+		//				iterationCount = 0;
+		//				yield return null; //Wait for next frame
+		//			}
+		//		}
+		//	}
 
-			//Pause before returning as we want to create mesh in a different frame
-			yield return null;
+		//	//Pause before returning as we want to create mesh in a different frame
+		//	yield return null;
 
-			MeshData md = new MeshData();
-			md.vertices = verts;
-			md.normals = norms;
-			md.indicies = indicies;
-			data.Add(md);
+		//	MeshData md = new MeshData();
+		//	md.vertices = verts;
+		//	md.normals = norms;
+		//	md.indicies = indicies;
+		//	data.Add(md);
 
-			onCalculated(data);
-		}
+		//	onCalculated(data);
+		//}
 
 		/// <summary>
 		/// Uses raycast hit information to check whether a grass 

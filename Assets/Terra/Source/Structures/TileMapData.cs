@@ -80,6 +80,14 @@ namespace Terra.Structure {
 		public float Spread = 50f;
 
 		/// <summary>
+		/// Returns the <see cref="Spread"/> value multiplied by 
+		/// <see cref="GenerationData.Length"/>. 
+		/// </summary>
+		public float SpreadAdjusted {
+			get { return Spread * TerraConfig.Instance.Generator.Length; }
+		}
+
+		/// <summary>
 		/// Internal <see cref="Generator"/>
 		/// </summary>
 		private Generator _generator;
@@ -148,7 +156,7 @@ namespace Terra.Structure {
 
 		/// <summary>
 		/// Updates the <see cref="Generator"/> assigned to this instance based on the 
-		/// set <see cref="MapGeneratorType"/> and returns it.
+		/// set <see cref="MapGeneratorType"/>.
 		/// </summary>
 		/// <returns>Generator if set, null if <see cref="MapGeneratorType.Custom"/> 
 		/// is set and no <see cref="CustomGenerator"/> is specified</returns>

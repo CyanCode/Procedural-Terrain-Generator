@@ -19,8 +19,6 @@ namespace Terra.Structure {
 		[SerializeField]
 		private int _resolution;
 		[SerializeField]
-		private int _heightmapResolution;
-		[SerializeField]
 		private float[,] _heightmap;
 
 		/// <summary>
@@ -37,46 +35,21 @@ namespace Terra.Structure {
 		public List<BiomeData> WeightedBiomeSet { get; private set; }
 
 		/// <summary>
-		/// Resolution of the biome map
-		/// </summary>
-		public int Resolution {
-			get { return _resolution; }
-			set { _resolution = value; }
-		}
-
-		/// <summary>
 		/// Readies a weighted map for creation and pulls heightmap 
 		/// information from the passed <see cref="Tile"/>
 		/// </summary>
 		/// <param name="tile">Tile to refernce heightmap from</param>
-		/// <param name="resolution">Resolution of the map (must be lower 
-		/// than or equal to heightmap resolution)</param>
-		public WeightedBiomeMap(Tile tile, int resolution) {
+		public WeightedBiomeMap(Tile tile) {
 			_tile = tile;
-			_resolution = resolution;
 			_heightmap = _tile.MeshManager.Heightmap;
-			_heightmapResolution = _tile.MeshManager.HeightmapResolution;
-		}
-
-		/// <summary>
-		/// Readies a weighted map for creation and pulls heightmap 
-		/// information from the passed <see cref="TileMesh"/>
-		/// </summary>
-		/// <param name="tileMesh">TileMesh to reference heightmap from</param>
-		/// <param name="resolution">Resolution of the map (must be lower 
-		/// than or equal to heightmap resolution)</param>
-		public WeightedBiomeMap(TileMesh tileMesh, int resolution) {
-			_resolution = resolution;
-			_tile = null;
-			_heightmapResolution = tileMesh.HeightmapResolution;
-			_heightmap = tileMesh.Heightmap;
+			_resolution = _tile.MeshManager.HeightmapResolution;
 		}
 
 		public void CreateMap() {
 			WeightedMap = new KeyValuePair<BiomeData[], float[]>[_resolution, _resolution];
 			WeightedBiomeSet = new List<BiomeData>();
 
-			for (int x = 0; x < _resolution; x++) {
+ 			for (int x = 0; x < _resolution; x++) {
 				for (int z = 0; z < _resolution; z++) {
 					List<BiomeData> biomes = new List<BiomeData>();
 					List<float> weights = new List<float>();
@@ -132,11 +105,6 @@ namespace Terra.Structure {
 			if (b.IsTemperatureConstrained && !tm.HasGenerator()) return 0;
 			if (b.IsMoistureConstrained && !mm.HasGenerator()) return 0;
 
-			//Calculate x and z offsets for checking heightmap
-			int offset = _resolution / _heightmapResolution;
-			x *= offset;
-			z *= offset;
-
 			//Calculate height and world x/z positions
 			var local = TileMesh.PositionToLocal(x, z, _resolution);
 			var world = TileMesh.LocalToWorld(_tile == null ? new GridPosition() : _tile.GridPosition, local.x, local.y);
@@ -145,8 +113,8 @@ namespace Terra.Structure {
 
 			//Establish and clamp sampled values between 1 & 0
 			var height = _heightmap[x, z];
-			var temp = tm.GetValue(wx, wz, tm.Spread);
-			var moisture = mm.GetValue(wx, wz, mm.Spread);
+			var temp = tm.GetValue(wx, wz, tm.SpreadAdjusted);
+			var moisture = mm.GetValue(wx, wz, mm.SpreadAdjusted);
 
 			height = Mathf.Clamp01(height);
 			temp = Mathf.Clamp01(temp);
@@ -158,12 +126,9 @@ namespace Terra.Structure {
 			}
 
 			//Which map constraints fit the passed value                                     //todo figure this out v
-			//bool passHeight = b.IsHeightConstrained && (b.HeightConstraint.Fits(height) || b.HeightConstraint.FitsMinMax(height));
-			//bool passTemp = b.IsTemperatureConstrained && (b.TemperatureConstraint.Fits(temp) || b.TemperatureConstraint.FitsMinMax(temp));
-			//bool passMoisture = b.IsMoistureConstrained && (b.MoistureConstraint.Fits(moisture) || b.MoistureConstraint.FitsMinMax(moisture));
-			bool passHeight = b.IsHeightConstrained && (b.HeightConstraint.Fits(height));
-			bool passTemp = b.IsTemperatureConstrained && (b.TemperatureConstraint.Fits(temp));
-			bool passMoisture = b.IsMoistureConstrained && (b.MoistureConstraint.Fits(moisture));
+			bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height);
+			bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(temp);
+			bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(moisture);
 
 			float blend = Config.Generator.BiomeBlendAmount;
 
@@ -185,20 +150,6 @@ namespace Terra.Structure {
 			.Aggregate((agg, next) => agg.value > next.value ? next : agg);
 
 			return maxWeight.constraint.Weight(maxWeight.value, blend, Config.Generator.BiomeFalloff);
-
-			//Calculate weight given to each map
-//			float weight = 0;
-//			if (passHeight) {
-//				weight += b.HeightConstraint.Weight(height, blend);
-//			}
-//			if (passTemp) {
-//				weight += b.TemperatureConstraint.Weight(temp, blend);
-//			}
-//			if (passMoisture) {
-//				weight += b.MoistureConstraint.Weight(moisture, blend);
-//			}
-//
-//			return weight / passAmt;
 		}
 
 		public BiomeData[] BiomesAt(int x, int z) {

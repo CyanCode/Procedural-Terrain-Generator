@@ -102,17 +102,6 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
 			_config.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _config.Generator.GenerateOnStart);
-
-			EditorGUILayout.BeginHorizontal();
-			_config.Generator.PrecalculateMaxHeight = EditorGUILayout.Toggle("Calc HM Transform", _config.Generator.PrecalculateMaxHeight);
-			if (GUILayout.Button("?", GUILayout.Width(25))) {
-				const string msg = "Heightmaps contain values in the range of 0 to 1. Because " +
-								   "noise functions can fall outside of this range, each retrieved value must " +
-								   "be normalized. Enabling this computes the linear transformation to apply " +
-								   "to the heightmap. This should be checked in almost all cases.";
-				EditorUtility.DisplayDialog("Help - Calculate Heightmap Transformation", msg, "Close");
-			}
-			EditorGUILayout.EndHorizontal();
 			
 			_config.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", _config.Generator.GenerationRadius);
 			if (!_config.Generator.UseRandomSeed)
@@ -153,6 +142,21 @@ namespace UnityEditor.Terra {
 				_config.Generator.ColliderGenerationExtent = EditorGUILayout.FloatField("Collider Gen Extent", _config.Generator.ColliderGenerationExtent);
 			_config.Generator.GenAllColliders = EditorGUILayout.Toggle("Gen All Colliders", _config.Generator.GenAllColliders);
 			_config.Generator.UseMultithreading = EditorGUILayout.Toggle("Multithreaded", _config.Generator.UseMultithreading);
+
+			EditorGUILayout.BeginHorizontal();
+			_config.Generator.RemapHeightmap = EditorGUILayout.Toggle("Remap Heightmap", _config.Generator.RemapHeightmap);
+			if (GUILayout.Button("?", GUILayout.Width(25))) {
+				const string msg = "Heightmaps contain values in the range of 0 to 1. Because " +
+				                   "noise functions can fall outside of this range, each retrieved value must " +
+				                   "be normalized. Enabling this computes the linear transformation to apply " +
+				                   "to the heightmap. This should be checked in almost all cases.";
+				EditorUtility.DisplayDialog("Help - Calculate Heightmap Transformation", msg, "Close");
+			}
+			EditorGUILayout.EndHorizontal();
+
+			int[] mapResOpts = { 32, 64, 128, 256, 512 };
+			string[] strResOpts = { "32", "64", "128", "256", "512" };
+			_config.Generator.RemapResolution = EditorGUILayout.IntPopup("Remap Resolution", _config.Generator.RemapResolution, strResOpts, mapResOpts);
 		}
 
 		/// <summary>
@@ -304,16 +308,19 @@ namespace UnityEditor.Terra {
 				if (GUI.Button(rect, "Update Preview")) {
 					float startHmSpread = _config.HeightMapData.Spread;
 					float startTmpSpread = _config.TemperatureMapData.Spread;
-					float startMstSpread = _config.MoistureMapData.Spread;
+					float startMstSpread = _config.MoistureMapData.SpreadAdjusted;
 
 					_config.HeightMapData.Spread /= _config.EditorState.BiomePreviewZoom;
 					_config.TemperatureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
 					_config.MoistureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
 
-					TileMesh tm = new TileMesh(null, new LodData.LodLevel(0, 64, 64));
-					tm.CalculateHeightmap(new GridPosition());
+					Tile tile = new Tile();
+					tile.UpdatePosition(new GridPosition(0, 0), false);
+					tile.MeshManager.LodLevel = new LodData.LodLevel(0, 64, 64);
+					tile.MeshManager.CalculateHeightmap();
+					tile.MeshManager.RemapHeightmap(tile.MeshManager.HeightmapMin, tile.MeshManager.HeightmapMax, 0f, 1f);
 
-					WeightedBiomeMap map = new WeightedBiomeMap(tm, 64);
+					WeightedBiomeMap map = new WeightedBiomeMap(tile);
 					map.CreateMap();
 					_config.EditorState.BiomePreview = map.GetPreviewTexture();
 

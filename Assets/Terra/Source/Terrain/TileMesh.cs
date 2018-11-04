@@ -13,16 +13,18 @@ namespace Terra.Terrain {
 	[Serializable]
 	public class TileMesh: ISerializationCallbackReceiver {
 		/// <summary>
-		/// Maximum height of the most recently calculated heightmap.
-		/// Default value is 1.
-		/// </summary>
-		public float HeightmapMaxHeight = 1;
+		/// The minimum value in the heightmap after the last call 
+		/// to <see cref="CalculateHeightmap"/>. Default value is 
+		/// <see cref="float.PositiveInfinity"/>
+		/// </summary>	
+		public float HeightmapMin = float.PositiveInfinity;
 
 		/// <summary>
-		/// Minimum height of the most recently calculated heightmap.
-		/// Default value is 0.
+		/// The maximum value in the heightmap after the last call 
+		/// to <see cref="CalculateHeightmap"/>. Default value is 
+		/// <see cref="float.NegativeInfinity"/>
 		/// </summary>
-		public float HeightmapMinHeight = 0;
+		public float HeightmapMax = float.NegativeInfinity;
 
 		/// <summary>
 		/// Resolution of the heightmap
@@ -138,7 +140,9 @@ namespace Terra.Terrain {
 		/// of to-be created vertices in 3D space.
 		/// </summary>
 		/// <param name="gridPos">Optionally override the GridPosition from the referenced Tile</param>
-		public void CalculateHeightmap(GridPosition? gridPos = null) {
+		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
+		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
+		public void CalculateHeightmap(GridPosition? gridPos = null, float remapMin = 0f, float remapMax = 1f) {
 			if (!TerraConfig.Instance.Generator.UseMultithreading) {
 				_lastGeneratedLodLevel = _tile.GetLodLevel();
 				LodLevel = _lastGeneratedLodLevel;
@@ -148,8 +152,10 @@ namespace Terra.Terrain {
 				return;
 
 			Heightmap = new float[HeightmapResolution, HeightmapResolution];
-			float max = float.NegativeInfinity;
-			float min = float.PositiveInfinity;
+			
+			float offset = TerraConfig.Instance.Generator.RemapPadding;
+			float newMin = offset;
+			float newMax = 1 - offset;
 
 			for (int x = 0; x < HeightmapResolution; x++) {
 				for (int z = 0; z < HeightmapResolution; z++) {
@@ -158,21 +164,24 @@ namespace Terra.Terrain {
 
 					lock (_asyncMeshLock) {
 						float height = HeightAt(worldXZ.x, worldXZ.y);
-						Heightmap[z, x] = height;
 
-						if (height > max) {
-							max = height;
+						//Set this instances min and max
+						if (height > HeightmapMax) {
+							HeightmapMax = height;
 						}
-						if (height < min) {
-							min = height;
+						if (height < HeightmapMin) {
+							HeightmapMin = height;
 						}
+
+						//Transform height
+						if (remapMin != 0f && remapMax != 1f) {
+							height = (height - remapMin) * (newMax - newMin) / (remapMax - remapMin) + newMin;
+						}
+
+						Heightmap[z, x] = height;
 					}
 				}
 			}
-
-			//Set calculated min and max heights
-			HeightmapMaxHeight = max;
-			HeightmapMinHeight = min;
 		}
 
 		/// <summary>
@@ -183,12 +192,14 @@ namespace Terra.Terrain {
 		/// of to-be created vertices in 3D space.
 		/// </summary>
 		/// <param name="onComplete">Called when the heightmap has been created</param>
-		public void CalculateHeightmapAsync(Action onComplete) {
+		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
+		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
+		public void CalculateHeightmapAsync(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
 			LodLevel = _lastGeneratedLodLevel;
 
 			ThreadPool.QueueUserWorkItem(d => { //Worker thread
-				CalculateHeightmap();
+				CalculateHeightmap(null, remapMin, remapMax);
 
 				MTDispatch.Instance().Enqueue(onComplete);
 			});
@@ -265,7 +276,7 @@ namespace Terra.Terrain {
 		/// <returns>height</returns>
 		private float HeightAt(float worldX, float worldZ) {
 			var sett = TerraConfig.Instance;
-			var spread = sett.HeightMapData.Spread;
+			var spread = sett.HeightMapData.SpreadAdjusted;
 
 			if (_genNeedsUpdating) {
 				sett.HeightMapData.UpdateGenerator();

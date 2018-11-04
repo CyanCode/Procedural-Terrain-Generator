@@ -16,7 +16,6 @@ namespace Terra.Terrain {
 		private TilePaint _painter;
 		[SerializeField]
 		private TileMesh _meshManager;
-	
 
 		[HideInInspector]
 		public bool IsColliderDirty = false;
@@ -95,10 +94,10 @@ namespace Terra.Terrain {
 		/// <param name="onComplete">Called after all calculations have completed. 
 		/// <see cref="onComplete"/>Can be null if the result is not needed.</param>
 		/// <param name="async">Perform mesh computation asynchronously</param>
-		public void Generate(Action onComplete, bool async = true) {
+		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
+		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
+		public void Generate(Action onComplete, bool async = true, float remapMin = 0f, float remapMax = 1f) {
 			//Cache current LOD
-			
-
 			if (async) {
 				MeshManager.CalculateHeightmapAsync(() => {
 					PostGenerateCalcHeightmap();
@@ -106,9 +105,9 @@ namespace Terra.Terrain {
 					if (onComplete != null) {
 						onComplete();
 					}
-				});
+				}, remapMin, remapMax);
 			} else {
-				MeshManager.CalculateHeightmap();
+				MeshManager.CalculateHeightmap(null, remapMin, remapMax);
 				PostGenerateCalcHeightmap();
 
 				if (onComplete != null) {
@@ -145,19 +144,13 @@ namespace Terra.Terrain {
 			return MeshManager.LastGeneratedLodLevel >= GetLodLevel();
 		}
 
-		/// <summary>
+	/// <summary>
 		/// Finishes the <see cref="Generate"/> method after the 
 		/// mesh has been created. This exists as a convenience as 
 		/// a mesh can be created asynchronously or synchronously but 
 		/// the logic afterwards is the same.
 		/// </summary>
 		internal void PostGenerateCalcHeightmap() {
-			//Remap heightmap to [offset, 1 - offset]
-			float offset = Config.Generator.LinearTransformOffset;
-			float currentMax = MeshManager.HeightmapMaxHeight;
-			float currentMin = MeshManager.HeightmapMinHeight;
-			MeshManager.RemapHeightmap(currentMin, currentMax, offset, 1 - offset);
-
 			MeshManager.SetTerrainHeightmap();
 			Painter.Paint();
 		}
@@ -170,7 +163,7 @@ namespace Terra.Terrain {
 		/// since initialization.
 		/// </summary>
 		/// <returns>LOD level</returns>
-		public LodData.LodLevel GetLodLevel() { //todo change to reflect description
+		public LodData.LodLevel GetLodLevel() {
 			GameObject tracked = Config.Generator.TrackedObject;
 
 			if (tracked == null) {

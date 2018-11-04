@@ -260,15 +260,20 @@ namespace Terra {
 
 			/// <summary>
 			/// How many textures should be written to the file 
-			/// system when <see cref="WRITE_SPLAT_TEXTURES"/> is 
-			/// enabled?
+			/// system when <see cref="WRITE_SPLAT_TEXTURES"/> or 
+			/// <see cref="WRITE_BIOME_DEBUG_TEXTURE"/> are true?
 			/// </summary>
-			public static int MAX_TEXTURE_WRITE_COUNT = 10;
+			public static int MAX_TEXTURE_WRITE_COUNT = 5;
 
 			/// <summary>
-			/// Displays the weighted biome map on created terrain
+			/// Writes the weighted biome map textures to the disk
 			/// </summary>
-			public const bool SHOW_BIOME_DEBUG_TEXTURE = false;
+			public const bool WRITE_BIOME_DEBUG_TEXTURE = false;
+
+			/// <summary>
+			/// Whether to show Debug.Log messages from Terra
+			/// </summary>
+			public const bool SHOW_DEBUG_MESSAGES = true;
 		}
 	}
 }

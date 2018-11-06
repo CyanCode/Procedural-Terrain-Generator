@@ -274,7 +274,6 @@ namespace UnityEditor.Terra {
 
 			//Calculate texture preview size
 			const float texWidth = 128;
-			float inspectorWidth = _config.EditorState.InspectorWidth;
 
 			//Previewing
 			EditorGUILayout.Space();
@@ -316,7 +315,7 @@ namespace UnityEditor.Terra {
 
 					Tile tile = new Tile();
 					tile.UpdatePosition(new GridPosition(0, 0), false);
-					tile.MeshManager.LodLevel = new LodData.LodLevel(0, 64, 64);
+					tile.MeshManager.LodLevel = new LodData.LodLevel(0, 64);
 					tile.MeshManager.CalculateHeightmap();
 					tile.MeshManager.RemapHeightmap(tile.MeshManager.HeightmapMin, tile.MeshManager.HeightmapMax, 0f, 1f);
 
@@ -482,7 +481,6 @@ namespace UnityEditor.Terra {
 
 			level.StartRadius = EditorGUILayout.IntField("Start Radius", level.StartRadius);
 			level.MapResolution = EditorGUILayout.IntPopup("Map Res", level.MapResolution, strResOpts, heightmapResOpts);
-			level.SplatmapResolution = EditorGUILayout.IntPopup("Splat Res", level.SplatmapResolution, strResOpts, mapResOpts);
 			EditorGUI.indentLevel--;
 
 			return level;

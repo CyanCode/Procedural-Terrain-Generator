@@ -70,12 +70,13 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void CalculateAlphaMap() { //todo implement for terrain
 			//Initialize Alphamap structure
-			int resolution = _tile.LodLevel.SplatmapResolution;
+			int resolution = _tile.LodLevel.MapResolution;
 			Alphamap = new float[resolution, resolution, Splats.Length];
 
 			//Sample weights and fill in textures
 			UnityEngine.Terrain t = _terrain;
 
+			float amplitude = TerraConfig.Instance.Generator.Amplitude;
 			for (int x = 0; x < resolution; x++) {
 				for (int z = 0; z < resolution; z++) {
 					float normx = (float)x / resolution;
@@ -83,7 +84,7 @@ namespace Terra.Terrain {
 
 					BiomeData[] biomesAt = BiomeMap.BiomesAt(x, z);
 					float[] weightsAt = BiomeMap.WeightsAt(x, z);
-					float height = t.terrainData.GetHeight(x, z);
+					float height = t.terrainData.GetHeight(x, z) / amplitude;
 					float angle = t.terrainData.GetSteepness(normz, normx);
 
 					float[] weights = GetTextureWeights(biomesAt, weightsAt, height, angle);
@@ -98,6 +99,7 @@ namespace Terra.Terrain {
 		/// Applies the calculated alphamap to the Terrain.
 		/// </summary>
 		public void SetAlphamap() {
+			_terrain.terrainData.alphamapResolution = _terrain.terrainData.heightmapResolution;
 			_terrain.terrainData.SetAlphamaps(0, 0, Alphamap);
 		}
 		
@@ -176,7 +178,7 @@ namespace Terra.Terrain {
 						weight += splat.AngleConstraint.Weight(angle, splat.Blend);
 						count++;
 					}
-
+					
 					weight /= count;
 					weight *= biomeWeight;
 

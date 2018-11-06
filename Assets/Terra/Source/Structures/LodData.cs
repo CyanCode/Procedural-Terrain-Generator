@@ -22,8 +22,6 @@ namespace Terra.Structure {
 		public class LodLevel {
 			[SerializeField]
 			private int _mapRes;
-			[SerializeField]
-			private int _splatmapRes;
 
 			/// <summary>
 			/// Where on the circular grid does this LOD level start to appear?
@@ -58,31 +56,15 @@ namespace Terra.Structure {
 				}
 			}
 
-			/// <summary>
-			/// Resolution of to-be created splatmap for tiles of this <see cref="LodLevel"/>
-			/// </summary>
-			public int SplatmapResolution {
-				get { return _splatmapRes; }
-				set {
-					_splatmapRes = value;
-					VerifyResolutions(); 
-				}
-			}
-
-			public LodLevel(int startRadius, int mapRes, int splatmapRes) {
+			public LodLevel(int startRadius, int mapRes) {
 				StartRadius = startRadius;
 				_mapRes = mapRes;
-				_splatmapRes = splatmapRes;
 
 				VerifyResolutions();
 			}
 
 			private void VerifyResolutions() {
 				_mapRes = Mathf.ClosestPowerOfTwo(_mapRes) + 1;
-				_splatmapRes = Mathf.ClosestPowerOfTwo(_splatmapRes);
-			
-				if (SplatmapResolution > MapResolution)
-					_splatmapRes = MapResolution;
 			}
 		}
 
@@ -106,9 +88,9 @@ namespace Terra.Structure {
 			set { _useHighLod = value; VerifyLodLevelEnabled(); }
 		}
 
-		public LodLevel Low = new LodLevel(2, 32, 32);
-		public LodLevel Medium = new LodLevel(1, 64, 64);
-		public LodLevel High = new LodLevel(0, 512, 128);
+		public LodLevel Low = new LodLevel(2, 32);
+		public LodLevel Medium = new LodLevel(1, 64);
+		public LodLevel High = new LodLevel(0, 512);
 
 		/// <summary>
 		/// Get the LodLevel associated with the passed radius. If 
@@ -117,7 +99,7 @@ namespace Terra.Structure {
 		/// <param name="radius">Radius to look for</param>
 		public LodLevel GetLevelForRadius(int radius) {
 			foreach (var lvl in new[]{ Low, Medium, High }) {
-				if (lvl.StartRadius < radius) {
+				if (lvl.StartRadius - 1< radius) {
 					return lvl;
 				}
 			}
@@ -132,9 +114,9 @@ namespace Terra.Structure {
 		/// </summary>
 		/// <param name="radius">Radius to look for</param>
 		public LodLevelType GetLevelTypeForRadius(int radius) {
-			if (UseLowLodLevel && Low.StartRadius < radius)
+			if (UseLowLodLevel && Low.StartRadius - 1 < radius)
 				return LodLevelType.Low;
-			if (UseMediumLodLevel && Medium.StartRadius < radius)
+			if (UseMediumLodLevel && Medium.StartRadius - 1 < radius)
 				return LodLevelType.Medium;
 
 			return LodLevelType.High;

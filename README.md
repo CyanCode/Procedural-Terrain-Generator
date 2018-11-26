@@ -1,6 +1,5 @@
 ## Overview
----
-This is a procedural terrain generator for the Unity 3D engine. It features a node generator construction system, biomes, material splatting, and a programmable generation pipeline API.
+This is a procedural terrain generator for the Unity 3D game engine. It features a node generator construction system, biomes, material splatting, and a programmable generation pipeline API.
 
 <a href="https://drive.google.com/open?id=12-6kPdBn5LssFr5xOF1vJnG4od9EWgj0">Documentation</a>
 

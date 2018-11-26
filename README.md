@@ -29,7 +29,7 @@ This is a procedural terrain generator for the Unity 3D game engine. It features
 ![Image of node editor](https://imgur.com/download/x1HhQCY)
 ![Image of node editor](https://imgur.com/download/AHSjdXl)
 
-####Heightmap Node Editor
+#### Heightmap Node Editor
 ![Image of node editor](https://imgur.com/download/Mas3PJ2)
 
 

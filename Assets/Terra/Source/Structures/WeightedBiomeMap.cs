@@ -12,6 +12,8 @@ namespace Terra.Structure {
 	/// </summary>
 	[Serializable]
 	public class WeightedBiomeMap: ISerializationCallbackReceiver {
+		private static object CreateMapLock;
+	
 		private TerraConfig Config { get { return TerraConfig.Instance; } }
 
 		[SerializeField]
@@ -34,6 +36,10 @@ namespace Terra.Structure {
 		/// </summary>
 		public List<BiomeData> WeightedBiomeSet { get; private set; }
 
+		static WeightedBiomeMap() {
+			CreateMapLock = new object();
+		}
+
 		/// <summary>
 		/// Readies a weighted map for creation and pulls heightmap 
 		/// information from the passed <see cref="Tile"/>
@@ -46,44 +52,46 @@ namespace Terra.Structure {
 		}
 
 		public void CreateMap() {
-			WeightedMap = new KeyValuePair<BiomeData[], float[]>[_resolution, _resolution];
-			WeightedBiomeSet = new List<BiomeData>();
+			lock(CreateMapLock) { 
+				WeightedMap = new KeyValuePair<BiomeData[], float[]>[_resolution, _resolution];
+				WeightedBiomeSet = new List<BiomeData>();
 
- 			for (int x = 0; x < _resolution; x++) {
-				for (int z = 0; z < _resolution; z++) {
-					List<BiomeData> biomes = new List<BiomeData>();
-					List<float> weights = new List<float>();
+				for (int x = 0; x < _resolution; x++) {
+					for (int z = 0; z < _resolution; z++) {
+						List<BiomeData> biomes = new List<BiomeData>();
+						List<float> weights = new List<float>();
 
-					//Collect weight of every biome at this coordinate
-					for (var i = 0; i < Config.BiomesData.Count; i++) {
-						BiomeData b = Config.BiomesData[i];
-						float weight = GetWeight(b, x, z);
+						//Collect weight of every biome at this coordinate
+						for (var i = 0; i < Config.BiomesData.Count; i++) {
+							BiomeData b = Config.BiomesData[i];
+							float weight = GetWeight(b, x, z);
 
-						if (weight > 0.0001f) {
-							biomes.Add(b);
-							weights.Add(weight);
+							if (weight > 0.0001f) {
+								biomes.Add(b);
+								weights.Add(weight);
 
-							if (i != 0) {
-								weights[i - 1] = 1 - weight;
-								weights[i] = weight;
+								if (i != 0) {
+									weights[i - 1] = 1 - weight;
+									weights[i] = weight;
+								}
 							}
 						}
-					}
 
-					//Normalize weights
-					float sum = weights.Sum();
-					for (var i = 0; i < weights.Count; i++) {
-						weights[i] /= sum;
-					}
-
-					WeightedMap[x, z] = new KeyValuePair<BiomeData[], float[]>(biomes.ToArray(), weights.ToArray());
-
-					//Add to biome set
-					biomes.ForEach(b => { 
-						if (!WeightedBiomeSet.Exists(existing => ReferenceEquals(existing, b))) {
-							WeightedBiomeSet.Add(b);
+						//Normalize weights
+						float sum = weights.Sum();
+						for (var i = 0; i < weights.Count; i++) {
+							weights[i] /= sum;
 						}
-					});
+
+						WeightedMap[x, z] = new KeyValuePair<BiomeData[], float[]>(biomes.ToArray(), weights.ToArray());
+
+						//Add to biome set
+						biomes.ForEach(b => {
+							if (!WeightedBiomeSet.Exists(existing => ReferenceEquals(existing, b))) {
+								WeightedBiomeSet.Add(b);
+							}
+						});
+					}
 				}
 			}
 		}

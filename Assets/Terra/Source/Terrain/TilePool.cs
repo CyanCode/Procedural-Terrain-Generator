@@ -19,7 +19,6 @@ namespace Terra.Terrain {
 		//Keeps track of tiles that were queued for generation.
 		[SerializeField]
 		private int _queuedTiles = 0;
-		private Action<GridPosition[]> _queueCompletedAction;
 
 		private bool _isFirstUpdate = true;
 
@@ -145,6 +144,18 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Creates a Tile at the passed grid position, activates it, and 
+		/// swaps it with the Tile that currently exists at the passed grid 
+		/// position. If a tile doesn't exist at that location, this functions 
+		/// the same as <see cref="AddTileAt"/>.
+		/// </summary>
+		/// <param name="p">position to create/swap tiles with</param>
+		/// <param name="onComplete">Called when the generated Tile has been swapped</param>
+		public void SwapTileAt(GridPosition p, Action<Tile> onComplete) {
+
+		}
+
+		/// <summary>
 		/// Calculates the min and maximum values to use when applying a heightmap 
 		/// remap. This sets <see cref="RemapMax"/> and <see cref="RemapMin"/>.
 		/// </summary>
@@ -212,10 +223,6 @@ namespace Terra.Terrain {
 				CalculateHeightmapRemap();
 			}
 
-			if (_queueCompletedAction == null) {
-				_queueCompletedAction = UpdateNeighbors;
-			}
-
 			Cache.PurgeDestroyedTiles();
 
 			if (_queuedTiles < 1) {
@@ -232,12 +239,12 @@ namespace Terra.Terrain {
 		public IEnumerator UpdateTiles() {
 			List<GridPosition> nearbyPositions = GetTilePositionsFromRadius();
 			List<GridPosition> newPositions = Cache.GetNewTilePositions(nearbyPositions);
-			List<Tile> needRegenerating = new List<Tile>();
+			List<Tile> toRegenerate = new List<Tile>();
 
-			RemoveOldPositions(ref nearbyPositions, ref needRegenerating);
+			RemoveOldPositions(ref nearbyPositions, ref toRegenerate);
 
 			//Add new positions
-			_queuedTiles = newPositions.Count + needRegenerating.Count;
+			_queuedTiles = newPositions.Count + toRegenerate.Count;
 			foreach (GridPosition pos in newPositions) {
 				Tile cached = Cache.GetCachedTileAtPosition(pos);
 
@@ -248,13 +255,15 @@ namespace Terra.Terrain {
 						_queuedTiles--;
 
 						continue;
-					} 
-					
+					}
+
 					//Cached tile has too low lod, mark for regeneration
-					Debug.Log("Cached tile " + cached + " has heightmap res=" + cached.MeshManager.HeightmapResolution + 
-						". requested res=" + cached.LodLevel.MapResolution + ". Regenerating.");
-					//Cache.RemoveCachedTile(cached);
-					needRegenerating.Add(cached);
+					if (TerraConfig.TerraDebug.SHOW_DEBUG_MESSAGES) {
+						Debug.Log("Cached tile " + cached + " has heightmap res=" + cached.MeshManager.HeightmapResolution +
+						". requested res=" + cached.GetLodLevel().Resolution + ". Regenerating.");
+					}
+					
+					toRegenerate.Add(cached);
 					Cache.AddActiveTile(cached);
 					continue;
 				} 
@@ -267,35 +276,43 @@ namespace Terra.Terrain {
 					_queuedTiles--;
 
 					if (_queuedTiles == 0)
-						_queueCompletedAction(newPositions.ToArray());
+						UpdateNeighbors(newPositions.ToArray(), false);
 				});
 			}
 
 			//Regenerate tiles with outdated positions
-			for (int i = 0; i < needRegenerating.Count; i++) {
-				Tile t = needRegenerating[i];
-				Debug.Log("Active tile " + t + " has heightmap res=" + t.MeshManager.HeightmapResolution +
-				          ". requested res=" + t.LodLevel.MapResolution + ". Regenerating.");
+			for (int i = 0; i < toRegenerate.Count; i++) {
+				Tile t = toRegenerate[i];
+
+				// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+				if (TerraConfig.TerraDebug.SHOW_DEBUG_MESSAGES) {
+					Debug.Log("Active tile " + t + " has heightmap res=" + t.MeshManager.HeightmapResolution +
+							  ". requested res=" + t.GetLodLevel().Resolution + ". Regenerating.");
+				}
 
 				//Generate one tile per frame
 				if (Application.isPlaying)
 					yield return null;
 
 				AddTileAt(t.GridPosition, tile => {
+					tile.enabled = false;
 					_queuedTiles--;
 
-					//Remove low res tile
-					Cache.RemoveActiveTile(t);
-					Cache.RemoveCachedTile(t);
+					UpdateNeighbors(new[] { tile.GridPosition }, true, tile1 => {
+						//Remove low res tile
+						Cache.RemoveActiveTile(t);
+						Cache.RemoveCachedTile(t);
+						tile.enabled = true;
+					});
 
 					if (_queuedTiles == 0)
-						_queueCompletedAction(newPositions.ToArray());
+						UpdateNeighbors(newPositions.ToArray(), false);
 				});
 			}
 
 			//If tiles were updated synchronously, notify queue completion
 			if (newPositions.Count > 0 && _queuedTiles == 0) {
-				_queueCompletedAction(newPositions.ToArray());
+				UpdateNeighbors(newPositions.ToArray(), false);
 			}
 		}
 
@@ -303,9 +320,21 @@ namespace Terra.Terrain {
 		/// Updates the neighboring Tiles of the passed list of 
 		/// Tiles.
 		/// </summary>
-		public void UpdateNeighbors(GridPosition[] positions) {
+		/// <param name="positions">A list of tile positions to updatee</param>
+		/// <param name="hideTerrain">Optionally hide the terrain when updating neighbors</param>
+		/// <param name="onComplete">Called when a Tile's neighbors have been updated since 
+		/// <see cref="TileMesh.SetTerrainHeightmap"/> can use a coroutine</param>
+		public void UpdateNeighbors(GridPosition[] positions, bool hideTerrain, Action<Tile> onComplete = null) {
 			if (positions == null)
 				return;
+
+				//todo remove
+				foreach (var gridPosition in positions)
+				{
+					if (gridPosition == new GridPosition(0,0)) {
+						Debug.Log("");
+					}
+				}
 
 			List<Tile> tiles = new List<Tile>(positions.Length);
 			foreach (var pos in positions)
@@ -323,7 +352,14 @@ namespace Terra.Terrain {
 					neighborTiles[i] = found;
 				}
 
-				tile.MeshManager.SetNeighboringTiles(new Neighborhood(neighborTiles));
+				//Copy reference to avoid loss of reference in closure
+				var tile1 = tile;
+
+				tile.MeshManager.SetNeighboringTiles(new Neighborhood(neighborTiles), true, hideTerrain, () => {
+					if (onComplete != null) {
+						onComplete(tile1);
+					}
+				});
 			}
 		}
 

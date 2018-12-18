@@ -4,6 +4,7 @@ using Terra.Structure;
 using UnityEngine;
 using Terra.Terrain;
 using Terra.Util;
+using UnityEditor;
 using Random = UnityEngine.Random;
 
 namespace Terra {
@@ -50,6 +51,12 @@ namespace Terra {
 
 				_instance = FindObjectOfType<TerraConfig>();
 				return _instance;
+			}
+		}
+
+		public static bool IsInEditMode {
+			get {
+				return !Application.isPlaying && Application.isEditor;
 			}
 		}
 
@@ -135,37 +142,6 @@ namespace Terra {
 			Generator.Pool.Update();
 		}
 
-		/// <summary>
-		/// Gets the biome at the passed x and z world coordinates.
-		/// </summary>
-		/// <param name="x">world space x coordinate</param>
-		/// <param name="z">world space z coordinate</param>
-		/// <returns>Found <see cref="BiomeData"/> instance, null if nothing was found.</returns> //todo remove
-//		public BiomeData GetBiomeAt(float x, float z) { //TODO moev to biomedata?
-//			BiomeData chosen = null;
-//			var settings = Instance;
-//
-//			foreach (BiomeData b in BiomesData) {
-//				var hm = settings.HeightMapData;
-//				var tm = settings.TemperatureMapData;
-//				var mm = settings.MoistureMapData;
-//
-//				if (b.IsHeightConstrained && !hm.HasGenerator()) continue;
-//				if (b.IsTemperatureConstrained && !tm.HasGenerator()) continue;
-//				if (b.IsMoistureConstrained && !mm.HasGenerator()) continue;
-//
-//				bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(hm.GetValue(x, z)) || !b.IsHeightConstrained;
-//				bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(tm.GetValue(x, z)) || !b.IsTemperatureConstrained;
-//				bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(mm.GetValue(x, z)) || !b.IsMoistureConstrained;
-//
-//				if (passHeight && passTemp && passMoisture) {
-//					chosen = b;
-//				}
-//			}
-//
-//			return chosen;
-//		}
-
 		void OnDrawGizmosSelected() {
 			if (!IsInitialized)
 				return;
@@ -180,27 +156,49 @@ namespace Terra {
 
 			//Mesh radius squares
 			foreach (GridPosition pos in positions) {
-				Vector3 pos3D = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
- 
-				//Draw LOD squares
-				Gizmos.color = GetLodPreviewColor(pos);
-				//bool isPreviewTile = Previewer.GetPreviewingPositions().Contains(pos);
-				if (Gizmos.color != Color.white)
-					Gizmos.DrawCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
+				if (!EditorState.ShowLodGrid && !EditorState.ShowLodCubes) {
+					break;
+				}
 
-				//Draw overlayed grid
-				Gizmos.color = Color.white;
-				pos3D.y += 0.1f;
-				Gizmos.DrawWireCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
+				Vector3 pos3D = new Vector3(pos.X * Generator.Length, 0, pos.Z * Generator.Length);
+				Color prevColor = GetLodPreviewColor(pos);
+
+				//Draw LOD squares and cubes
+				if (EditorState.ShowLodGrid) {	
+					Gizmos.color = prevColor;
+					if (Gizmos.color != Color.white)
+						Gizmos.DrawCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
+
+					//Draw overlayed grid
+					Gizmos.color = Color.white;
+					pos3D.y += 0.1f;
+					Gizmos.DrawWireCube(pos3D, new Vector3(Generator.Length, 0, Generator.Length));
+				}
+
+				//Draw cube wireframes
+				if (EditorState.ShowLodCubes) {
+					float height = Generator.Amplitude;
+					Gizmos.color = prevColor;
+					pos3D.y += height / 2;
+					Gizmos.DrawWireCube(pos3D, new Vector3(Generator.Length - 1f, height, Generator.Length - 1f));
+				}
+			}
+
+			//LOD change radius
+			if (Generator.TrackedObject != null && EditorState.ShowLodChangeRadius) {
+				Gizmos.color = Color.blue;
+				Handles.color = Gizmos.color;
+
+				Vector3 pos = Generator.TrackedObject.transform.position;
+				DrawCylinder(pos, Generator.LodChangeRadius);
 			}
 
 			//Generation radius
 			if (Generator.TrackedObject != null) {
 				var pos = Generator.TrackedObject.transform.position;
-				Vector3 extPos = new Vector3(pos.x, 0, pos.z);
 
 				Gizmos.color = Color.blue;
-				Gizmos.DrawWireCube(extPos, new Vector3(Generator.ColliderGenerationExtent, 0, Generator.ColliderGenerationExtent));
+				//DrawCylinder(pos);
 			}
 		}
 
@@ -223,23 +221,35 @@ namespace Terra {
 				return Color.white;
 
 			bool isCenter00 = !Application.isPlaying && Application.isEditor || Generator.TrackedObject == null;
-			Vector3 worldXYZ = isCenter00 ? Vector3.zero : Generator.TrackedObject.transform.position;
+			Vector3 worldXYZ = Generator.TrackedObject == null ? Vector3.zero : Generator.TrackedObject.transform.position;
 			Vector3 worldXZ = new Vector2(worldXYZ.x, worldXYZ.z);
 
 			var lod = Generator.Lod;
 			var tileLength = Generator.Length;
-			var lvlType = lod.GetLevelTypeForRadius((int)position.Distance(new GridPosition(worldXZ, tileLength)));
-			
-			switch (lvlType) {
-				case LodData.LodLevelType.High:
-					return Color.green;
-				case LodData.LodLevelType.Medium:
-					return Color.yellow;
-				case LodData.LodLevelType.Low:
-					return Color.red;
-			}
+			//var lvlType = lod.GetLevelForRadius((int)position.Distance(new GridPosition(worldXZ, tileLength)));
+			var lvlType = lod.GetLevelForPosition(position, worldXYZ);
 
-			return Color.white;
+			return lvlType.PreviewColor;
+		}
+
+		private void DrawCylinder(Vector3 position, float radius) {
+			Vector3 startCenter = position;
+			Vector3 endCenter = position;
+
+			startCenter.y = 0;
+			endCenter.y = Generator.Amplitude;
+
+			//Draw both circles
+			Handles.DrawWireArc(startCenter, Vector3.up, Vector3.forward, 360f, radius);
+			Handles.DrawWireArc(endCenter, Vector3.up, Vector3.forward, 360f, radius);
+
+			//Draw squares in center
+			Vector3 sqrCenter = position;
+			sqrCenter.y = Generator.Amplitude / 2f;
+			float vertLen = Generator.Amplitude;
+
+			Gizmos.DrawWireCube(sqrCenter, new Vector3(radius * 2, vertLen, 0f));
+			Gizmos.DrawWireCube(sqrCenter, new Vector3(0f, vertLen, radius * 2));
 		}
 		
 		/// <summary>

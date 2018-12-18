@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Terra.Structure;
+using Terra.Util;
 using UnityEngine;
 
 namespace Terra.Terrain {
@@ -45,24 +47,31 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// TODO Summary
+		/// Paints this Tile according to <see cref="TerraConfig"/>
 		/// </summary>
-		public void Paint() {
-			BiomeMap.CreateMap();
+		/// <param name="async">Create the BiomeMap for this Tile off of the main thread</param>
+		/// <param name="onComplete">Optional callback called after painting the terrain</param>
+		public void Paint(bool async, Action onComplete = null) {
+			if (async) {
+				ThreadPool.QueueUserWorkItem(d => { //Worker thread
+					BiomeMap.CreateMap();
 
-			if (BiomeMap == null) {
-				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
-				return;
+					MTDispatch.Instance().Enqueue(() => {
+						PostCreateBiomeMap();
+
+						if (onComplete != null) {
+							onComplete();
+						}
+					});
+				});
+			} else {
+				BiomeMap.CreateMap();
+				PostCreateBiomeMap();
+
+				if (onComplete != null) {
+					onComplete();
+				}
 			}
-
-			if (TerraConfig.TerraDebug.WRITE_BIOME_DEBUG_TEXTURE) {
-				WriteDebugBiomeMap();
-			}
-
-			SetSplatPrototypes();
-			CalculateAlphaMap();
-			SetAlphamap();
-			//ApplyControlMapsToShaders();
 		}
 
 		/// <summary>
@@ -70,7 +79,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		public void CalculateAlphaMap() { //todo implement for terrain
 			//Initialize Alphamap structure
-			int resolution = _tile.LodLevel.MapResolution;
+			int resolution = _tile.GetLodLevel().SplatResolution;
 			Alphamap = new float[resolution, resolution, Splats.Length];
 
 			//Sample weights and fill in textures
@@ -128,6 +137,25 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Continuation of <see cref="Paint"/>'s logic after the biome map
+		/// has been calculated asynchronously or synchronously.
+		/// </summary>
+		private void PostCreateBiomeMap() {
+			if (BiomeMap == null) {
+				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
+				return;
+			}
+
+			if (TerraConfig.TerraDebug.WRITE_BIOME_DEBUG_TEXTURE) {
+				WriteDebugBiomeMap();
+			}
+
+			SetSplatPrototypes();
+			CalculateAlphaMap();
+			SetAlphamap();
+		}
+
+		/// <summary>
 		/// Calculates the weights of each splat texture within this 
 		/// <see cref="BiomeMap"/>. 
 		/// </summary>
@@ -136,7 +164,7 @@ namespace Terra.Terrain {
 		/// <param name="height">Height at some point on the Tile</param>
 		/// <param name="angle">Angle at some point on the Tile</param>
 		/// <returns>Weight of each texture in the order they appear in <see cref="BiomeMap"/></returns>
-		float[] GetTextureWeights(BiomeData[] biomes, float[] biomeWeights, float height, float angle) {
+		private float[] GetTextureWeights(BiomeData[] biomes, float[] biomeWeights, float height, float angle) {
 			int totalSplatCount = Splats.Length;
 			float[] weights = new float[totalSplatCount];
 			

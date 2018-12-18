@@ -1,5 +1,4 @@
-﻿using System;
-using Terra.CoherentNoise;
+﻿using Terra.CoherentNoise;
 
 namespace Terra.Graph.Noise.Modifier {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Arithmetic")]
@@ -31,22 +30,6 @@ namespace Terra.Graph.Noise.Modifier {
 
 		public override string GetTitle() {
 			return "Arithmetic";
-		}
-
-		public override float GetMaxValue() {
-			if (operation == Operation.Add || operation == Operation.Subtract) {
-				return Generator1.GetMaxValue() + Generator2.GetMaxValue();
-			}
-			
-			return Math.Max(Generator1.GetMaxValue(), Generator2.GetMaxValue());	
-		}
-
-		public override float GetMinValue() {
-			if (operation == Operation.Add || operation == Operation.Subtract) {
-				return Generator1.GetMinValue() + Generator2.GetMinValue();
-			}
-
-			return Math.Min(Generator1.GetMinValue(), Generator2.GetMinValue());
 		}
 	}
 }

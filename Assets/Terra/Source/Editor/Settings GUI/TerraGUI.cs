@@ -102,8 +102,8 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Generation Settings", EditorStyles.boldLabel);
 			_config.Generator.GenerateOnStart = EditorGUILayout.Toggle("Generate On Start", _config.Generator.GenerateOnStart);
-			
 			_config.Generator.GenerationRadius = EditorGUILayout.IntField("Gen Radius", _config.Generator.GenerationRadius);
+			_config.Generator.LodChangeRadius = EditorGUILayout.FloatField("LOD Change Radius", _config.Generator.LodChangeRadius);
 			if (!_config.Generator.UseRandomSeed)
 				TerraConfig.GenerationSeed = EditorGUILayout.IntField("Seed", TerraConfig.GenerationSeed);
 			_config.Generator.UseRandomSeed = EditorGUILayout.Toggle("Use Random Seed", _config.Generator.UseRandomSeed);
@@ -111,24 +111,41 @@ namespace UnityEditor.Terra {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Mesh Settings", EditorStyles.boldLabel);
 
+			//Used for LOD display and remap heightmap display
+			int[] mapResOpts = { 32, 64, 128, 256, 512 };
+			string[] strResOpts = { "32", "64", "128", "256", "512" };
+			int[] heightmapResOpts = { 33, 65, 129, 257, 513 };
+
 			//Show LOD info
 			_config.EditorState.IsLodFoldout = EditorGUILayout.Foldout(_config.EditorState.IsLodFoldout, "Level of Detail");
 			if (_config.EditorState.IsLodFoldout) {
 				EditorGUI.indentLevel++;
-
-				EditorGUILayout.BeginHorizontal(new GUIStyle { margin = new RectOffset(12, 0, 0, 0)});
+				
 				var lod = _config.Generator.Lod;
-				lod.UseHighLodLevel = GUILayout.Toggle(lod.UseHighLodLevel, "High");
-				lod.UseMediumLodLevel = GUILayout.Toggle(lod.UseMediumLodLevel, "Med");
-				lod.UseLowLodLevel = GUILayout.Toggle(lod.UseLowLodLevel, "Low");
-				EditorGUILayout.EndHorizontal();
 
-				if (lod.UseHighLodLevel)
-					lod.High = General_LodFoldout("High", lod.High);
-				if (lod.UseMediumLodLevel)
-					lod.Medium = General_LodFoldout("Medium", lod.Medium);
-				if (lod.UseLowLodLevel)
-					lod.Low = General_LodFoldout("Low", lod.Low);
+				//Enforce >= 1 Lod Count
+				EditorGUI.BeginChangeCheck();
+				_config.Generator.LodCount = EditorGUILayout.IntField("LOD Count", _config.Generator.LodCount);
+				if (_config.Generator.LodCount < 1) {
+					_config.Generator.LodCount = 1;
+				}
+				if (EditorGUI.EndChangeCheck()) {
+					lod.AdjustLevelsToCount(_config.Generator.LodCount);
+				}
+
+				EditorGUI.BeginChangeCheck(); 
+				for (int i = 0; i < lod.LevelsOfDetail.Length; i++) {
+					var level = lod.LevelsOfDetail[i]; 
+					EditorGUILayout.LabelField("Level " + (i + 1));
+				
+					EditorGUI.indentLevel++;
+					lod.LevelsOfDetail[i].StartRadius = EditorGUILayout.IntField("Start Radius", level.StartRadius);
+					lod.LevelsOfDetail[i].Resolution = EditorGUILayout.IntPopup("Resolution", level.Resolution, strResOpts, heightmapResOpts);
+					EditorGUI.indentLevel--;
+				}
+				if (EditorGUI.EndChangeCheck()) {
+					lod.SortByStartRadius();
+				}
 
 				EditorGUI.indentLevel--;
 			}
@@ -153,10 +170,16 @@ namespace UnityEditor.Terra {
 				EditorUtility.DisplayDialog("Help - Calculate Heightmap Transformation", msg, "Close");
 			}
 			EditorGUILayout.EndHorizontal();
-
-			int[] mapResOpts = { 32, 64, 128, 256, 512 };
-			string[] strResOpts = { "32", "64", "128", "256", "512" };
+			
 			_config.Generator.RemapResolution = EditorGUILayout.IntPopup("Remap Resolution", _config.Generator.RemapResolution, strResOpts, mapResOpts);
+
+			//Preview settings
+			EditorGUILayout.Space();
+			EditorGUILayout.LabelField("Show Previews", EditorStyles.boldLabel);
+
+			_config.EditorState.ShowLodGrid = EditorGUILayout.Toggle("LOD Grid", _config.EditorState.ShowLodGrid);
+			_config.EditorState.ShowLodCubes = EditorGUILayout.Toggle("LOD Cubes", _config.EditorState.ShowLodCubes);
+			_config.EditorState.ShowLodChangeRadius = EditorGUILayout.Toggle("LOD Change Radius", _config.EditorState.ShowLodChangeRadius);
 		}
 
 		/// <summary>
@@ -315,7 +338,7 @@ namespace UnityEditor.Terra {
 
 					Tile tile = new Tile();
 					tile.UpdatePosition(new GridPosition(0, 0), false);
-					tile.MeshManager.LodLevel = new LodData.LodLevel(0, 64);
+					tile.MeshManager.Lod = new LodData.Lod(0, 129);
 					tile.MeshManager.CalculateHeightmap();
 					tile.MeshManager.RemapHeightmap(tile.MeshManager.HeightmapMin, tile.MeshManager.HeightmapMax, 0f, 1f);
 
@@ -462,28 +485,6 @@ namespace UnityEditor.Terra {
 					EditorGUILayout.IntField("Tex Count", TerraConfig.TerraDebug.MAX_TEXTURE_WRITE_COUNT);
 			}
 #pragma warning restore 162
-		}
-
-		/// <summary>
-		/// Displays a GUI for the passed <see cref="LodData.LodLevel"/> 
-		/// and modifies its values.
-		/// </summary>
-		/// <param name="name">String name to display on the foldout</param>
-		/// <param name="level">LodLevel to modify</param>
-		private LodData.LodLevel General_LodFoldout(string name, LodData.LodLevel level) {
-			EditorGUILayout.Foldout(true, name);
-			EditorGUI.indentLevel++;
-
-			string[] strResOpts = { "32", "64", "128", "256", "512" };
-
-			int[] mapResOpts = { 32, 64, 128, 256, 512 };
-			int[] heightmapResOpts = { 33, 65, 129, 257, 513 };
-
-			level.StartRadius = EditorGUILayout.IntField("Start Radius", level.StartRadius);
-			level.MapResolution = EditorGUILayout.IntPopup("Map Res", level.MapResolution, strResOpts, heightmapResOpts);
-			EditorGUI.indentLevel--;
-
-			return level;
 		}
 
 		/// <summary>

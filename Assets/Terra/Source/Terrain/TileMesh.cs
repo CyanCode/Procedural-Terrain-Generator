@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Threading;
 using Terra.Structure;
 using Terra.Util;
@@ -29,7 +29,10 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Resolution of the heightmap
 		/// </summary>
-		public int HeightmapResolution { get; private set; }
+		public int HeightmapResolution {
+			get { return _heightmapResolution; }
+			private set { _heightmapResolution = value; }
+		}
 
 		/// <summary>
 		/// The last heightmap computed after calling <see cref="CalculateHeightmapAsync"/> or 
@@ -38,11 +41,11 @@ namespace Terra.Terrain {
 		/// </summary>
 		public float[,] Heightmap { get; private set; }
 
-		public LodData.LodLevel LodLevel {
-			get { return _lodLevel; }
+		public LodData.Lod Lod {
+			get { return _lod; }
 			set {
-				_lodLevel = value;
-				HeightmapResolution = value.MapResolution;
+				_lod = value;
+				HeightmapResolution = value.Resolution;
 			}
 		}
 
@@ -58,32 +61,38 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// The LOD level of this mesh during the last creation of the heightmap. If 
+		/// The LOD of this mesh during the last creation of the heightmap. If 
 		/// the heightmap hasn't been created yet this value is null.
 		/// </summary>
-		public LodData.LodLevel LastGeneratedLodLevel {
+		public LodData.Lod LastGeneratedLodLevel {
 			get {
 				return _lastGeneratedLodLevel;
 			}
 		}
 
 		/// <summary>
-		/// Internal <see cref="LodLevel"/>
+		/// Internal <see cref="Lod"/>
 		/// </summary>
 		[SerializeField]
-		private LodData.LodLevel _lodLevel;
+		private LodData.Lod _lod;
+
+		/// <summary>
+		/// Internal <see cref="HeightmapResolution"/>
+		/// </summary>
+		[SerializeField]
+		private int _heightmapResolution;
 
 		/// <summary>
 		/// Tile using this TileMesh
 		/// </summary>
 		[SerializeField]
 		private Tile _tile;
-
+		
 		/// <summary>
 		/// LOD of last generated heightmap
 		/// </summary>
 		[SerializeField]
-		private LodData.LodLevel _lastGeneratedLodLevel;
+		private LodData.Lod _lastGeneratedLodLevel;
 
 		/// <summary>
 		/// If this TileMesh needs to update its generator
@@ -100,10 +109,10 @@ namespace Terra.Terrain {
 		/// Constructs a new TileMesh instance
 		/// </summary>
 		/// <param name="tile">Tile to attach mesh to</param>
-		/// <param name="lodLevel">LOD level to reference when creating heightmap and Terrain</param>
-		public TileMesh(Tile tile, LodData.LodLevel lodLevel) {
+		/// <param name="lod">LOD level to reference when creating heightmap and Terrain</param>
+		public TileMesh(Tile tile, LodData.Lod lod) {
 			_tile = tile;
-			LodLevel = lodLevel;
+			Lod = lod;
 		}
 
 		/// <summary>
@@ -145,7 +154,7 @@ namespace Terra.Terrain {
 		public void CalculateHeightmap(GridPosition? gridPos = null, float remapMin = 0f, float remapMax = 1f) {
 			if (!TerraConfig.Instance.Generator.UseMultithreading) {
 				_lastGeneratedLodLevel = _tile.GetLodLevel();
-				LodLevel = _lastGeneratedLodLevel;
+				Lod = _lastGeneratedLodLevel;
 			}
 		
 			if (Heightmap != null && (int)Math.Sqrt(Heightmap.Length) >= HeightmapResolution)
@@ -196,7 +205,7 @@ namespace Terra.Terrain {
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		public void CalculateHeightmapAsync(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
-			LodLevel = _lastGeneratedLodLevel;
+			Lod = _lastGeneratedLodLevel;
 
 			ThreadPool.QueueUserWorkItem(d => { //Worker thread
 				CalculateHeightmap(null, remapMin, remapMax);
@@ -211,9 +220,8 @@ namespace Terra.Terrain {
 		public void RemapHeightmap(float min, float max, float newMin, float newMax) {
 			for (int x = 0; x < HeightmapResolution; x++) {
 				for (int z = 0; z < HeightmapResolution; z++) {
-					//NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 					float val = Heightmap[x, z];
-					Heightmap[x, z] = ((val - min) * (newMax - newMin) / (max - min)) + newMin;
+					Heightmap[x, z] = (val - min) * (newMax - newMin) / (max - min) + newMin;
 				}
 			}
 		}
@@ -221,7 +229,11 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Sets the neighboring <see cref="UnityEngine.Terrain"/> types.
 		/// </summary>
-		public void SetNeighboringTiles(Neighborhood neighbors) {
+		/// <param name="neighbors">Neighboring tiles</param>
+		/// <param name="weldNeighbors">Should neighboring Tiles of different resolutions be welded together</param>
+		/// <param name="hideTerrain">Should the terrain be hid when setting neighboring tiles?</param>
+		/// <param name="onComplete">Called when the neighboring tiles have been set and welded together</param>
+		public void SetNeighboringTiles(Neighborhood neighbors, bool weldNeighbors, bool hideTerrain, Action onComplete = null) {
 			Neighborhood n = neighbors;
 
 			UnityEngine.Terrain t = ActiveTerrain;
@@ -229,12 +241,24 @@ namespace Terra.Terrain {
 				return;
 			}
 
-			UnityEngine.Terrain left = n.Left == null ? null : n.Left.MeshManager.ActiveTerrain;
-			UnityEngine.Terrain top = n.Up == null ? null : n.Up.MeshManager.ActiveTerrain;
-			UnityEngine.Terrain right = n.Right == null ? null : n.Right.MeshManager.ActiveTerrain;
-			UnityEngine.Terrain bottom = n.Down == null ? null : n.Down.MeshManager.ActiveTerrain;
+			if (weldNeighbors) {
+				if (onComplete != null) {
+					WeldNeighbors(neighbors, hideTerrain, () => {
+						UnityEngine.Terrain[] tiles = GetValidNeighbors(n);
 
-			t.SetNeighbors(left, top, right, bottom);
+						t.SetNeighbors(tiles[0], tiles[1], tiles[2], tiles[3]);
+						onComplete();
+					});
+				} else {
+					WeldNeighbors(neighbors, hideTerrain);
+				}
+			}
+
+			if (onComplete == null) {
+				UnityEngine.Terrain[] tiles = GetValidNeighbors(n);
+
+				t.SetNeighbors(tiles[0], tiles[1], tiles[2], tiles[3]);
+			}
 		}
 
 		/// <summary>
@@ -244,9 +268,12 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <remarks>Since this method creates and adds a <see cref="UnityEngine.Terrain"/> 
 		/// component, it is not thread safe.</remarks>
+		/// <param name="useCoroutine">Should the heightmap be set over a series of frames?</param>
+		/// <param name="hideTerrain">Should the terrain be disabled when setting the heightmap?</param>
+		/// <param name="onComplete">Called when the coroutine has finished</param>
 		/// <param name="heightmap">Optionally use the passed heightmap instead of 
 		/// <see cref="TileMesh"/>'s <see cref="Heightmap"/></param>
-		public void SetTerrainHeightmap(float[,] heightmap = null) {
+		public void SetTerrainHeightmap(bool useCoroutine, bool hideTerrain, Action onComplete = null, float[,] heightmap = null) {
 			float[,] hm = heightmap ?? Heightmap;
 
 			if (hm == null) {
@@ -256,14 +283,275 @@ namespace Terra.Terrain {
 				AddTerrainComponent();
 			}
 			
-			// ReSharper disable once PossibleNullReferenceException
+			//ReSharper disable once PossibleNullReferenceException
 			TerrainData td = ActiveTerrain.terrainData;
 			TerraConfig conf = TerraConfig.Instance;
 			int length = conf.Generator.Length;
 
+			//Disable terrain rendering while generating
+			ActiveTerrain.enabled = !hideTerrain;
+
 			td.heightmapResolution = HeightmapResolution;
-			td.SetHeights(0, 0, hm);
-			td.size = new Vector3(length, conf.Generator.Amplitude, length);
+
+			if (useCoroutine) {
+				td.size = new Vector3(length, conf.Generator.Amplitude, length);
+				_tile.StartCoroutine(SetTerrainHeightmap_Coroutine(hm, () => {
+					td.size = new Vector3(length, conf.Generator.Amplitude, length);
+					ActiveTerrain.enabled = true;
+
+					if (onComplete != null) {	
+						onComplete();
+					}
+				}));
+			} else {
+				td.SetHeights(0, 0, hm);
+				td.size = new Vector3(length, conf.Generator.Amplitude, length);
+				ActiveTerrain.Flush();
+				ActiveTerrain.enabled = true;
+
+				if (onComplete != null) {	
+					onComplete();
+				}
+			}
+		}
+
+		private IEnumerator SetTerrainHeightmap_Coroutine(float[,] heightmap, Action onComplete) {
+			TerrainData td = ActiveTerrain.terrainData;
+			const int maxResPerFrame = 64;
+			int hmRes = heightmap.GetLength(0) - 1;
+
+			if (hmRes <= maxResPerFrame) {
+				td.SetHeights(0, 0, heightmap);
+				
+				if (onComplete != null) {
+					onComplete();
+				}
+
+				yield break;
+			}
+
+			int resFactor = hmRes / maxResPerFrame;
+			int subResolution = hmRes / resFactor;
+
+			//Loop through first chunk of the resolution
+			for (int ix = 0; ix < resFactor; ix++) {
+				for (int iy = 0; iy < resFactor; iy++) {
+					int xPlus1 = ix == resFactor - 1 ? 1 : 0;
+					int yPlus1 = iy == resFactor - 1 ? 1 : 0;
+
+					float[,] subheights = new float[subResolution + yPlus1, subResolution + xPlus1];
+					
+					//Copy heights into new subdivision array
+					for (int x = 0; x < subResolution + xPlus1; x++) {
+						for (int y = 0; y < subResolution + yPlus1; y++) {
+							int thisHmX = ix * subResolution + x;
+							int thisHmY = iy * subResolution + y;
+							subheights[y, x] = heightmap[thisHmY, thisHmX];
+						}
+					}
+
+					//Set heights for this subsection
+					//td.SetHeightsDelayLOD(subResolution * ix, subResolution * iy, subheights);
+					td.SetHeights(subResolution * ix, subResolution * iy, subheights);
+
+					//Wait for next frame
+					yield return null;
+				}
+			}
+
+			if (onComplete != null) {
+				onComplete();
+			}
+		}
+
+		/// <summary>
+		/// todo write description
+		/// </summary>
+		/// <param name="neighbors"></param>
+		/// <param name="hideTerrain">Hide the terrain when welding neighbors?</param>
+		/// <param name="onComplete">Called when the heightmap has finished applying</param>
+		private void WeldNeighbors(Neighborhood neighbors, bool hideTerrain, Action onComplete = null) {
+			if (HeightmapResolution == 0) {
+				return;
+			}
+
+			foreach (Tile t in neighbors) { //todo remove
+				if (t.GridPosition == new GridPosition(0,0) && System.Diagnostics.Debugger.IsAttached)
+					System.Diagnostics.Debugger.Break();
+			}
+
+			if (!(neighbors.Right == null || neighbors.Right.MeshManager.HeightmapResolution == 0)) {
+				// x[1 -> max] z[max]
+				WeldEdges(neighbors.Right, true, false, hideTerrain);
+			}
+			if (!(neighbors.Up == null || neighbors.Up.MeshManager.HeightmapResolution == 0)) {
+				// x[max] z[1 -> max]
+				WeldEdges(neighbors.Up, false, false, hideTerrain);
+			}
+			if (!(neighbors.Left == null || neighbors.Left.MeshManager.HeightmapResolution == 0)) {
+				// x[1 -> max] z[1]
+				WeldEdges(neighbors.Left, true, true, hideTerrain);
+			}
+			if (!(neighbors.Down == null || neighbors.Down.MeshManager.HeightmapResolution == 0)) {
+				// x[1] z[1 -> max]
+				WeldEdges(neighbors.Down, false, true, hideTerrain);
+			}
+
+			if (_tile.GridPosition == new GridPosition(0, 0) && System.Diagnostics.Debugger.IsAttached)
+				System.Diagnostics.Debugger.Break();
+
+			bool useCoroutine = TerraConfig.Instance.Generator.UseCoroutineForHeightmap &&
+				!TerraConfig.IsInEditMode;
+			SetTerrainHeightmap(useCoroutine, false, onComplete);
+		}
+
+		/// <summary>
+		/// todo write description
+		/// </summary>
+		/// <param name="neighbor"></param>
+		/// <param name="incrX"></param>
+		/// <param name="incrStart0"></param>
+		private void WeldEdges(Tile neighbor, bool incrX, bool incrStart0, bool hideTerrain) {
+			//todo optimize to only setheights on modified stuff
+			if (HeightmapResolution > neighbor.MeshManager.HeightmapResolution) {
+				int incrStart = incrStart0 ? 0 : HeightmapResolution - 1;
+				int neighborIncrStart = incrStart0 ? neighbor.MeshManager.HeightmapResolution - 1 : 0;
+				int resDifference = (HeightmapResolution - 1) / (neighbor.MeshManager.HeightmapResolution - 1);
+				float[,] neighborHm = neighbor.MeshManager.Heightmap;
+
+				for (int cursor = 1; cursor < HeightmapResolution; cursor++) {
+					//Find neighbors start and end vertices
+					int neighborStartIdx = (cursor - 1) / resDifference;
+					int neighborEndIdx = neighborStartIdx + 1;
+
+					float neighborStartY, neighborEndY;
+					if (incrX) {
+						neighborStartY = neighborHm[neighborStartIdx, neighborIncrStart];
+						neighborEndY = neighborHm[neighborEndIdx, neighborIncrStart];
+					} else {
+						neighborStartY = neighborHm[neighborIncrStart, neighborStartIdx];
+						neighborEndY = neighborHm[neighborIncrStart, neighborEndIdx];
+					}
+
+					//Weld vertices in-between neighboring vertices
+					int j;
+					for (j = 0; j < resDifference - 1; j++) {
+						if (cursor >= HeightmapResolution - 1) {
+							break;
+						}
+
+						float distance = (j + 1) / (float)resDifference;
+						float newHeight = 0;
+
+						if (neighborStartY > neighborEndY) {
+							float heightDiff = neighborStartY - neighborEndY;
+							newHeight = heightDiff * (1 - distance);
+							newHeight += neighborEndY;
+						}
+						if (neighborStartY < neighborEndY) {
+							float heightDiff = neighborEndY - neighborStartY;
+							newHeight = heightDiff * (distance);
+							newHeight += neighborStartY;
+						}
+
+						if (incrX) {
+							Heightmap[cursor + j, incrStart] = newHeight;
+						} else {
+							Heightmap[incrStart, cursor + j] = newHeight;
+						}
+					}
+
+					cursor += j;
+				}
+
+				//SetTerrainHeightmapEdges(null, incrX, incrStart0);
+			}
+
+			if (HeightmapResolution == neighbor.MeshManager.HeightmapResolution) {
+				int incrStart = incrStart0 ? 0 : HeightmapResolution - 1;
+				int neighborIncrStart = incrStart0 ? neighbor.MeshManager.HeightmapResolution - 1 : 0;
+				float[,] neighborHm = neighbor.MeshManager.Heightmap;
+
+				for (int cursor = 0; cursor < HeightmapResolution; cursor++) {
+					//Find neighbors start and end vertices
+					if (incrX) {
+						float neighborY = neighborHm[cursor, neighborIncrStart];
+						float thisY = Heightmap[cursor, incrStart];
+						float avg = (neighborY + thisY) / 2;
+
+						neighborHm[cursor, neighborIncrStart] = avg;
+						Heightmap[cursor, incrStart] = avg;
+					} else {
+						float neighborY = neighborHm[neighborIncrStart, cursor];
+						float thisY = Heightmap[incrStart, cursor];
+						float avg = (neighborY + thisY) / 2;
+
+						neighborHm[neighborIncrStart, cursor] = avg;
+						Heightmap[incrStart, cursor] = avg;
+					}
+				}
+
+				//Update neighbor's heightmap
+				GameObject tracked = TerraConfig.Instance.Generator.TrackedObject;
+				bool trackedOnNeighbor = false;
+				if (tracked != null) {
+					GridPosition gp = new GridPosition(tracked, TerraConfig.Instance.Generator.Length);
+					if (gp == neighbor.GridPosition) {
+						trackedOnNeighbor = true;
+					}
+				}
+
+				bool useCoroutine = TerraConfig.Instance.Generator.UseCoroutineForHeightmap &&
+					!TerraConfig.IsInEditMode;
+				neighbor.MeshManager.SetTerrainHeightmap(useCoroutine && !trackedOnNeighbor, hideTerrain && !trackedOnNeighbor);
+			}
+		}
+
+		/// <summary>
+		/// //todo write description
+		/// </summary>
+		/// <param name="neighbor"></param>
+		/// <param name="incrX"></param>
+		/// <param name="incrStart0"></param>
+		private void SetTerrainHeightmapEdges(Tile neighbor, bool incrX, bool incrStart0) {
+			int incrStart = incrStart0 ? 0 : HeightmapResolution - 1;
+			int neighborIncrStart = 0;
+			int resDifference = 0;
+			float[,] neighborHm = null;
+
+			if (neighbor != null) {
+				neighborIncrStart = incrStart0 ? neighbor.MeshManager.HeightmapResolution - 1 : 0;
+				resDifference = (HeightmapResolution - 1) / (neighbor.MeshManager.HeightmapResolution - 1);
+				neighborHm = neighbor.MeshManager.Heightmap;
+			}
+
+			for (int cursor = 1; cursor < HeightmapResolution; cursor++) {
+				if (incrX) {
+					float[,] height = { { Heightmap[cursor, incrStart] } };
+					ActiveTerrain.terrainData.SetHeightsDelayLOD(incrStart, cursor, height);
+				} else {
+					float[,] height = { { Heightmap[incrStart, cursor] } };
+					ActiveTerrain.terrainData.SetHeightsDelayLOD(incrStart, cursor, height);
+				}
+
+				if (neighbor != null && cursor % resDifference == 0) {
+					int neighborStartIdx = (cursor - 1) / resDifference;
+
+					if (incrX) {
+						float[,] height = { { neighborHm[neighborStartIdx, neighborIncrStart] } };
+						ActiveTerrain.terrainData.SetHeightsDelayLOD(neighborIncrStart, neighborStartIdx, height);
+					} else {
+						float[,] height = { { neighborHm[neighborIncrStart, neighborStartIdx] } };
+						ActiveTerrain.terrainData.SetHeightsDelayLOD(neighborStartIdx, neighborIncrStart, height);
+					}
+				}
+			}
+
+			ActiveTerrain.ApplyDelayedHeightmapModification();
+
+			if (neighbor != null) {
+				neighbor.MeshManager.ActiveTerrain.ApplyDelayedHeightmapModification();
+			}
 		}
 
 		/// <summary>
@@ -284,6 +572,26 @@ namespace Terra.Terrain {
 			}
 			
 			return sett.HeightMapData.GetValue(worldX, worldZ, spread);
+		}
+
+		/// <summary>
+		/// Creates an array of valid neighboring Terrains that fit the following 
+		/// requirements:
+		/// - not null
+		/// - heightmap resolutions match between neighboring tile and this one
+		/// </summary>
+		/// <param name="n">Neighborhood of tiles</param>
+		private UnityEngine.Terrain[] GetValidNeighbors(Neighborhood n) {
+			UnityEngine.Terrain left = n.Left == null || n.Left.MeshManager.HeightmapResolution != HeightmapResolution ?
+				null : n.Left.MeshManager.ActiveTerrain;
+			UnityEngine.Terrain top = n.Up == null || n.Up.MeshManager.HeightmapResolution != HeightmapResolution ?
+				null : n.Up.MeshManager.ActiveTerrain;
+			UnityEngine.Terrain right = n.Right == null || n.Right.MeshManager.HeightmapResolution != HeightmapResolution ?
+				null : n.Right.MeshManager.ActiveTerrain;
+			UnityEngine.Terrain bottom = n.Down == null || n.Down.MeshManager.HeightmapResolution != HeightmapResolution ?
+				null : n.Down.MeshManager.ActiveTerrain;
+
+			return new[] { left, top, right, bottom };
 		}
 
 		/// <summary>
@@ -316,91 +624,6 @@ namespace Terra.Terrain {
 
 			return new Vector2(worldX, worldZ);
 		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="z"></param>
-		/// <param name="resolution"></param>
-		/// <returns></returns>
-		//public static Vector2 PositionToWorld(int x, int z, int resolution) {
-		//	float length = TerraConfig.Instance.Generator.Length;
-		//	float xLocal = ((float)x / (resolution - 1) - .5f) * length;
-		//	float zLocal = ((float)z / (resolution - 1) - .5f) * length;
-		//	float xWorld = 
-		//}
-
-		/// <summary>
-		/// Averages the normals of the passed TileMesh with this TileMesh's ActiveMesh. 
-		/// </summary>
-		/// <param name="tm">Mesh to average normals with</param>
-		/// <param name="orientation">Orientation of the passed mesh in relation to this one.</param>
-		//private void AverageNormalsWith(TileMesh tm, Orientation orientation) {
-		//	int res = HeightmapResolution;
-		//	int tmRes = tm.HeightmapResolution;
-
-		//	if (tmRes == 0 || res == 0) {
-		//		//One or more of the referenced tiles hasn't been 
-		//		//generated yet. Skip.
-		//		return;
-		//	}
-
-		//	bool incrX = false;
-		//	int x1Start, x2Start, z1Start, z2Start;
-		//	x1Start = x2Start = z1Start = z2Start = 0;
-
-		//	switch (orientation) {
-		//		case Orientation.Up:
-		//			z1Start = res - 1;
-		//			incrX = true;
-		//			break;
-		//		case Orientation.Right:
-		//			x1Start = res - 1;
-		//			break;
-		//		case Orientation.Down:
-		//			z2Start = tmRes - 1;
-		//			incrX = true;
-		//			break;
-		//		case Orientation.Left:
-		//			x2Start = tmRes - 1;
-		//			break;
-		//	}
-
-		//	Vector3[] norms1 = ActiveMesh.normals;
-		//	Vector3[] norms2 = tm.ActiveMesh.normals;
-			
-		//	//Since meshes can be different resolutions, x an z 
-		//	//vector components across both meshes are 
-		//	//incremented independently
-		//	int incrAmt1 = 1;
-		//	int incrAmt2 = 1;
-		//	if (res > tm.HeightmapResolution) {
-		//		incrAmt1 = res / tm.HeightmapResolution;
-		//	} else {
-		//		incrAmt2 = tm.HeightmapResolution / res;
-		//	}
-		
-		//	for (int i = 0; i < Math.Min(res, tm.HeightmapResolution); i++) {
-		//		Vector3 average = (norms1[x1Start + z1Start * HeightmapResolution] + 
-		//			norms2[x2Start + z2Start * tm.HeightmapResolution]) / 2;
-		//		average = average.normalized;
-				
-		//		norms1[x1Start + z1Start * HeightmapResolution] = average;
-		//		norms2[x2Start + z2Start * tm.HeightmapResolution] = average;
-
-		//		if (incrX) {
-		//			x1Start += incrAmt1;
-		//			x2Start += incrAmt2;
-		//		} else {
-		//			z1Start += incrAmt1;
-		//			z2Start += incrAmt2;
-		//		}
-		//	}
-
-		//	ActiveMesh.normals = norms1;
-		//	tm.ActiveMesh.normals = norms2;
-		//}
 
 		#region Serialization
 

@@ -33,14 +33,6 @@ namespace Terra.Graph.Noise.Modifier {
 			return "Scale";
 		}
 
-		public override float GetMaxValue() {
-			return Max(Factor) * Generator.GetMaxValue();
-		}
-
-		public override float GetMinValue() {
-			return Max(Factor) * Generator.GetMinValue();
-		}
-
 		float Max(Vector3 v) {
 			return Mathf.Max(v.x, v.y, v.z);
 		}

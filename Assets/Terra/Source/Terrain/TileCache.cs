@@ -112,12 +112,12 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="tile">Tile to remove and destroy</param>
 		public void RemoveActiveTile(Tile tile) {
-			PurgeDestroyedTiles();
-
 			if (ActiveTiles.Contains(tile)) {
 				Destroy(tile.gameObject);
-				PurgeDestroyedTiles();
+				ActiveTiles.Remove(tile);
 			}
+
+			PurgeDestroyedTiles();
 		}
 
 		/// <summary>

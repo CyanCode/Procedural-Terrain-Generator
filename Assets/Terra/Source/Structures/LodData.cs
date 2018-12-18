@@ -1,136 +1,170 @@
 ﻿using System;
-using Terra.Terrain;
 using UnityEngine;
+using System.Linq;
 
 namespace Terra.Structure {
 	[Serializable]
 	public class LodData {
-		public enum LodLevelType {
-			High, Medium, Low
-		}
-
 		/// <summary>
-		/// Represents a level of detail for each <see cref="TileMesh"/> to 
-		/// adhere to. This specifies the resolution of various maps across 
-		/// <see cref="Tile"/>s.
-		/// 
-		/// The resolution of <see cref="SplatmapResolution"/> and 
-		/// <see cref="MeshResolution"/> cannot be greater than 
-		/// <see cref="MapResolution"/>.
+		/// Represents a level of detail
 		/// </summary>
 		[Serializable]
-		public class LodLevel {
-			[SerializeField]
-			private int _mapRes;
-
-			/// <summary>
-			/// Where on the circular grid does this LOD level start to appear?
-			/// </summary>
+		public class Lod {
 			public int StartRadius;
+			public int Resolution;
 
-			public static bool operator <(LodLevel lhs, LodLevel rhs) {
-				return lhs._mapRes < rhs._mapRes;
-			}
-
-			public static bool operator >(LodLevel lhs, LodLevel rhs) {
-				return lhs._mapRes > rhs._mapRes;
-			}
-
-			public static bool operator <=(LodLevel lhs, LodLevel rhs) {
-				return lhs._mapRes <= rhs._mapRes;
-			}
-
-			public static bool operator >=(LodLevel lhs, LodLevel rhs) {
-				return lhs._mapRes >= rhs._mapRes;
-			}
-
-			/// <summary>
-			/// Resolution of the height, moisture, and temperature maps for 
-			/// each <see cref="Tile"/>.
-			/// </summary>
-			public int MapResolution {
-				get { return _mapRes; }
-				set {
-					_mapRes = value;
-					VerifyResolutions();
+			public int SplatResolution {
+				get {
+					return Resolution;
 				}
 			}
 
-			public LodLevel(int startRadius, int mapRes) {
+			public Color PreviewColor {
+				get {
+					switch (StartRadius) {
+						case 0:
+							return Color.green;
+						case 1:
+							return Color.yellow;
+						case 2:
+							return Color.red;
+					}
+
+					if (_previewColor == default(Color)) {
+						_previewColor = UnityEngine.Random.ColorHSV();
+					}
+
+					return _previewColor;
+				}
+			}
+
+			/// <summary>
+			/// Internal <see cref="PreviewColor"/>
+			/// </summary>
+			[SerializeField]
+			private Color _previewColor;
+
+			public Lod(int startRadius, int resolution) {
 				StartRadius = startRadius;
-				_mapRes = mapRes;
-
-				VerifyResolutions();
-			}
-
-			private void VerifyResolutions() {
-				_mapRes = Mathf.ClosestPowerOfTwo(_mapRes) + 1;
+				Resolution = resolution;
 			}
 		}
 
-		[SerializeField]
-		private bool _useLowLod;
-		[SerializeField]
-		private bool _useMediumLod;
-		[SerializeField]
-		private bool _useHighLod = true;
-
-		public bool UseLowLodLevel {
-			get { return _useLowLod; }
-			set { _useLowLod = value; VerifyLodLevelEnabled(); }
+		public LodData() {
+			if (LevelsOfDetail == null) {
+				LevelsOfDetail = new Lod[1];
+				LevelsOfDetail[0] = new Lod(0, 129);
+			}
 		}
-		public bool UseMediumLodLevel {
-			get { return _useMediumLod; }
-			set { _useMediumLod = value; VerifyLodLevelEnabled(); }
-		}
-		public bool UseHighLodLevel {
-			get { return _useHighLod; }
-			set { _useHighLod = value; VerifyLodLevelEnabled(); }
-		}
-
-		public LodLevel Low = new LodLevel(2, 32);
-		public LodLevel Medium = new LodLevel(1, 64);
-		public LodLevel High = new LodLevel(0, 512);
 
 		/// <summary>
-		/// Get the LodLevel associated with the passed radius. If 
-		/// no level matches, <see cref="High"/> is returned instead.
+		/// Represents the various levels of detail assigned to this LodData instance.
+		/// </summary>
+		public Lod[] LevelsOfDetail;
+
+		/// <summary>
+		/// Get the Lod associated with the passed radius. If 
+		/// no level matches, a LOD with a resolution 128 is returned.
 		/// </summary>
 		/// <param name="radius">Radius to look for</param>
-		public LodLevel GetLevelForRadius(int radius) {
-			foreach (var lvl in new[]{ Low, Medium, High }) {
-				if (lvl.StartRadius - 1< radius) {
+		public Lod GetLevelForRadius(int radius) {
+			foreach (var lvl in LevelsOfDetail.Reverse()) {
+				if (lvl.StartRadius < radius) {
 					return lvl;
 				}
 			}
 
-			return High;
+			return new Lod(0, 129);
 		}
 
 		/// <summary>
-		/// Works exactly the same as <see cref="GetLevelForRadius"/> 
-		/// but instead of returning the <see cref="LodLevel"/> itself, 
-		/// the <see cref="LodLevelType"/> is returned.
+		/// Get the LOD associated with the passed position in world space. This 
+		/// checks for grid intersections with <see cref="GenerationData.LodChangeRadius"/>.
 		/// </summary>
-		/// <param name="radius">Radius to look for</param>
-		public LodLevelType GetLevelTypeForRadius(int radius) {
-			if (UseLowLodLevel && Low.StartRadius - 1 < radius)
-				return LodLevelType.Low;
-			if (UseMediumLodLevel && Medium.StartRadius - 1 < radius)
-				return LodLevelType.Medium;
+		/// <param name="gridPosition">GridPosition to get a LOD for</param>
+		/// <param name="position">Position of whatever object is being tracked</param>
+		/// <returns></returns>
+		public Lod GetLevelForPosition(GridPosition gridPosition, Vector3 position) {
+			Vector2 circCenter = new Vector2(position.x, position.z);
+			float radius = TerraConfig.Instance.Generator.LodChangeRadius;
 
-			return LodLevelType.High;
+			if (SquareIntersectsCircle(circCenter, radius, gridPosition)) {
+				return LevelsOfDetail[0];
+			}
+
+			//Default to getting level from radius if no intersection
+			int length = TerraConfig.Instance.Generator.Length;
+			Vector2 worldXz = new Vector2(position.x, position.z);
+			return GetLevelForRadius((int)gridPosition.Distance(new GridPosition(worldXz, length)));
 		}
-		
+
 		/// <summary>
-		/// Ensures that at least one LOD level is enabled at a time. 
-		/// If all levels are false, <see cref="UseHighLodLevel"/> is 
-		/// made true.
+		/// Adjusts the internal <see cref="LevelsOfDetail"/> array to match 
+		/// the passed count. If the passed count is greater than <see cref="LevelsOfDetail"/>'s 
+		/// count, <see cref="LevelsOfDetail"/> is expanded. If it is 
+		/// less than <see cref="LevelsOfDetail"/>'s count, <see cref="LevelsOfDetail"/> is 
+		/// truncated to match the passed count.
 		/// </summary>
-		private void VerifyLodLevelEnabled() {
-			if (!UseLowLodLevel && !UseMediumLodLevel && !UseHighLodLevel) {
-				UseHighLodLevel = true;
+		/// <param name="count">Count to match <see cref="LevelsOfDetail"/> with.</param>
+		public void AdjustLevelsToCount(int count) {
+			if (LevelsOfDetail == null) {
+				LevelsOfDetail = new Lod[count];
+			}
+
+			if (count > LevelsOfDetail.Length) {
+				Lod[] tmp = new Lod[count];
+				LevelsOfDetail.CopyTo(tmp, 0);
+
+				//New indices should have an increasing StartRadius
+				int lastStartRadius = LevelsOfDetail[count - (count - LevelsOfDetail.Length) - 1].StartRadius;
+				for (int i = LevelsOfDetail.Length; i < count; i++) {
+					lastStartRadius++;
+					tmp[i] = new Lod(lastStartRadius, 129);
+				}
+
+				LevelsOfDetail = tmp;
+			}
+			if (count < LevelsOfDetail.Length) {
+				Lod[] tmp = new Lod[count];
+				for (int i = 0; i < count; i++) {
+					tmp[i] = LevelsOfDetail[i];
+				}
+
+				LevelsOfDetail = tmp;
 			}
 		}
+
+		/// <summary>
+		/// Sorts <see cref="LevelsOfDetail"/> by <see cref="Lod.StartRadius"/>.
+		/// </summary>
+		public void SortByStartRadius() {
+			LevelsOfDetail = LevelsOfDetail.OrderBy(lod => lod.StartRadius).ToArray();
+		}
+
+		private bool SquareIntersectsCircle(Vector2 circCenter, float cirRadius, GridPosition square) {
+			int length = TerraConfig.Instance.Generator.Length;
+			Rect rect = new Rect {
+				x = length * square.X,
+				y = length * square.Z ,
+				height = length,
+				width = length
+			};
+
+			Vector2 circleDistance = Vector2.zero;
+
+			circleDistance.x = Mathf.Abs(circCenter.x - rect.x);
+			circleDistance.y = Mathf.Abs(circCenter.y - rect.y);
+
+			if (circleDistance.x > (rect.width / 2 + cirRadius)) { return false; }
+			if (circleDistance.y > (rect.height / 2 + cirRadius)) { return false; }
+
+			if (circleDistance.x <= (rect.width / 2)) { return true; }
+			if (circleDistance.y <= (rect.height / 2)) { return true; }
+
+			float cornerDistanceSq = Mathf.Pow(circleDistance.x - rect.width / 2, 2) +
+			                    Mathf.Pow(circleDistance.y - rect.height / 2, 2);
+
+			return (cornerDistanceSq <= Mathf.Pow(cirRadius, 2));
+		} 
 	}
 }

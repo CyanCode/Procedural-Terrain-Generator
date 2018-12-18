@@ -18,6 +18,11 @@ namespace Terra.Structure {
 		public Texture2D BiomePreview = null;
 		public bool ShowWhittakerInfo = false;
 
+		//Previewing
+		public bool ShowLodGrid = true;
+		public bool ShowLodCubes = true;
+		public bool ShowLodChangeRadius = true;
+
 		public float InspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
 	}
 

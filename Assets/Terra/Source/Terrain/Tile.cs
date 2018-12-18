@@ -61,16 +61,6 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// The LOD level for this Tile. This value can change if the tracked object 
-		/// has moved or <see cref="GridPosition"/> was modified.
-		/// </summary>
-		public LodData.LodLevel LodLevel {
-			get {
-				return GetLodLevel();
-			}
-		}
-
-		/// <summary>
 		/// Creates a gameobject with an attached Tile component and 
 		/// places it in the scene. This is a convienence method and is not required 
 		/// for correct tile creation.
@@ -127,7 +117,7 @@ namespace Terra.Terrain {
 			GridPosition = position;
 
 			//Update TileMesh LOD level
-			MeshManager.LodLevel = GetLodLevel();
+			MeshManager.Lod = GetLodLevel();
 
 			if (transformInScene) {
 				int len = Config.Generator.Length;
@@ -141,42 +131,40 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <returns>true if heightmap matches lod, false otherwise</returns>
 		public bool IsHeightmapLodValid() {
-			return MeshManager.LastGeneratedLodLevel >= GetLodLevel();
+			return MeshManager.LastGeneratedLodLevel.Resolution >= GetLodLevel().Resolution;
 		}
 
-	/// <summary>
+		/// <summary>
 		/// Finishes the <see cref="Generate"/> method after the 
 		/// mesh has been created. This exists as a convenience as 
 		/// a mesh can be created asynchronously or synchronously but 
 		/// the logic afterwards is the same.
 		/// </summary>
 		internal void PostGenerateCalcHeightmap() {
-			MeshManager.SetTerrainHeightmap();
-			Painter.Paint();
+			MeshManager.SetTerrainHeightmap(Config.Generator.UseCoroutineForHeightmap && !TerraConfig.IsInEditMode, true, () => {
+				bool multithreaded = Config.Generator.UseMultithreading;
+				MeshManager.ActiveTerrain.enabled = !multithreaded;
+				
+				Painter.Paint(multithreaded, () => {
+					MeshManager.ActiveTerrain.enabled = true;
+				});
+			});
 		}
 
 		/// <summary>
 		/// Gets the LOD level for this tile based off of its <see cref="GridPosition"/>'s 
 		/// distance from the tracked object. If no tracked object is specified, the level 
-		/// is determined by the <see cref="GridPosition"/>'s distance from [0, 0]. The returned 
-		/// LOD level may not be equal to this Tile's <see cref="LodLevel"/> as it could have changed 
-		/// since initialization.
+		/// is determined by the <see cref="GridPosition"/>'s distance from [0, 0].
 		/// </summary>
 		/// <returns>LOD level</returns>
-		public LodData.LodLevel GetLodLevel() {
+		public LodData.Lod GetLodLevel() {
 			GameObject tracked = Config.Generator.TrackedObject;
 
 			if (tracked == null) {
-				int radius = (int)GridPosition.Distance(new GridPosition(0, 0));
-				return Config.Generator.Lod.GetLevelForRadius(radius);
-			} else {
-				float length = Config.Generator.Length;
-				Vector2 worldXZ = new Vector2(tracked.transform.position.x, tracked.transform.position.z);
-				GridPosition gp = new GridPosition(worldXZ, length);
-
-				int radius = (int)gp.Distance(GridPosition);
-				return Config.Generator.Lod.GetLevelForRadius(radius);
+				return Config.Generator.Lod.GetLevelForPosition(GridPosition, Vector3.zero);
 			}
+			
+			return Config.Generator.Lod.GetLevelForPosition(GridPosition, tracked.transform.position);
 		}
 
 		public override string ToString() {

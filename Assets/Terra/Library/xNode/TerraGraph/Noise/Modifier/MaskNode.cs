@@ -1,5 +1,4 @@
-﻿using System;
-using Terra.CoherentNoise;
+﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
 using UnityEngine;
 
@@ -28,14 +27,6 @@ namespace Terra.Graph.Noise.Modifier {
 
 		public override string GetTitle() {
 			return "Mask";
-		}
-
-		public override float GetMaxValue() {
-			return Math.Max(Generator1.GetMaxValue(), Generator2.GetMaxValue());
-		}
-
-		public override float GetMinValue() {
-			return Math.Min(Generator1.GetMinValue(), Generator2.GetMinValue());
 		}
 	}
 }

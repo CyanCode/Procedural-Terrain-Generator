@@ -6,13 +6,5 @@ namespace Terra.Nodes.Generation {
 		[Input] public float Period;
 
 		protected const string MENU_PARENT_NAME = "Terrain/Noise/Voronoi/";
-
-		public override float GetMaxValue() {
-			return 1;
-		}
-
-		public override float GetMinValue() {
-			return -1;
-		}
 	}
 }

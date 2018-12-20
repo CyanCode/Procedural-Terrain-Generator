@@ -1,9 +1,9 @@
-﻿using Terra.Graph.Noise.Modifier;
+﻿using Terra.Graph;
 using UnityEngine;
 using UnityEditor;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(AbsTwoModNode))]
 	public class TwoModeNodeEditor: NodeEditor {
 		public override Color GetTint() {

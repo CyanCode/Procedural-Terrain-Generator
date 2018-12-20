@@ -1,6 +1,7 @@
 ﻿using Terra.CoherentNoise;
+using XNode;
 
-namespace Terra.Graph.Noise.Modifier {
+namespace Terra.Graph {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Arithmetic")]
 	public class ArithmeticNode: AbsTwoModNode {
 		public Operation operation = Operation.Add;

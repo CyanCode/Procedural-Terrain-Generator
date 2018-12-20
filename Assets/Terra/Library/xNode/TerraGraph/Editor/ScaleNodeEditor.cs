@@ -1,9 +1,9 @@
 ﻿using Terra.Graph.Noise;
-using Terra.Graph.Noise.Modifier;
+using Terra.Graph;
 using UnityEditor;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(ScaleNode))]
 	class ScaleNodeEditor: NodeEditor {
 		private ScaleNode Sn {

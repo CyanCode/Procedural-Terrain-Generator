@@ -2,8 +2,8 @@
 using UnityEngine;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
-	[CustomNodeEditorAttribute(typeof(SplatObjectNode))]
+namespace Terra.Graph {
+	[CustomNodeEditor(typeof(SplatObjectNode))]
 	public class SplatObjectNodeEditor: NodeEditor {
 		private const int TEXTURE_PADDING = 8;
 		private const int NODE_PADDING = 6;

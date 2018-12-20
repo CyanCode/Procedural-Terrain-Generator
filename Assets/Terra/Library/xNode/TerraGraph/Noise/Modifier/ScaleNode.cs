@@ -1,10 +1,11 @@
 ﻿using System;
 using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Displacement;
+using Terra.Graph.Noise;
 using UnityEngine;
 using XNode;
 
-namespace Terra.Graph.Noise.Modifier {
+namespace Terra.Graph {
 	[CreateNodeMenu(AbsTwoModNode.MENU_PARENT_NAME + "Scale")]
 	public class ScaleNode: AbsGeneratorNode {
 		//[Output] public AbsGeneratorNode Out;

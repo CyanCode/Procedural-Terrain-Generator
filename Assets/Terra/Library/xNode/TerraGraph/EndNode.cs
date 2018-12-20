@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Terra.CoherentNoise;
 using Terra.Graph.Noise;
-using Terra.Graph.Noise.Modifier;
+using Terra.Graph;
 
 namespace Terra.Graph {
 	[CreateNodeMenu("End Generator")]

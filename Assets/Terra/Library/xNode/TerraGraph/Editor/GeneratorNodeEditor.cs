@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(AbsGeneratorNode))]
 	class GeneratorNodeEditor: NodeEditor {
 		public override void OnBodyGUI() {

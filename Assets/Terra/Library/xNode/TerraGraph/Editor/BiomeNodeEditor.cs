@@ -1,11 +1,11 @@
-﻿using Terra.Graph.Noise.Modifier;
+﻿using Terra.Graph;
 using UnityEngine;
 using UnityEditor;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(BiomeNode))]
-	public class BiomeNodeEditor: PreviewableNode {
+	public class BiomeNodeEditor: NodeEditor {
 		private const string TITLE = "Biome";
 
 		private BiomeNode Bn {
@@ -13,13 +13,16 @@ namespace Terra.Editor.Graph {
 				return (BiomeNode)target;
 			}
 		}
-
+		
 		public override void OnBodyGUI() {
 			//Output
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Output"));
 
 			//Biome Name
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Name"), new GUIContent("Biome Name"));
+
+			//Preview Color
+			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("PreviewColor"), new GUIContent("Preview Color"));
 
 			//Blend
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Blend"));
@@ -36,8 +39,8 @@ namespace Terra.Editor.Graph {
 			EditorGUILayout.Space(); 
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("SplatObjects"), new GUIContent("Splat Objects"));
 
-			//Texture Preview
-			TextureField();
+			//Show Preview
+			PreviewField.Show(Bn);
 
 			serializedObject.ApplyModifiedProperties();
 		}
@@ -48,10 +51,6 @@ namespace Terra.Editor.Graph {
 
 		public override Color GetTint() {
 			return Constants.TintBiome;
-		}
-
-		public override Texture2D DidRequestTextureUpdate() {
-			return Bn.Preview(PreviewTextureSize);
 		}
 
 		/// <summary>

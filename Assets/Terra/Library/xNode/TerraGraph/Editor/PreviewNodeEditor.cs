@@ -3,9 +3,9 @@ using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(NoisePreviewNode))]
-	class PreviewNodeEditor: NodeEditor {
+	public class PreviewNodeEditor: NodeEditor {
 		private NoisePreviewNode PreviewNode {
 			get {
 				return (NoisePreviewNode)target;

@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(AbsFractalNoiseNode))]
 	class FractalNodeEditor: NodeEditor {
 		private readonly int OCTAVE_CNT_MAX = 15;

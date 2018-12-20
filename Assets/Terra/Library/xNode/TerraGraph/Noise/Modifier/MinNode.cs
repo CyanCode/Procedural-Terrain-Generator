@@ -1,7 +1,7 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
 
-namespace Terra.Graph.Noise.Modifier {
+namespace Terra.Graph {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Min")]
 	public class MinNode: AbsTwoModNode {
 		public override Generator GetGenerator() {

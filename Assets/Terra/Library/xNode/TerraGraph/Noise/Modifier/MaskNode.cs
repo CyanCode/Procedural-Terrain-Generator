@@ -1,8 +1,10 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
+using Terra.Graph.Noise;
 using UnityEngine;
+using XNode;
 
-namespace Terra.Graph.Noise.Modifier {
+namespace Terra.Graph {
 	[CreateNodeMenu(AbsTwoModNode.MENU_PARENT_NAME + "Mask")]
 	public class MaskNode: AbsGeneratorNode {
 		[Input(ShowBackingValue.Never, ConnectionType.Override)] public AbsGeneratorNode Generator1;

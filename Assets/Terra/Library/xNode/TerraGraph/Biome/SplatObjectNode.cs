@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using XNode;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CreateNodeMenu("Biomes/Splat Object")]
 	public class SplatObjectNode: Node {
 		[Output]

@@ -2,8 +2,8 @@
 using UnityEngine;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
-	[CustomNodeEditorAttribute(typeof(ValueNode))]
+namespace Terra.Graph {
+	[CustomNodeEditor(typeof(ValueNode))]
 	public class ValueNodeEditor: NodeEditor {
 		public override Color GetTint() {
 			return Constants.TintValue;

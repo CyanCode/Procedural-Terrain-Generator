@@ -1,6 +1,7 @@
 ﻿using Terra.CoherentNoise;
+using Terra.Graph.Noise;
 
-namespace Terra.Graph.Noise.Modifier {
+namespace Terra.Graph {
 	public abstract class AbsTwoModNode: AbsGeneratorNode {
 		[Input(ShowBackingValue.Never, ConnectionType.Override)] public AbsGeneratorNode Generator1;
 		[Input(ShowBackingValue.Never, ConnectionType.Override)] public AbsGeneratorNode Generator2;

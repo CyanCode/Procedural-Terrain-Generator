@@ -1,7 +1,8 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
+using XNode;
 
-namespace Terra.Graph.Noise.Modifier {
+namespace Terra.Graph {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Max")]
 	public class MaxNode: AbsTwoModNode {
 		public override Generator GetGenerator() {

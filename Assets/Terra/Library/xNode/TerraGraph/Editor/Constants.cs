@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	internal static class Constants {
 		public static Color TintBiome = C(214, 255, 255);    //green
 		public static Color TintNoise = C(207, 208, 254);    //purple

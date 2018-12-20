@@ -2,7 +2,7 @@
 using UnityEngine;
 using XNodeEditor;
 
-namespace Terra.Editor.Graph {
+namespace Terra.Graph {
 	[CustomNodeEditor(typeof(EndNode))]
 	class EndNodeEditor: NodeEditor {
 		private readonly int NODE_WIDTH = 150;

@@ -8,7 +8,7 @@ namespace Terra.Editor.Graph {
 	class ScaleNodeEditor: NodeEditor {
 		private ScaleNode Sn {
 			get {
-				return ((ScaleNode)target);
+				return (ScaleNode)target;
 			}
 		}
 

@@ -1,5 +1,6 @@
 ﻿using Terra.Graph.Noise;
 using UnityEditor;
+using UnityEngine;
 using XNodeEditor;
 
 namespace Terra.Editor.Graph {
@@ -15,6 +16,10 @@ namespace Terra.Editor.Graph {
 
 		public override string GetTitle() {
 			return ((AbsGeneratorNode)target).GetTitle();
+		}
+
+		public override Color GetTint() {
+			return Constants.TintNoise;
 		}
 	}
 }

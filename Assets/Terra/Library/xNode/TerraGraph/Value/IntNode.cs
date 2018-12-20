@@ -1,8 +1,8 @@
 ﻿using XNode;
 
 namespace Terra.Graph.Value {
-	[CreateNodeMenu(AbsValueNode.MENU_PARENT_NAME + "Int")]
-	class IntNode: XNode.Node {
+	[CreateNodeMenu(MENU_PARENT_NAME + "Int")]
+	class IntNode: ValueNode {
 		[Output] public int Output;
 		[Input] public int Value;
 

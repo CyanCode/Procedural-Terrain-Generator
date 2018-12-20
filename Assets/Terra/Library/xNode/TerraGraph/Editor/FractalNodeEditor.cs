@@ -24,5 +24,13 @@ namespace Terra.Editor.Graph {
 				fnn.OnValueChange();
 			}
 		}
+
+		public override string GetTitle() {
+			return ((AbsFractalNoiseNode)target).GetTitle();
+		}
+
+		public override Color GetTint() {
+			return Constants.TintNoise;
+		}
 	}
 }

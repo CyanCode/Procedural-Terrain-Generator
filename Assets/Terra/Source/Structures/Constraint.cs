@@ -46,11 +46,19 @@ namespace Terra.Structure {
 		/// <param name="falloff"></param>
 		/// <returns>A weight in the range of 0 and 1</returns>
 		public float Weight(float value, float blend, float falloff = 1f) {
-			float range = Max - Min;
-			float weight = (range - Mathf.Abs(value - Max)) * blend;
-			weight = Mathf.Pow(weight, falloff);
 
-			return Mathf.Clamp01(weight);
+			if (value > Max - blend) {
+				float nmin = Max - blend;
+				float a = (value - nmin) / (Max - nmin);
+				return Mathf.Lerp(value, 0, a);
+			}
+			if (value < Min + blend) {
+				float nmax = Min + blend;
+				float a = (value - Min) / (nmax - Min);
+				return Mathf.Lerp(value, 0, 1 - a);
+			}
+
+			return value;
 		}
 	}
 }

@@ -17,9 +17,15 @@ namespace XNodeEditor {
         /// <summary> Draws the node GUI.</summary>
         /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
         public void OnNodeGUI() {
-            OnHeaderGUI();
+			var labelStyle = new GUIStyle(EditorStyles.label);
+	        EditorStyles.label.normal.textColor = Color.white;
+
+			OnHeaderGUI();
             OnBodyGUI();
-        }
+
+
+			EditorStyles.label.normal = labelStyle.normal;
+		}
 
         public virtual void OnHeaderGUI() {
             GUI.color = Color.white;

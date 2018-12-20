@@ -1,4 +1,5 @@
 ﻿using Terra.Graph;
+using UnityEngine;
 using XNodeEditor;
 
 namespace Terra.Editor.Graph {
@@ -8,6 +9,14 @@ namespace Terra.Editor.Graph {
 	
 		public override int GetWidth() {
 			return NODE_WIDTH;
+		}
+
+		public override string GetTitle() {
+			return "End";
+		}
+
+		public override Color GetTint() {
+			return Constants.TintEnd;
 		}
 	}
 }

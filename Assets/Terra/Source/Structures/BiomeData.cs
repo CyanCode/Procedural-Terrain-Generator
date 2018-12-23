@@ -7,11 +7,6 @@ namespace Terra.Structure {
 	/// </summary>
 	[Serializable]
 	public class BiomeData {
-		[Serializable]
-		public enum ConstraintMixMethod {
-			AND, OR
-		}
-
 		/// <summary>
 		/// Detail information for this biome
 		/// </summary>

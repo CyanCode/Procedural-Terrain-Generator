@@ -86,7 +86,7 @@ public class ReorderableBiomeList: GenericListAdaptor<BiomeData> {
 		EditorGUILayout.LabelField("Constraints", EditorGUIExtension.TerraStyle.TextBold);
 		GUILayout.Space(-2);
 
-		biome.MixMethod = (BiomeData.ConstraintMixMethod)EditorGUIExtension.EnumToolbar(biome.MixMethod);
+		biome.MixMethod = (ConstraintMixMethod)EditorGUIExtension.EnumToolbar(biome.MixMethod);
 
 		//height
 		biome.IsHeightConstrained = EditorGUILayout.Toggle("Height", biome.IsHeightConstrained);

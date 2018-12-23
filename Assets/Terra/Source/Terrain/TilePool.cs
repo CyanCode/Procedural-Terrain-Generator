@@ -166,11 +166,10 @@ namespace Terra.Terrain {
 			float min = float.PositiveInfinity;
 			float max = float.NegativeInfinity;
 			int res = Config.Generator.RemapResolution;
-			Config.HeightMapData.UpdateGenerator();
 
 			for (int x = 0; x < res; x++) {
 				for (int z = 0; z < res; z++) {
-					float value = Config.HeightMapData.GetValue(x, z);
+					float value = Config.Graph.GetEndGenerator().GetValue(x, z, 0f);
 
 					if (value > max) {
 						max = value;

@@ -2,6 +2,7 @@
 using Terra.ReorderableList;
 using System.Linq;
 using Terra;
+using Terra.Graph;
 using Terra.Structure;
 using Terra.Graph.Noise;
 using Terra.Terrain;
@@ -152,6 +153,7 @@ namespace UnityEditor.Terra {
 
 			_config.Generator.Length = EditorGUILayout.IntField("Length", _config.Generator.Length);
 			_config.Generator.Amplitude = EditorGUILayout.FloatField("Amplitude", _config.Generator.Amplitude);
+			_config.Generator.Spread = EditorGUILayout.FloatField("Spread", _config.Generator.Spread);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);
@@ -185,6 +187,7 @@ namespace UnityEditor.Terra {
 		/// <summary>
 		/// Displays GUI elements for the "Maps" tab
 		/// </summary>
+		/**
 		public void Maps() {
 			const string mapDescription = "Create height, temperature, and moisture maps from various noise functions; or create your own custom map generator.";
 			Header("Maps", mapDescription);
@@ -216,13 +219,13 @@ namespace UnityEditor.Terra {
 				EditorGUI.indentLevel++; //Indent following controls
 				md.MapType = (MapGeneratorType)EditorGUILayout.EnumPopup("Noise Type", md.MapType);
 				if (md.MapType == MapGeneratorType.Custom) {
-					md.Graph = (NoiseGraph)EditorGUILayout.ObjectField("Noise Graph", md.Graph, typeof(NoiseGraph), false);
+					_config.Graph = (TerraGraph)EditorGUILayout.ObjectField("Noise Graph", _config.Graph, typeof(TerraGraph), false);
 
 					//If graph is unlinked or has no end node
 					string error = null;
-					if (md.Graph == null) {
+					if (_config.Graph == null) {
 						error = "Create new noise graph asset by right-clicking in project: Create > Terra > Noise Graph";
-					} else if (md.Graph.GetEndGenerator() == null) {
+					} else if (_config.Graph.GetEndGenerator() == null) {
 						error = "The selected noise graph does not have a valid End Node.";
 					} 
 					if (error != null) {
@@ -233,7 +236,7 @@ namespace UnityEditor.Terra {
 					ctrlRect.x += 15;
 					ctrlRect.width -= 15;
 					if (GUI.Button(ctrlRect, "Open Graph Editor")) {
-						NodeEditorWindow.TryOpen(md.Graph);
+						NodeEditorWindow.TryOpen(_config.Graph);
 					}
 				}
 				
@@ -277,7 +280,7 @@ namespace UnityEditor.Terra {
 				//if (i != mapTypes.Length - 1) 
 				//	GUIHelper.Separator(EditorGUILayout.GetControlRect(false, 1));
 			}
-		}
+		}**/
 
 		/// <summary>
 		/// Displays GUI elements for the "Biomes" tab
@@ -328,27 +331,27 @@ namespace UnityEditor.Terra {
 				rect.y += 2;
 				rect.width = texWidth;
 				if (GUI.Button(rect, "Update Preview")) {
-					float startHmSpread = _config.HeightMapData.Spread;
-					float startTmpSpread = _config.TemperatureMapData.Spread;
-					float startMstSpread = _config.MoistureMapData.SpreadAdjusted;
-
-					_config.HeightMapData.Spread /= _config.EditorState.BiomePreviewZoom;
-					_config.TemperatureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
-					_config.MoistureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
-
-					Tile tile = new Tile();
-					tile.UpdatePosition(new GridPosition(0, 0), false);
-					tile.MeshManager.Lod = new LodData.Lod(0, 129);
-					tile.MeshManager.CalculateHeightmap();
-					tile.MeshManager.RemapHeightmap(tile.MeshManager.HeightmapMin, tile.MeshManager.HeightmapMax, 0f, 1f);
-
-					WeightedBiomeMap map = new WeightedBiomeMap(tile);
-					map.CreateMap();
-					_config.EditorState.BiomePreview = map.GetPreviewTexture();
-
-					_config.HeightMapData.Spread = startHmSpread;
-					_config.TemperatureMapData.Spread = startTmpSpread;
-					_config.MoistureMapData.Spread = startMstSpread;
+//					float startHmSpread = _config.HeightMapData.Spread;
+//					float startTmpSpread = _config.TemperatureMapData.Spread;
+//					float startMstSpread = _config.MoistureMapData.SpreadAdjusted;
+//
+//					_config.HeightMapData.Spread /= _config.EditorState.BiomePreviewZoom;
+//					_config.TemperatureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
+//					_config.MoistureMapData.Spread /= _config.EditorState.BiomePreviewZoom;
+//
+//					Tile tile = new Tile();
+//					tile.UpdatePosition(new GridPosition(0, 0), false);
+//					tile.MeshManager.Lod = new LodData.Lod(0, 129);
+//					tile.MeshManager.CalculateHeightmap();
+//					tile.MeshManager.RemapHeightmap(tile.MeshManager.HeightmapMin, tile.MeshManager.HeightmapMax, 0f, 1f);
+//
+//					WeightedBiomeMap map = new WeightedBiomeMap(tile);
+//					map.CreateMap();
+//					_config.EditorState.BiomePreview = map.GetPreviewTexture();
+//
+//					_config.HeightMapData.Spread = startHmSpread;
+//					_config.TemperatureMapData.Spread = startTmpSpread;
+//					_config.MoistureMapData.Spread = startMstSpread;
 				}
 			}
 

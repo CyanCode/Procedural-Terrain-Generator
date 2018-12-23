@@ -42,10 +42,10 @@ namespace Terra.Structure {
 		}
 
 		/// <summary>
-		/// The NoiseGraph attached to this map when using 
+		/// The TerraGraph attached to this map when using 
 		/// <see cref="MapGeneratorType.Custom"/>
 		/// </summary>
-		public NoiseGraph Graph;
+//		public NoiseGraph Graph;
 
 		/// <summary>
 		/// "Zoom" level applied to the preview texture
@@ -161,29 +161,29 @@ namespace Terra.Structure {
 		/// <returns>Generator if set, null if <see cref="MapGeneratorType.Custom"/> 
 		/// is set and no <see cref="CustomGenerator"/> is specified</returns>
 		public void UpdateGenerator() {
-			int seed = TerraConfig.GenerationSeed;
-			Generator gen;
-
-			switch (MapType) {
-				case MapGeneratorType.Perlin:
-					gen = new GradientNoise(seed).ScaleShift(0.5f, 0.5f);
-					break;
-				case MapGeneratorType.Fractal:
-					gen = new PinkNoise(seed).ScaleShift(0.5f, 0.5f);
-					break;
-				case MapGeneratorType.Billow:
-					gen = new BillowNoise(seed).ScaleShift(0.5f, 0.5f);
-					break;
-				case MapGeneratorType.Custom:
-					if (Graph == null)
-						return;
-					gen = Graph.GetEndGenerator();
-					break;
-				default:
-					return;
-			}
-
-			_generator = gen;
+//			int seed = TerraConfig.GenerationSeed;
+//			Generator gen;
+//
+//			switch (MapType) {
+//				case MapGeneratorType.Perlin:
+//					gen = new GradientNoise(seed).ScaleShift(0.5f, 0.5f);
+//					break;
+//				case MapGeneratorType.Fractal:
+//					gen = new PinkNoise(seed).ScaleShift(0.5f, 0.5f);
+//					break;
+//				case MapGeneratorType.Billow:
+//					gen = new BillowNoise(seed).ScaleShift(0.5f, 0.5f);
+//					break;
+//				case MapGeneratorType.Custom:
+//					if (Graph == null)
+//						return;
+//					gen = Graph.GetEndGenerator();
+//					break;
+//				default:
+//					return;
+//			}
+//
+//			_generator = gen;
 		}
 
 		/// <summary>

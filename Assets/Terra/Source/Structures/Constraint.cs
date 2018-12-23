@@ -2,6 +2,11 @@
 using UnityEngine;
 
 namespace Terra.Structure {
+	[Serializable]
+	public enum ConstraintMixMethod {
+		AND, OR
+	}
+
 	/// <summary>
 	/// Represents a constraint between a minimum and 
 	/// a maximum.

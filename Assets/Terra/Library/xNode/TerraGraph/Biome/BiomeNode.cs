@@ -4,6 +4,7 @@ using Terra.CoherentNoise;
 using Terra.Graph;
 using Terra.Graph.Noise;
 using Terra.Structure;
+using Terra.Terrain;
 using UnityEngine;
 using XNode;
 
@@ -19,13 +20,12 @@ namespace Terra.Graph {
 		public string Name;
 
 		public Color PreviewColor;
-		public bool IsDropdown;
 
 		/// <summary>
 		/// Splats that this Biome will display
 		/// </summary>
 		[Input(ShowBackingValue.Never)] 
-		public SplatObjectNode[] SplatObjects;
+		public SplatObjectNode SplatObjects;
 
 		[Input]
 		public float Blend = 1f;
@@ -51,6 +51,10 @@ namespace Terra.Graph {
 
 		public override Texture2D DidRequestTextureUpdate() {
 			return Preview(PreviewTextureSize);
+		}
+
+		public SplatObjectNode[] GetSplatObjects() {
+			return GetInputValues<SplatObjectNode>("SplatObjects", null);
 		}
 
 		/// <summary>
@@ -82,7 +86,7 @@ namespace Terra.Graph {
 			return heights;
 		}
 
-		public float[,] GetNormalizedValues(int resolution) {
+		public float[,] GetNormalizedValues(GridPosition position, int length, float spread, int resolution) {
 			//Constraints
 			Constraint hc = new Constraint(HeightmapMinMaxMask.x, HeightmapMinMaxMask.y);
 			Constraint tc = new Constraint(TemperatureMinMaxMask.x, TemperatureMinMaxMask.y);
@@ -95,7 +99,10 @@ namespace Terra.Graph {
 			//Fill heights structure and set min/max values
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
-					float[] generated = GetMapHeightsAt(x / (float)resolution, y / (float)resolution);
+					Vector2 local = TileMesh.PositionToLocal(x, y, resolution);
+					Vector2 world = TileMesh.LocalToWorld(position, local.x, local.y);
+
+					float[] generated = GetMapHeightsAt(world.x / spread, world.y / spread);
 
 					for (int z = 0; z < 3; z++) {
 						float height = generated[z];
@@ -113,7 +120,7 @@ namespace Terra.Graph {
 
 			float[,] normalized = new float[resolution, resolution];
 
-			//Normalize values and set texture
+			//Normalize values
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
 					float hv = (heights[x, y, 0] - min) / (max - min);
@@ -126,15 +133,14 @@ namespace Terra.Graph {
 					//Gather heights that fit set min/max
 					if (UseHeightmap && hc.Fits(hv)) {
 						val += hc.Weight(hv, Blend);
-						//val += hv;
 						count++;
 					}
 					if (UseTemperature && tc.Fits(tv)) {
-						val += tv;
+						val += tc.Weight(tv, Blend);
 						count++;
 					}
 					if (UseMoisture && mc.Fits(mv)) {
-						val += mv;
+						val += mc.Weight(mv, Blend);
 						count++;
 					}
 
@@ -144,6 +150,10 @@ namespace Terra.Graph {
 			}
 
 			return normalized;
+		}
+
+		public float[,] GetNormalizedValues(int resolution) {
+			return GetNormalizedValues(GridPosition.Zero, 1, 1f, resolution);
 		}
 
 		/// <summary>

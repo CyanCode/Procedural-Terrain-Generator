@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Threading;
+using Terra.CoherentNoise;
 using Terra.Structure;
 using Terra.Util;
 using UnityEngine;
@@ -563,15 +564,16 @@ namespace Terra.Terrain {
 		/// <param name="worldZ">World z coordinate</param>
 		/// <returns>height</returns>
 		private float HeightAt(float worldX, float worldZ) {
-			var sett = TerraConfig.Instance;
-			var spread = sett.HeightMapData.SpreadAdjusted;
+			var conf = TerraConfig.Instance;
 
-			if (_genNeedsUpdating) {
-				sett.HeightMapData.UpdateGenerator();
-				_genNeedsUpdating = false;
-			}
+			float spread = conf.Generator.Spread;
+			Generator generator = conf.Graph.GetEndGenerator();
 			
-			return sett.HeightMapData.GetValue(worldX, worldZ, spread);
+			if (generator == null) {
+				return 0f;
+			}
+
+			return generator.GetValue(worldX / spread, worldZ / spread, 1f);
 		}
 
 		/// <summary>

@@ -107,57 +107,58 @@ namespace Terra.Structure {
 		public float GetWeight(BiomeData biome, int x, int z) {
 			BiomeData b = biome;
 
-			var tm = Config.TemperatureMapData;
-			var mm = Config.MoistureMapData;
-
-			if (b.IsTemperatureConstrained && !tm.HasGenerator()) return 0;
-			if (b.IsMoistureConstrained && !mm.HasGenerator()) return 0;
-
-			//Calculate height and world x/z positions
-			var local = TileMesh.PositionToLocal(x, z, _resolution);
-			var world = TileMesh.LocalToWorld(_tile == null ? new GridPosition() : _tile.GridPosition, local.x, local.y);
-			var wx = world.x;
-			var wz = world.y;
-
-			//Establish and clamp sampled values between 1 & 0
-			var height = _heightmap[x, z];
-			var temp = tm.GetValue(wx, wz, tm.SpreadAdjusted);
-			var moisture = mm.GetValue(wx, wz, mm.SpreadAdjusted);
-
-			height = Mathf.Clamp01(height);
-			temp = Mathf.Clamp01(temp);
-			moisture = Mathf.Clamp01(moisture);
-
-			//If no constraints return 1f
-			if (!b.IsHeightConstrained && !b.IsTemperatureConstrained && !b.IsMoistureConstrained) {
-				return 1f;
-			}
-
-			//Which map constraints fit the passed value                                     //todo figure this out v
-			bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height);
-			bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(temp);
-			bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(moisture);
-
-			float blend = Config.Generator.BiomeBlendAmount;
-
-			//Confirm constraint requirements
-			int passAmt = new[] { passHeight, passTemp, passMoisture }.Count(pass => pass);
-			int passMax = new[] { b.IsHeightConstrained, b.IsTemperatureConstrained, b.IsMoistureConstrained }.Count(pass => pass);
-
-			//Not all constraints were passed, return 0f
-			if (passAmt < passMax && b.MixMethod == BiomeData.ConstraintMixMethod.AND) {
-				return 0f;
-			}
-
-			var maxWeight = new[] {
-				new { value = height, pass = passHeight, constraint = b.HeightConstraint },
-				new { value = temp, pass = passTemp, constraint = b.TemperatureConstraint },
-				new { value = moisture, pass = passMoisture, constraint =  b.MoistureConstraint }
-			}
-			.Where(type => type.pass)
-			.Aggregate((agg, next) => agg.value > next.value ? next : agg);
-
-			return maxWeight.constraint.Weight(maxWeight.value, blend, Config.Generator.BiomeFalloff);
+			//			var tm = Config.TemperatureMapData;
+			//			var mm = Config.MoistureMapData;
+			//
+			//			if (b.IsTemperatureConstrained && !tm.HasGenerator()) return 0;
+			//			if (b.IsMoistureConstrained && !mm.HasGenerator()) return 0;
+			//
+			//			//Calculate height and world x/z positions
+			//			var local = TileMesh.PositionToLocal(x, z, _resolution);
+			//			var world = TileMesh.LocalToWorld(_tile == null ? new GridPosition() : _tile.GridPosition, local.x, local.y);
+			//			var wx = world.x;
+			//			var wz = world.y;
+			//
+			//			//Establish and clamp sampled values between 1 & 0
+			//			var height = _heightmap[x, z];
+			//			var temp = tm.GetValue(wx, wz, tm.SpreadAdjusted);
+			//			var moisture = mm.GetValue(wx, wz, mm.SpreadAdjusted);
+			//
+			//			height = Mathf.Clamp01(height);
+			//			temp = Mathf.Clamp01(temp);
+			//			moisture = Mathf.Clamp01(moisture);
+			//
+			//			//If no constraints return 1f
+			//			if (!b.IsHeightConstrained && !b.IsTemperatureConstrained && !b.IsMoistureConstrained) {
+			//				return 1f;
+			//			}
+			//
+			//			//Which map constraints fit the passed value                                     //todo figure this out v
+			//			bool passHeight = b.IsHeightConstrained && b.HeightConstraint.Fits(height);
+			//			bool passTemp = b.IsTemperatureConstrained && b.TemperatureConstraint.Fits(temp);
+			//			bool passMoisture = b.IsMoistureConstrained && b.MoistureConstraint.Fits(moisture);
+			//
+			//			float blend = Config.Generator.BiomeBlendAmount;
+			//
+			//			//Confirm constraint requirements
+			//			int passAmt = new[] { passHeight, passTemp, passMoisture }.Count(pass => pass);
+			//			int passMax = new[] { b.IsHeightConstrained, b.IsTemperatureConstrained, b.IsMoistureConstrained }.Count(pass => pass);
+			//
+			//			//Not all constraints were passed, return 0f
+			//			if (passAmt < passMax && b.MixMethod == ConstraintMixMethod.AND) {
+			//				return 0f;
+			//			}
+			//
+			//			var maxWeight = new[] {
+			//				new { value = height, pass = passHeight, constraint = b.HeightConstraint },
+			//				new { value = temp, pass = passTemp, constraint = b.TemperatureConstraint },
+			//				new { value = moisture, pass = passMoisture, constraint =  b.MoistureConstraint }
+			//			}
+			//			.Where(type => type.pass)
+			//			.Aggregate((agg, next) => agg.value > next.value ? next : agg);
+			//
+			//			return maxWeight.constraint.Weight(maxWeight.value, blend, Config.Generator.BiomeFalloff);
+			return 0f;
 		}
 
 		public BiomeData[] BiomesAt(int x, int z) {

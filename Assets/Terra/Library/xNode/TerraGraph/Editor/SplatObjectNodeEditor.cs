@@ -8,6 +8,12 @@ namespace Terra.Graph {
 		private const int TEXTURE_PADDING = 8;
 		private const int NODE_PADDING = 6;
 
+		private SplatObjectNode Node {
+			get {
+				return (SplatObjectNode)target;
+			}
+		}
+
 		public override void OnBodyGUI() {
 			//Output
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Output"));
@@ -50,9 +56,36 @@ namespace Terra.Graph {
 			ctrl.x += texDimens + TEXTURE_PADDING;
 			EditorGUI.LabelField(ctrl, "Normal", centeredStyle);
 
-			//Other fields
+			//Tiling/Offset
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Tiling"));
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Offset"));
+
+			//Height Constraint
+			EditorGUILayout.Space();
+			float startWidth = EditorGUIUtility.labelWidth;
+
+			EditorGUIUtility.labelWidth += 25;
+			SerializedProperty heightProp = serializedObject.FindProperty("IsHeightConstrained");
+			EditorGUILayout.PropertyField(heightProp, new GUIContent("Constrain Height"));
+			EditorGUIUtility.labelWidth = startWidth;
+
+			if (heightProp.boolValue) {
+				EditorGUI.indentLevel++;
+				Node.HeightConstraint = EditorGUIExtension.DrawConstraintRange("", Node.HeightConstraint, 0, 1);
+				EditorGUI.indentLevel--;
+			}
+
+			//Angle constraitn
+			EditorGUIUtility.labelWidth += 25;
+			SerializedProperty angleProp = serializedObject.FindProperty("IsAngleConstrained");
+			EditorGUILayout.PropertyField(angleProp, new GUIContent("Constrain Angle"));
+			EditorGUIUtility.labelWidth = startWidth;
+
+			if (angleProp.boolValue) {
+				EditorGUI.indentLevel++;
+				Node.AngleConstraint = EditorGUIExtension.DrawConstraintRange("", Node.AngleConstraint, 0, 90);
+				EditorGUI.indentLevel--;
+			}
 		}
 
 		public override string GetTitle() {

@@ -9,8 +9,8 @@ namespace Terra.Graph {
 		[Input(ShowBackingValue.Never, ConnectionType.Override)] 
 		public AbsGeneratorNode Noise;
 
-		[Input(ShowBackingValue.Never)]
-		public BiomeNode[] Biomes;
+		[Input(ShowBackingValue.Never, ConnectionType.Override)]
+		public BiomeCombinerNode Biomes;
 
 		/// <summary>
 		/// Returns the "final" generator attached to this 
@@ -25,10 +25,8 @@ namespace Terra.Graph {
 		/// Get the biomes attached to this node's input
 		/// </summary>
 		/// <returns></returns>
-		public BiomeNode[] GetBiomes() {
-			return GetInputValues<BiomeNode>("Biomes");
+		public BiomeCombinerNode GetBiomeCombiner() {
+			return GetInputValue<BiomeCombinerNode>("Biomes");
 		}
-
-
 	}
 }

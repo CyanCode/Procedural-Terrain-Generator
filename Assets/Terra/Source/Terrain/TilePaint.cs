@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Terra.Graph;
 using Terra.Structure;
 using Terra.Util;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace Terra.Terrain {
 		/// List of SplatData that are placed (splatted) onto the terrain.
 		/// This is a cached result from calling <see cref="GatherTextures"/>
 		/// </summary>
-		public SplatData[] Splats;
+		public SplatObjectNode[] Splats;
 
 		/// <summary>
 		/// Standard unity terrain representation of an alphamap. Call <see cref="CalculateAlphaMap"/> 
@@ -30,7 +31,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		public float[,,] Alphamap { get; private set; }
 
-		public readonly WeightedBiomeMap BiomeMap;
+		public BiomeNode[,] BiomeMap;
 
 		private UnityEngine.Terrain _terrain {
 			get {
@@ -39,11 +40,24 @@ namespace Terra.Terrain {
 		}
 
 		[SerializeField]
-		private readonly Tile _tile;
+		private Tile _tile;
+		[SerializeField]
+		private BiomeCombinerNode _combiner;
+		[SerializeField]
+		private int _resolution;
+		[SerializeField]
+		private GridPosition _gridPosition;
+		[SerializeField]
+		private int _length;
 		
 		public TilePaint(Tile tile) {
 			_tile = tile;
-			BiomeMap = new WeightedBiomeMap(tile);
+
+			//Get biome combiner from terraconfig
+			_combiner = TerraConfig.Instance.Graph.GetBiomeCombiner();
+			_length = TerraConfig.Instance.Generator.Length;
+			_resolution = _tile.GetLodLevel().SplatResolution;
+			_gridPosition = _tile.GridPosition;
 		}
 
 		/// <summary>
@@ -54,7 +68,7 @@ namespace Terra.Terrain {
 		public void Paint(bool async, Action onComplete = null) {
 			if (async) {
 				ThreadPool.QueueUserWorkItem(d => { //Worker thread
-					BiomeMap.CreateMap();
+					BiomeMap = _combiner.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
 
 					MTDispatch.Instance().Enqueue(() => {
 						PostCreateBiomeMap();
@@ -65,7 +79,7 @@ namespace Terra.Terrain {
 					});
 				});
 			} else {
-				BiomeMap.CreateMap();
+				BiomeMap = _combiner.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
 				PostCreateBiomeMap();
 
 				if (onComplete != null) {
@@ -91,15 +105,32 @@ namespace Terra.Terrain {
 					float normx = (float)x / resolution;
 					float normz = (float)z / resolution;
 
-					BiomeData[] biomesAt = BiomeMap.BiomesAt(x, z);
-					float[] weightsAt = BiomeMap.WeightsAt(x, z);
+					BiomeNode biome = BiomeMap[x, z];
 					float height = t.terrainData.GetHeight(x, z) / amplitude;
 					float angle = t.terrainData.GetSteepness(normz, normx);
 
-					float[] weights = GetTextureWeights(biomesAt, weightsAt, height, angle);
-					for (var i = 0; i < weights.Length; i++) {
-						Alphamap[x, z, i] = weights[i];
+					//biomes splats added in order to the splats array
+					foreach(SplatObjectNode splat in biome.GetSplatObjects()) {
+						//TODO Probably slow, rewrite
+						int[] splatIdxs = Splats.Select((c, i) => new { index = i, c })
+							.Where(c => c.c == splat)
+							.Select(c => c.index)
+							.ToArray();
+
+						if (splatIdxs.Length == 0) {
+							continue;
+						}
+
+						if (splat.ShouldShowAt(height, angle)) {
+							Alphamap[z, x, splatIdxs[0]] = 1f;
+							break;
+						}
 					}
+
+//					float[] weights = GetTextureWeights(biomesAt, weightsAt, height, angle);
+//					for (var i = 0; i < weights.Length; i++) {
+//						Alphamap[x, z, i] = weights[i];
+//					}
 				}
 			}
 		}
@@ -118,11 +149,11 @@ namespace Terra.Terrain {
 			SplatPrototype[] prototypes = new SplatPrototype[Splats.Length];
 			
 			for (int i = 0; i < Splats.Length; i++) {
-				SplatData sd = Splats[i];
+				SplatObjectNode sd = Splats[i];
 				SplatPrototype sp = new SplatPrototype();
-				
-				sp.metallic = sd.Metallic;
-				sp.smoothness = sd.Smoothness;
+
+				sp.metallic = 0;
+				sp.smoothness = 0.2f;
 
 				sp.tileOffset = sd.Offset;
 				sp.tileSize = sd.Tiling;
@@ -144,10 +175,6 @@ namespace Terra.Terrain {
 			if (BiomeMap == null) {
 				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
 				return;
-			}
-
-			if (TerraConfig.TerraDebug.WRITE_BIOME_DEBUG_TEXTURE) {
-				WriteDebugBiomeMap();
 			}
 
 			SetSplatPrototypes();
@@ -240,7 +267,7 @@ namespace Terra.Terrain {
 			if (BiomeMap == null)
 				return;
 
-			Splats = BiomeMap.WeightedBiomeSet.SelectMany(b => b.Details.SplatsData).ToArray();
+			Splats = _combiner.GetConnectedBiomeNodes().SelectMany(b => b.GetSplatObjects()).ToArray();
 		}
 
 		/// <summary>
@@ -267,23 +294,6 @@ namespace Terra.Terrain {
 				}
 			}
 #pragma warning restore CS0162 // Unreachable code detected
-		}
-
-		/// <summary>
-		/// Writes a texture representing the biome map to the file system
-		/// </summary>
-		private void WriteDebugBiomeMap() {
-			string tileName = _tile != null ?
-				"Tile[" + _tile.GridPosition.X + "_" + _tile.GridPosition.Z + "]" :
-				"Tile[0_0]";
-			string folderPath = Application.dataPath + "/BiomeImages/";
-			if (!Directory.Exists(folderPath))
-				Directory.CreateDirectory(folderPath);
-
-			Texture2D preview = BiomeMap.GetPreviewTexture();
-			byte[] bytes = preview.EncodeToPNG();
-			string name = "Biome_" + tileName + ".png";
-			File.WriteAllBytes(folderPath + name, bytes);
 		}
 	}
 }

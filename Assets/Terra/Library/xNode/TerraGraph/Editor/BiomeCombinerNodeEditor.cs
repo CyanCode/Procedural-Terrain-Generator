@@ -1,5 +1,4 @@
-﻿using Terra.Graph;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using XNode;
 using XNodeEditor;
@@ -17,26 +16,31 @@ namespace Terra.Graph {
 			//Output
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Output"));
 
-		//	if (Event.current.type != EventType.MouseUp) {
-				//Draw mix method enum
-				SerializedProperty mixType = serializedObject.FindProperty("Mix");
-				NodeEditorGUILayout.PropertyField(mixType, new GUIContent("Mix Type"));
+			//Draw mix method enum
+			SerializedProperty mixType = serializedObject.FindProperty("Mix");
+			NodeEditorGUILayout.PropertyField(mixType, new GUIContent("Mix Type"));
 
-				//Draw Instance Ports with colors
+			//Draw Instance Ports with colors
+			if (!Bcn.DidAddPort) {
 				NodePort[] ports = Bcn.GetInstanceInputs();
 
-				foreach (NodePort p in ports) {
+				for (var i = 0; i < ports.Length; i++) {
+					NodePort p = ports[i];
 					EditorGUILayout.BeginHorizontal();
 					NodeEditorGUILayout.PortField(p, GUILayout.ExpandWidth(false));
 
 					BiomeNode node = p.GetInputValue<BiomeNode>();
 					if (node != null) {
-						EditorGUILayout.ColorField(GUIContent.none, node.PreviewColor, false, false, false, null, GUILayout.MaxWidth(32f));
+						EditorGUILayout.ColorField(GUIContent.none, node.PreviewColor, false, false, false, null,
+							GUILayout.MaxWidth(32f));
 					}
 
 					EditorGUILayout.EndHorizontal();
 				}
-		//	} 
+			} else {
+				Bcn.DidAddPort = false;
+			}
+		
 
 			//Show Preview
 			PreviewField.Show(Bcn);

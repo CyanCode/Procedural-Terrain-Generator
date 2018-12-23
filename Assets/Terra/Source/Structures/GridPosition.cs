@@ -7,6 +7,12 @@ namespace Terra.Structure {
 	/// </summary>
 	[Serializable]
 	public struct GridPosition {
+		public static GridPosition Zero {
+			get {
+				return new GridPosition(0, 0);
+			}
+		}
+
 		public int X;
 		public int Z;
 

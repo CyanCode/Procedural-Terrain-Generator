@@ -25,6 +25,7 @@ namespace Terra.Structure {
 
 		public int Length = 500;
 		public float Amplitude = 50f;
+		public float Spread = 100f;
 
 		public float BiomeBlendAmount = 1f;
 		public float BiomeFalloff = 1f;

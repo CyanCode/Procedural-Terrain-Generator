@@ -38,24 +38,24 @@ namespace Terra.Terrain {
 			//Clear existing objects if any
 			ClearExistingObjects();
 
-			foreach (ObjectPlacementData type in _config.ObjectData) {
-				List<Vector3> positions = Placer.GetFilteredGrid(PreviewMesh, type);
-				
-				//Don't exceed max objects count
-				int count = positions.Count > type.MaxObjects ? type.MaxObjects : positions.Count;
-
-				for (int i = 0; i < count; i++) { 
-					if (type.Prefab != null) {
-						#if UNITY_EDITOR
-						GameObject obj = (GameObject) PrefabUtility.InstantiatePrefab(type.Prefab);
-
-						//Calculate correct positioning
-						obj.transform.parent = Parent.transform;
-						type.TransformGameObject(obj, positions[i], _config.Generator.Length, Vector3.zero);
-						#endif
-					}
-				}
-			}
+//			foreach (ObjectPlacementData type in _config.ObjectData) {
+//				List<Vector3> positions = Placer.GetFilteredGrid(PreviewMesh, type);
+//				
+//				//Don't exceed max objects count
+//				int count = positions.Count > type.MaxObjects ? type.MaxObjects : positions.Count;
+//
+//				for (int i = 0; i < count; i++) { 
+//					if (type.Prefab != null) {
+//						#if UNITY_EDITOR
+//						GameObject obj = (GameObject) PrefabUtility.InstantiatePrefab(type.Prefab);
+//
+//						//Calculate correct positioning
+//						obj.transform.parent = Parent.transform;
+//						type.TransformGameObject(obj, positions[i], _config.Generator.Length, Vector3.zero);
+//						#endif
+//					}
+//				}
+//			}
 		}
 
 		/// <summary>

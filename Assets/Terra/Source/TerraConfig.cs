@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Terra.Graph;
 using Terra.Structure;
 using UnityEngine;
 using Terra.Terrain;
 using Terra.Util;
 using UnityEditor;
+using XNode;
 using Random = UnityEngine.Random;
 
 namespace Terra {
@@ -19,17 +21,18 @@ namespace Terra {
 
 		public static int GenerationSeed = 1337;
 
+		public TerraGraph Graph;
+
 		//Topology Generation
 		public GenerationData Generator;
-		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
-		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
-		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
+//		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
+//		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
+//		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 
 		//Detail
 		public ShaderData ShaderData;
 		public List<BiomeData> BiomesData;
 		public List<DetailData> Details;
-		public List<ObjectPlacementData> ObjectData; //TODO Remove
 
 		public TessellationData Tessellation;
 		public GrassData Grass;
@@ -72,9 +75,6 @@ namespace Terra {
 			if (ShaderData == null) ShaderData = new ShaderData(); 
 			if (BiomesData == null) BiomesData = new List<BiomeData>();
 			if (Details == null) Details = new List<DetailData>();
-			if (HeightMapData == null) HeightMapData = new TileMapData { Name = "Height Map" };
-			if (TemperatureMapData == null) TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
-			if (MoistureMapData == null) MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 			if (Tessellation == null) Tessellation = new TessellationData();
 			if (Grass == null) Grass = new GrassData();
 			if (EditorState == null) EditorState = new EditorStateData();

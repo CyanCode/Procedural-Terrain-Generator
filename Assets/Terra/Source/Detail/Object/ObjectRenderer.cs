@@ -28,7 +28,7 @@ namespace Terra.Terrain.Detail {
 		public ObjectRenderer(bool observeTiles = true) {
 			_config = TerraConfig.Instance;
 			ObserveTiles = observeTiles;
-			ObjectsToPlace = _config.ObjectData;
+			//ObjectsToPlace = _config.ObjectData;
 			Pool = new ObjectPool(this);
 
 			if (ObserveTiles) {

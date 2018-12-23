@@ -33,7 +33,7 @@ namespace UnityEditor.Terra {
 
 					break;
 				case ToolbarOptions.Maps:
-					_gui.Maps();
+					//_gui.Maps();
 
 					break;
 				case ToolbarOptions.Biomes:

@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Linq;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	[Serializable]
 	public class LodData {
 		/// <summary>

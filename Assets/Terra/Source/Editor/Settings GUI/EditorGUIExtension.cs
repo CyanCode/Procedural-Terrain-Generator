@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.ReorderableList;
 using Terra.ReorderableList.Internal;
 using Terra.Terrain;

@@ -1,4 +1,4 @@
-﻿using Terra.Structure;
+﻿using Terra.Structures;
 using UnityEngine;
 
 namespace Terra.Terrain {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.Terrain;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Represents a 2D map of biomes and their weights for 
 	/// a set <see cref="Tile"/>

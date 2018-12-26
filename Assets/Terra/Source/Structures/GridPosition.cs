@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Represents a position in the grid of <see cref="Tile"/>s
 	/// </summary>

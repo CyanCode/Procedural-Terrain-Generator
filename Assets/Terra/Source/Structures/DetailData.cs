@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	[Serializable]
 	public class DetailData {
 		public bool ShowMaterialFoldout = false;

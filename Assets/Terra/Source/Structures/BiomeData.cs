@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Represents a Biome and its various settings
 	/// </summary>

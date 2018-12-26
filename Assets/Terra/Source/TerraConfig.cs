@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Terra.Graph;
-using Terra.Structure;
+using Terra.Structures;
 using UnityEngine;
 using Terra.Terrain;
 using Terra.Util;

@@ -1,4 +1,4 @@
-﻿namespace Terra.Structure {
+﻿namespace Terra.Structures {
 	/// <summary>
 	/// Stores information relating to how shaders are applied 
 	/// to Tiles.

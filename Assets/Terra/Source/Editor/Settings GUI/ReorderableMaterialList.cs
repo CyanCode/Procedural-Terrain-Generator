@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Terra;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.ReorderableList;
 using Terra.Terrain;
 using UnityEngine;

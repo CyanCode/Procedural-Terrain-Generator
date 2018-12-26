@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// An implementation of <see cref="Mesh"/> that does not return 
 	/// copies of its' parameters.

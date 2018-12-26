@@ -3,8 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using System.Diagnostics;
-using System.Linq;
-using Terra.Structure;
+using Terra.Structures;
 using Debug = UnityEngine.Debug;
 
 namespace Terra.Terrain {
@@ -326,14 +325,6 @@ namespace Terra.Terrain {
 		public void UpdateNeighbors(GridPosition[] positions, bool hideTerrain, Action<Tile> onComplete = null) {
 			if (positions == null)
 				return;
-
-				//todo remove
-				foreach (var gridPosition in positions)
-				{
-					if (gridPosition == new GridPosition(0,0)) {
-						Debug.Log("");
-					}
-				}
 
 			List<Tile> tiles = new List<Tile>(positions.Length);
 			foreach (var pos in positions)

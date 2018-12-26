@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using Terra.Graph;
+using Terra.Graph.Biome;
 using Terra.Terrain;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Represents a 2D structure of biomes within a <see cref="Tile"/>
 	/// </summary>
@@ -56,7 +57,6 @@ namespace Terra.Structure {
 			_combiner = combiner;
 			_position = position;
 			_resolution = resolution;
-			
 		}
 
 		public void CreateMap() {

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Terra.Graph;
-using Terra.Structure;
+using Terra.Graph.Biome;
+using Terra.Structures;
 using Terra.Util;
 using UnityEngine;
 
@@ -68,7 +67,7 @@ namespace Terra.Terrain {
 		public void Paint(bool async, Action onComplete = null) {
 			if (async) {
 				ThreadPool.QueueUserWorkItem(d => { //Worker thread
-					BiomeMap = _combiner.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
+					BiomeMap = _combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
 
 					MTDispatch.Instance().Enqueue(() => {
 						PostCreateBiomeMap();
@@ -79,7 +78,7 @@ namespace Terra.Terrain {
 					});
 				});
 			} else {
-				BiomeMap = _combiner.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
+				BiomeMap = _combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
 				PostCreateBiomeMap();
 
 				if (onComplete != null) {
@@ -106,7 +105,9 @@ namespace Terra.Terrain {
 					float normz = (float)z / resolution;
 
 					BiomeNode biome = BiomeMap[x, z];
-					float height = t.terrainData.GetHeight(x, z) / amplitude;
+
+
+					float height = t.terrainData.GetInterpolatedHeight(normx, normz) / amplitude; //
 					float angle = t.terrainData.GetSteepness(normz, normx);
 
 					//biomes splats added in order to the splats array
@@ -121,16 +122,11 @@ namespace Terra.Terrain {
 							continue;
 						}
 
-						if (splat.ShouldShowAt(height, angle)) {
+						//if (splat.ShouldShowAt(height, angle)) {
 							Alphamap[z, x, splatIdxs[0]] = 1f;
-							break;
-						}
+							//break;
+						//}
 					}
-
-//					float[] weights = GetTextureWeights(biomesAt, weightsAt, height, angle);
-//					for (var i = 0; i < weights.Length; i++) {
-//						Alphamap[x, z, i] = weights[i];
-//					}
 				}
 			}
 		}

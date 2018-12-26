@@ -1,6 +1,6 @@
 ﻿using System;
 using Terra;
-using Terra.Structure;
+using Terra.Structures;
 using UnityEngine;
 
 namespace UnityEditor.Terra {

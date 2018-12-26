@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.ReorderableList;
 using UnityEditor;
 using UnityEditor.Terra;

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Terra.Structure;
+using Terra.Structures;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

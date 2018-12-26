@@ -2,7 +2,7 @@
 using Terra.Terrain;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	[Serializable]
 	public class GenerationData {
 		public GameObject TrackedObject;

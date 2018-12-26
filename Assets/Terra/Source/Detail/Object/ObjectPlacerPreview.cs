@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.Terrain.Detail;
 using UnityEngine;
 #if UNITY_EDITOR

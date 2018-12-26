@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Container for data relating to the state of the TerraSettingsEditor
 	/// </summary>

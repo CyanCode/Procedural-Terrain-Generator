@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	[Serializable]
 	public enum ConstraintMixMethod {
 		AND, OR

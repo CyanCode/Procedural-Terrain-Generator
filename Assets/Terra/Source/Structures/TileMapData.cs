@@ -2,10 +2,10 @@
 using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation;
 using Terra.CoherentNoise.Generation.Fractal;
-using Terra.Graph.Noise;
+using Terra.Graph.Generators;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Holds data relating to various types of maps (ie height, temperature, etc). 
 	/// Used by <see cref="TerraConfig"/> for storing information.

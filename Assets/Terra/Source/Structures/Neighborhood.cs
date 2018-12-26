@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Terra.Terrain;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	public struct Neighborhood : IEnumerable<Tile> {
 		public Tile Up;
 		public Tile Right;

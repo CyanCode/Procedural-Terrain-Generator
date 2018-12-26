@@ -48,6 +48,23 @@ namespace XNodeEditor {
             }
         }
 
+		public void OnBodyGUI(string[] excludes) {
+			List<string> excludesInit = new List<string>();
+			excludesInit.AddRange(excludes);
+			excludesInit.AddRange(new[] { "m_Script", "graph", "position", "ports" });
+
+			portPositions = new Dictionary<XNode.NodePort, Vector2>();
+
+			SerializedProperty iterator = serializedObject.GetIterator();
+			bool enterChildren = true;
+			EditorGUIUtility.labelWidth = 84;
+			while (iterator.NextVisible(enterChildren)) {
+				enterChildren = false;
+				if (excludesInit.Contains(iterator.name)) continue;
+				NodeEditorGUILayout.PropertyField(iterator, true);
+			}
+		}
+
         public virtual int GetWidth() {
             return 208;
         }

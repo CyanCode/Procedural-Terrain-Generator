@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Threading;
 using Terra.CoherentNoise;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.Util;
 using UnityEngine;
 
@@ -157,23 +157,26 @@ namespace Terra.Terrain {
 				_lastGeneratedLodLevel = _tile.GetLodLevel();
 				Lod = _lastGeneratedLodLevel;
 			}
+
+			//Grid position
+			GridPosition pos = gridPos ?? _tile.GridPosition;
 		
+			//Heightmap
 			if (Heightmap != null && (int)Math.Sqrt(Heightmap.Length) >= HeightmapResolution)
 				return;
 
 			Heightmap = new float[HeightmapResolution, HeightmapResolution];
 			
+			//Remap
 			float offset = TerraConfig.Instance.Generator.RemapPadding;
 			float newMin = offset;
 			float newMax = 1 - offset;
+			GeneratorSampler sampler = new GeneratorSampler(TerraConfig.Instance.Graph.GetEndGenerator());
 
 			for (int x = 0; x < HeightmapResolution; x++) {
 				for (int z = 0; z < HeightmapResolution; z++) {
-					Vector2 localXZ = PositionToLocal(x, z, HeightmapResolution);
-					Vector2 worldXZ = LocalToWorld(gridPos == null ? _tile.GridPosition : new GridPosition(), localXZ.x, localXZ.y);
-
 					lock (_asyncMeshLock) {
-						float height = HeightAt(worldXZ.x, worldXZ.y);
+						float height = sampler.GetValue(x, z, pos, HeightmapResolution);
 
 						//Set this instances min and max
 						if (height > HeightmapMax) {
@@ -618,9 +621,9 @@ namespace Terra.Terrain {
 		/// <param name="gridPos">Position of the Tile in the grid</param>
 		/// <param name="localX">Local x coordinate on mesh</param>
 		/// <param name="localZ">Local z coordinate on mesh</param>
+		/// <param name="length">Length of a Tile</param>
 		/// <returns>World X and Z coordinates</returns>
-		public static Vector2 LocalToWorld(GridPosition gridPos, float localX, float localZ) {
-			int length = TerraConfig.Instance.Generator.Length;
+		public static Vector2 LocalToWorld(GridPosition gridPos, float localX, float localZ, int length) {
 			float worldX = localX + (gridPos.X * length);
 			float worldZ = localZ + (gridPos.Z * length);
 

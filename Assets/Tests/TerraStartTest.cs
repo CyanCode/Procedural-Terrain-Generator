@@ -1,5 +1,5 @@
 ﻿using Terra;
-using Terra.Structure;
+using Terra.Structures;
 using Terra.Terrain;
 using UnityEngine;
 

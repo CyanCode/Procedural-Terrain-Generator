@@ -13,28 +13,24 @@ namespace Terra {
 	[Serializable, ExecuteInEditMode]
 	public class TerraConfig: MonoBehaviour {
 		public static bool IsInitialized;
+		public static int GenerationSeed = 1337;
 
 		/// <summary>
 		/// Internal TerraSettings instance to avoid finding when its not needed
 		/// </summary>
 		private static TerraConfig _instance;
 
-		public static int GenerationSeed = 1337;
 
 		public TerraGraph Graph;
 
 		//Topology Generation
 		public GenerationData Generator;
-//		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
-//		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
-//		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 
 		//Detail
 		public ShaderData ShaderData;
 		public List<BiomeData> BiomesData;
 		public List<DetailData> Details;
 
-		public TessellationData Tessellation;
 		public GrassData Grass;
 
 		//Editor state information
@@ -75,7 +71,6 @@ namespace Terra {
 			if (ShaderData == null) ShaderData = new ShaderData(); 
 			if (BiomesData == null) BiomesData = new List<BiomeData>();
 			if (Details == null) Details = new List<DetailData>();
-			if (Tessellation == null) Tessellation = new TessellationData();
 			if (Grass == null) Grass = new GrassData();
 			if (EditorState == null) EditorState = new EditorStateData();
 		}
@@ -195,10 +190,7 @@ namespace Terra {
 
 			//Generation radius
 			if (Generator.TrackedObject != null) {
-				var pos = Generator.TrackedObject.transform.position;
-
 				Gizmos.color = Color.blue;
-				//DrawCylinder(pos);
 			}
 		}
 
@@ -220,14 +212,9 @@ namespace Terra {
 			if (Generator == null || Generator.Lod == null)
 				return Color.white;
 
-			bool isCenter00 = !Application.isPlaying && Application.isEditor || Generator.TrackedObject == null;
 			Vector3 worldXYZ = Generator.TrackedObject == null ? Vector3.zero : Generator.TrackedObject.transform.position;
-			Vector3 worldXZ = new Vector2(worldXYZ.x, worldXYZ.z);
-
-			var lod = Generator.Lod;
-			var tileLength = Generator.Length;
-			//var lvlType = lod.GetLevelForRadius((int)position.Distance(new GridPosition(worldXZ, tileLength)));
-			var lvlType = lod.GetLevelForPosition(position, worldXYZ);
+			LodData lod = Generator.Lod;
+			LodData.Lod lvlType = lod.GetLevelForPosition(position, worldXYZ);
 
 			return lvlType.PreviewColor;
 		}

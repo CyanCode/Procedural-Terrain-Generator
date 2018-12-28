@@ -1,4 +1,5 @@
 ﻿using System;
+using RSG;
 using UnityEngine;
 using Terra.Structures;
 
@@ -81,14 +82,11 @@ namespace Terra.Terrain {
 		/// By default, calculating heights is done off of the main thread but 
 		/// can be disabled.
 		/// </summary>
-		/// <param name="onComplete">Called after all calculations have completed. 
-		/// <see cref="onComplete"/>Can be null if the result is not needed.</param>
-		/// <param name="async">Perform mesh computation asynchronously</param>
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
-		public void Generate(Action onComplete, bool async = true, float remapMin = 0f, float remapMax = 1f) {
+		public Promise Generate(float remapMin = 0f, float remapMax = 1f) {
 			//Cache current LOD
-			if (async) {
+			if (Config.Generator.UseMultithreading) {
 				MeshManager.CalculateHeightmapAsync(() => {
 					PostGenerateCalcHeightmap();
 

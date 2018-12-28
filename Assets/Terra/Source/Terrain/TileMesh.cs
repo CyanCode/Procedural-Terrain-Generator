@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Threading;
+using RSG;
 using Terra.CoherentNoise;
 using Terra.Structures;
 using Terra.Util;
@@ -152,7 +153,7 @@ namespace Terra.Terrain {
 		/// <param name="gridPos">Optionally override the GridPosition from the referenced Tile</param>
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
-		public void CalculateHeightmap(GridPosition? gridPos = null, float remapMin = 0f, float remapMax = 1f) {
+		public Promise CalculateHeightmap(GridPosition? gridPos = null, float remapMin = 0f, float remapMax = 1f) {
 			if (!TerraConfig.Instance.Generator.UseMultithreading) {
 				_lastGeneratedLodLevel = _tile.GetLodLevel();
 				Lod = _lastGeneratedLodLevel;
@@ -207,7 +208,7 @@ namespace Terra.Terrain {
 		/// <param name="onComplete">Called when the heightmap has been created</param>
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
-		public void CalculateHeightmapAsync(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
+		public Promise CalculateHeightmapAsync(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
 			Lod = _lastGeneratedLodLevel;
 

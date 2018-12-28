@@ -96,10 +96,8 @@ namespace Terra.Terrain {
 			Alphamap = new float[resolution, resolution, Splats.Length];
 
 			//Sample weights and fill in textures
-			UnityEngine.Terrain t = _terrain;
 			BiomeNode[] connected = _combiner.GetConnectedBiomeNodes();
 
-			float amplitude = TerraConfig.Instance.Generator.Amplitude;
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
 				

@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using System.Diagnostics;
+using RSG;
 using Terra.Structures;
 using Debug = UnityEngine.Debug;
 
@@ -16,14 +17,12 @@ namespace Terra.Terrain {
 		private const int CACHE_SIZE = 50;
 
 		//Keeps track of tiles that were queued for generation.
-		[SerializeField]
-		private int _queuedTiles = 0;
-
 		private bool _isFirstUpdate = true;
 
 		[SerializeField]
+		private int _queuedTiles = 0;
+		[SerializeField]
 		private float _remapMin = 0;
-
 		[SerializeField]
 		private float _remapMax = 1;
 
@@ -132,7 +131,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="p">position in grid to add tile at.</param>
 		/// <param name="onComplete">called when the Tile has finished generating.</param>
-		public void AddTileAt(GridPosition p, Action<Tile> onComplete) {
+		public Promise<Tile> AddTileAt(GridPosition p, Action<Tile> onComplete) {
 			Tile t = Tile.CreateTileGameobject("Tile [" + p.X + ", " + p.Z + "]");
 			t.UpdatePosition(p);
 

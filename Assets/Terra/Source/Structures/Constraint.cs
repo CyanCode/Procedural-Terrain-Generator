@@ -30,28 +30,14 @@ namespace Terra.Structures {
 		}
 
 		/// <summary>
-		/// Checks whether:
-		/// val >= max 
-		/// OR 
-		/// val <= min
-		/// </summary>
-		/// <param name="val">Value to check</param>
-		public bool FitsMinMax(float val) {
-			return val >= Max || val <= Min;
-		}
-
-		/// <summary>
 		/// Calculates the "weight" of the passed value by finding
-		/// the passed value's smaller distance between the min & max 
-		/// and dividing the value by <see cref="blend"/>. The result is 
-		/// then raised to the power of <see cref="falloff"/>.
+		/// the whether it fits within the min & max and how much to 
+		/// show if the value is within the blend distance
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="blend"></param>
-		/// <param name="falloff"></param>
 		/// <returns>A weight in the range of 0 and 1</returns>
-		public float Weight(float value, float blend, float falloff = 1f) {
-
+		public float Weight(float value, float blend) {
 			if (value > Max - blend) {
 				float nmin = Max - blend;
 				float a = (value - nmin) / (Max - nmin);
@@ -63,6 +49,7 @@ namespace Terra.Structures {
 				return Mathf.Lerp(value, 0, 1 - a);
 			}
 
+			//return Fits(value) ? 1f : 0f;
 			return value;
 		}
 	}

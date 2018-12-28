@@ -14,7 +14,7 @@ namespace Terra.Graph {
 		}
 
 		public override void OnBodyGUI() {
-			//Output
+			//Output 
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Output"));
 
 			//Draw mix method enum

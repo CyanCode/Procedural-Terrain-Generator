@@ -30,7 +30,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		public float[,,] Alphamap { get; private set; }
 
-		public BiomeNode[,] BiomeMap;
+		public float[,,] BiomeMap;
 
 		private UnityEngine.Terrain _terrain {
 			get {
@@ -66,7 +66,7 @@ namespace Terra.Terrain {
 		/// <param name="onComplete">Optional callback called after painting the terrain</param>
 		public void Paint(bool async, Action onComplete = null) {
 			if (async) {
-				ThreadPool.QueueUserWorkItem(d => { //Worker thread
+				ThreadPool.QueueUserWorkItem(d => { //Worker thread //TODO Put back
 					BiomeMap = _combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
 
 					MTDispatch.Instance().Enqueue(() => {
@@ -90,43 +90,47 @@ namespace Terra.Terrain {
 		/// <summary>
 		/// Calculates the alphamap for this <see cref="Tile"/>. 
 		/// </summary>
-		public void CalculateAlphaMap() { //todo implement for terrain
+		public void CalculateAlphaMap() { 
 			//Initialize Alphamap structure
 			int resolution = _tile.GetLodLevel().SplatResolution;
 			Alphamap = new float[resolution, resolution, Splats.Length];
 
 			//Sample weights and fill in textures
 			UnityEngine.Terrain t = _terrain;
+			BiomeNode[] connected = _combiner.GetConnectedBiomeNodes();
 
 			float amplitude = TerraConfig.Instance.Generator.Amplitude;
 			for (int x = 0; x < resolution; x++) {
-				for (int z = 0; z < resolution; z++) {
-					float normx = (float)x / resolution;
-					float normz = (float)z / resolution;
-
-					BiomeNode biome = BiomeMap[x, z];
-
-
-					float height = t.terrainData.GetInterpolatedHeight(normx, normz) / amplitude; //
-					float angle = t.terrainData.GetSteepness(normz, normx);
-
+				for (int y = 0; y < resolution; y++) {
+				
 					//biomes splats added in order to the splats array
-					foreach(SplatObjectNode splat in biome.GetSplatObjects()) {
-						//TODO Probably slow, rewrite
-						int[] splatIdxs = Splats.Select((c, i) => new { index = i, c })
-							.Where(c => c.c == splat)
-							.Select(c => c.index)
-							.ToArray();
-
-						if (splatIdxs.Length == 0) {
+					for (int z = 0; z < connected.Length; z++) {
+						//TODO Expand to n amount of splat objects
+						SplatObjectNode[] splats = connected[z].GetSplatObjects();
+						if (splats.Length == 0) {
 							continue;
 						}
 
-						//if (splat.ShouldShowAt(height, angle)) {
-							Alphamap[z, x, splatIdxs[0]] = 1f;
-							//break;
-						//}
+						SplatObjectNode splat = splats[0];
+						Alphamap[y, x, z] = BiomeMap[x, y, z];
 					}
+
+//					foreach(SplatObjectNode splat in biome.GetSplatObjects()) {
+//						//TODO Probably slow, rewrite
+//						int[] splatIdxs = Splats.Select((c, i) => new { index = i, c })
+//							.Where(c => c.c == splat)
+//							.Select(c => c.index)
+//							.ToArray();
+//
+//						if (splatIdxs.Length == 0) {
+//							continue;
+//						}
+//
+//						//if (splat.ShouldShowAt(height, angle)) {
+//							Alphamap[y, x, splatIdxs[0]] = 1f;
+//							//break;
+//						//}
+//					}
 				}
 			}
 		}

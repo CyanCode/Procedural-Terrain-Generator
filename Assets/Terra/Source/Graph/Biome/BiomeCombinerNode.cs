@@ -12,7 +12,8 @@ namespace Terra.Graph.Biome {
 		[Serializable]
 		public enum MixMethod {
 			MAX = 0,
-			MIN = 1
+			MIN = 1,
+			ADD = 2
 		}
 
 		[Output]

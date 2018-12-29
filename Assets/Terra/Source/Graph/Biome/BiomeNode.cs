@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using Terra.CoherentNoise;
 using Terra.Graph.Generators;
 using Terra.Structures;
 using Terra.Terrain;
@@ -12,6 +10,32 @@ using XNode;
 namespace Terra.Graph.Biome {
 	[CreateNodeMenu("Biomes/Biome")]
 	public class BiomeNode: PreviewableNode {
+		public struct BiomeMapResult {
+			/// <summary>
+			/// A structure containing the weights of the height, temperature, and moisture maps.
+			/// The returned structure is a 3D array where the first two indices are the x & y 
+			/// coordinates while the last index is the weight of the height, temperature, and 
+			/// moisture maps (in that order).
+			/// </summary>
+			public float[,,] Values;
+
+			/// <summary>
+			/// The lowest value within <see cref="Values"/>
+			/// </summary>
+			public float Min;
+
+			/// <summary>
+			/// The highest value within <see cref="Values"/>
+			/// </summary>
+			public float Max;
+
+			public BiomeMapResult(float[,,] values, float min, float max) {
+				Values = values;
+				Min = min;
+				Max = max;
+			}
+		}
+
 		[Output]
 		public BiomeNode Output;
 
@@ -55,7 +79,7 @@ namespace Terra.Graph.Biome {
 		}
 
 		public override Texture2D DidRequestTextureUpdate() {
-			return Preview(PreviewTextureSize);
+			return GetPreviewTexture(PreviewTextureSize);
 		}
 
 		public SplatObjectNode[] GetSplatObjects() {
@@ -74,6 +98,10 @@ namespace Terra.Graph.Biome {
 		/// <param name="resolution">Resolution of the map to sample for</param>
 		/// <returns></returns>
 		public float[] GetMapHeightsAt(int x, int y, GridPosition position, int resolution, float spread, int length) {
+			if (!UseHeightmap && !UseTemperature && !UseMoisture) {
+				return new[] { 1f, 1f, 1f };
+			}
+
 			float[] heights = new float[3];
 
 			if (UseHeightmap && _heightmapSampler != null) {
@@ -113,13 +141,22 @@ namespace Terra.Graph.Biome {
 			//Normalize values
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
-					float hv = (values[x, y, 0] - min) / (max - min);
-					float tv = (values[x, y, 1] - min) / (max - min);
-					float mv = (values[x, y, 2] - min) / (max - min);
+					if (y == 100 && x == 110) {
+						int asd = 1;
+					}
+
+					if (!UseHeightmap && !UseTemperature && !UseMoisture) {
+						map[x, y] = 1f;
+						continue;
+					}
+
+					float hv = MathUtil.Map01(values[x, y, 0], min, max);
+					float tv = MathUtil.Map01(values[x, y, 1], min, max);
+					float mv = MathUtil.Map01(values[x, y, 2], min, max);
 
 					float val = 0;
 					int count = 0;
-
+			
 					//Gather heights that fit set min/max
 					if (UseHeightmap && hc.Fits(hv)) {
 						val += hc.Weight(hv, Blend);
@@ -135,7 +172,7 @@ namespace Terra.Graph.Biome {
 					}
 
 					val = count > 0 ? val / count : 0;
-					map[x, y] = val;
+					map[x, y] = Mathf.Clamp01(val);
 				}
 			}
 
@@ -156,29 +193,68 @@ namespace Terra.Graph.Biome {
 		/// coordinates while the last index is the weight of the height, temperature, and 
 		/// moisture maps (in that order).
 		/// </returns>
-		public float[,,] GetMapValues(GridPosition position, int resolution, float spread = -1f, int length = -1) {
+		public BiomeMapResult GetMapsValues(GridPosition position, int resolution, float spread = -1f, int length = -1) {
 			float[,,] heights = new float[resolution, resolution, 3];
 
+			//Update generators
 			SetHeightmapSampler();
 			SetTemperatureSampler();
 			SetMoistureSampler();
 
+			//Default spread/length to TerraConfig settings
+			spread = spread == -1f ? TerraConfig.Instance.Generator.Spread : spread;
+			length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
+
+			//Track min/max
+			float min = float.PositiveInfinity;
+			float max = float.NegativeInfinity;
+
 			//Fill heights structure and set min/max values
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
-					spread = spread == -1f ? TerraConfig.Instance.Generator.Spread : spread;
-					length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
-
-					float[] generated = GetMapHeightsAt(x, y, position, resolution, spread, length);
+					float[] generated =  GetMapHeightsAt(x, y, position, resolution, spread, length);
 
 					for (int z = 0; z < 3; z++) {
 						float height = generated[z];
 						heights[x, y, z] = height;
+
+						if (height < min) {
+							min = height;
+						}
+						if (height > max) {
+							max = height;
+						}
 					}
 				}
 			}
 
-			return heights;
+			return new BiomeMapResult(heights, min, max);
+		}
+
+		/// <summary>
+		/// Calculates the min and max result for this Biome's 
+		/// connected Generator
+		/// </summary>
+		/// <param name="resolution">resolution of remap calculation</param>
+		public MinMaxResult CalculateMinMax(int resolution) {
+			float min = float.PositiveInfinity;
+			float max = float.NegativeInfinity;
+
+			for (int x = 0; x < resolution; x++) {
+				for (int y = 0; y < resolution; y++) {
+					float[] heights = GetMapHeightsAt(x, y, GridPosition.Zero, resolution, resolution, 1);
+					MinMaxResult localMinMax = MathUtil.GetMinMax(heights);
+					
+					if (localMinMax.Min < min) {
+						min = localMinMax.Min;
+					}
+					if (localMinMax.Max > max) {
+						max = localMinMax.Max;
+					}
+				}
+			}
+
+			return new MinMaxResult(min, max);
 		}
 
 		/// <summary>
@@ -187,31 +263,11 @@ namespace Terra.Graph.Biome {
 		/// </summary>
 		/// <param name="size">width & height</param>
 		/// <returns></returns>
-		public Texture2D Preview(int size) {
+		private Texture2D GetPreviewTexture(int size) {
 			Texture2D tex = new Texture2D(size, size);
 			
-			float[,,] biomeVals = GetMapValues(GridPosition.Zero, size, size, 1);
-
-			//Calculate min/max
-			float min = float.PositiveInfinity;
-			float max = float.NegativeInfinity;
-
-			for (int x = 0; x < size; x++) {
-				for (int y = 0; y < size; y++) {
-					for (int z = 0; z < 3; z++) {
-						float val = biomeVals[x, y, z];
-						
-						if (val < min) {
-							min = val;
-						}
-						if (val > max) {
-							max = val;
-						}
-					}
-				}
-			}
-
-			float[,] normalized = GetWeightedValues(biomeVals, min, max);
+			BiomeMapResult mapVals = GetMapsValues(GridPosition.Zero, size, size, 1);
+			float[,] normalized = GetWeightedValues(mapVals.Values, mapVals.Min, mapVals.Max);
 
 			//Set texture
 			for (int x = 0; x < size; x++) {
@@ -225,7 +281,7 @@ namespace Terra.Graph.Biome {
 			return tex;
 		}
 
-		public void SetHeightmapSampler() {
+		private void SetHeightmapSampler() {
 			if (!UseHeightmap) {
 				return;
 			}
@@ -234,7 +290,7 @@ namespace Terra.Graph.Biome {
 			_heightmapSampler = gen == null ? null : new GeneratorSampler(gen.GetGenerator());
 		}
 
-		public void SetTemperatureSampler() {
+		private void SetTemperatureSampler() {
 			if (!UseTemperature) {
 				return;
 			}
@@ -243,7 +299,7 @@ namespace Terra.Graph.Biome {
 			_temperatureSampler = gen == null ? null : new GeneratorSampler(gen.GetGenerator());
 		}
 
-		public void SetMoistureSampler() {
+		private void SetMoistureSampler() {
 			if (!UseMoisture) {
 				return;
 			}

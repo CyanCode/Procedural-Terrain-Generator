@@ -219,18 +219,6 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Remaps each value in the heightmap to the new min and max.
-		/// </summary>
-		public void RemapHeightmap(float min, float max, float newMin, float newMax) {
-			for (int x = 0; x < HeightmapResolution; x++) {
-				for (int z = 0; z < HeightmapResolution; z++) {
-					float val = Heightmap[x, z];
-					Heightmap[x, z] = (val - min) * (newMax - newMin) / (max - min) + newMin;
-				}
-			}
-		}
-
-		/// <summary>
 		/// Sets the neighboring <see cref="UnityEngine.Terrain"/> types.
 		/// </summary>
 		/// <param name="neighbors">Neighboring tiles</param>
@@ -308,6 +296,21 @@ namespace Terra.Terrain {
 					}
 				}));
 			} else {
+				float min = float.PositiveInfinity;
+				float max = float.NegativeInfinity;
+				for (int x = 0; x < hm.GetLength(0); x++) {
+					for (int y = 0; y < hm.GetLength(0); y++) {
+						float val = hm[x, y];
+						if (val < min) {
+							min = val;
+						}
+						if (val > max) {
+							max = val;
+						}
+					}
+				}
+				//Debug.Log(string.Format("Heightmap -- min: {0} max: {1}", min, max));
+
 				td.SetHeights(0, 0, hm);
 				td.size = new Vector3(length, conf.Generator.Amplitude, length);
 				ActiveTerrain.Flush();
@@ -377,11 +380,6 @@ namespace Terra.Terrain {
 		private void WeldNeighbors(Neighborhood neighbors, bool hideTerrain, Action onComplete = null) {
 			if (HeightmapResolution == 0) {
 				return;
-			}
-
-			foreach (Tile t in neighbors) { //todo remove
-				if (t.GridPosition == new GridPosition(0,0) && System.Diagnostics.Debugger.IsAttached)
-					System.Diagnostics.Debugger.Break();
 			}
 
 			if (!(neighbors.Right == null || neighbors.Right.MeshManager.HeightmapResolution == 0)) {

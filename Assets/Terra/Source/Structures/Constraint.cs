@@ -1,4 +1,5 @@
 ﻿using System;
+using Terra.CoherentNoise.Generation.Combination;
 using UnityEngine;
 
 namespace Terra.Structures {
@@ -16,7 +17,25 @@ namespace Terra.Structures {
 		public float Min;
 		public float Max;
 
-		public Constraint(float min, float max) {
+		/// <summary>
+		/// If <see cref="Max"/> equals 1
+		/// </summary>
+		public bool IsMaxConstraint {
+			get {
+				return Max == 1f;
+			}
+		}
+
+		/// <summary>
+		/// If <see cref="Min"/> equals 0
+		/// </summary>
+		public bool IsMinConstraint {
+			get {
+				return Min == 0f;
+			}
+		}
+
+		public Constraint(float min, float max) : this() {
 			Min = min;
 			Max = max;
 		}
@@ -34,22 +53,31 @@ namespace Terra.Structures {
 		/// the whether it fits within the min & max and how much to 
 		/// show if the value is within the blend distance
 		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="blend"></param>
+		/// <param name="value">Value within the range of 0 and 1 to weight</param>
+		/// <param name="blend">Blend distance</param>
 		/// <returns>A weight in the range of 0 and 1</returns>
 		public float Weight(float value, float blend) {
 			if (value > Max - blend) {
+				//Value within max transition zone
+				if (IsMaxConstraint) {
+					return value;
+				}
+
 				float nmin = Max - blend;
 				float a = (value - nmin) / (Max - nmin);
 				return Mathf.Lerp(value, 0, a);
 			}
 			if (value < Min + blend) {
+				//Value within min transition zone
+				if (IsMinConstraint) {
+					return value;
+				}
+
 				float nmax = Min + blend;
 				float a = (value - Min) / (nmax - Min);
 				return Mathf.Lerp(value, 0, 1 - a);
 			}
 
-			//return Fits(value) ? 1f : 0f;
 			return value;
 		}
 	}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Terra.Structures;
 using Terra.Terrain;
 using UnityEngine;
 using XNode;
@@ -26,7 +25,6 @@ namespace Terra.Graph.Biome {
 
 		public BiomeCombinerSampler Sampler;
 		public MixMethod Mix;
-		public float BlendDistance = 1f;
 
 		private LinkedList<NodePort> _activePorts;
 		[SerializeField]

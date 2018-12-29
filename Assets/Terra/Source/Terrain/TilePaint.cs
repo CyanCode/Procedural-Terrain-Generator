@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Terra.Graph.Biome;
 using Terra.Structures;
@@ -24,7 +25,7 @@ namespace Terra.Terrain {
 		public SplatObjectNode[] Splats;
 
 		/// <summary>
-		/// Standard unity terrain representation of an alphamap. Call <see cref="CalculateAlphaMap"/> 
+		/// Standard unity terrain representation of an alphamap. Call <see cref="SetAlphamap"/> 
 		/// to fill.
 		/// See <see cref="https://docs.unity3d.com/ScriptReference/TerrainData.SetAlphamaps.html"/>
 		/// </summary>
@@ -46,15 +47,12 @@ namespace Terra.Terrain {
 		private int _resolution;
 		[SerializeField]
 		private GridPosition _gridPosition;
-		[SerializeField]
-		private int _length;
 		
 		public TilePaint(Tile tile) {
 			_tile = tile;
 
 			//Get biome combiner from terraconfig
 			_combiner = TerraConfig.Instance.Graph.GetBiomeCombiner();
-			_length = TerraConfig.Instance.Generator.Length;
 			_resolution = _tile.GetLodLevel().SplatResolution;
 			_gridPosition = _tile.GridPosition;
 		}
@@ -66,7 +64,7 @@ namespace Terra.Terrain {
 		/// <param name="onComplete">Optional callback called after painting the terrain</param>
 		public void Paint(bool async, Action onComplete = null) {
 			if (async) {
-				ThreadPool.QueueUserWorkItem(d => { //Worker thread //TODO Put back
+				ThreadPool.QueueUserWorkItem(d => { //Worker thread 
 					BiomeMap = _combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
 
 					MTDispatch.Instance().Enqueue(() => {
@@ -88,57 +86,49 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Calculates the alphamap for this <see cref="Tile"/>. 
+		/// Calculates the <see cref="Alphamap"/> for this <see cref="Tile"/>. 
 		/// </summary>
-		public void CalculateAlphaMap() { 
+		public void SetAlphamap() { 
 			//Initialize Alphamap structure
 			int resolution = _tile.GetLodLevel().SplatResolution;
 			Alphamap = new float[resolution, resolution, Splats.Length];
 
 			//Sample weights and fill in textures
-			UnityEngine.Terrain t = _terrain;
 			BiomeNode[] connected = _combiner.GetConnectedBiomeNodes();
 
-			float amplitude = TerraConfig.Instance.Generator.Amplitude;
+			float min = float.PositiveInfinity;
+			float max = float.NegativeInfinity;
+
 			for (int x = 0; x < resolution; x++) {
-				for (int y = 0; y < resolution; y++) {
-				
+				for (int y = 0; y < resolution; y++) {	
 					//biomes splats added in order to the splats array
 					for (int z = 0; z < connected.Length; z++) {
 						//TODO Expand to n amount of splat objects
-						SplatObjectNode[] splats = connected[z].GetSplatObjects();
-						if (splats.Length == 0) {
-							continue;
-						}
-
-						SplatObjectNode splat = splats[0];
 						Alphamap[y, x, z] = BiomeMap[x, y, z];
+						
+						if (BiomeMap[x, y, z] < min) {
+							min = BiomeMap[x, y, z];
+						}
+						if (BiomeMap[x, y, z] > max) {
+							max = BiomeMap[x, y, z];
+						}
 					}
-
-//					foreach(SplatObjectNode splat in biome.GetSplatObjects()) {
-//						//TODO Probably slow, rewrite
-//						int[] splatIdxs = Splats.Select((c, i) => new { index = i, c })
-//							.Where(c => c.c == splat)
-//							.Select(c => c.index)
-//							.ToArray();
-//
-//						if (splatIdxs.Length == 0) {
-//							continue;
-//						}
-//
-//						//if (splat.ShouldShowAt(height, angle)) {
-//							Alphamap[y, x, splatIdxs[0]] = 1f;
-//							//break;
-//						//}
-//					}
 				}
 			}
+
+			//todo Debug.Log(string.Format("Alpha -- min: {0} max: {1}", min, max));
+		}
+
+		public void NormalizeAlphamap() {
+			MinMaxResult minMax = MathUtil.MinMax(Alphamap);
+			Alphamap = MathUtil.Map01(Alphamap, minMax.Min, minMax.Max);
 		}
 
 		/// <summary>
 		/// Applies the calculated alphamap to the Terrain.
 		/// </summary>
-		public void SetAlphamap() {
+		public void ApplyAlphamap() {
+			NormalizeAlphamap();
 			_terrain.terrainData.alphamapResolution = _terrain.terrainData.heightmapResolution;
 			_terrain.terrainData.SetAlphamaps(0, 0, Alphamap);
 		}
@@ -178,8 +168,8 @@ namespace Terra.Terrain {
 			}
 
 			SetSplatPrototypes();
-			CalculateAlphaMap();
 			SetAlphamap();
+			ApplyAlphamap();
 		}
 
 		/// <summary>
@@ -244,8 +234,6 @@ namespace Terra.Terrain {
 					} else {
 						weights[weightIndex] = 1f;
 					}
-
-					
 				}
 			}
 
@@ -268,32 +256,6 @@ namespace Terra.Terrain {
 				return;
 
 			Splats = _combiner.GetConnectedBiomeNodes().SelectMany(b => b.GetSplatObjects()).ToArray();
-		}
-
-		/// <summary>
-		/// Writes debug textures to the file system if 
-		/// <see cref="TerraConfig.TerraDebug.WRITE_SPLAT_TEXTURES"/> is 
-		/// true.
-		/// </summary>
-		private void WriteDebugTextures() {
-#pragma warning disable CS0162 // Unreachable code detected
-			if (TerraConfig.TerraDebug.WRITE_SPLAT_TEXTURES) {
-				string tileName = _tile != null ?
-					"Tile[" + _tile.GridPosition.X + "_" + _tile.GridPosition.Z + "]" :
-					"Tile[0_0]";
-				string folderPath = Application.dataPath + "/SplatImages/";
-				if (!Directory.Exists(folderPath))
-					Directory.CreateDirectory(folderPath);
-
-				int max = TerraConfig.TerraDebug.MAX_TEXTURE_WRITE_COUNT;
-				int length = Controls.Length > max ? max : Controls.Length;
-				for (var i = 0; i < length; i++) {
-					byte[] bytes = Controls[i].EncodeToPNG();
-					string name = "Splat" + i + "_" + tileName + ".png";
-					File.WriteAllBytes(folderPath + name, bytes);
-				}
-			}
-#pragma warning restore CS0162 // Unreachable code detected
 		}
 	}
 }

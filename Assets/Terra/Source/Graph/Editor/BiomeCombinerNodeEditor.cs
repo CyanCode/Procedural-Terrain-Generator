@@ -21,10 +21,6 @@ namespace Terra.Graph {
 			SerializedProperty mixType = serializedObject.FindProperty("Mix");
 			NodeEditorGUILayout.PropertyField(mixType, new GUIContent("Mix Type"));
 
-			//Blend distance
-			SerializedProperty blend = serializedObject.FindProperty("BlendDistance");
-			NodeEditorGUILayout.PropertyField(blend, new GUIContent("Blend Distance"));
-
 			//Draw Instance Ports with colors
 			if (!Bcn.DidAddPort) {
 				NodePort[] ports = Bcn.GetInstanceInputs();

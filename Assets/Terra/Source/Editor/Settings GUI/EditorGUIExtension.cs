@@ -248,8 +248,44 @@ public static class EditorGUIExtension {
 		return new Constraint(minConst, maxConst);
 	}
 
+	public static Vector3 StackedVector3(string name, Vector3 vec) {
+		float lineHeight = EditorGUIUtility.singleLineHeight;
+		float ctrlHeight = lineHeight * 3;
+		Rect ctrl = EditorGUILayout.GetControlRect(false, ctrlHeight);
+
+		//Label
+		Rect labelCtrl = ctrl;
+		labelCtrl.width = EditorGUIUtility.labelWidth;
+		EditorGUI.LabelField(labelCtrl, new GUIContent(name));
+
+		//Axis Label
+		const int axisLabelWidth = 15;
+		Rect axisCtrl = ctrl;
+		axisCtrl.x += EditorGUIUtility.labelWidth;
+		axisCtrl.width = axisLabelWidth;
+
+		EditorGUI.LabelField(axisCtrl, new GUIContent("X"));
+
+		//X Axis
+		Rect fieldCtrl = ctrl;
+		fieldCtrl.x += EditorGUIUtility.labelWidth + axisLabelWidth;
+		fieldCtrl.width = EditorGUIUtility.fieldWidth - axisLabelWidth;
+
+		vec.x = EditorGUI.FloatField(fieldCtrl, GUIContent.none, vec.x);
+
+		return vec;
+	}
+
+	public static Texture2D BackgroundColor(Color c) {
+		Texture2D tex = new Texture2D(1, 1);
+		tex.SetPixel(1, 1, c);
+
+		return tex;
+	}
+
 	public struct TerraStyle {
 		public const int TITLE_FONT_SIZE = 12;
+		public const int NODE_LABEL_WIDTH = 120;
 
 		public static GUIStyle TextBold = new GUIStyle { fontStyle = FontStyle.Bold };
 		public static GUIStyle TextTitle = new GUIStyle { fontStyle = FontStyle.Bold, fontSize = TITLE_FONT_SIZE };

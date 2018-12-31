@@ -38,7 +38,7 @@ namespace Terra.Terrain {
 			//Clear existing objects if any
 			ClearExistingObjects();
 
-//			foreach (ObjectPlacementData type in _config.ObjectData) {
+//			foreach (PlaceableObject type in _config.ObjectData) {
 //				List<Vector3> positions = Placer.GetFilteredGrid(PreviewMesh, type);
 //				
 //				//Don't exceed max objects count

@@ -1,11 +1,14 @@
-﻿using Terra.Graph.Generators;
+﻿using System.Collections.Generic;
+using Terra.CoherentNoise;
+using Terra.Graph.Fields;
+using Terra.Graph.Generators;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
 
 namespace Terra.Graph {
 	[CustomNodeEditor(typeof(AbsGeneratorNode))]
-	class GeneratorNodeEditor: NodeEditor {
+	class GeneratorNodeEditor: PreviewableNodeEditor {
 		private AbsGeneratorNode _generator {
 			get {
 				return (AbsGeneratorNode)target;
@@ -14,16 +17,18 @@ namespace Terra.Graph {
 
 		public override void OnBodyGUI() {
 			EditorGUI.BeginChangeCheck();
-			OnBodyGUI(PreviewableNode.FieldNames);
+			OnBodyGUI(true);
 			if (EditorGUI.EndChangeCheck()) {
-				_generator.OnValueChange(); 
+				_generator.OnValueChange();
 			}
-
-			PreviewField.Show(_generator);
 		}
 
 		public override string GetTitle() {
 			return ((AbsGeneratorNode)target).GetTitle();
+		}
+
+		public override void ShouldShowPreviewGenerator() {
+			PreviewField.Show(_generator);
 		}
 
 		public override Color GetTint() {

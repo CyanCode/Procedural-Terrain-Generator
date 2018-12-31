@@ -2,11 +2,10 @@
 using Terra;
 using Terra.Structures;
 using Terra.ReorderableList;
-using Terra.Terrain;
 using UnityEditor;
 using UnityEngine;
 
-public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
+public class ReorderableObjectList: GenericListAdaptor<PlaceableObject> {
 	private const float MAX_HEIGHT = 200f;
 
 	private Dictionary<int, Rect> _positions; //Cached positions at last repaint
@@ -204,7 +203,7 @@ public class ReorderableObjectList: GenericListAdaptor<ObjectPlacementData> {
 	}
 
 	public override void Add() {
-		List.Add(new ObjectPlacementData(TerraConfig.GenerationSeed));
+		List.Add(ScriptableObject.CreateInstance<PlaceableObject>().Init(TerraConfig.GenerationSeed));
 	}
 
 	/// <summary>

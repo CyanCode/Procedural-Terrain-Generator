@@ -119,16 +119,10 @@ namespace Terra.Terrain {
 			//todo Debug.Log(string.Format("Alpha -- min: {0} max: {1}", min, max));
 		}
 
-		public void NormalizeAlphamap() {
-			MinMaxResult minMax = MathUtil.MinMax(Alphamap);
-			Alphamap = MathUtil.Map01(Alphamap, minMax.Min, minMax.Max);
-		}
-
 		/// <summary>
 		/// Applies the calculated alphamap to the Terrain.
 		/// </summary>
 		public void ApplyAlphamap() {
-			NormalizeAlphamap();
 			_terrain.terrainData.alphamapResolution = _terrain.terrainData.heightmapResolution;
 			_terrain.terrainData.SetAlphamaps(0, 0, Alphamap);
 		}

@@ -12,13 +12,13 @@ namespace Terra.Structures {
 		public bool IsMinHeightSelected = false;
 
 		public List<SplatData> SplatsData;
-		public List<ObjectPlacementData> ObjectData;
+		public List<PlaceableObject> ObjectData;
 
 		public DetailData() {
 			if (SplatsData == null)
 				SplatsData = new List<SplatData>();
 			if (ObjectData == null)
-				ObjectData = new List<ObjectPlacementData>();
+				ObjectData = new List<PlaceableObject>();
 		}
 	}
 }

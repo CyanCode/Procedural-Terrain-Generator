@@ -25,7 +25,7 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="opt">Object placement type to sample</param>
 		/// <returns>List of vectors within the grid</returns>
-		public List<Vector2> GetPoissonGrid(ObjectPlacementType opt) {
+		public Vector2[] GetPoissonGrid(ObjectPlacementType opt) {
 			PoissonDiscSampler pds = new PoissonDiscSampler(opt.GridSize, opt.GridSize, opt.Density);
 			List<Vector2> total = new List<Vector2>();
 
@@ -33,7 +33,7 @@ namespace Terra.Terrain {
 				total.Add(sample);
 			}
 
-			return total;
+			return total.ToArray();
 		}
 	}
 }

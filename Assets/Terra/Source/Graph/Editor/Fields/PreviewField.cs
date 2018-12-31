@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Terra.Graph {
+namespace Terra.Graph.Fields {
 	public static class PreviewField {
 		public static void Show(PreviewableNode node) {
 			node.IsPreviewDropdown = EditorGUILayout.Foldout(node.IsPreviewDropdown, "Preview");

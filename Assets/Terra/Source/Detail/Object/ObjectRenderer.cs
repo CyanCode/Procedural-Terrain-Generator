@@ -11,7 +11,7 @@ namespace Terra.Terrain.Detail {
 		private ObjectPool Pool;
 		private bool ObserveTiles;
 
-		public List<ObjectPlacementData> ObjectsToPlace {
+		public List<PlaceableObject> ObjectsToPlace {
 			get; private set;
 		}
 
@@ -67,17 +67,17 @@ namespace Terra.Terrain.Detail {
 		/// mesh information from TerraSettings.
 		/// </summary>
 		/// <param name="m">Mesh to sample height and angle values from</param>
-		/// <param name="objectPlacementData">object placement type to sample</param>
+		/// <param name="placeableObject">object placement type to sample</param>
 		/// <returns>List of vectors within the grid and sample constraints</returns>
-		public List<Vector3> GetFilteredGrid(Mesh m, ObjectPlacementData objectPlacementData) {
+		public List<Vector3> GetFilteredGrid(Mesh m, PlaceableObject placeableObject) {
 			MeshSampler sampler = /**new MeshSampler(m, Settings.Generator.MeshResolution);*/ new MeshSampler(m, 128); //TODO Resolution from TerraSettings
-			List<Vector2> grid = GetPoissonGrid(objectPlacementData.Spread / 10);
+			List<Vector2> grid = GetPoissonGrid(placeableObject.Spread / 10);
 			List<Vector3> toAdd = new List<Vector3>();
 
 			foreach (Vector2 pos in grid) {
 				MeshSampler.MeshSample sample = sampler.SampleAt(pos.x, pos.y);
 
-				if (objectPlacementData.ShouldPlaceAt(sample.Height, sample.Angle)) {
+				if (placeableObject.ShouldPlaceAt(sample.Height, sample.Angle)) {
 					Vector3 newPos = new Vector3(pos.x, sample.Height, pos.y);
 					toAdd.Add(newPos);
 				}
@@ -92,16 +92,16 @@ namespace Terra.Terrain.Detail {
 		/// type taking into account height and angle constraints.
 		/// </summary>
 		/// <param name="m">Mesh to sample height and angle values from</param>
-		/// <param name="objectPlacementData">object placement type to sample</param>
+		/// <param name="placeableObject">object placement type to sample</param>
 		/// <param name="density">How dense should the samples be</param>
 		/// <returns>List of vectors within the grid and sample constraints</returns>
-		public List<Vector3> GetFilteredGrid(Tile tile, ObjectPlacementData objectPlacementData, float density) {
+		public List<Vector3> GetFilteredGrid(Tile tile, PlaceableObject placeableObject, float density) {
 			MeshFilter mf = tile.GetComponent<MeshFilter>();
 			if (mf == null) {
 				throw new ArgumentException("The passed Tile does not have an attached MeshFilter. Has a mesh been created?");
 			}
 
-			return GetFilteredGrid(mf.sharedMesh, objectPlacementData);
+			return GetFilteredGrid(mf.sharedMesh, placeableObject);
 		}
 
 		/// <summary>
@@ -127,15 +127,15 @@ namespace Terra.Terrain.Detail {
 		/// gameobjects and their associated placement type
 		/// </summary>
 		protected class ObjectContainer {
-			public ObjectPlacementData ObjectPlacementData {
+			public PlaceableObject PlaceableObject {
 				get; private set;
 			}
 
 			private Dictionary<int, GameObject> Active = new Dictionary<int, GameObject>();
 			private LinkedList<GameObject> Inactive = new LinkedList<GameObject>();
 
-			public ObjectContainer(ObjectPlacementData objectPlacementData) {
-				ObjectPlacementData = objectPlacementData;
+			public ObjectContainer(PlaceableObject placeableObject) {
+				PlaceableObject = placeableObject;
 			}
 
 			/// <summary>
@@ -147,7 +147,7 @@ namespace Terra.Terrain.Detail {
 			/// <param name="active">Optionally set gameobjects to active at start</param>
 			public void Warmup(int count, Transform parent, bool active = true) {
 				for (int i = 0; i < count; i++) {
-					GameObject go = UnityEngine.Object.Instantiate(ObjectPlacementData.Prefab, parent);
+					GameObject go = UnityEngine.Object.Instantiate(PlaceableObject.Prefab, parent);
 					go.SetActive(active);
 
 					if (active)
@@ -177,7 +177,7 @@ namespace Terra.Terrain.Detail {
 				}
 
 				//Inactive list is empty, create new gameobject
-				GameObject go = UnityEngine.Object.Instantiate(ObjectPlacementData.Prefab, parent);
+				GameObject go = UnityEngine.Object.Instantiate(PlaceableObject.Prefab, parent);
 				Active.Add(go.GetInstanceID(), go);
 				return go;
 			}
@@ -200,8 +200,8 @@ namespace Terra.Terrain.Detail {
 
 			public override bool Equals(object obj) {
 				if (obj is ObjectContainer) {
-					string n1 = this.ObjectPlacementData.Prefab.name;
-					string n2 = ((ObjectContainer)obj).ObjectPlacementData.Prefab.name;
+					string n1 = this.PlaceableObject.Prefab.name;
+					string n2 = ((ObjectContainer)obj).PlaceableObject.Prefab.name;
 
 					return n1 == n2;
 				}
@@ -211,7 +211,7 @@ namespace Terra.Terrain.Detail {
 
 			public override int GetHashCode() {
 				var hashCode = -572560676;
-				hashCode = hashCode * -1521134295 + EqualityComparer<ObjectPlacementData>.Default.GetHashCode(ObjectPlacementData);
+				hashCode = hashCode * -1521134295 + EqualityComparer<PlaceableObject>.Default.GetHashCode(PlaceableObject);
 				hashCode = hashCode * -1521134295 + EqualityComparer<Dictionary<int, GameObject>>.Default.GetHashCode(Active);
 				hashCode = hashCode * -1521134295 + EqualityComparer<LinkedList<GameObject>>.Default.GetHashCode(Inactive);
 				return hashCode;
@@ -225,11 +225,11 @@ namespace Terra.Terrain.Detail {
 		protected class TileContainer {
 			private class PositionsContainer {
 				public Vector3[] Positions;
-				public ObjectPlacementData ObjectPlacementData;
+				public PlaceableObject PlaceableObject;
 
-				public PositionsContainer(Vector3[] positions, ObjectPlacementData objectPlacementData) {
+				public PositionsContainer(Vector3[] positions, PlaceableObject placeableObject) {
 					Positions = positions;
-					ObjectPlacementData = objectPlacementData;
+					PlaceableObject = placeableObject;
 				}
 			}
 
@@ -260,13 +260,13 @@ namespace Terra.Terrain.Detail {
 
 				if (Positions != null && config != null) {
 					foreach (PositionsContainer p in Positions) {
-						ObjectContainer container = GetContainerForType(p.ObjectPlacementData);
+						ObjectContainer container = GetContainerForType(p.PlaceableObject);
 						Transform parent = GetParent();
 
 						if (container != null) {
 							foreach (Vector3 pos in p.Positions) {
 								GameObject go = container.GetObject(parent);
-								p.ObjectPlacementData.TransformGameObject(go, pos, config.Generator.Length, Tile.transform.position);
+								p.PlaceableObject.TransformGameObject(go, pos, config.Generator.Length, Tile.transform.position);
 
 								PlacedObjects.Add(go);
 							}
@@ -281,7 +281,7 @@ namespace Terra.Terrain.Detail {
 			/// </summary>
 			public void RemoveObjects() {
 				foreach (PositionsContainer p in Positions) {
-					ObjectContainer container = GetContainerForType(p.ObjectPlacementData);
+					ObjectContainer container = GetContainerForType(p.PlaceableObject);
 
 					foreach (GameObject go in PlacedObjects) {
 						container.RemoveObject(go);
@@ -300,9 +300,9 @@ namespace Terra.Terrain.Detail {
 				Positions = new PositionsContainer[Pool.Placer.ObjectsToPlace.Count];
 
 				for (int i = 0; i < Positions.Length; i++) {
-					ObjectPlacementData objectPlacementData = Pool.Placer.ObjectsToPlace[i];
-					Vector3[] locations = Pool.Placer.GetFilteredGrid(Tile, objectPlacementData, 1).ToArray();
-					Positions[i] = new PositionsContainer(locations, objectPlacementData);
+					PlaceableObject placeableObject = Pool.Placer.ObjectsToPlace[i];
+					Vector3[] locations = Pool.Placer.GetFilteredGrid(Tile, placeableObject, 1).ToArray();
+					Positions[i] = new PositionsContainer(locations, placeableObject);
 				}
 			}
 
@@ -338,11 +338,11 @@ namespace Terra.Terrain.Detail {
 			/// Gets the container that holds the passed 
 			/// ObjectPlacementType
 			/// </summary>
-			/// <param name="objectPlacementData">type to search for</param>
+			/// <param name="placeableObject">type to search for</param>
 			/// <returns>ObjectContainer, null if no matches were found</returns>
-			ObjectContainer GetContainerForType(ObjectPlacementData objectPlacementData) {
+			ObjectContainer GetContainerForType(PlaceableObject placeableObject) {
 				foreach (ObjectContainer c in Pool.Containers) {
-					if (c.ObjectPlacementData.Equals(objectPlacementData)) {
+					if (c.PlaceableObject.Equals(placeableObject)) {
 						return c;
 					}
 				}
@@ -359,12 +359,12 @@ namespace Terra.Terrain.Detail {
 		public ObjectPool(ObjectRenderer placer) {
 			Placer = placer;
 
-			ObjectPlacementData[] objectPlacementData = placer.ObjectsToPlace.ToArray();
-			Containers = new ObjectContainer[objectPlacementData.Length];
+			PlaceableObject[] placeableObject = placer.ObjectsToPlace.ToArray();
+			Containers = new ObjectContainer[placeableObject.Length];
 			Tiles = new List<TileContainer>();
 
-			for (int i = 0; i < objectPlacementData.Length; i++) {
-				Containers[i] = new ObjectContainer(objectPlacementData[i]);
+			for (int i = 0; i < placeableObject.Length; i++) {
+				Containers[i] = new ObjectContainer(placeableObject[i]);
 			}
 		}
 

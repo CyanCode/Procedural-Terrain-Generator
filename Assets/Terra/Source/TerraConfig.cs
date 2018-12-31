@@ -25,9 +25,6 @@ namespace Terra {
 
 		//Topology Generation
 		public GenerationData Generator;
-//		public TileMapData HeightMapData = new TileMapData { Name = "Height Map" };
-//		public TileMapData TemperatureMapData = new TileMapData { Name = "Temperature Map", RampColor1 = Color.red, RampColor2 = Color.blue };
-//		public TileMapData MoistureMapData = new TileMapData { Name = "Moisture Map", RampColor1 = Color.cyan, RampColor2 = Color.white };
 
 		//Detail
 		public ShaderData ShaderData;

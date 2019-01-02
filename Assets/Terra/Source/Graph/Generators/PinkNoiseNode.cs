@@ -7,7 +7,7 @@ namespace Terra.Graph.Generators {
 		[Input] public float Persistence = 1f;
 
 		public override Generator GetGenerator() {
-			PinkNoise noise = new PinkNoise(TerraConfig.GenerationSeed);
+			PinkNoise noise = new PinkNoise(TerraConfig.Instance.Seed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;

@@ -7,7 +7,7 @@ namespace Terra.Graph.Generators {
 		[Input] public float Persistence = 1f;
 
 		public override Generator GetGenerator() {
-			BillowNoise noise = new BillowNoise(TerraConfig.GenerationSeed);
+			BillowNoise noise = new BillowNoise(TerraConfig.Instance.Seed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;

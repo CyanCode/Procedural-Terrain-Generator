@@ -38,7 +38,10 @@ namespace Terra.Graph {
 
 			//Splats
 			EditorGUILayout.Space(); 
-			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("SplatObjects"), new GUIContent("Splat Objects"));
+			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("SplatDetails"), new GUIContent("Splat"));
+
+            //Trees
+            NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Trees"), new GUIContent("Trees"));
 
 			//Show Preview
 			PreviewField.Show(Bn);

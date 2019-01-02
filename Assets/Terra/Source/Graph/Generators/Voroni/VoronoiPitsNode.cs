@@ -5,7 +5,7 @@ namespace Terra.Graph.Generators.Voronoi {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Pits")]
 	public class VoronoiPitsNode: AbsVoronoiNoiseNode {
 		public override Generator GetGenerator() {
-			VoronoiPits2D noise = new VoronoiPits2D(TerraConfig.GenerationSeed);
+			VoronoiPits2D noise = new VoronoiPits2D(TerraConfig.Instance.Seed);
 			noise.Frequency = Frequency;
 			noise.Period = (int)Period;
 

@@ -2,6 +2,7 @@
 using Terra.Structures;
 using UnityEditor;
 using UnityEngine;
+using XNodeEditor;
 
 namespace Terra.Graph.Fields {
 	[Serializable]
@@ -12,7 +13,9 @@ namespace Terra.Graph.Fields {
 			PlaceableObject placeable = (PlaceableObject)prop.objectReferenceValue;
 
 			if (placeable != null) {
-				Show(placeable, "Tree");
+				Show(placeable, "Tree", () => {
+                    NodeEditorGUILayout.PropertyField(treeNode.serializedObject.FindProperty("BendFactor"));
+                });
 			}
 
 			if (EditorGUI.EndChangeCheck()) {
@@ -20,14 +23,18 @@ namespace Terra.Graph.Fields {
 			}
 		}
 
-		private static void Show(PlaceableObject obj, string prefabName = "Prefab") {
+		private static void Show(PlaceableObject obj, string prefabName = "Prefab", Action afterProperties = null) {
 			//General
 			obj.Prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", obj.Prefab, typeof(GameObject), false);
 			obj.AllowsIntersection = EditorGUILayout.Toggle("Can Intersect", obj.AllowsIntersection);
-			obj.PlacementProbability = EditorGUILayout.IntSlider("Place Prob.", obj.PlacementProbability, 0, 100);
-			obj.Spread = EditorGUILayout.Slider("Spread", obj.Spread, 5f, 50f);
+			obj.PlacementProbability = EditorGUIExtension.MinMaxIntField("Place Prob.", obj.PlacementProbability, 0, 100);
+			obj.Spread = EditorGUIExtension.MinMaxFloatField("Spread", obj.Spread, 1f, 50f);
 			obj.MaxObjects = EditorGUILayout.IntField("Max Objects", obj.MaxObjects);
 			if (obj.MaxObjects < 1) obj.MaxObjects = 1;
+
+            if (afterProperties != null) {
+                afterProperties();
+            }
 
 			//Constrain label
 			EditorGUILayout.Space();

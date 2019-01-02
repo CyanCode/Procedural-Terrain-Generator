@@ -640,9 +640,6 @@ namespace Terra.Terrain {
 		[SerializeField, HideInInspector]
 		private int[] _serializedMeshResolutions;
 
-		[SerializeField, HideInInspector]
-		private MeshData[] _serializedMeshData;
-
 		public void OnBeforeSerialize() {
 			//Heightmap
 			if (Heightmap != null) {

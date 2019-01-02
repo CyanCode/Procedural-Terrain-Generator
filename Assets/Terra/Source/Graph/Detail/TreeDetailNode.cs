@@ -69,7 +69,7 @@ namespace Terra.Graph.Biome {
 
 	    public override Vector2[] SamplePositions() {
 	        //Fill in sampled spots
-	        ObjectSampler sampler = new ObjectSampler(Placeable);
+	        DetailSampler sampler = new DetailSampler(Placeable);
 	        Vector2[] samples = sampler.GetPoissonGridSamples(GRID_SIZE);
 
 	        return samples;

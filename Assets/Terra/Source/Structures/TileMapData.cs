@@ -161,7 +161,7 @@ namespace Terra.Structures {
 		/// <returns>Generator if set, null if <see cref="MapGeneratorType.Custom"/> 
 		/// is set and no <see cref="CustomGenerator"/> is specified</returns>
 		public void UpdateGenerator() {
-//			int seed = TerraConfig.GenerationSeed;
+//			int seed = TerraConfig.Seed;
 //			Generator gen;
 //
 //			switch (MapType) {

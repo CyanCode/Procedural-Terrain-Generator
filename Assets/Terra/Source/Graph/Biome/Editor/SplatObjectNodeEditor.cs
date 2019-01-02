@@ -4,14 +4,14 @@ using UnityEngine;
 using XNodeEditor;
 
 namespace Terra.Graph {
-	[CustomNodeEditor(typeof(SplatObjectNode))]
+	[CustomNodeEditor(typeof(SplatDetailNode))]
 	public class SplatObjectNodeEditor: NodeEditor {
 		private const int TEXTURE_PADDING = 8;
 		private const int NODE_PADDING = 6;
 
-		private SplatObjectNode Node {
+		private SplatDetailNode Node {
 			get {
-				return (SplatObjectNode)target;
+				return (SplatDetailNode)target;
 			}
 		}
 

@@ -3,10 +3,10 @@ using UnityEngine;
 using XNode;
 
 namespace Terra.Graph.Biome {
-	[CreateNodeMenu("Biomes/Splat Object")]
-	public class SplatObjectNode: Node {
+	[CreateNodeMenu("Biomes/Objects/Splat")]
+	public class SplatDetailNode: Node {
 		[Output]
-		public SplatObjectNode Output;
+		public SplatDetailNode Output;
 
 		public Texture2D Diffuse;
 		public Texture2D Normal;

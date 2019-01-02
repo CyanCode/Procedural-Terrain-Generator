@@ -4,18 +4,18 @@ using UnityEngine;
 using XNodeEditor;
 
 namespace Terra.Graph {
-	[CustomNodeEditor(typeof(TreeNode))]
+	[CustomNodeEditor(typeof(TreeDetailNode))]
 	public class TreeNodeEditor: PreviewableNodeEditor {
-		private TreeNode _treeNode {
+		private TreeDetailNode TreeDetailNode {
 			get {
-				return (TreeNode)target;
+				return (TreeDetailNode)target;
 			}
 		}
 
 	    public override void OnBodyGUI() {
-            NodeEditorGUILayout.PortField(_treeNode.GetOutputPort("Output"));
+            NodeEditorGUILayout.PortField(TreeDetailNode.GetOutputPort("Output"));
 			PlaceableObjectField.Show(this);
-	        PreviewField.Show(_treeNode);
+	        PreviewField.Show(TreeDetailNode);
         }
 
 		public override void ShouldShowPreviewGenerator() { }

@@ -9,7 +9,7 @@ namespace Terra.Graph.Generators {
 		[Input] public float Gain = 2f;
 
 		public override Generator GetGenerator() {
-			RidgeNoise noise = new RidgeNoise(TerraConfig.GenerationSeed);
+			RidgeNoise noise = new RidgeNoise(TerraConfig.Instance.Seed);
 			noise.Frequency = Frequency;
 			noise.Lacunarity = Lacunarity;
 			noise.OctaveCount = OctaveCount;

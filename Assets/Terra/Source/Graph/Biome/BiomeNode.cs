@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Terra.Graph.Generators;
@@ -50,7 +51,10 @@ namespace Terra.Graph.Biome {
 		/// Splats that this Biome will display
 		/// </summary>
 		[Input(ShowBackingValue.Never)] 
-		public SplatObjectNode SplatObjects;
+		public SplatDetailNode SplatDetails;
+
+        [Input(ShowBackingValue.Never)]
+        public DetailNode Trees;
 
 		[Input]
 		public float Blend = 1f;
@@ -82,9 +86,37 @@ namespace Terra.Graph.Biome {
 			return GetPreviewTexture(PreviewTextureSize);
 		}
 
-		public SplatObjectNode[] GetSplatObjects() {
-			return GetInputValues<SplatObjectNode>("SplatObjects", null);
+		public SplatDetailNode[] GetSplatObjects() {
+			return GetInputValues<SplatDetailNode>("SplatDetails", null);
 		}
+
+        /// <summary>
+        /// Creates a list of ObjectPlacementNodes added as inputs to <see cref="Trees"/>. 
+        /// If any connected nodes don't extend from <see cref="TreeDetailNode"/> an 
+        /// error is logged and null is returned.
+        /// 
+        /// <see cref="DetailNode"/> is returned because a modifier may be connected 
+        /// and its placement values will need to be sampled. To get the connected 
+        /// <see cref="TreeDetailNode"/>'s value call <see cref="Node.GetValue"/>
+        /// </summary>
+        /// <returns></returns>
+        public DetailNode[] GetTreeNodes() {
+            DetailNode[] placementNodes = GetInputValues<DetailNode>("Trees", null);
+
+            if (placementNodes == null) {
+                return null;
+            }
+
+            foreach (DetailNode node in placementNodes) {
+                if (!(node is TreeDetailNode)) {
+                    Debug.LogError("All trees in added to biome must be an instance of 'TreeNode', " +
+                                   node.GetType() + " provided instead");
+                    return null;
+                }
+            }
+
+            return placementNodes;
+        }
 
 		/// <summary>
 		/// Gets the heights for the height, temperature, and moisture maps. If 

@@ -16,6 +16,8 @@ namespace Terra.Terrain {
 		private TilePaint _painter;
 		[SerializeField]
 		private TileMesh _meshManager;
+        [SerializeField]
+        private TileDetail _detail;
 
 		[HideInInspector]
 		public bool IsColliderDirty = false;
@@ -59,6 +61,19 @@ namespace Terra.Terrain {
 				_painter = value;
 			}
 		}
+
+        public TileDetail Detailer {
+            get {
+                if (_detail == null) {
+                    _detail = new TileDetail(this);
+                }
+
+                return _detail;
+            }
+            set {
+                _detail = value;
+            }
+        }
 
 		/// <summary>
 		/// Creates a gameobject with an attached Tile component and 
@@ -134,22 +149,22 @@ namespace Terra.Terrain {
 			return MeshManager.LastGeneratedLodLevel.Resolution >= GetLodLevel().Resolution;
 		}
 
-		/// <summary>
-		/// Finishes the <see cref="Generate"/> method after the 
-		/// mesh has been created. This exists as a convenience as 
-		/// a mesh can be created asynchronously or synchronously but 
-		/// the logic afterwards is the same.
-		/// </summary>
-		internal void PostGenerateCalcHeightmap() {
-			MeshManager.SetTerrainHeightmap(Config.Generator.UseCoroutineForHeightmap && !TerraConfig.IsInEditMode, true, () => {
-				bool multithreaded = Config.Generator.UseMultithreading;
-				MeshManager.ActiveTerrain.enabled = !multithreaded;
-				
-				Painter.Paint(multithreaded, () => {
-					MeshManager.ActiveTerrain.enabled = true;
-				});
-			});
-		}
+        /// <summary>
+        /// Converts the normalized x and z coordinates to world x & z
+        /// coordinates for this Tile.
+        /// </summary>
+        /// <param name="x">normalized x coordinate</param>
+        /// <param name="z">normalized z coordinate</param>
+        /// <returns></returns>
+        public Vector2 GetXzWorldPositionInterpolated(float x, float z) {
+            int length = TerraConfig.Instance.Generator.Length;
+
+            //Position of [0, 0] coordinates tile
+            float tx = x * length;
+            float tz = z * length;
+
+            return TileMesh.LocalToWorld(GridPosition, tx, tz, length);
+        }
 
 		/// <summary>
 		/// Gets the LOD level for this tile based off of its <see cref="GridPosition"/>'s 
@@ -167,6 +182,23 @@ namespace Terra.Terrain {
 			return Config.Generator.Lod.GetLevelForPosition(GridPosition, tracked.transform.position);
 		}
 
+		/// <summary>
+		/// Finishes the <see cref="Generate"/> method after the 
+		/// mesh has been created. This exists as a convenience as 
+		/// a mesh can be created asynchronously or synchronously but 
+		/// the logic afterwards is the same.
+		/// </summary>
+		internal void PostGenerateCalcHeightmap() {
+			MeshManager.SetTerrainHeightmap(Config.Generator.UseCoroutineForHeightmap && !TerraConfig.IsInEditMode, true, () => {
+				bool multithreaded = Config.Generator.UseMultithreading;
+				MeshManager.ActiveTerrain.enabled = !multithreaded;
+				
+				Painter.Paint(multithreaded, () => {
+					MeshManager.ActiveTerrain.enabled = true;
+                    Detailer.AddTrees();
+				});
+			});
+		}
 		public override string ToString() {
 			return "Tile[" + GridPosition.X + ", " + GridPosition.Z + "]";
 		}

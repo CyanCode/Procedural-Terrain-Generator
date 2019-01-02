@@ -41,6 +41,40 @@ namespace Terra.Terrain {
 			return tex;
 		}
 
+        public DetailNode[] GetAllTreeNodes() {
+            List<DetailNode> trees = new List<DetailNode>();
+
+            foreach (BiomeNode biome in _combiner.GetConnectedBiomeNodes()) {
+                var treeNodes = biome.GetTreeNodes();
+                
+                if (treeNodes != null) {
+                    trees.AddRange(treeNodes);
+                }
+            }
+
+            return trees.ToArray();
+        }
+
+        /// <summary>
+        /// Samples the passed biomemap at the passed normalized 
+        /// x & y coordinates.
+        /// </summary>
+        /// <param name="x">normalized x coordinate</param>
+        /// <param name="y">normalized y coordinate</param>
+        /// <returns></returns>
+        public float[] SampleBiomeMapAt(float[,,] map, float x, float y) {
+            int res = map.GetLength(0);
+            int sx = Mathf.Clamp(Mathf.RoundToInt(x * res), 0, res - 1);
+            int sy = Mathf.Clamp(Mathf.RoundToInt(y * res), 0, res - 1);
+
+            float[] result = new float[map.GetLength(2)];
+            for (int i = 0; i < result.Length; i++) {
+                result[i] = map[sx, sy, i];
+            }
+
+            return result;
+        }
+
 		/// <summary>
 		/// Generates a map of biomes constructed from connected biome nodes.
 		/// </summary>

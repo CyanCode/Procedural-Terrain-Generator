@@ -18,21 +18,11 @@ namespace Terra {
 		/// Internal TerraSettings instance to avoid finding when its not needed
 		/// </summary>
 		private static TerraConfig _instance;
-
-		public static int GenerationSeed = 1337;
-
-		public TerraGraph Graph;
-
+        
 		//Topology Generation
+		public TerraGraph Graph;
 		public GenerationData Generator;
-
-		//Detail
-		public ShaderData ShaderData;
-		public List<BiomeData> BiomesData;
-		public List<DetailData> Details;
-
-		public TessellationData Tessellation;
-		public GrassData Grass;
+		public int Seed = 1337;
 
 		//Editor state information
 		public EditorStateData EditorState;
@@ -69,11 +59,6 @@ namespace Terra {
 			IsInitialized = true;
 			 
 			if (Generator == null) Generator = new GenerationData();
-			if (ShaderData == null) ShaderData = new ShaderData(); 
-			if (BiomesData == null) BiomesData = new List<BiomeData>();
-			if (Details == null) Details = new List<DetailData>();
-			if (Tessellation == null) Tessellation = new TessellationData();
-			if (Grass == null) Grass = new GrassData();
 			if (EditorState == null) EditorState = new EditorStateData();
 		}
 
@@ -111,9 +96,9 @@ namespace Terra {
 
 			//Set seed for RNG
 			if (!Generator.UseRandomSeed)
-				Random.InitState(GenerationSeed);
+				Random.InitState(Seed);
 			else
-				GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
+				Seed = new System.Random().Next(0, Int32.MaxValue);
 			
 			//Allows for update to continue
 			Generator.GenerateOnStart = true;
@@ -131,9 +116,9 @@ namespace Terra {
 
 			//Set seed for RNG
 			if (!Generator.UseRandomSeed)
-				Random.InitState(GenerationSeed);
+				Random.InitState(Seed);
 			else
-				GenerationSeed = new System.Random().Next(0, Int32.MaxValue);
+				Seed = new System.Random().Next(0, Int32.MaxValue);
 
 			Generator.Pool.ResetQueue(); 
 			Generator.Pool.Update();
@@ -219,12 +204,9 @@ namespace Terra {
 
 			bool isCenter00 = !Application.isPlaying && Application.isEditor || Generator.TrackedObject == null;
 			Vector3 worldXYZ = Generator.TrackedObject == null ? Vector3.zero : Generator.TrackedObject.transform.position;
-			Vector3 worldXZ = new Vector2(worldXYZ.x, worldXYZ.z);
 
-			var lod = Generator.Lod;
-			var tileLength = Generator.Length;
-			//var lvlType = lod.GetLevelForRadius((int)position.Distance(new GridPosition(worldXZ, tileLength)));
-			var lvlType = lod.GetLevelForPosition(position, worldXYZ);
+			LodData lod = Generator.Lod;
+			LodData.Lod lvlType = lod.GetLevelForPosition(position, worldXYZ);
 
 			return lvlType.PreviewColor;
 		}

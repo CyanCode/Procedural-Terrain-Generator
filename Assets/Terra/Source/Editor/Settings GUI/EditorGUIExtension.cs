@@ -4,7 +4,7 @@ using System;
 using Terra.Structures;
 using Terra.ReorderableList;
 using Terra.ReorderableList.Internal;
-using Terra.Terrain;
+using XNodeEditor;
 
 public static class EditorGUIExtension {
 	public static GUIStyle StyleButtonToggled {
@@ -26,19 +26,15 @@ public static class EditorGUIExtension {
 	/// to be greater than the max OR the max to be smaller than 
 	/// the min.
 	/// </summary>
-	/// <param name="name">Name of control</param>
-	/// <param name="min">min value</param>
-	/// <param name="max">max value</param>
+	/// <param label="label">Name of control</param>
+	/// <param label="min">min value</param>
+	/// <param label="max">max value</param>
 	/// <returns>Created Vector2</returns>
-	public static Vector2 MinMaxVector2(string name, float min, float max) {
-		//Clamp
-		min = min > max ? max : min;
-		max = max < min ? min : max;
+	public static Vector2 MinMaxVector2(string label, Vector2 value, float min, float max) {
+		value.x = Mathf.Clamp(value.x, min, max);
+	    value.y = Mathf.Clamp(value.y, min, max);
 
-		Vector2 v = new Vector2(min, max);
-		EditorGUILayout.Vector2Field(name, v);
-
-		return v;
+        return EditorGUILayout.Vector2Field(label, value);
 	}
 
 	/// <summary>
@@ -166,10 +162,10 @@ public static class EditorGUIExtension {
 	/// <returns>
 	/// Toggle state
 	/// </returns>
-	/// <param name='state'>
+	/// <param label='state'>
 	/// If set to <c>true</c> state.
 	/// </param>
-	/// <param name='label'>
+	/// <param label='label'>
 	/// If set to <c>true</c> label.
 	/// </param>
 	public static bool ToggleButton(bool state, string label) {
@@ -213,16 +209,80 @@ public static class EditorGUIExtension {
 		EditorGUILayout.EndVertical();
 	}
 
-	/// <summary>
-	/// Draws the UI for a constraint using a range slider between the 
-	/// passed min and max values
-	/// </summary>
-	public static Constraint DrawConstraintRange(string text, Constraint constraint, float min, float max) {
+    public static void DrawMinMax(string label, ref float min, ref float max) {
+        min = min > max ? max : min;
+        max = max < min ? min : max;
+
+        EditorGUILayout.LabelField(label);
+        const int lblWidth = 30;
+        const float indent = 15;
+        float fieldWidth = 45;
+
+        Rect ctrl = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
+        ctrl.x += indent;
+        ctrl.width -= indent;
+
+        Rect minLbl = ctrl;
+        minLbl.width = lblWidth;
+        EditorGUI.LabelField(minLbl, "Min");
+
+        Rect minField = minLbl;
+        minField.width = fieldWidth;
+        minField.x += minLbl.width;
+        min = EditorGUI.FloatField(minField, GUIContent.none, min);
+
+        Rect maxLbl = minLbl;
+        maxLbl.x = minField.x + fieldWidth + 5;
+        EditorGUI.LabelField(maxLbl, "Max");
+
+        Rect maxField = maxLbl;
+        maxField.width = fieldWidth;
+        maxField.x += maxLbl.width;
+        max = EditorGUI.FloatField(maxField, GUIContent.none, max);
+    }
+
+    public static void DrawMinMax(string label, ref int min, ref int max) {
+        min = min > max ? max : min;
+        max = max < min ? min : max;
+
+        EditorGUILayout.LabelField(label);
+        const int lblWidth = 30;
+        const float indent = 15;
+        float fieldWidth = 42;
+
+        Rect ctrl = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
+        ctrl.x += indent;
+        ctrl.width -= indent;
+
+        Rect minLbl = ctrl;
+        minLbl.width = lblWidth;
+        EditorGUI.LabelField(minLbl, "Min");
+
+        Rect minField = minLbl;
+        minField.width = fieldWidth;
+        minField.x += minLbl.width;
+        min = EditorGUI.IntField(minField, GUIContent.none, min);
+
+        Rect maxLbl = minLbl;
+        maxLbl.x = minField.x + fieldWidth + 5;
+        EditorGUI.LabelField(maxLbl, "Max");
+
+        Rect maxField = maxLbl;
+        maxField.width = fieldWidth;
+        maxField.x += maxLbl.width;
+        max = EditorGUI.IntField(maxField, GUIContent.none, max);
+    }
+
+    /// <summary>
+    /// Draws the UI for a constraint using a range slider between the 
+    /// passed min and max values
+    /// </summary>
+    public static Constraint DrawConstraintRange(string text, Constraint constraint, float min, float max) {
 		float minConst = constraint.Min;
 		float maxConst = constraint.Max;
 		EditorGUILayout.MinMaxSlider(text, ref minConst, ref maxConst, min, max, GUILayout.ExpandWidth(true));
 
-		GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
+        GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
 		EditorGUILayout.LabelField("[" + constraint.Min.ToString("F1") + "," + constraint.Max.ToString("F1") + "]", style);
 
 		return new Constraint(minConst, maxConst);
@@ -248,34 +308,6 @@ public static class EditorGUIExtension {
 		return new Constraint(minConst, maxConst);
 	}
 
-	public static Vector3 StackedVector3(string name, Vector3 vec) {
-		float lineHeight = EditorGUIUtility.singleLineHeight;
-		float ctrlHeight = lineHeight * 3;
-		Rect ctrl = EditorGUILayout.GetControlRect(false, ctrlHeight);
-
-		//Label
-		Rect labelCtrl = ctrl;
-		labelCtrl.width = EditorGUIUtility.labelWidth;
-		EditorGUI.LabelField(labelCtrl, new GUIContent(name));
-
-		//Axis Label
-		const int axisLabelWidth = 15;
-		Rect axisCtrl = ctrl;
-		axisCtrl.x += EditorGUIUtility.labelWidth;
-		axisCtrl.width = axisLabelWidth;
-
-		EditorGUI.LabelField(axisCtrl, new GUIContent("X"));
-
-		//X Axis
-		Rect fieldCtrl = ctrl;
-		fieldCtrl.x += EditorGUIUtility.labelWidth + axisLabelWidth;
-		fieldCtrl.width = EditorGUIUtility.fieldWidth - axisLabelWidth;
-
-		vec.x = EditorGUI.FloatField(fieldCtrl, GUIContent.none, vec.x);
-
-		return vec;
-	}
-
 	public static Texture2D BackgroundColor(Color c) {
 		Texture2D tex = new Texture2D(1, 1);
 		tex.SetPixel(1, 1, c);
@@ -283,7 +315,33 @@ public static class EditorGUIExtension {
 		return tex;
 	}
 
-	public struct TerraStyle {
+    public static float MinMaxFloatField(string label, float value, float min, float max) {
+        float v = EditorGUILayout.FloatField(label, value);
+
+        if (v < min) {
+            v = min;
+        }
+        if (v > max) {
+            v = max;
+        }
+
+        return v;
+    }
+
+    public static int MinMaxIntField(string label, int value, int min, int max) {
+        int v = EditorGUILayout.IntField(label, value);
+
+        if (v < min) {
+            v = min;
+        }
+        if (v > max) {
+            v = max;
+        }
+
+        return v;
+    }
+
+    public struct TerraStyle {
 		public const int TITLE_FONT_SIZE = 12;
 		public const int NODE_LABEL_WIDTH = 120;
 

@@ -37,13 +37,11 @@ namespace UnityEditor.Terra {
 
 					break;
 				case ToolbarOptions.Biomes:
-					_gui.Biomes();
 
-					break;
+				    break;
 				case ToolbarOptions.Details:
-					_gui.Details();
 
-					break;
+				    break;
 			}
 
 			//Preview button

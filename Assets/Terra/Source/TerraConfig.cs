@@ -14,10 +14,10 @@ namespace Terra {
 	public class TerraConfig: MonoBehaviour {
 		public static bool IsInitialized;
 
-		/// <summary>
-		/// Internal TerraSettings instance to avoid finding when its not needed
-		/// </summary>
-		private static TerraConfig _instance;
+        /// <summary>
+        /// TerraConfig singleton instance
+        /// </summary>
+        private static TerraConfig _instance;
         
 		//Topology Generation
 		public TerraGraph Graph;
@@ -26,11 +26,12 @@ namespace Terra {
 
 		//Editor state information
 		public EditorStateData EditorState;
-		 
-		/// <summary>
-		/// Finds the active TerraConfig instance in this scene if one exists.
-		/// </summary>
-		public static TerraConfig Instance {
+
+        /// <returns>
+        /// TerraConfig singleton or null if TerraConfig does not 
+        /// exist in the scene.
+        /// </returns>
+        public static TerraConfig Instance {
 			get {
 				if (_instance != null) {
 					return _instance;
@@ -202,7 +203,7 @@ namespace Terra {
 			if (Generator == null || Generator.Lod == null)
 				return Color.white;
 
-			bool isCenter00 = !Application.isPlaying && Application.isEditor || Generator.TrackedObject == null;
+
 			Vector3 worldXYZ = Generator.TrackedObject == null ? Vector3.zero : Generator.TrackedObject.transform.position;
 
 			LodData lod = Generator.Lod;

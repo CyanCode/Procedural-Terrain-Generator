@@ -30,9 +30,8 @@ public static class EditorGUIExtension {
 	/// <param label="min">min value</param>
 	/// <param label="max">max value</param>
 	/// <returns>Created Vector2</returns>
-	public static Vector2 MinMaxVector2(string label, Vector2 value, float min, float max) {
-		value.x = Mathf.Clamp(value.x, min, max);
-	    value.y = Mathf.Clamp(value.y, min, max);
+	public static Vector2 MinMaxVector2(string label, Vector2 value) {
+        value.x = value.x > value.y ? value.y : value.x;
 
         return EditorGUILayout.Vector2Field(label, value);
 	}

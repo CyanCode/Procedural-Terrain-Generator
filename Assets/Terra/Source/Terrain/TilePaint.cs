@@ -172,7 +172,10 @@ namespace Terra.Terrain {
 			if (BiomeMap == null)
 				return;
 
-			Splats = Combiner.GetConnectedBiomeNodes().SelectMany(b => b.GetSplatObjects()).ToArray();
-		}
+            Splats = Combiner.GetConnectedBiomeNodes()
+                .Where(b => b.GetSplatInputs() != null)
+                .SelectMany(b => b.GetSplatInputs())
+                .ToArray();
+        }
 	}
 }

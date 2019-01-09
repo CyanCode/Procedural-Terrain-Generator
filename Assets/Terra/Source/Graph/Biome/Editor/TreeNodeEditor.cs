@@ -6,7 +6,7 @@ using XNodeEditor;
 namespace Terra.Graph {
 	[CustomNodeEditor(typeof(TreeDetailNode))]
 	public class TreeNodeEditor: PreviewableNodeEditor {
-		private TreeDetailNode TreeDetailNode {
+		public TreeDetailNode TreeDetailNode {
 			get {
 				return (TreeDetailNode)target;
 			}
@@ -14,7 +14,7 @@ namespace Terra.Graph {
 
 	    public override void OnBodyGUI() {
             NodeEditorGUILayout.PortField(TreeDetailNode.GetOutputPort("Output"));
-			PlaceableObjectField.Show(this);
+			DetailField.Show(this);
 	        PreviewField.Show(TreeDetailNode);
         }
 

@@ -1,79 +1,36 @@
 ﻿using System.Collections.Generic;
-using Terra.Structures;
 using UnityEngine;
 using XNode;
 
 namespace Terra.Graph.Biome {
-    [CreateNodeMenu("Biomes/Propagate")]
-    public class PropagateNode : DetailNode {
-        [Output]
-        public NodePort Output;
-
-        [Input(ShowBackingValue.Never, ConnectionType.Override)]
-        public DetailNode PlacementNode;
-
+    [CreateNodeMenu("Biomes/Modifiers/Propagate")]
+    public class PropagateNode : DetailModifierNode {
         public float DistanceMin = 50f;
         public float DistanceMax = 30f;
 
         public int ObjectCountMin = 3;
         public int ObjectCountMax = 7;
 
-        private DetailNode _placement {
-            get {
-                return GetInputValue<DetailNode>("PlacementNode");
-            }
-        }
-
         public override object GetValue(NodePort port) {
-            var placement = GetInputValue<DetailNode>("PlacementNode");
-            return placement == null ? null : placement.GetValue(port);
+            return this;
         }
 
-        public override Texture2D DidRequestTextureUpdate() {
-            Texture2D tex = new Texture2D(PreviewTextureSize, PreviewTextureSize);
-
-            //Fill texture with black
-            for (int x = 0; x < PreviewTextureSize; x++) {
-                for (int y = 0; y < PreviewTextureSize; y++) {
-                    tex.SetPixel(x, y, Color.black);
-                }
+        public override Vector2[] SamplePositions(Vector2[] samples) {
+            DetailObjectNode obj = GetOutputValue();
+            if (obj == null) {
+                return new Vector2[0];
             }
 
-            Vector2[] samples = SamplePositions();
-            for (var i = 0; i < samples.Length; i++) {
-                Vector2 sample = samples[i];
-                int x = Mathf.Clamp((int)(sample.x * PreviewTextureSize), 0, PreviewTextureSize);
-                int y = Mathf.Clamp((int)(sample.y * PreviewTextureSize), 0, PreviewTextureSize);
-
-                tex.SetPixel(x, y, Color.white);
-
-                if (i >= _placement.GetPlaceableObject().MaxObjects) {
-                    break;
-                }
-            }
-
-            tex.Apply();
-            return tex;
-        }
-
-        public override Vector2[] SamplePositions() {
-            Vector2[] startPositions = _placement.SamplePositions();
-
-            int totalMaxObjs = _placement.GetPlaceableObject().MaxObjects;
-            if (startPositions.Length >= totalMaxObjs) {
-                return startPositions;
-            }
-
-            List<Vector2> positions = new List<Vector2>(startPositions.Length);
-            foreach (Vector2 pos in startPositions) {
+            List<Vector2> positions = new List<Vector2>(samples.Length);
+            foreach (Vector2 pos in samples) {
                 for (int i = 0; i < Random.Range(ObjectCountMin, ObjectCountMax + 1); i++) {
-                    if (positions.Count >= totalMaxObjs) {
+                    if (positions.Count >= obj.MaxObjects) {
                         return positions.ToArray();
                     }
 
                     //Calculate random rotation & offset
-                    float min = DistanceMin / GRID_SIZE;
-                    float max = DistanceMax / GRID_SIZE;
+                    float min = DistanceMin / GridSize;
+                    float max = DistanceMax / GridSize;
 
                     Vector2 offset = GetRandomInCircle(pos, min, max);
                     float x = offset.x;
@@ -86,10 +43,6 @@ namespace Terra.Graph.Biome {
             }
 
             return positions.ToArray();
-        }
-
-        public override DetailData GetPlaceableObject() {
-            return _placement.GetPlaceableObject();
         }
 
         private Vector2 GetRandomInCircle(Vector2 center, float min, float max) {

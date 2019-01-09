@@ -4,35 +4,20 @@ using UnityEngine;
 using XNode;
 
 namespace Terra.Graph.Biome { 
-	[Serializable, CreateNodeMenu("Biomes/Details/Tree")]
-	public class TreeDetailNode: DetailNode {
-        [Output] public NodePort Output;
-
-		public DetailData Placeable;
-        public float BendFactor;
-        
-		protected override void Init() {
-			base.Init();
-
-			if (Placeable == null) {
-                Placeable = CreateInstance<DetailData>().Init(TerraConfig.Instance.Seed);
-			}
-		}
+	[Serializable, CreateNodeMenu("Biomes/Objects/Tree")]
+	public class TreeDetailNode: DetailObjectNode {
+        public GameObject Prefab;
+        public bool RandomRotation;
 
         public TreeInstance GetTreeInstance(Vector3 position, int prototypeIndex) {
             return new TreeInstance {
                 position = position,
-                heightScale = Placeable.GetScale().y,
-                rotation = Placeable.GetRotation().y,
-                widthScale = Placeable.GetScale().x,
+                heightScale = GetRandomHeight(),
+                widthScale = GetRandomWidthScale(),
+                rotation = UnityEngine.Random.Range(0, Mathf.PI * 2),
+                color = Color.white,
+                lightmapColor = Color.white,
                 prototypeIndex = prototypeIndex
-            };
-        }
-
-        public TreePrototype GetTreePrototype() {
-            return new TreePrototype {
-                bendFactor = BendFactor,
-                prefab = Placeable.Prefab
             };
         }
 
@@ -40,43 +25,11 @@ namespace Terra.Graph.Biome {
             return this;
         }
 
-        public override Texture2D DidRequestTextureUpdate() {
-			Texture2D tex = new Texture2D(PreviewTextureSize, PreviewTextureSize);
-
-            //Fill texture with black
-            for (int x = 0; x < PreviewTextureSize; x++) {
-                for (int y = 0; y < PreviewTextureSize; y++) {
-                    tex.SetPixel(x, y, Color.black);
-                }
-            }
-
-            Vector2[] samples = SamplePositions();
-            for (var i = 0; i < samples.Length; i++) {
-                Vector2 sample = samples[i];
-                int x = Mathf.Clamp((int)(sample.x * PreviewTextureSize), 0, PreviewTextureSize);
-                int y = Mathf.Clamp((int)(sample.y * PreviewTextureSize), 0, PreviewTextureSize);
-
-                tex.SetPixel(x, y, Color.white);
-
-                if (i >= Placeable.MaxObjects) {
-                    break;
-                }
-            }
-
-            tex.Apply();
-            return tex;
-		}
-
-	    public override Vector2[] SamplePositions() {
-	        //Fill in sampled spots
-	        DetailSampler sampler = new DetailSampler(Placeable);
-	        Vector2[] samples = sampler.GetPoissonGridSamples(GRID_SIZE);
-
-	        return samples;
+	    public virtual object GetDetailPrototype() {
+	        return new TreePrototype {
+	            bendFactor = BendFactor,
+	            prefab = Prefab
+	        };
         }
-
-	    public override DetailData GetPlaceableObject() {
-            return Placeable;
-	    }
 	}
 }

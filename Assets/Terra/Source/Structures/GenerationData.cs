@@ -29,6 +29,7 @@ namespace Terra.Structures {
 
 		public float BiomeBlendAmount = 1f;
 		public float BiomeFalloff = 1f;
+        public int DetailMapResolution = 1024;
 
 		public TilePool Pool;
 

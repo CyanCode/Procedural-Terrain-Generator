@@ -40,6 +40,13 @@ namespace Terra.Structures {
 			Max = max;
 		}
 
+        /// <summary>
+        /// Returns a random number in the range of min and max
+        /// </summary>
+        public float Random() {
+            return UnityEngine.Random.Range(Min, Max);
+        }
+
 		/// <summary>
 		/// Does the passed value fit within the min and max?
 		/// </summary>

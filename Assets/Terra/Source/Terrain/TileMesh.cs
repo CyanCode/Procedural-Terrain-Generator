@@ -95,11 +95,6 @@ namespace Terra.Terrain {
 		[SerializeField]
 		private LodData.Lod _lastGeneratedLodLevel;
 
-		/// <summary>
-		/// If this TileMesh needs to update its generator
-		/// </summary>
-		private bool _genNeedsUpdating = true;
-
 		private static readonly object _asyncMeshLock;
 
 		static TileMesh() {

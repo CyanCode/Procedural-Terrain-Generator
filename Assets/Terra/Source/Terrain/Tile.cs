@@ -196,6 +196,7 @@ namespace Terra.Terrain {
 				Painter.Paint(multithreaded, () => {
 					MeshManager.ActiveTerrain.enabled = true;
                     Detailer.AddTrees();
+                    Detailer.AddDetailLayers();
 				});
 			});
 		}

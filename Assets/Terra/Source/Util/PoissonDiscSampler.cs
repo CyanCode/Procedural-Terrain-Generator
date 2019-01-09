@@ -26,7 +26,7 @@ namespace Terra.Util {
 		private readonly float cellSize;
 		private Vector2[,] grid;
 		private List<Vector2> activeSamples = new List<Vector2>();
-        private int seed;
+
 
 		/// Create a sampler with the following parameters:
 		///
@@ -39,7 +39,6 @@ namespace Terra.Util {
 			cellSize = radius / Mathf.Sqrt(2);
 			grid = new Vector2[Mathf.CeilToInt(width / cellSize),
 							   Mathf.CeilToInt(height / cellSize)];
-            this.seed = seed;
 		}
 
 		/// Return a lazy sequence of samples. You typically want to call this in a foreach loop, like so:

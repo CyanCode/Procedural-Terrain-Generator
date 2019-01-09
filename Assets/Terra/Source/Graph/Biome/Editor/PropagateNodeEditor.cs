@@ -23,7 +23,7 @@ namespace Terra.Graph {
 
         public override void OnBodyGUI() {
             NodeEditorGUILayout.PortField(_propagate.GetOutputPort("Output"));
-            NodeEditorGUILayout.PortField(_propagate.GetInputPort("PlacementNode"));
+            NodeEditorGUILayout.PortField(_propagate.GetInputPort("DetailNode"));
 
             //Object count min max
             EditorGUI.BeginChangeCheck();
@@ -34,8 +34,6 @@ namespace Terra.Graph {
             if (EditorGUI.EndChangeCheck()) {
                 serializedObject.ApplyModifiedProperties();
             }
-
-            PreviewField.Show(_propagate);
         }
 
         public override void ShouldShowPreviewGenerator() { }

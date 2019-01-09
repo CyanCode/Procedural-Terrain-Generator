@@ -1,6 +1,5 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Combination;
-using UnityEngine;
 
 namespace Terra.Graph.Generators.Modifiers {
 	[CreateNodeMenu(AbsTwoModNode.MENU_PARENT_NAME + "Mask")]

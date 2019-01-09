@@ -14,9 +14,24 @@ namespace Terra.Structures {
 			Max = max;
 		}
 	}
-
+    
 	public static class MathUtil {
-		public static float Map(float value, float minOld, float maxOld, float minNew, float maxNew) {
+	    /// <summary>
+	    /// Converts normalized coordinates to world coordinates
+	    /// </summary>
+	    /// <param name="gp">Current grid position of this Tile</param>
+	    /// <param name="normal">Normalized coordinates</param>
+	    /// <returns>World coordinates</returns>
+	    public static Vector2 NormalToWorld(GridPosition gp, Vector2 normal) {
+	        int length = TerraConfig.Instance.Generator.Length;
+
+	        float wx = (normal.x * length) + (gp.X * length);
+	        float wy = (normal.y * length) + (gp.Z * length);
+
+	        return new Vector2(wx, wy);
+	    }
+
+        public static float Map(float value, float minOld, float maxOld, float minNew, float maxNew) {
 			return minNew + (value - minOld) * (maxNew - minNew) / (maxOld - minOld);
 		}
 
@@ -39,6 +54,7 @@ namespace Terra.Structures {
 
 			return new MinMaxResult(min, max);
 		}
+
 		public static MinMaxResult MinMax(float[,] values) {
 			float min = float.PositiveInfinity;
 			float max = float.NegativeInfinity;

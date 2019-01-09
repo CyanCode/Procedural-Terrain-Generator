@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Terra.Graph.Generators;
 using Terra.Structures;
 using Terra.Terrain;
@@ -54,9 +51,12 @@ namespace Terra.Graph.Biome {
 		public SplatDetailNode SplatDetails;
 
         [Input(ShowBackingValue.Never)]
-        public DetailNode Trees;
+        public TreeDetailNode Trees;
 
-		[Input]
+        [Input(ShowBackingValue.Never)]
+        public GrassDetailNode Grass;
+
+        [Input]
 		public float Blend = 1f;
 
 		[Input(ShowBackingValue.Never, ConnectionType.Override)] 
@@ -86,38 +86,20 @@ namespace Terra.Graph.Biome {
 			return GetPreviewTexture(PreviewTextureSize);
 		}
 
-		public SplatDetailNode[] GetSplatObjects() {
+		public SplatDetailNode[] GetSplatInputs() {
 			return GetInputValues<SplatDetailNode>("SplatDetails", null);
 		}
-
-        /// <summary>
-        /// Creates a list of ObjectPlacementNodes added as inputs to <see cref="Trees"/>. 
-        /// If any connected nodes don't extend from <see cref="TreeDetailNode"/> an 
-        /// error is logged and null is returned.
-        /// 
-        /// <see cref="DetailNode"/> is returned because a modifier may be connected 
-        /// and its placement values will need to be sampled. To get the connected 
-        /// <see cref="TreeDetailNode"/>'s value call <see cref="Node.GetValue"/>
-        /// </summary>
-        /// <returns></returns>
-        public DetailNode[] GetTreeNodes() {
-            DetailNode[] placementNodes = GetInputValues<DetailNode>("Trees", null);
-
-            if (placementNodes == null) {
-                return null;
-            }
-
-            foreach (DetailNode node in placementNodes) {
-                if (!(node is TreeDetailNode)) {
-                    Debug.LogError("All trees in added to biome must be an instance of 'TreeNode', " +
-                                   node.GetType() + " provided instead");
-                    return null;
-                }
-            }
-
-            return placementNodes;
+        
+        /// <returns>All connected Tree inputs</returns>
+        public TreeDetailNode[] GetTreeInputs() {
+            return GetInputValues<TreeDetailNode>("Trees");
         }
 
+	    /// <returns>All connected Grass inputs</returns>
+        public GrassDetailNode[] GetGrassInputs() {
+            return GetInputValues<GrassDetailNode>("Grass");
+        }
+        
 		/// <summary>
 		/// Gets the heights for the height, temperature, and moisture maps. If 
 		/// a map isn't used, 0 is set for its value. The returned float structure 
@@ -162,7 +144,7 @@ namespace Terra.Graph.Biome {
 				return null;
 			}
 
-			//Constraints
+			//Constraint
 			Constraint hc = new Constraint(HeightmapMinMaxMask.x, HeightmapMinMaxMask.y);
 			Constraint tc = new Constraint(TemperatureMinMaxMask.x, TemperatureMinMaxMask.y);
 			Constraint mc = new Constraint(MoistureMinMaxMask.x, MoistureMinMaxMask.y);
@@ -173,10 +155,6 @@ namespace Terra.Graph.Biome {
 			//Normalize values
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
-					if (y == 100 && x == 110) {
-						int asd = 1;
-					}
-
 					if (!UseHeightmap && !UseTemperature && !UseMoisture) {
 						map[x, y] = 1f;
 						continue;

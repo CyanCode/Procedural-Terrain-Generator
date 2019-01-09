@@ -41,20 +41,6 @@ namespace Terra.Terrain {
 			return tex;
 		}
 
-        public DetailNode[] GetAllTreeNodes() {
-            List<DetailNode> trees = new List<DetailNode>();
-
-            foreach (BiomeNode biome in _combiner.GetConnectedBiomeNodes()) {
-                var treeNodes = biome.GetTreeNodes();
-                
-                if (treeNodes != null) {
-                    trees.AddRange(treeNodes);
-                }
-            }
-
-            return trees.ToArray();
-        }
-
         /// <summary>
         /// Samples the passed biomemap at the passed normalized 
         /// x & y coordinates.

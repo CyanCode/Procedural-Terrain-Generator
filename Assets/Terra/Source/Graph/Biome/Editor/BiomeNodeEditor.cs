@@ -43,6 +43,9 @@ namespace Terra.Graph {
             //Trees
             NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Trees"), new GUIContent("Trees"));
 
+            //Grass
+            NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Grass"), new GUIContent("Grass"));
+
 			//Show Preview
 			PreviewField.Show(Bn);
 

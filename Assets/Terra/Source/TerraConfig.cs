@@ -26,6 +26,9 @@ namespace Terra {
 
 		//Editor state information
 		public EditorStateData EditorState;
+        
+        internal bool IsEditor;
+        internal string DataPath;
 
         /// <returns>
         /// TerraConfig singleton or null if TerraConfig does not 
@@ -61,10 +64,15 @@ namespace Terra {
 			 
 			if (Generator == null) Generator = new GenerationData();
 			if (EditorState == null) EditorState = new EditorStateData();
+
+            IsEditor = IsInEditMode;
 		}
 
 		void Start() {
-			CreateMTD();
+		    IsEditor = IsInEditMode;
+            DataPath = Application.dataPath;
+
+            CreateMTD();
 
 			if (Generator.GenerateOnStart) {
 				Generate();
@@ -75,8 +83,7 @@ namespace Terra {
 			if (!IsInitialized) return;
 
 			if (Application.isPlaying && Generator.Pool != null && Generator.GenerateOnStart) {
-				//Generator.Pool.ResetQueue();
-				Generator.Pool.Update();
+                Generator.Pool.Update();
 			}
 		}
 
@@ -110,6 +117,8 @@ namespace Terra {
 		/// to the editor.
 		/// </summary>
 		public void GenerateEditor() {
+            CreateMTD();
+
 			//Set default tracked object
 			if (Generator.TrackedObject == null) {
 				Generator.TrackedObject = Camera.main.gameObject;
@@ -263,7 +272,7 @@ namespace Terra {
 			/// <summary>
 			/// Whether to show Debug.Log messages from Terra
 			/// </summary>
-			public const bool SHOW_DEBUG_MESSAGES = true;
+			public const bool SHOW_DEBUG_MESSAGES = false;
 		}
 	}
 }

@@ -45,7 +45,7 @@ namespace Terra.Graph.Biome {
         /// objects. Top of curve = 100% chance of placing the object,
         /// bottom of curve = 0% chance of placing the object.
         /// </summary>
-        public AnimationCurve HeightProbCurve;
+        public AnimationCurve HeightProbCurve = AnimationCurve.Linear(0, 1, 1, 1);
 
         /// <summary>
         /// Angle curve to evaluate when procedurally placing 
@@ -53,7 +53,7 @@ namespace Terra.Graph.Biome {
         /// bottom of curve = 0% chance of placing the object.
         /// Evaluates from 0 - 90 degrees.
         /// </summary>
-        public AnimationCurve AngleProbCurve;
+        public AnimationCurve AngleProbCurve = AnimationCurve.Linear(0, 1, 90, 1);
 
         public AbsGeneratorNode GetMaskValue() {
             return GetInputValue<AbsGeneratorNode>("Mask");
@@ -144,19 +144,16 @@ namespace Terra.Graph.Biome {
         /// <param name="angle">Angle to sample</param>
         /// <returns></returns>
         public bool EvaluateAngle(float angle) {
-            float probability = 1f;
-
             if (ConstrainAngle) {
                 float totalAngle = AngleConstraint.Max - AngleConstraint.Min;
                 float sampleAt = (angle + AngleConstraint.Max) / totalAngle;
 
-                probability = AngleProbCurve.Evaluate(sampleAt);
-            } else {
-                return true;
+                float probability = AngleProbCurve.Evaluate(sampleAt);
+                float chance = UnityEngine.Random.Range(0f, 1f);
+                return chance > 1 - probability;
             }
 
-            float chance = UnityEngine.Random.Range(0f, 1f);
-            return chance > 1 - probability;
+            return true;
         }
 
         public override object GetValue(NodePort port) {

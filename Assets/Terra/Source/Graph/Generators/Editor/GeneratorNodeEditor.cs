@@ -32,7 +32,7 @@ namespace Terra.Graph {
 		}
 
 		public override Color GetTint() {
-			return Constants.TintNoise;
+			return EditorColors.TintNoise;
 		}
 	}
 }

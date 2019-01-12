@@ -80,9 +80,8 @@ namespace Terra.Terrain {
 
                     foreach (Vector2 sample in samples) {
                         float[] biomeWeights = combiner.Sampler.SampleBiomeMapAt(BiomeMap, sample.x, sample.y);
-                        float thisBiomeWeight = biomeWeights[i];
 
-                        if (thisBiomeWeight < DETAIL_SHOW_THRESHHOLD) {
+                        if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
                             continue; //Not in this biome, skip
                         }
 
@@ -116,7 +115,7 @@ namespace Terra.Terrain {
         public void AddDetailLayers() {
             BiomeCombinerNode combiner = _tile.Painter.Combiner;
             BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
-            int res = TerraConfig.Instance.Generator.DetailMapResolution;
+            int res = TerraConfig.Instance.Generator.DetailmapResolution;
 
             //Collect prototypes
             GrassDetailNode[] allDetailNodes = biomeNodes
@@ -135,61 +134,40 @@ namespace Terra.Terrain {
             for (int i = 0; i < biomeNodes.Length; i++) {
                 //Collect all details for this biome
                 BiomeNode biome = biomeNodes[i];
-                GrassDetailNode[] detailNodes = 
-                    biome.GetGrassInputs()
-                    .ToArray();
+                GrassDetailNode[] grassNodes = biome.GetGrassInputs();
 
-                if (detailNodes.Length == 0) { //A biome may contain no grass or object nodes
+                if (grassNodes.Length == 0) { //A biome may contain no grass nodes
                     continue;
                 }
 
-                foreach (GrassDetailNode grassNode in detailNodes) {
+                foreach (GrassDetailNode grassNode in grassNodes) {
                     int[,] layer = new int[res, res];
-//
-//                    if (grassNode.CoverTerrain) {
-//                        for (var x = 0; x < res; x++) {
-//                            for (var z = 0; z < res; z++) {
-//                                float nx = x / (float)res;
-//                                float ny = z / (float)res;
-//                                float amp = TerraConfig.Instance.Generator.Amplitude;
-//
-//                                float height = _terrain.terrainData.GetInterpolatedHeight(nx, ny) / amp;
-//                                float angle = Vector3.Angle(Vector3.up, _terrain.terrainData.GetInterpolatedNormal(nx, ny));
-//                                Vector2 world = NormalToWorld(new Vector2(nx, ny));
-//
-//                                if (grassNode.ShouldPlaceAt(world.x, world.y, height, angle)) {
-//                                    layer[x, z] = 1; //Display object
-//                                }
-//                            }
-//                        }
-//                    } else {
-                        //Get map of normalized placement positions
-                        Vector2[] samples = grassNode.SamplePositions();
-                        foreach (Vector2 sample in samples) {
-                            float[] biomeWeights = combiner.Sampler.SampleBiomeMapAt(BiomeMap, sample.x, sample.y);
-                            float thisBiomeWeight = biomeWeights[i];
 
-                            if (thisBiomeWeight < DETAIL_SHOW_THRESHHOLD) {
-                                continue; //Not in this biome, skip
-                            }
+                    //Get map of normalized placement positions
+                    Vector2[] samples = grassNode.SamplePositions();
+                    foreach (Vector2 sample in samples) {
+                        float[] biomeWeights = combiner.Sampler.SampleBiomeMapAt(BiomeMap, sample.x, sample.y);
 
-                            //Check whether an object can be placed here
-                            float height = _terrain.terrainData.GetInterpolatedHeight(sample.x, sample.y) /
-                                           TerraConfig.Instance.Generator.Amplitude;
-                            float angle = Vector3.Angle(Vector3.up,
-                                _terrain.terrainData.GetInterpolatedNormal(sample.x, sample.y));
-                            Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, sample);
-
-                            if (grassNode.ShouldPlaceAt(world.x, world.y, height, angle)) {
-                                //Convert normalized x,y coordinates to positions in layer map
-                                Vector2 sampleWorld = sample * res;
-                                int x = Mathf.Clamp(Mathf.RoundToInt(sampleWorld.x), 0, res - 1);
-                                int y = Mathf.Clamp(Mathf.RoundToInt(sampleWorld.y), 0, res - 1);
-
-                                layer[x, y] = 1; //Display object here
-                            }
+                        if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
+                            continue; //Not in this biome, skip
                         }
-//                    }
+
+                        //Check whether an object can be placed here
+                        float height = _terrain.terrainData.GetInterpolatedHeight(sample.x, sample.y) /
+                                        TerraConfig.Instance.Generator.Amplitude;
+                        float angle = Vector3.Angle(Vector3.up,
+                            _terrain.terrainData.GetInterpolatedNormal(sample.x, sample.y));
+                        Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, sample);
+
+                        if (grassNode.ShouldPlaceAt(world.x, world.y, height, angle)) {
+                            //Convert normalized x,y coordinates to positions in layer map
+                            Vector2 sampleWorld = sample * res;
+                            int x = Mathf.Clamp(Mathf.RoundToInt(sampleWorld.x), 0, res - 1);
+                            int y = Mathf.Clamp(Mathf.RoundToInt(sampleWorld.y), 0, res - 1);
+
+                            layer[y, x] = 1; //Display object here
+                        }
+                    }
 
                     _terrain.terrainData.SetDetailLayer(0, 0, prototypeIndex, layer);
                     prototypeIndex++;

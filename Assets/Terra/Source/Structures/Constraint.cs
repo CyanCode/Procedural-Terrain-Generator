@@ -87,5 +87,18 @@ namespace Terra.Structures {
 
 			return value;
 		}
-	}
+
+	    public Constraint Clamp(Constraint to) {
+	        Constraint from = new Constraint(Min, Max);
+
+	        if (from.Min < to.Min) {
+	            from.Min = to.Min;
+	        }
+	        if (from.Max > to.Max) {
+	            from.Max = to.Max;
+	        }
+
+	        return from;
+	    }
+    }
 }

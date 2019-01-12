@@ -9,18 +9,36 @@ namespace Terra.Structures {
 		public float Min;
 		public float Max;
 
+        //TODO replace with Constraint
 		public MinMaxResult(float min, float max) {
 			Min = min;
 			Max = max;
 		}
+
+        public MinMaxResult Clamp(MinMaxResult to) {
+            MinMaxResult from = new MinMaxResult(Min, Max);
+
+            if (from.Min < to.Min) {
+                from.Min = to.Min;
+            }
+            if (from.Max > to.Max) {
+                from.Max = to.Max;
+            }
+
+            return from;
+        }
+
+        public Constraint ToConstraint() {
+            return new Constraint(Min, Max);
+        }
 	}
     
 	public static class MathUtil {
 	    /// <summary>
 	    /// Converts normalized coordinates to world coordinates
 	    /// </summary>
-	    /// <param name="gp">Current grid position of this Tile</param>
-	    /// <param name="normal">Normalized coordinates</param>
+	    /// <param path="gp">Current grid position of this Tile</param>
+	    /// <param path="normal">Normalized coordinates</param>
 	    /// <returns>World coordinates</returns>
 	    public static Vector2 NormalToWorld(GridPosition gp, Vector2 normal) {
 	        int length = TerraConfig.Instance.Generator.Length;
@@ -161,11 +179,6 @@ namespace Terra.Structures {
 			WriteTexture(tex, path);
 		}
 
-		private static void WriteTexture(Texture2D tex, string path) {
-			byte[] encoded = tex.EncodeToJPG(100);
-			File.WriteAllBytes(path, encoded);
-		}
-
 		public static void WriteMap(float[,,] values, string path) {
 			StringBuilder sb = new StringBuilder();
 			for (int x = 0; x < values.GetLength(0); x++) {
@@ -187,6 +200,11 @@ namespace Terra.Structures {
 			}
 			
 			File.WriteAllText(path, sb.ToString());
+		}
+
+		private static void WriteTexture(Texture2D tex, string path) {
+			byte[] encoded = tex.EncodeToJPG(100);
+			File.WriteAllBytes(path, encoded);
 		}
 
 		private static void Loop(float[,] values, Action<int, int> operation) {

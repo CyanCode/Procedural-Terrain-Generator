@@ -15,7 +15,7 @@ namespace Terra.Graph {
 		}
 
 		public override Color GetTint() {
-			return Constants.TintEnd;
+			return EditorColors.TintEnd;
 		}
 	}
 }

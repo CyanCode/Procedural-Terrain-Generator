@@ -182,7 +182,9 @@ namespace Terra.Graph.Biome {
 
             for (int x = 0; x < UniformResolution; x++) {
                 for (int y = 0; y < UniformResolution; y++) {
-                    samples.Add(new Vector2(x / (float) UniformResolution, y / (float) UniformResolution));
+                    float fx = Mathf.Clamp01(x / (float)UniformResolution);
+                    float fy = Mathf.Clamp01(y / (float)UniformResolution);
+                    samples.Add(new Vector2(fx, fy));
                 }
             }
 

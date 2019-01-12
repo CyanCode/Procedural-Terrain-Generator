@@ -139,7 +139,7 @@ namespace Terra.Terrain {
 			t.Generate(() => {
 				AddTile(t);
 				onComplete(t);
-			}, Config.Generator.UseMultithreading, RemapMin, RemapMax);
+			}, RemapMin, RemapMax);
 		}
 
 		/// <summary>
@@ -184,10 +184,13 @@ namespace Terra.Terrain {
 			_remapMax = max;
 
 			sw.Stop();
+		    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+#pragma warning disable 162
 			if (TerraConfig.TerraDebug.SHOW_DEBUG_MESSAGES) {
 				Debug.Log("CalculateHeightmapRemap took " + sw.ElapsedMilliseconds + "ms to complete. " +
 				          "New min=" + min + " New max=" + max);
 			}
+#pragma warning restore 162
 		}
 
 		/// <summary>

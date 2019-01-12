@@ -14,11 +14,7 @@ namespace Terra.Structures {
 
 		public bool GenerateOnStart = true;
 		public bool UseRandomSeed = false;
-		public bool UseMultithreading = true;
 		public bool UseCoroutineForHeightmap = true;
-
-		public float ColliderGenerationExtent = 50f;
-		public bool GenAllColliders = false;
 
 		public LodData Lod;
 		public int LodCount = 0;
@@ -29,7 +25,16 @@ namespace Terra.Structures {
 
 		public float BiomeBlendAmount = 1f;
 		public float BiomeFalloff = 1f;
-        public int DetailMapResolution = 1024;
+        public int DetailmapResolution = 1024;
+        public int DetailResolutionPerPatch = 16;
+        public int SplatmapResolution = 1024;
+
+        public int DetailDistance = 80;
+        public float DetailDensity = 1f;
+        public int TreeDistance = 2000;
+        public int BillboardStart = 50;
+        public int FadeLength = 5;
+        public int MaxMeshTrees = 50;
 
 		public TilePool Pool;
 

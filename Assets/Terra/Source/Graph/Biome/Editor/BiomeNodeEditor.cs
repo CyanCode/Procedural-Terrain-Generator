@@ -57,7 +57,7 @@ namespace Terra.Graph {
 		}
 
 		public override Color GetTint() {
-			return Constants.TintBiome;
+			return EditorColors.TintBiome;
 		}
 
 		/// <summary>

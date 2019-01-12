@@ -5,7 +5,7 @@ namespace Terra.Graph {
 	[CustomNodeEditor(typeof(AbsTwoModNode))]
 	abstract class ModNodeEditor: PreviewableNodeEditor {
 		public override Color GetTint() {
-			return Constants.TintModifier;
+			return EditorColors.TintModifier;
 		}
 	}
 }

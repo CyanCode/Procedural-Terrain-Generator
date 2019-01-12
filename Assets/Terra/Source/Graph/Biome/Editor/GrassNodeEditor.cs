@@ -21,7 +21,7 @@ namespace Terra.Graph {
 		public override void ShouldShowPreviewGenerator() { }
 
 		public override Color GetTint() {
-			return Constants.TintValue;
+			return EditorColors.TintValue;
 		}
 
 		public override string GetTitle() {

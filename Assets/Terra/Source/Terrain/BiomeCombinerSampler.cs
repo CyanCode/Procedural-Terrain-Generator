@@ -13,6 +13,8 @@ namespace Terra.Terrain {
 		[SerializeField]
 		private BiomeCombinerNode _combiner;
 
+        private static object _asyncLock = new object();
+
 		public BiomeCombinerSampler(BiomeCombinerNode combiner) {
 			_combiner = combiner;
 		}
@@ -110,6 +112,35 @@ namespace Terra.Terrain {
 			return GetBiomeMap(position, config.Generator.Length, config.Generator.Spread, resolution);
 		}
 
+        /// <summary>
+        /// Finds the lowest and highest <see cref="Constraint"/>s in connected 
+        /// biome nodes.
+        /// </summary>
+        /// <returns></returns>
+        public MinMaxResult GetMaskConstraintMinMax() {
+            float min = 1;
+            float max = 0;
+
+            foreach (BiomeNode node in _combiner.GetConnectedBiomeNodes()) {
+                Vector2[] constraints = {
+                    node.HeightmapMinMaxMask,
+                    node.MoistureMinMaxMask,
+                    node.TemperatureMinMaxMask
+                };
+
+                foreach (Vector2 cons in constraints) {
+                    if (cons.x < min) {
+                        min = cons.x;
+                    }
+                    if (cons.y > max) {
+                        max = cons.y;
+                    }
+                }
+            }
+
+            return new MinMaxResult(min, max);
+        }
+
 		/// <summary>
 		/// Generates a map of biomes constructed from connected biome nodes.
 		/// </summary>
@@ -122,16 +153,18 @@ namespace Terra.Terrain {
 			float min = float.PositiveInfinity;
 			float max = float.NegativeInfinity;
 
-			foreach (BiomeNode biome in _combiner.GetConnectedBiomeNodes()) {
-				MinMaxResult minMax = biome.CalculateMinMax(resolution);
+            lock (_asyncLock) {
+                foreach (BiomeNode biome in _combiner.GetConnectedBiomeNodes()) {
+                    MinMaxResult minMax = biome.CalculateMinMax(resolution);
 
-				if (minMax.Min < min) {
-					min = minMax.Min;
-				}
-				if (minMax.Min > max) {
-					max = minMax.Max;
-				}
-			}
+                    if (minMax.Min < min) {
+                        min = minMax.Min;
+                    }
+                    if (minMax.Min > max) {
+                        max = minMax.Max;
+                    }
+                }
+            }
 
 			return new MinMaxResult(min, max);
 		}

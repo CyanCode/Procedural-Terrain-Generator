@@ -109,7 +109,7 @@ namespace Terra.Terrain {
 		public TileMesh(Tile tile, LodData.Lod lod) {
 			_tile = tile;
 			Lod = lod;
-		}
+        }
 
 		/// <summary>
 		/// Adds a <see cref="UnityEngine.Terrain"/> component to this <see cref="Tile"/>'s 
@@ -148,13 +148,11 @@ namespace Terra.Terrain {
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		public void CalculateHeightmap(GridPosition? gridPos = null, float remapMin = 0f, float remapMax = 1f) {
-			if (!TerraConfig.Instance.Generator.UseMultithreading) {
-				_lastGeneratedLodLevel = _tile.GetLodLevel();
-				Lod = _lastGeneratedLodLevel;
-			}
+//		    _lastGeneratedLodLevel = _tile.GetLodLevel();
+//		    Lod = _lastGeneratedLodLevel;
 
-			//Grid position
-			GridPosition pos = gridPos ?? _tile.GridPosition;
+            //Grid position
+            GridPosition pos = gridPos ?? _tile.GridPosition;
 		
 			//Heightmap
 			if (Heightmap != null && (int)Math.Sqrt(Heightmap.Length) >= HeightmapResolution)
@@ -168,9 +166,9 @@ namespace Terra.Terrain {
 			float newMax = 1 - offset;
 			GeneratorSampler sampler = new GeneratorSampler(TerraConfig.Instance.Graph.GetEndGenerator());
 
-			for (int x = 0; x < HeightmapResolution; x++) {
-				for (int z = 0; z < HeightmapResolution; z++) {
-					lock (_asyncMeshLock) {
+		    lock (_asyncMeshLock) {
+                for (int x = 0; x < HeightmapResolution; x++) {
+				    for (int z = 0; z < HeightmapResolution; z++) {
 						float height = sampler.GetValue(x, z, pos, HeightmapResolution);
 
 						//Set this instances min and max

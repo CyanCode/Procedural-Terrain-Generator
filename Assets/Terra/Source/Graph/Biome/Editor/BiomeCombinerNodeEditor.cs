@@ -49,7 +49,7 @@ namespace Terra.Graph {
 		}
 
 		public override Color GetTint() {
-			return Constants.TintBiome;
+			return EditorColors.TintBiome;
 		}
 
 		public override string GetTitle() {

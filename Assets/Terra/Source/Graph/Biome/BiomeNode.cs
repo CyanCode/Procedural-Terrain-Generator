@@ -2,6 +2,7 @@
 using Terra.Graph.Generators;
 using Terra.Structures;
 using Terra.Terrain;
+using Terra.Util;
 using UnityEngine;
 using XNode;
 
@@ -78,6 +79,8 @@ namespace Terra.Graph.Biome {
 		private GeneratorSampler _temperatureSampler;
 		private GeneratorSampler _moistureSampler;
 
+        private static object _asyncLock = new object();
+
 		public override object GetValue(NodePort port) {
 			return this;
 		}
@@ -112,23 +115,23 @@ namespace Terra.Graph.Biome {
 		/// <param name="resolution">Resolution of the map to sample for</param>
 		/// <returns></returns>
 		public float[] GetMapHeightsAt(int x, int y, GridPosition position, int resolution, float spread, int length) {
-			if (!UseHeightmap && !UseTemperature && !UseMoisture) {
-				return new[] { 1f, 1f, 1f };
-			}
+            if (!UseHeightmap && !UseTemperature && !UseMoisture) {
+                return new[] { 1f, 1f, 1f };
+            }
 
-			float[] heights = new float[3];
+            float[] heights = new float[3];
 
-			if (UseHeightmap && _heightmapSampler != null) {
-				heights[0] = _heightmapSampler.GetValue(x, y, position, resolution, spread, length);
-			}
-			if (UseTemperature && _temperatureSampler != null) {
-				heights[1] = _temperatureSampler.GetValue(x, y, position, resolution, spread, length);
-			}
-			if (UseMoisture && _moistureSampler != null) {
-				heights[2] = _moistureSampler.GetValue(x, y, position, resolution, spread, length);
-			}
+            if (UseHeightmap && _heightmapSampler != null) {
+                heights[0] = _heightmapSampler.GetValue(x, y, position, resolution, spread, length);
+            }
+            if (UseTemperature && _temperatureSampler != null) {
+                heights[1] = _temperatureSampler.GetValue(x, y, position, resolution, spread, length);
+            }
+            if (UseMoisture && _moistureSampler != null) {
+                heights[2] = _moistureSampler.GetValue(x, y, position, resolution, spread, length);
+            }
 
-			return heights;
+            return heights;
 		}
 		
 		/// <summary>
@@ -204,41 +207,50 @@ namespace Terra.Graph.Biome {
 		/// moisture maps (in that order).
 		/// </returns>
 		public BiomeMapResult GetMapsValues(GridPosition position, int resolution, float spread = -1f, int length = -1) {
-			float[,,] heights = new float[resolution, resolution, 3];
+            lock (_asyncLock) {
+                float[,,] heights = new float[resolution, resolution, 3];
 
-			//Update generators
-			SetHeightmapSampler();
-			SetTemperatureSampler();
-			SetMoistureSampler();
+                //Update generators
+                SetHeightmapSampler();
+                SetTemperatureSampler();
+                SetMoistureSampler();
 
-			//Default spread/length to TerraConfig settings
-			spread = spread == -1f ? TerraConfig.Instance.Generator.Spread : spread;
-			length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
+                //Default spread/length to TerraConfig settings
+                spread = spread == -1f ? TerraConfig.Instance.Generator.Spread : spread;
+                length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
 
-			//Track min/max
-			float min = float.PositiveInfinity;
-			float max = float.NegativeInfinity;
+                //Track min/max
+                float min = float.PositiveInfinity;
+                float max = float.NegativeInfinity;
 
-			//Fill heights structure and set min/max values
-			for (int x = 0; x < resolution; x++) {
-				for (int y = 0; y < resolution; y++) {
-					float[] generated =  GetMapHeightsAt(x, y, position, resolution, spread, length);
+                //Fill heights structure and set min/max values
+                for (int x = 0; x < resolution; x++) {
+                    for (int y = 0; y < resolution; y++) {
+                        float[] generated = GetMapHeightsAt(x, y, position, resolution, spread, length);
 
-					for (int z = 0; z < 3; z++) {
-						float height = generated[z];
-						heights[x, y, z] = height;
+                        for (int z = 0; z < 3; z++) {
+                            float height = generated[z];
+                            heights[x, y, z] = height;
 
-						if (height < min) {
-							min = height;
-						}
-						if (height > max) {
-							max = height;
-						}
-					}
-				}
-			}
+                            if (height < min) {
+                                min = height;
+                            }
+                            if (height > max) {
+                                max = height;
+                            }
+                        }
+                    }
+                }
 
-			return new BiomeMapResult(heights, min, max);
+                //todo remove
+                if (position.X == 1 && position.Z == 0) {
+                    MTDispatch.Instance().Enqueue(() => {
+                        MathUtil.WriteDebugTexture(heights, Application.dataPath + "/" + Name + ".jpg");
+                    });
+                }
+
+                return new BiomeMapResult(heights, min, max);
+            }
 		}
 
 		/// <summary>

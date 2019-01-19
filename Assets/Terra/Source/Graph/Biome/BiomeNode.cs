@@ -57,6 +57,9 @@ namespace Terra.Graph.Biome {
         [Input(ShowBackingValue.Never)]
         public GrassDetailNode Grass;
 
+        [Input(ShowBackingValue.Never)]
+        public ObjectDetailNode Objects;
+
         [Input]
 		public float Blend = 1f;
 
@@ -101,6 +104,10 @@ namespace Terra.Graph.Biome {
 	    /// <returns>All connected Grass inputs</returns>
         public GrassDetailNode[] GetGrassInputs() {
             return GetInputValues<GrassDetailNode>("Grass");
+        }
+
+        public ObjectDetailNode[] GetObjectInputs() {
+            return GetInputValues<ObjectDetailNode>("Objects");
         }
         
 		/// <summary>

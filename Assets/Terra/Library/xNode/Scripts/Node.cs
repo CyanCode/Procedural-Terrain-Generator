@@ -60,6 +60,8 @@ namespace XNode {
         /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
+//        public bool IsExpanded = true;
+
         protected void OnEnable() {
             UpdateStaticPorts();
             Init();

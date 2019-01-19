@@ -9,6 +9,10 @@ using XNodeEditor;
 namespace Terra.Graph.Fields {
     [Serializable]
     public static class DetailField {
+        public static void Show(ObjectDetailNodeEditor objectNode) {
+
+        }
+
         public static void Show(TreeNodeEditor treeNode) {
             EditorGUI.BeginChangeCheck();
 
@@ -54,13 +58,13 @@ namespace Terra.Graph.Fields {
             }
         }
 
-        private static void Show(DetailObjectNode obj, Action beforeProperties = null) {
+        private static void Show(DetailNode obj, Action beforeProperties = null) {
             //General
             NodeEditorGUILayout.PortField(obj.GetInputPort("Constraint"));
             NodeEditorGUILayout.PortField(obj.GetInputPort("Modifier"));
             
-            obj.DistributionType = (DetailObjectNode.Distribution) EditorGUILayout.EnumPopup("Distribution", obj.DistributionType);
-            if (obj.DistributionType == DetailObjectNode.Distribution.PoissonDisc) { 
+            obj.DistributionType = (DetailNode.Distribution) EditorGUILayout.EnumPopup("Distribution", obj.DistributionType);
+            if (obj.DistributionType == DetailNode.Distribution.PoissonDisc) { 
                 obj.Spread = EditorGUIExtension.MinMaxFloatField("Spread", obj.Spread, 1f, 50f);
             } else {
                 obj.UniformResolution = EditorGUIExtension.MinMaxIntField("Resolution", obj.UniformResolution, 2, 1024);

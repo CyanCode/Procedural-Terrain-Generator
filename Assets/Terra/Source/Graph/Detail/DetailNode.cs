@@ -18,20 +18,20 @@ namespace Terra.Graph.Biome {
 
         public abstract Vector2[] SamplePositions(Vector2[] samples);
 
-        protected DetailObjectNode GetOutputValue() {
+        protected DetailNode GetOutputValue() {
             NodePort port = GetOutputPort("Output");
             if (port == null || port.Connection == null) {
                 return null;
             }
 
-            var val = port.Connection.node as DetailObjectNode;
+            var val = port.Connection.node as DetailNode;
 
             return val;
         }
     }
 
     [Serializable]
-    public abstract class DetailObjectNode : PreviewableNode {
+    public abstract class DetailNode : PreviewableNode {
         public enum Distribution {
             PoissonDisc, Uniform
         }

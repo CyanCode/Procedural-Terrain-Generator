@@ -107,11 +107,18 @@ namespace Terra.Terrain {
 
 			//Cache current LOD
 			MeshManager.CalculateHeightmapAsync(() => {
-				PostGenerateCalcHeightmap();
+			    MeshManager.SetTerrainHeightmap(Config.Generator.UseCoroutineForHeightmap && !TerraConfig.IsInEditMode, true, () => {
 
-				if (onComplete != null) {
-					onComplete();
-				}
+			        Painter.Paint(() => {
+			            MeshManager.ActiveTerrain.enabled = true;
+			            Detailer.AddTrees();
+			            Detailer.AddDetailLayers();
+
+			            if (onComplete != null) {
+			                onComplete();
+			            }
+                    });
+			    });
 			}, remapMin, remapMax);
 		}
 
@@ -183,14 +190,7 @@ namespace Terra.Terrain {
 		/// the logic afterwards is the same.
 		/// </summary>
 		internal void PostGenerateCalcHeightmap() {
-			MeshManager.SetTerrainHeightmap(Config.Generator.UseCoroutineForHeightmap && !TerraConfig.IsInEditMode, true, () => {
-				
-				Painter.Paint(() => {
-					MeshManager.ActiveTerrain.enabled = true;
-                    Detailer.AddTrees();
-                    Detailer.AddDetailLayers();
-				});
-			});
+			
 		}
 		public override string ToString() {
 			return "Tile[" + GridPosition.X + ", " + GridPosition.Z + "]";

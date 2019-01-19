@@ -16,7 +16,7 @@ namespace Terra.Graph.Biome {
         }
 
         public override Vector2[] SamplePositions(Vector2[] samples) {
-            DetailObjectNode obj = GetOutputValue();
+            DetailNode obj = GetOutputValue();
             if (obj == null) {
                 return new Vector2[0];
             }

@@ -21,7 +21,7 @@ namespace Terra.Graph {
 
 			//Biome Name
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Name"), new GUIContent("Biome Name"));
-
+             
 			//Preview Color
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("PreviewColor"), new GUIContent("Preview Color"));
 

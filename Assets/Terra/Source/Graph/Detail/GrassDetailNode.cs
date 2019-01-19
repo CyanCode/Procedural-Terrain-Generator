@@ -4,7 +4,7 @@ using XNode;
 
 namespace Terra.Graph.Biome { 
 	[Serializable, CreateNodeMenu("Biomes/Objects/Grass")]
-	public class GrassDetailNode : DetailObjectNode {
+	public class GrassDetailNode : DetailNode {
         public DetailRenderMode RenderMode;
 
         public Texture2D Texture;

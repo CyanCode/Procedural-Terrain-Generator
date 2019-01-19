@@ -220,8 +220,7 @@ namespace Terra.Graph.Biome {
                 length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
 
                 //Track min/max
-                float min = float.PositiveInfinity;
-                float max = float.NegativeInfinity;
+                MinMaxRecorder minMax = new MinMaxRecorder();
 
                 //Fill heights structure and set min/max values
                 for (int x = 0; x < resolution; x++) {
@@ -231,25 +230,20 @@ namespace Terra.Graph.Biome {
                         for (int z = 0; z < 3; z++) {
                             float height = generated[z];
                             heights[x, y, z] = height;
-
-                            if (height < min) {
-                                min = height;
-                            }
-                            if (height > max) {
-                                max = height;
-                            }
+                            minMax.Register(height);
                         }
                     }
                 }
 
                 //todo remove
-                if (position.X == 1 && position.Z == 0) {
-                    MTDispatch.Instance().Enqueue(() => {
-                        MathUtil.WriteDebugTexture(heights, Application.dataPath + "/" + Name + ".jpg");
-                    });
-                }
+//                if (position.X == 1 && position.Z == 0) {
+//                    MTDispatch.Instance().Enqueue(() => {
+//                        MathUtil.WriteDebugTexture(heights, Application.dataPath + "/" + Name + ".jpg");
+//                    });
+//                }
 
-                return new BiomeMapResult(heights, min, max);
+                MinMaxResult result = minMax.GetMinMax();
+                return new BiomeMapResult(heights, result.Min, result.Max);
             }
 		}
 

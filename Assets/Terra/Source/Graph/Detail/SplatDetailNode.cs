@@ -20,6 +20,8 @@ namespace Terra.Graph.Biome {
 
 		public ConstraintMixMethod MixMethod = ConstraintMixMethod.AND;
 
+        public float Blend = 0.05f;
+
 		public override object GetValue(NodePort port) {
 			return this;
 		}

@@ -259,11 +259,27 @@ public static class EditorGUIExtension {
 		return new Constraint(minConst, maxConst);
 	}
 
-	/// <summary>
-	/// Draws the UI for a constraint using a range slider between the 
-	/// passed min and max values
-	/// </summary>
-	public static Constraint DrawConstraintRange(Rect pos, string text, Constraint constraint, float min, float max) {
+    /// <summary>
+    /// Draws the UI for a constraint using a range slider between the 
+    /// passed min and max values
+    /// </summary>
+    public static Constraint DrawConstraintRange(string text, Constraint constraint, float min, float max, float multiply) {
+        float minConst = constraint.Min;
+        float maxConst = constraint.Max;
+        EditorGUILayout.MinMaxSlider(text, ref minConst, ref maxConst, min, max, GUILayout.ExpandWidth(true));
+
+        GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
+        EditorGUILayout.LabelField("[" + (constraint.Min * multiply).ToString("F1") + "," +
+            (constraint.Max * multiply).ToString("F1") + "]", style);
+
+        return new Constraint(minConst, maxConst);
+    }
+
+    /// <summary>
+    /// Draws the UI for a constraint using a range slider between the 
+    /// passed min and max values
+    /// </summary>
+    public static Constraint DrawConstraintRange(Rect pos, string text, Constraint constraint, float min, float max) {
 		float minConst = constraint.Min;
 		float maxConst = constraint.Max;
 		EditorGUI.MinMaxSlider(pos, text, ref minConst, ref maxConst, min, max);

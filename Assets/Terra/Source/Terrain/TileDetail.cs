@@ -174,5 +174,13 @@ namespace Terra.Terrain {
                 }
             }
         }
+
+        /// <summary>
+        /// Adds objects from all biomes to the scene. Objects are 
+        /// stored in an object pool.
+        /// </summary>
+        public void AddObjects() {
+
+        }
     }
 }

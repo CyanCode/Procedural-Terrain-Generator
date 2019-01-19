@@ -1,11 +1,10 @@
 ﻿using Terra.Graph.Biome;
 using Terra.Graph.Fields;
-using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
 
 namespace Terra.Graph {
-    [CustomEditor(typeof(ObjectDetailNode))]
+    [CustomNodeEditor(typeof(ObjectDetailNode))]
     public class ObjectDetailNodeEditor : PreviewableNodeEditor {
         public ObjectDetailNode ObjectDetailNode {
             get {
@@ -24,8 +23,9 @@ namespace Terra.Graph {
         }
 
         public override string GetTitle() {
-            return "Grass";
+            return "Object";
         }
+
         public override void ShouldShowPreviewGenerator() { }
     }
 }

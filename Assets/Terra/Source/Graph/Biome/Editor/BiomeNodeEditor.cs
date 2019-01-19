@@ -24,7 +24,7 @@ namespace Terra.Graph {
              
 			//Preview Color
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("PreviewColor"), new GUIContent("Preview Color"));
-
+            
 			//Blend
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Blend"));
 
@@ -45,6 +45,9 @@ namespace Terra.Graph {
 
             //Grass
             NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Grass"), new GUIContent("Grass"));
+
+            //Objects
+            NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Objects"));
 
 			//Show Preview
 			PreviewField.Show(Bn);

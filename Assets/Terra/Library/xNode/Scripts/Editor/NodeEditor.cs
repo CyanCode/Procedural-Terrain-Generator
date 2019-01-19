@@ -21,8 +21,8 @@ namespace XNodeEditor {
 	        EditorStyles.label.normal.textColor = Color.white;
 
 			OnHeaderGUI();
+//            if (target.IsExpanded)
             OnBodyGUI();
-
 
 			EditorStyles.label.normal = labelStyle.normal;
 		}
@@ -31,6 +31,21 @@ namespace XNodeEditor {
             GUI.color = Color.white;
 			string title = GetTitle();
             GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+//
+//            const int buttonWidth = 25;
+//            Rect ctrl = new Rect {
+//                y = 15,
+//                x = GetWidth() - buttonWidth - 5,
+//                width = buttonWidth,
+//                height = 8
+//            };
+//
+//            var up = Resources.Load<Texture2D>("arrow_up");
+//            var down = Resources.Load<Texture2D>("arrow_down");
+//            var show = target.IsExpanded ? up : down;
+//            if (GUI.Button(ctrl, show, GUIStyle.none)) {
+//                target.IsExpanded = !target.IsExpanded;
+//            }
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>

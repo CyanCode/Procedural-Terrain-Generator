@@ -5,7 +5,7 @@ using XNode;
 
 namespace Terra.Graph.Biome { 
 	[Serializable, CreateNodeMenu("Biomes/Objects/Tree")]
-	public class TreeDetailNode: DetailObjectNode {
+	public class TreeDetailNode: DetailNode {
         public GameObject Prefab;
         public bool RandomRotation;
 

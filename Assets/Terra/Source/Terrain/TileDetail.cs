@@ -79,7 +79,7 @@ namespace Terra.Terrain {
                     Vector2[] samples = treeNode.SamplePositions();
 
                     foreach (Vector2 sample in samples) {
-                        float[] biomeWeights = combiner.Sampler.SampleBiomeMapAt(BiomeMap, sample.x, sample.y);
+                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(BiomeMap, sample.x, sample.y);
 
                         if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
                             continue; //Not in this biome, skip
@@ -146,7 +146,7 @@ namespace Terra.Terrain {
                     //Get map of normalized placement positions
                     Vector2[] samples = grassNode.SamplePositions();
                     foreach (Vector2 sample in samples) {
-                        float[] biomeWeights = combiner.Sampler.SampleBiomeMapAt(BiomeMap, sample.x, sample.y);
+                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(BiomeMap, sample.x, sample.y);
 
                         if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
                             continue; //Not in this biome, skip

@@ -51,9 +51,9 @@ namespace Terra.Graph.Biome {
         /// Angle curve to evaluate when procedurally placing 
         /// objects. Top of curve = 100% chance of placing the object,
         /// bottom of curve = 0% chance of placing the object.
-        /// Evaluates from 0 - 90 degrees.
+        /// Evaluates from 0 - 1 where 1 = 90 degrees.
         /// </summary>
-        public AnimationCurve AngleProbCurve = AnimationCurve.Linear(0, 1, 90, 1);
+        public AnimationCurve AngleProbCurve = AnimationCurve.Linear(0, 1, 1, 1);
 
         public AbsGeneratorNode GetMaskValue() {
             return GetInputValue<AbsGeneratorNode>("Mask");

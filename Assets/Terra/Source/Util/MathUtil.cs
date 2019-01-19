@@ -31,7 +31,46 @@ namespace Terra.Structures {
         public Constraint ToConstraint() {
             return new Constraint(Min, Max);
         }
-	}
+
+        public override string ToString() {
+            return "Min: " + Min + " Max: " + Max;
+        }
+    }
+
+    /// <summary>
+    /// Used for tracking min/max values
+    /// </summary>
+    public class MinMaxRecorder {
+        private float _min = float.PositiveInfinity;
+        private float _max = float.NegativeInfinity;
+
+        /// <summary>
+        /// Sets the internal min and/or max values to the passed value 
+        /// if the passed value &lt; internal min and/or the passed 
+        /// value &gt; internal max.
+        /// </summary>
+        public void Register(float value) {
+            if (value < _min) {
+                _min = value;
+            }
+            if (value > _max) {
+                _max = value;
+            }
+        }
+
+        /// <returns>Returns the set min/max values after calls to <see cref="Register"/></returns>
+        public MinMaxResult GetMinMax() {
+            return new MinMaxResult(_min, _max);
+        }
+
+        /// <summary>
+        /// Resets the internally tracked min/max values 
+        /// </summary>
+        public void Reset() {
+            _min = float.PositiveInfinity;
+            _max = float.NegativeInfinity;
+        }
+    }
     
 	public static class MathUtil {
 	    /// <summary>

@@ -62,6 +62,9 @@ namespace Terra.Graph {
 			//Tiling/Offset
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Tiling"));
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Offset"));
+
+            //Blend
+            NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Blend"));
 		}
 
 		public override string GetTitle() {

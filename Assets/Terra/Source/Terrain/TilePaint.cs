@@ -32,6 +32,8 @@ namespace Terra.Terrain {
 		public float[,,] BiomeMap;
 	    public BiomeCombinerNode Combiner;
 
+        private static object _lock = new object();
+
 		private UnityEngine.Terrain _terrain {
 			get {
 				return _tile.GetComponent<UnityEngine.Terrain>();
@@ -60,51 +62,26 @@ namespace Terra.Terrain {
 	    /// <param name="onComplete">Optional callback called after painting the terrain</param>
 	    public void Paint(Action onComplete = null) {
 			ThreadPool.QueueUserWorkItem(d => { //Worker thread 
-				BiomeMap = Combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
+                lock (_lock) {
+                    BiomeMap = Combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
+                }
 
 				MTDispatch.Instance().Enqueue(() => {
-					PostCreateBiomeMap();
+				    if (BiomeMap == null) {
+				        Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
+				        return;
+				    }
 
-					if (onComplete != null) {
+				    SetSplatPrototypes();
+				    SetAlphamap();
+				    ApplyAlphamap();
+
+                    if (onComplete != null) {
 						onComplete();
 					}
 				});
 			});
 		}
-
-//        void SetSplatWeightFor(BiomeNode[] biomes, int x, int y, float height, float angle) {
-//            SplatDetailNode[] splats = biomes.SelectMany(bn => bn.GetSplatInputs()).ToArray();
-//            float[] weights = new float[splats.Length];
-//            float sum = 0f;
-//
-//            //Biomes at the end of "connected" array overlay previous biomes
-//            int splatIdx = 0;
-//            for (int i = 0; i < biomes.Length; i++) {
-//                float bweight = BiomeMap[x, y, i];
-//                SplatDetailNode[] inputs = biomes[i].GetSplatInputs();
-//
-//                //Calculate individual "splat weight"
-//                int offsetSize = splatIdx + inputs.Length;
-//                for (int si = splatIdx; si < offsetSize; si++) {
-//                    if (sum >= 1f) {
-//                        //No remaining weight to assign, terminate
-//                        break;
-//                    }
-//                    if (i == inputs.Length - 1) {
-//                        //All remaining weight goes to last idx 
-//                        weights[i] = 1 - sum;
-//                        break;
-//                    }
-//
-//                    sum += remapped;
-//                    weights[i] = remapped;
-//                }
-//
-//                splatIdx += inputs.Length;
-//            }
-//
-//            return weights;
-//        }
 
         /// <summary>
         /// Calculates the <see cref="Alphamap"/> for this <see cref="Tile"/>. 
@@ -118,106 +95,114 @@ namespace Terra.Terrain {
 			BiomeNode[] biomes = Combiner.GetConnectedBiomeNodes();
             Constraint minMaxMask = Combiner.Sampler.GetMaskConstraintMinMax().ToConstraint();
 
-			float min = float.PositiveInfinity;
-			float max = float.NegativeInfinity;
-
-            //todo remove
-            float mi = float.PositiveInfinity;
-            float ma = float.NegativeInfinity;
-            //todo remove
-
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
-                    Vector2 norm = new Vector2(x / (float)resolution, y / (float)resolution);
-				    Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, norm);
+                    float[] weights = GetSplatWeights(x, y, biomes, resolution);
 
-				    float height = _terrain.terrainData.GetInterpolatedHeight(norm.x, norm.y) /
-				                   TerraConfig.Instance.Generator.Amplitude;
-				    float angle = Vector3.Angle(Vector3.up,
-				        _terrain.terrainData.GetInterpolatedNormal(norm.x, norm.y));
-                    //limit the height of splat to height of biome
-                    //find the max and min transition height for all biomes
-                    //add method to biomecombinersampler?
-
-                    for (int z = 0; z < biomes.Length; z++) {
-                        SplatDetailNode[] splats = biomes[z].GetSplatInputs();
-
-                        for (var i = 0; i < splats.Length; i++) {
-                            //If no constraint, display
-                            SplatDetailNode splat = splats[i];
-                            ConstraintNode cons = splat.GetConstraintValue();
-                            if (cons == null) {
-                                Alphamap[y, x, i + z] = BiomeMap[x, y, z];
-                                continue;
-                            }
-
-                            //Constrain Height to this biome
-                            cons.HeightConstraint = cons.HeightConstraint.Clamp(minMaxMask);
-
-                            if (splat.ShouldPlaceAt(world.x, world.y, height, angle)) {
-
-
-
-                                //Check whether this SplatData fits required height and angle constraints
-                                bool passHeight = cons.ConstrainHeight && cons.HeightConstraint.Fits(height) || !cons.ConstrainHeight;
-                                bool passAngle = cons.ConstrainAngle && cons.AngleConstraint.Fits(angle) || !cons.ConstrainAngle;
-
-                                if (!passHeight && !passAngle) {
-                                    continue;
-                                }
-
-                                //If it passes height or angle constraints what are the texturing weights
-                                float weight = 0;
-                                int count = 0;
-                                if (passHeight) {
-                                    weight += cons.HeightConstraint.Weight(height, TerraConfig.Instance.Generator.BiomeBlendAmount);
-                                    count++;
-                                }
-                                if (passAngle) {
-                                    float w = cons.AngleConstraint.Weight(angle, 0.1f);
-                                    //w /= 90;
-                                    //todo remove
-                                    if (w < mi) {
-                                        mi = w;
-                                    }
-                                    if (w > ma) {
-                                        ma = w;
-                                    }
-                                    //todo remove
-
-                                    weight += w;
-                                    count++;
-                                }
-
-                                weight /= count;
-                                weight *= BiomeMap[x, y, z];
-
-                                //Blend the bottom with the top
-                                if (i + z > 0) {
-                                    Alphamap[y, x, i + z - 1] = 1 - weight;
-                                    Alphamap[y, x, i + z] = weight;
-                                } else {
-                                    Alphamap[y, x, i + z] = 1f;
-                                }
-                            }
-                        }
-
-                        if (BiomeMap[x, y, z] < min) {
-                            min = BiomeMap[x, y, z];
-                        }
-                        if (BiomeMap[x, y, z] > max) {
-                            max = BiomeMap[x, y, z];
-                        }
+                    //Normalize weights before assigning to Alphamap
+                    float sum = weights.Sum();
+                    for (var i = 0; i < weights.Length; i++) {
+                        Alphamap[y, x, i] = weights[i] / sum;
                     }
-
-                   // SetSplatWeightFor(biomes, x, y, height, angle);
 				}
 			}
-            //todo remove
+            
+//            //todo remove
             if (_tile.GridPosition.X == 1 && _tile.GridPosition.Z == 0) {
-                Debug.Log("min " + mi + "    max " + ma);
+                Debug.Log("Angle: " + angleRec.GetMinMax());
+                Debug.Log("Height: " + heightRec.GetMinMax());
+
+//                MTDispatch.Instance().Enqueue(() => {
+//                    MathUtil.WriteDebugTexture(BiomeMap, Application.dataPath + "/biome.jpg");
+//                });
             }
-            //todo remove
+//            //todo remove
+        }
+
+        MinMaxRecorder angleRec = new MinMaxRecorder();
+        MinMaxRecorder heightRec = new MinMaxRecorder();
+        private float[] GetSplatWeights(int x, int y, BiomeNode[] biomes, int resolution) {
+            float[] weights = new float[Splats.Length];
+            Vector2 norm = new Vector2(x / (float)resolution, y / (float)resolution);
+            Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, norm);
+
+            float height = _terrain.terrainData.GetInterpolatedHeight(norm.x, norm.y) /
+                           TerraConfig.Instance.Generator.Amplitude;
+            float angle = Vector3.Angle(Vector3.up,
+                              _terrain.terrainData.GetInterpolatedNormal(norm.x, norm.y)) / 90;
+            angleRec.Register(angle);
+            heightRec.Register(height);
+            for (int z = 0; z < biomes.Length; z++) {
+                SplatDetailNode[] splats = biomes[z].GetSplatInputs();
+
+                float[] splatsWeights = new float[splats.Length];
+                float curMax = 1f;
+                float oldMax = 1f;
+                float sum = 0f;
+
+                for (var i = 0; i < splats.Length; i++) {
+                    //If no constraint, display
+                    SplatDetailNode splat = splats[i];
+                    ConstraintNode cons = splat.GetConstraintValue();
+                    if (cons == null) {
+                        splatsWeights[i] = BiomeMap[x, y, z];
+                        continue;
+                    }
+
+                    //Check whether this SplatData fits required height and angle constraints
+                    bool passHeight = cons.ConstrainHeight && cons.HeightConstraint.Fits(height) || !cons.ConstrainHeight;
+                    bool passAngle = cons.ConstrainAngle && cons.AngleConstraint.Fits(angle) || !cons.ConstrainAngle;
+
+                    if (!passHeight && !passAngle || !splat.ShouldPlaceAt(world.x, world.y, height, angle)) {
+                        continue;
+                    }
+
+                    //If it passes height or angle constraints what are the texturing weights
+                    float weight = 0;
+                    int count = 0;
+
+                    if (passHeight && !passAngle) {
+                        weight += cons.HeightConstraint.Weight(height, splat.Blend);
+                        count++;
+                    }
+                    if (passAngle) {
+                        weight += cons.AngleConstraint.Weight(angle, splat.Blend);
+                        count++;
+                    }
+
+                    splatsWeights[i] = weight / count;
+                }
+
+                for (int i = 0; i < splats.Length; i++) {
+                    float val = splatsWeights[i];
+                    float remapped = MathUtil.Map(val, 0f, oldMax, 0f, curMax);
+
+                    if (sum >= 1f) {
+                        //No remaining weight to assign, terminate
+                        break;
+                    }
+                    if (i == splats.Length - 1) {
+                        //All remaining weight goes to last idx 
+                        splatsWeights[i] = 1 - sum;
+                        break;
+                    }
+
+                    sum += remapped;
+                    splatsWeights[i] = remapped;
+                    oldMax = curMax;
+                    curMax = 1 - remapped;
+                }
+
+                for (int i = 0; i < splats.Length; i++) {
+                    splatsWeights[i] *= BiomeMap[x, y, z];
+                }
+
+                for (int i = 0; i < splatsWeights.Length; i++) {
+                    weights[i + z] = splatsWeights[i];
+                }
+            }
+
+            return weights;
         }
 
         /// <summary>
@@ -250,21 +235,6 @@ namespace Terra.Terrain {
 			}
 
 			_terrain.terrainData.splatPrototypes = prototypes;
-		}
-
-		/// <summary>
-		/// Continuation of <see cref="Paint"/>'s logic after the biome map
-		/// has been calculated asynchronously or synchronously.
-		/// </summary>
-		private void PostCreateBiomeMap() {
-			if (BiomeMap == null) {
-				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
-				return;
-			}
-
-			SetSplatPrototypes();
-			SetAlphamap();
-			ApplyAlphamap();
 		}
 
 		/// <summary>

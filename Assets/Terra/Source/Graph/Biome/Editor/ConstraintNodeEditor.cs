@@ -55,11 +55,11 @@ namespace Terra.Graph {
 
             if (cons.ConstrainAngle) {
                 EditorGUI.indentLevel = 1;
-
-                cons.AngleConstraint = EditorGUIExtension.DrawConstraintRange("Angle", cons.AngleConstraint, 0, 90);
+                
+                cons.AngleConstraint = EditorGUIExtension.DrawConstraintRange("Angle", cons.AngleConstraint, 0, 1, 90);
 
                 EditorGUILayout.BeginHorizontal();
-                cons.AngleProbCurve = EditorGUILayout.CurveField("Probability", cons.AngleProbCurve, Color.green, new Rect(0, 0, 90, 1));
+                cons.AngleProbCurve = EditorGUILayout.CurveField("Probability", cons.AngleProbCurve, Color.green, new Rect(0, 0, 1, 1));
                 if (GUILayout.Button("?", GUILayout.Width(25))) {
                     const string msg = "This is the angle probability curve. The X axis represents " +
                                         "0 to 90 degrees and the Y axis represents the probability an " +

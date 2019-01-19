@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Terra.Graph.Biome;
 using Terra.Structures;
+using Terra.Util;
 using UnityEngine;
 
 namespace Terra.Terrain {
@@ -13,7 +14,9 @@ namespace Terra.Terrain {
 		[SerializeField]
 		private BiomeCombinerNode _combiner;
 
-        private static object _asyncLock = new object();
+        private static object _minMaxLock = new object();
+        private static object _weightLock = new object();
+        private static object _valueLock = new object();
 
 		public BiomeCombinerSampler(BiomeCombinerNode combiner) {
 			_combiner = combiner;
@@ -50,7 +53,7 @@ namespace Terra.Terrain {
         /// <param name="x">normalized x coordinate</param>
         /// <param name="y">normalized y coordinate</param>
         /// <returns></returns>
-        public float[] SampleBiomeMapAt(float[,,] map, float x, float y) {
+        public float[] GetBiomeWeightsInterpolated(float[,,] map, float x, float y) {
             int res = map.GetLength(0);
             int sx = Mathf.Clamp(Mathf.RoundToInt(x * res), 0, res - 1);
             int sy = Mathf.Clamp(Mathf.RoundToInt(y * res), 0, res - 1);
@@ -77,27 +80,36 @@ namespace Terra.Terrain {
 			float[,,] biomeMap = new float[resolution, resolution, connected.Length];
 			List<float[,]> weightedBiomeValues = new List<float[,]>(biomeMap.Length);
 
-			//Gather each biome's values
-			for (var i = 0; i < connected.Length; i++) {
-				BiomeNode biome = connected[i];
-				BiomeNode.BiomeMapResult biomeResults = biome.GetMapsValues(position, resolution, spread, length);
-				if (_cachedMinMax == null) {
-					_cachedMinMax = CalculateMinMax(TerraConfig.Instance.Generator.RemapResolution);
-				}
+            //Gather each biome's values
+            lock (_valueLock) {
+                for (var i = 0; i < connected.Length; i++) {
+                    BiomeNode biome = connected[i];
+                    BiomeNode.BiomeMapResult biomeResults = biome.GetMapsValues(position, resolution, spread, length);
+                    if (_cachedMinMax == null) {
+                        _cachedMinMax = CalculateMinMax(TerraConfig.Instance.Generator.RemapResolution);
+                    }
 
-				float[,] weighted = biome.GetWeightedValues(biomeResults.Values, _cachedMinMax.Value.Min, _cachedMinMax.Value.Max);
-				weightedBiomeValues.Add(weighted);
-			}
+                    float[,] weighted = biome.GetWeightedValues(biomeResults.Values, _cachedMinMax.Value.Min, _cachedMinMax.Value.Max);
+                    weightedBiomeValues.Add(weighted);
 
-			for (int x = 0; x < resolution; x++) {
-				for (int y = 0; y < resolution; y++) {
-					float[] map = GetBiomeWeights(x, y, connected, weightedBiomeValues);
+                    //todo remove
+                                    if (biome.Name == "Grass" && position == new GridPosition(1,0)) {
+                                        MTDispatch.Instance().Enqueue(() => MathUtil.WriteDebugTexture(weighted, Application.dataPath + "/grass.jpg"));
+                                    }
+                }
+            }
 
-					for (int z = 0; z < map.Length; z++) {
-						biomeMap[x, y, z] = map[z];
-					}
-				}
-			}
+            lock (_weightLock) {
+                for (int x = 0; x < resolution; x++) {
+                    for (int y = 0; y < resolution; y++) {
+                        float[] map = CalculateBiomeWeightsAt(x, y, connected, weightedBiomeValues);
+
+                        for (int z = 0; z < map.Length; z++) {
+                            biomeMap[x, y, z] = map[z];
+                        }
+                    }
+                }
+            }
 
 			return biomeMap;
 		}
@@ -153,7 +165,7 @@ namespace Terra.Terrain {
 			float min = float.PositiveInfinity;
 			float max = float.NegativeInfinity;
 
-            lock (_asyncLock) {
+            lock (_minMaxLock) {
                 foreach (BiomeNode biome in _combiner.GetConnectedBiomeNodes()) {
                     MinMaxResult minMax = biome.CalculateMinMax(resolution);
 
@@ -169,7 +181,7 @@ namespace Terra.Terrain {
 			return new MinMaxResult(min, max);
 		}
 
-		private float[] GetBiomeWeights(int x, int y, BiomeNode[] connected, List<float[,]> individualWeights) {
+		private float[] CalculateBiomeWeightsAt(int x, int y, BiomeNode[] connected, List<float[,]> individualWeights) {
 			if (_combiner.Mix == BiomeCombinerNode.MixMethod.MAX || _combiner.Mix == BiomeCombinerNode.MixMethod.MIN) {
 				//Order from min->max or max->min
 				var selection = individualWeights

@@ -61,6 +61,7 @@ namespace Terra.Graph.Biome {
 
         private AbsGeneratorNode _cachedGeneratorNode;
         private Generator _cachedGenerator;
+        private System.Random _random = new System.Random();
 
         /// <summary>
         /// Decides whether or not this object should be placed at
@@ -129,7 +130,7 @@ namespace Terra.Graph.Biome {
                 return true;
             }
 
-            float chance = UnityEngine.Random.Range(0f, 1f);
+            float chance = _random.Next(0, 100) / (float)100;
             return chance > 1 - probability;
         }
 
@@ -149,7 +150,7 @@ namespace Terra.Graph.Biome {
                 float sampleAt = (angle + AngleConstraint.Max) / totalAngle;
 
                 float probability = AngleProbCurve.Evaluate(sampleAt);
-                float chance = UnityEngine.Random.Range(0f, 1f);
+                float chance = _random.Next(0, 100) / (float)100;
                 return chance > 1 - probability;
             }
 

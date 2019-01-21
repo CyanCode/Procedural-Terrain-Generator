@@ -289,21 +289,6 @@ namespace Terra.Terrain {
 					}
 				}));
 			} else {
-				float min = float.PositiveInfinity;
-				float max = float.NegativeInfinity;
-				for (int x = 0; x < hm.GetLength(0); x++) {
-					for (int y = 0; y < hm.GetLength(0); y++) {
-						float val = hm[x, y];
-						if (val < min) {
-							min = val;
-						}
-						if (val > max) {
-							max = val;
-						}
-					}
-				}
-				//Debug.Log(string.Format("Heightmap -- min: {0} max: {1}", min, max));
-
 				td.SetHeights(0, 0, hm);
 				td.size = new Vector3(length, conf.Generator.Amplitude, length);
 				ActiveTerrain.Flush();

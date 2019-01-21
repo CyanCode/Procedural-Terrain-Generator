@@ -37,5 +37,18 @@ namespace Terra.Terrain {
 			GenerationData gen = TerraConfig.Instance.Generator;
 			return GetValue(x, y, position, resolution, gen.Spread, gen.Length);			
 		}
-	}
+        
+	    public MinMaxResult GetRemap() {
+	        int res = TerraConfig.Instance.Generator.RemapResolution;
+	        MinMaxRecorder recorder = new MinMaxRecorder();
+
+	        for (int x = 0; x < res; x++) {
+	            for (int y = 0; y < res; y++) {
+	                recorder.Register(_generator.GetValue(x / (float)res, y / (float)res, 0));
+	            }
+	        }
+
+	        return recorder.GetMinMax();
+	    }
+    }
 }

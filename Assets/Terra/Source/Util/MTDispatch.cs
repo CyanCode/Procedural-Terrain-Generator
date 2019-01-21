@@ -233,8 +233,6 @@ namespace Terra.Util {
         public static void Beep() {
             EditorApplication.Beep();
         }
-
-        // todo create texture, load asset? Does AssetDatabase need to be dispatched? Expand me!
     }
 
     internal class EditorCoroutineRunner {

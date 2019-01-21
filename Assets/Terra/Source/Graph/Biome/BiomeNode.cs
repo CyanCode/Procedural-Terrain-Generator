@@ -1,4 +1,5 @@
 ﻿using System;
+using Terra.CoherentNoise;
 using Terra.Graph.Generators;
 using Terra.Structures;
 using Terra.Terrain;
@@ -82,6 +83,10 @@ namespace Terra.Graph.Biome {
 		private GeneratorSampler _temperatureSampler;
 		private GeneratorSampler _moistureSampler;
 
+        private MinMaxResult? _heightRemap;
+        private MinMaxResult? _temperatureRemap;
+        private MinMaxResult? _moistureRemap;
+
         private static object _asyncLock = new object();
 
 		public override object GetValue(NodePort port) {
@@ -127,15 +132,31 @@ namespace Terra.Graph.Biome {
             }
 
             float[] heights = new float[3];
+            float padding = TerraConfig.Instance.Generator.RemapPadding;
 
             if (UseHeightmap && _heightmapSampler != null) {
-                heights[0] = _heightmapSampler.GetValue(x, y, position, resolution, spread, length);
+                if (_heightRemap == null) {
+                    _heightRemap = _heightmapSampler.GetRemap();
+                }
+
+                float val = _heightmapSampler.GetValue(x, y, position, resolution, spread, length);
+                heights[0] = MathUtil.Map01(val, _heightRemap.Value.Min - padding, _heightRemap.Value.Max + padding);
             }
             if (UseTemperature && _temperatureSampler != null) {
-                heights[1] = _temperatureSampler.GetValue(x, y, position, resolution, spread, length);
+                if (_temperatureRemap == null) {
+                    _temperatureRemap = _temperatureSampler.GetRemap();
+                }
+
+                float val = _temperatureSampler.GetValue(x, y, position, resolution, spread, length);
+                heights[1] = MathUtil.Map01(val, _temperatureRemap.Value.Min - padding, _temperatureRemap.Value.Max + padding);
             }
             if (UseMoisture && _moistureSampler != null) {
-                heights[2] = _moistureSampler.GetValue(x, y, position, resolution, spread, length);
+                if (_moistureRemap == null) {
+                    _moistureRemap = _moistureSampler.GetRemap();
+                }
+
+                float val = _moistureSampler.GetValue(x, y, position, resolution, spread, length);
+                heights[2] = MathUtil.Map01(val, _moistureRemap.Value.Min - padding, _moistureRemap.Value.Max + padding);
             }
 
             return heights;
@@ -241,44 +262,37 @@ namespace Terra.Graph.Biome {
                         }
                     }
                 }
-
-                //todo remove
-//                if (position.X == 1 && position.Z == 0) {
-//                    MTDispatch.Instance().Enqueue(() => {
-//                        MathUtil.WriteDebugTexture(heights, Application.dataPath + "/" + Name + ".jpg");
-//                    });
-//                }
-
+                
                 MinMaxResult result = minMax.GetMinMax();
                 return new BiomeMapResult(heights, result.Min, result.Max);
             }
 		}
 
-		/// <summary>
-		/// Calculates the min and max result for this Biome's 
-		/// connected Generator
-		/// </summary>
-		/// <param name="resolution">resolution of remap calculation</param>
-		public MinMaxResult CalculateMinMax(int resolution) {
-			float min = float.PositiveInfinity;
-			float max = float.NegativeInfinity;
+        /// <summary>
+        /// Calculates the min and max result for this Biome's 
+        /// connected Generator
+        /// </summary>
+        /// <param name="resolution">resolution of remap calculation</param>
+        public MinMaxResult CalculateMinMax(int resolution) {
+            float min = float.PositiveInfinity;
+            float max = float.NegativeInfinity;
 
-			for (int x = 0; x < resolution; x++) {
-				for (int y = 0; y < resolution; y++) {
-					float[] heights = GetMapHeightsAt(x, y, GridPosition.Zero, resolution, resolution, 1);
-					MinMaxResult localMinMax = MathUtil.GetMinMax(heights);
-					
-					if (localMinMax.Min < min) {
-						min = localMinMax.Min;
-					}
-					if (localMinMax.Max > max) {
-						max = localMinMax.Max;
-					}
-				}
-			}
+            for (int x = 0; x < resolution; x++) {
+                for (int y = 0; y < resolution; y++) {
+                    float[] heights = GetMapHeightsAt(x, y, GridPosition.Zero, resolution, resolution, 1);
+                    MinMaxResult localMinMax = MathUtil.GetMinMax(heights);
 
-			return new MinMaxResult(min, max);
-		}
+                    if (localMinMax.Min < min) {
+                        min = localMinMax.Min;
+                    }
+                    if (localMinMax.Max > max) {
+                        max = localMinMax.Max;
+                    }
+                }
+            }
+
+            return new MinMaxResult(min, max);
+        }
 
 		/// <summary>
 		/// Creates a texture previewing this biome with the passed size used 

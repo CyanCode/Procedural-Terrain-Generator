@@ -22,6 +22,7 @@ namespace Terra {
 		//Topology Generation
 		public TerraGraph Graph;
 		public GenerationData Generator;
+        public ObjectPlacer Placer;
 		public int Seed = 1337;
 
 		//Editor state information
@@ -64,6 +65,7 @@ namespace Terra {
 			 
 			if (Generator == null) Generator = new GenerationData();
 			if (EditorState == null) EditorState = new EditorStateData();
+            if (Placer == null) Placer = new ObjectPlacer();
 
             IsEditor = IsInEditMode;
 		}

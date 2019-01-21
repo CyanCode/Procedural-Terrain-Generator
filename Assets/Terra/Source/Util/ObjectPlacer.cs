@@ -9,20 +9,25 @@ namespace Terra.Terrain {
     [Serializable]
     public class ObjectPlacer {
         private TerraConfig _config;
-        private ObjectPool Pool;
-        private bool ObserveTiles;
+
+        private ObjectPool _pool {
+            get { return _poolInternal ?? (_poolInternal = new ObjectPool()); }
+        }
+        private ObjectPool _poolInternal;
 
         public List<ObjectDetailNode> ObjectsToPlace {
             get {
-                return _objectsToPlace;
-            }
-            private set {
-                _objectsToPlace = value;
+                BiomeCombinerNode combiner = TerraConfig.Instance.Graph.GetBiomeCombiner();
+                if (combiner == null) {
+                    return null;
+                }
+
+                return combiner
+                    .GetConnectedBiomeNodes()
+                    .SelectMany(bn => bn.GetObjectInputs())
+                    .ToList();
             }
         }
-
-        [SerializeField]
-        private List<ObjectDetailNode> _objectsToPlace;
 
         /// <summary>
         /// Creates a new ObjectPlacer that uses mesh information provided 
@@ -31,25 +36,17 @@ namespace Terra.Terrain {
         /// manage the placement of tiles manually rather than displaying 
         /// and hiding when a Tile activates or deactivates.
         /// </summary>
-        /// <param name="observeTiles">Observe Tile events?</param>
-        public ObjectPlacer(bool observeTiles = true) {
-            _config = TerraConfig.Instance;
+        public ObjectPlacer() {
+            RegisterTileEventListeners();
+        }
 
-            if (_config.Graph.GetBiomeCombiner() == null) {
-                return;
-            }
-
-            ObserveTiles = observeTiles;
-            ObjectsToPlace = _config.Graph.GetBiomeCombiner()
-                .GetConnectedBiomeNodes()
-                .SelectMany(bn => bn.GetObjectInputs())
-                .ToList();
-            Pool = new ObjectPool(this);
-
-            if (ObserveTiles) {
-                TerraEvent.OnTileActivated += OnTerrainTileActivate;
-                TerraEvent.OnTileDeactivated += OnTerrainTileDeactivate;
-            }
+        /// <summary>
+        /// Registers listeners that respond to a Tile being activated 
+        /// and deactivated. Adds/removes objects accordingly.
+        /// </summary>
+        public void RegisterTileEventListeners() {
+            TerraEvent.OnTileActivated += OnTerrainTileActivate;
+            TerraEvent.OnTileDeactivated += OnTerrainTileDeactivate;
         }
 
         /// <summary>
@@ -57,7 +54,7 @@ namespace Terra.Terrain {
         /// </summary>
         /// <param name="tile">Activated tile</param>
         void OnTerrainTileActivate(Tile tile) {
-            Pool.ActivateTile(tile);
+            _pool.ActivateTile(tile);
         }
 
         /// <summary>
@@ -65,17 +62,92 @@ namespace Terra.Terrain {
         /// </summary>
         /// <param name="tile">Deactivated tile</param>
         void OnTerrainTileDeactivate(Tile tile) {
-            Pool.DeactivateTile(tile);
+            _pool.DeactivateTile(tile);
         }
     }
 
     [Serializable]
     public class ObjectPool {
+        private ObjectPlacer _placer {
+            get {
+                return TerraConfig.Instance.Placer;
+            }
+        }
+        
+        [SerializeField] private List<TileContainer> _tiles;
+
+        /// <summary>
+        /// Internal representation of <see cref="_containers"/> to 
+        /// allow for lazy loading of data
+        /// </summary>
+        private ObjectContainer[] _containersInternal;
+        private ObjectContainer[] _containers {
+            get {
+                if (_containersInternal == null) {
+                    ObjectDetailNode[] objectPlacementData = _placer.ObjectsToPlace.ToArray();
+                    _containersInternal = new ObjectContainer[objectPlacementData.Length];
+
+                    for (int i = 0; i < objectPlacementData.Length; i++) {
+                        _containersInternal[i] = new ObjectContainer(objectPlacementData[i]);
+                    }
+                }
+
+                return _containersInternal;
+            }
+        }
+
+        public ObjectPool() {
+            if (_tiles == null) {
+                _tiles = new List<TileContainer>();
+            }
+        }
+
+        /// <summary>
+        /// Activates all necessary objects and places them 
+        /// on the passed Tile.
+        /// </summary>
+        /// <param name="tile"></param>
+        public void ActivateTile(Tile tile) {
+            TileContainer setContainer = null;
+
+            foreach (TileContainer container in _tiles) {
+                if (container.Tile == tile) {
+                    setContainer = container;
+                }
+            }
+
+            if (setContainer == null) {
+                setContainer = new TileContainer(tile, this);
+                _tiles.Add(setContainer);
+            }
+
+            //Compute positions if needed
+            if (!setContainer.HasComputedPositions()) {
+                setContainer.ComputePositions();
+            }
+
+            setContainer.PlaceObjects();
+        }
+
+        public void DeactivateTile(Tile tile) {
+            TileContainer setContainer = null;
+
+            foreach (TileContainer container in _tiles) {
+                if (container.Tile == tile) {
+                    setContainer = container;
+                }
+            }
+
+            if (setContainer != null) {
+                setContainer.RemoveObjects();
+            }
+        }
+
         /// <summary>
         /// Wrapper class for handling the passing of 
         /// gameobjects and their associated placement type
         /// </summary>
-        protected class ObjectContainer {
+        private class ObjectContainer {
             public ObjectDetailNode ObjectPlacementData {
                 get; private set;
             }
@@ -171,7 +243,7 @@ namespace Terra.Terrain {
         /// Wrapper class for managing various TerrainTiles that 
         /// are added and removed
         /// </summary>
-        protected class TileContainer {
+        private class TileContainer {
             private class PositionsContainer {
                 public Vector3[] Positions;
                 public ObjectDetailNode ObjectPlacementData;
@@ -206,6 +278,7 @@ namespace Terra.Terrain {
             public void PlaceObjects() {
                 //Get TerraSettings instance
                 TerraConfig config = UnityEngine.Object.FindObjectOfType<TerraConfig>();
+                int length = config.Generator.Length;
 
                 if (Positions != null && config != null) {
                     foreach (PositionsContainer p in Positions) {
@@ -215,7 +288,11 @@ namespace Terra.Terrain {
                         if (container != null) {
                             foreach (Vector3 pos in p.Positions) {
                                 GameObject go = container.GetObject(parent);
-                                p.ObjectPlacementData.TransformGameObject(go, pos, config.Generator.Length, Tile.transform.position);
+                                p.ObjectPlacementData.TransformGameObject(go, pos);
+
+                                //Translate object back into place (terrain origin is centered)
+                                go.transform.position = 
+                                    new Vector3(go.transform.position.x - length / 2f, go.transform.position.y, go.transform.position.z - length / 2f);
 
                                 PlacedObjects.Add(go);
                             }
@@ -246,23 +323,27 @@ namespace Terra.Terrain {
             /// them.
             /// </summary>
             public void ComputePositions() {
-                Positions = new PositionsContainer[Pool.Placer.ObjectsToPlace.Count];
+                Positions = new PositionsContainer[Pool._placer.ObjectsToPlace.Count];
                 UnityEngine.Terrain t = Tile.MeshManager.ActiveTerrain;
+                float amp = TerraConfig.Instance.Generator.Amplitude;
 
                 for (int i = 0; i < Positions.Length; i++) {
-                    ObjectDetailNode objectPlacementData = Pool.Placer.ObjectsToPlace[i];
+                    ObjectDetailNode objectPlacementData = Pool._placer.ObjectsToPlace[i];
                     Vector2[] samples = objectPlacementData.SamplePositions();
-                    Vector3[] worldPositions = new Vector3[samples.Length];
+                    List<Vector3> worldPositions = new List<Vector3>((int) (Positions.Length * 0.66f));
 
                     for (var j = 0; j < samples.Length; j++) {
                         Vector2 pos = samples[j];
                         float height = t.terrainData.GetInterpolatedHeight(pos.x, pos.y);
+                        float angle = Vector3.Angle(Vector3.up, t.terrainData.GetInterpolatedNormal(pos.x, pos.y)) / 90;
                         Vector2 world = MathUtil.NormalToWorld(Tile.GridPosition, pos);
 
-                        worldPositions[j] = new Vector3(world.x, height, world.y);
+                        if (objectPlacementData.ShouldPlaceAt(world.x, world.y, height / amp, angle)) {
+                            worldPositions.Add(new Vector3(world.x, height, world.y));
+                        }
                     }
 
-                    Positions[i] = new PositionsContainer(worldPositions, objectPlacementData);
+                    Positions[i] = new PositionsContainer(worldPositions.ToArray(), objectPlacementData);
                 }
             }
 
@@ -301,73 +382,13 @@ namespace Terra.Terrain {
             /// <param name="objectPlacementData">type to search for</param>
             /// <returns>ObjectContainer, null if no matches were found</returns>
             ObjectContainer GetContainerForType(ObjectDetailNode objectPlacementData) {
-                foreach (ObjectContainer c in Pool.Containers) {
+                foreach (ObjectContainer c in Pool._containers) {
                     if (c.ObjectPlacementData.Equals(objectPlacementData)) {
                         return c;
                     }
                 }
 
                 return null;
-            }
-        }
-
-        [SerializeField]
-        private ObjectPlacer Placer;
-        [SerializeField]
-        private ObjectContainer[] Containers;
-        [SerializeField]
-        private List<TileContainer> Tiles;
-
-        public ObjectPool(ObjectPlacer placer) {
-            Placer = placer;
-
-            ObjectDetailNode[] objectPlacementData = placer.ObjectsToPlace.ToArray();
-            Containers = new ObjectContainer[objectPlacementData.Length];
-            Tiles = new List<TileContainer>();
-
-            for (int i = 0; i < objectPlacementData.Length; i++) {
-                Containers[i] = new ObjectContainer(objectPlacementData[i]);
-            }
-        }
-
-        /// <summary>
-        /// Activates all necessary objects and places them 
-        /// on the passed Tile.
-        /// </summary>
-        /// <param name="tile"></param>
-        public void ActivateTile(Tile tile) {
-            TileContainer setContainer = null;
-
-            foreach (TileContainer container in Tiles) {
-                if (container.Tile == tile) {
-                    setContainer = container;
-                }
-            }
-
-            if (setContainer == null) {
-                setContainer = new TileContainer(tile, this);
-                Tiles.Add(setContainer);
-            }
-
-            //Compute positions if needed
-            if (!setContainer.HasComputedPositions()) {
-                setContainer.ComputePositions();
-            }
-
-            setContainer.PlaceObjects();
-        }
-
-        public void DeactivateTile(Tile tile) {
-            TileContainer setContainer = null;
-
-            foreach (TileContainer container in Tiles) {
-                if (container.Tile == tile) {
-                    setContainer = container;
-                }
-            }
-
-            if (setContainer != null) {
-                setContainer.RemoveObjects();
             }
         }
     }

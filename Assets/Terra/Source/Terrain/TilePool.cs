@@ -126,9 +126,8 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
-		/// Creates a Tile at the passed grid position, activates it, //todo update docs
-		/// and places it in the scene.
-		/// This method calls <see cref="Tile.Generate"/>.
+		/// Creates a Tile at the passed grid position and calls 
+		/// <see cref="Tile.Generate"/>
 		/// </summary>
 		/// <param name="p">position in grid to add tile at.</param>
 		/// <param name="onComplete">called when the Tile has finished generating.</param>
@@ -165,10 +164,11 @@ namespace Terra.Terrain {
 			float min = float.PositiveInfinity;
 			float max = float.NegativeInfinity;
 			int res = Config.Generator.RemapResolution;
+            var generator = Config.Graph.GetEndGenerator();
 
-			for (int x = 0; x < res; x++) {
+            for (int x = 0; x < res; x++) {
 				for (int z = 0; z < res; z++) {
-					float value = Config.Graph.GetEndGenerator().GetValue(x, z, 0f);
+					float value = generator.GetValue(x / (float)res, z / (float)res, 0f);
 
 					if (value > max) {
 						max = value;
@@ -218,6 +218,11 @@ namespace Terra.Terrain {
 		/// has finished generating.
 		/// </summary>
 		public void Update() {
+            //Register event handlers for object placer
+            if (_isFirstUpdate) {
+                TerraConfig.Instance.Placer.RegisterTileEventListeners();
+            }
+
 			//Calculate remap
 			if (Config.Generator.RemapHeightmap && _isFirstUpdate) {
 				_isFirstUpdate = false;

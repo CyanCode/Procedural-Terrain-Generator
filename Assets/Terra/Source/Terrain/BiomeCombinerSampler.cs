@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Terra.CoherentNoise;
 using Terra.Graph.Biome;
 using Terra.Structures;
 using Terra.Util;
@@ -17,6 +18,8 @@ namespace Terra.Terrain {
         private static object _minMaxLock = new object();
         private static object _weightLock = new object();
         private static object _valueLock = new object();
+
+        private static MinMaxResult? _biomeRemap = null;
 
 		public BiomeCombinerSampler(BiomeCombinerNode combiner) {
 			_combiner = combiner;
@@ -91,11 +94,6 @@ namespace Terra.Terrain {
 
                     float[,] weighted = biome.GetWeightedValues(biomeResults.Values, _cachedMinMax.Value.Min, _cachedMinMax.Value.Max);
                     weightedBiomeValues.Add(weighted);
-
-                    //todo remove
-                                    if (biome.Name == "Grass" && position == new GridPosition(1,0)) {
-                                        MTDispatch.Instance().Enqueue(() => MathUtil.WriteDebugTexture(weighted, Application.dataPath + "/grass.jpg"));
-                                    }
                 }
             }
 
@@ -151,6 +149,42 @@ namespace Terra.Terrain {
             }
 
             return new MinMaxResult(min, max);
+        }
+
+        /// <summary>
+        /// Gets the min/max values for all connected biomes
+        /// </summary>
+        /// <returns></returns>
+        private MinMaxResult GetBiomesMinMax() {
+            MinMaxRecorder recorder = new MinMaxRecorder();
+            int res = TerraConfig.Instance.Generator.RemapResolution;
+            
+            List<Generator> generators = new List<Generator>();
+            foreach (BiomeNode b in _combiner.GetConnectedBiomeNodes()) {
+                Generator g1 = b.HeightmapGenerator.GetGenerator();
+                Generator g2 = b.TemperatureGenerator.GetGenerator();
+                Generator g3 = b.MoistureGenerator.GetGenerator();
+
+                if (g1 != null) {
+                    generators.Add(g1);
+                }
+                if (g2 != null) {
+                    generators.Add(g2);
+                }
+                if (g3 != null) {
+                    generators.Add(g3);
+                }
+            }
+
+            for (int x = 0; x < res; x++) {
+                for (int y = 0; y < res; y++) {
+                    foreach (Generator g in generators) {
+                        recorder.Register(g.GetValue(x / (float)res, y / (float)res, 0));
+                    }
+                }
+            }
+
+            return recorder.GetMinMax();
         }
 
 		/// <summary>

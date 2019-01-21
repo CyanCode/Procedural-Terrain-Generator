@@ -58,8 +58,12 @@ namespace Terra.Terrain {
                 prototypes.Add((TreePrototype)treeNode.GetDetailPrototype());
             }
 
+            GenerationData conf = TerraConfig.Instance.Generator;
             _terrain.terrainData.treePrototypes = prototypes.ToArray();
             _terrain.terrainData.RefreshPrototypes();
+            _terrain.treeDistance = conf.TreeDistance;
+            _terrain.treeBillboardDistance = conf.BillboardStart;
+            _terrain.treeMaximumFullLODCount = conf.MaxMeshTrees;
 
             BiomeCombinerNode combiner = _tile.Painter.Combiner;
             BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
@@ -86,10 +90,9 @@ namespace Terra.Terrain {
                         }
 
                         //Check whether a tree can be placed here
-                        float height = _terrain.terrainData.GetInterpolatedHeight(sample.x, sample.y) /
-                            TerraConfig.Instance.Generator.Amplitude;
-                        float angle = Vector3.Angle(Vector3.up,
-                            _terrain.terrainData.GetInterpolatedNormal(sample.x, sample.y));
+                        float amp = TerraConfig.Instance.Generator.Amplitude;
+                        float height = _terrain.terrainData.GetInterpolatedHeight(sample.x, sample.y) / amp;
+                        float angle = Vector3.Angle(Vector3.up, _terrain.terrainData.GetInterpolatedNormal(sample.x, sample.y)) / 90;
                         Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, sample);
 
                         if (treeNode.ShouldPlaceAt(world.x, world.y, height, angle)) {
@@ -128,8 +131,11 @@ namespace Terra.Terrain {
             }
 
             int prototypeIndex = 0;
+            GenerationData conf = TerraConfig.Instance.Generator;
             _terrain.terrainData.SetDetailResolution(res, 16);
             _terrain.terrainData.detailPrototypes = prototypes.ToArray();
+            _terrain.detailObjectDistance = conf.DetailDistance;
+            _terrain.detailObjectDensity = conf.DetailDensity;
 
             for (int i = 0; i < biomeNodes.Length; i++) {
                 //Collect all details for this biome
@@ -153,10 +159,9 @@ namespace Terra.Terrain {
                         }
 
                         //Check whether an object can be placed here
-                        float height = _terrain.terrainData.GetInterpolatedHeight(sample.x, sample.y) /
-                                        TerraConfig.Instance.Generator.Amplitude;
-                        float angle = Vector3.Angle(Vector3.up,
-                            _terrain.terrainData.GetInterpolatedNormal(sample.x, sample.y));
+                        float amp = TerraConfig.Instance.Generator.Amplitude;
+                        float height = _terrain.terrainData.GetInterpolatedHeight(sample.x, sample.y) / amp;
+                        float angle = Vector3.Angle(Vector3.up, _terrain.terrainData.GetInterpolatedNormal(sample.x, sample.y)) / 90;
                         Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, sample);
 
                         if (grassNode.ShouldPlaceAt(world.x, world.y, height, angle)) {
@@ -173,14 +178,6 @@ namespace Terra.Terrain {
                     prototypeIndex++;
                 }
             }
-        }
-
-        /// <summary>
-        /// Adds objects from all biomes to the scene. Objects are 
-        /// stored in an object pool.
-        /// </summary>
-        public void AddObjects() {
-
         }
     }
 }

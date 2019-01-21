@@ -269,6 +269,7 @@ public static class EditorGUIExtension {
         EditorGUILayout.MinMaxSlider(text, ref minConst, ref maxConst, min, max, GUILayout.ExpandWidth(true));
 
         GUIStyle style = new GUIStyle { alignment = TextAnchor.MiddleRight };
+        style.normal.textColor = Color.white;
         EditorGUILayout.LabelField("[" + (constraint.Min * multiply).ToString("F1") + "," +
             (constraint.Max * multiply).ToString("F1") + "]", style);
 

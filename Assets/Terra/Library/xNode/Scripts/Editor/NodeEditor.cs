@@ -17,15 +17,14 @@ namespace XNodeEditor {
         /// <summary> Draws the node GUI.</summary>
         /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
         public void OnNodeGUI() {
-			var labelStyle = new GUIStyle(EditorStyles.label);
-	        EditorStyles.label.normal.textColor = Color.white;
+	        SetEditorStyle();
 
-			OnHeaderGUI();
+            OnHeaderGUI();
 //            if (target.IsExpanded)
             OnBodyGUI();
 
-			EditorStyles.label.normal = labelStyle.normal;
-		}
+            ResetEditorStyle();
+        }
 
         public virtual void OnHeaderGUI() {
             GUI.color = Color.white;
@@ -93,6 +92,29 @@ namespace XNodeEditor {
 		public virtual string GetTitle() {
 			return target.name;
 		}
+
+        /// <summary>
+        /// Sets the editor style for Terra's editor
+        /// </summary>
+        private void SetEditorStyle() {
+            EditorStyles.label.normal.textColor = Color.white;
+            EditorStyles.foldoutPreDrop.normal.textColor = Color.white;
+            EditorStyles.foldout.normal.textColor = Color.white;
+            EditorStyles.foldout.active.textColor = Color.white;
+            EditorStyles.foldout.onNormal.textColor = Color.white;
+        }
+
+        /// <summary>
+        /// Resets the editor style to default
+        /// </summary>
+        private void ResetEditorStyle() {
+            EditorStyles.label.normal.textColor = Color.black;
+            EditorStyles.foldoutPreDrop.normal.textColor = Color.black;
+            EditorStyles.foldout.normal.textColor = Color.black;
+            EditorStyles.foldout.active.textColor = Color.black;
+            EditorStyles.objectField.normal.textColor = Color.black;
+            EditorStyles.foldout.onNormal.textColor = Color.black;
+        }
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,

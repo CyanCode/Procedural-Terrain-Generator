@@ -50,6 +50,7 @@ namespace Terra.Graph {
 
 			//Labels
 			GUIStyle centeredStyle = GUI.skin.GetStyle("Label");
+            centeredStyle.normal.textColor = Color.white;
 			centeredStyle.alignment = TextAnchor.UpperCenter;
 
 			ctrl = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);

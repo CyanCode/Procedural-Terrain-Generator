@@ -35,12 +35,8 @@ namespace Terra.Terrain {
 		/// </summary>
 		public TileMesh MeshManager {
 			get {
-				if (_meshManager == null) {
-					_meshManager = new TileMesh(this, GetLodLevel());
-				}
-
-				return _meshManager;
-			}
+                return _meshManager ?? (_meshManager = new TileMesh(this, GetLodLevel()));
+            }
 			set {
 				_meshManager = value;
 			}

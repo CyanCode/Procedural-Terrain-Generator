@@ -9,7 +9,6 @@ namespace Terra.Structures {
 		public float Min;
 		public float Max;
 
-        //TODO replace with Constraint
 		public MinMaxResult(float min, float max) {
 			Min = min;
 			Max = max;

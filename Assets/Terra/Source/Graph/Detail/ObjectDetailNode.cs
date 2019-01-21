@@ -191,14 +191,8 @@ namespace Terra.Graph.Biome {
         /// </summary>
         /// <param name="go">GameObject to transform</param>
         /// <param name="position">Calculated position</param>
-        /// <param name="length">Length of the mesh</param>
-        /// <param name="tileOffset">Location where the Tile starts</param>
-        public void TransformGameObject(GameObject go, Vector3 position, int length, Vector3 tileOffset) {
-            float xPos = ((position.x * length) - length / 2) + tileOffset.x;
-            float yPos = position.y;
-            float zPos = ((position.z * length) - length / 2) + tileOffset.z;
-
-            go.transform.position = GetTranslation(new Vector3(xPos, yPos, zPos));
+        public void TransformGameObject(GameObject go, Vector3 position) {
+            go.transform.position = GetTranslation(position);
             go.transform.eulerAngles = GetRotation();
             go.transform.localScale = GetScale();
         }

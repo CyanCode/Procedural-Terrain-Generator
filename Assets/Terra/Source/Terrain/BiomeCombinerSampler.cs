@@ -19,8 +19,6 @@ namespace Terra.Terrain {
         private static object _weightLock = new object();
         private static object _valueLock = new object();
 
-        private static MinMaxResult? _biomeRemap = null;
-
 		public BiomeCombinerSampler(BiomeCombinerNode combiner) {
 			_combiner = combiner;
 		}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Threading;
 using Terra.CoherentNoise;
 using Terra.Structures;
@@ -148,9 +149,6 @@ namespace Terra.Terrain {
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		public void CalculateHeightmap(GridPosition? gridPos = null, float remapMin = 0f, float remapMax = 1f) {
-//		    _lastGeneratedLodLevel = _tile.GetLodLevel();
-//		    Lod = _lastGeneratedLodLevel;
-
             //Grid position
             GridPosition pos = gridPos ?? _tile.GridPosition;
 		
@@ -204,8 +202,8 @@ namespace Terra.Terrain {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
 			Lod = _lastGeneratedLodLevel;
 
-			ThreadPool.QueueUserWorkItem(d => { //Worker thread
-				CalculateHeightmap(null, remapMin, remapMax);
+            ThreadPool.QueueUserWorkItem(d => { //Worker thread
+                CalculateHeightmap(null, remapMin, remapMax);
 
 				MTDispatch.Instance().Enqueue(onComplete);
 			});
@@ -215,10 +213,8 @@ namespace Terra.Terrain {
 		/// Sets the neighboring <see cref="UnityEngine.Terrain"/> types.
 		/// </summary>
 		/// <param name="neighbors">Neighboring tiles</param>
-		/// <param name="weldNeighbors">Should neighboring Tiles of different resolutions be welded together</param>
 		/// <param name="hideTerrain">Should the terrain be hid when setting neighboring tiles?</param>
-		/// <param name="onComplete">Called when the neighboring tiles have been set and welded together</param>
-		public void SetNeighboringTiles(Neighborhood neighbors, bool weldNeighbors, bool hideTerrain, Action onComplete = null) {
+		public void SetNeighboringTiles(Neighborhood neighbors, bool hideTerrain) {
 			Neighborhood n = neighbors;
 
 			UnityEngine.Terrain t = ActiveTerrain;
@@ -226,24 +222,9 @@ namespace Terra.Terrain {
 				return;
 			}
 
-			if (weldNeighbors) {
-				if (onComplete != null) {
-					WeldNeighbors(neighbors, hideTerrain, () => {
-						UnityEngine.Terrain[] tiles = GetValidNeighbors(n);
-
-						t.SetNeighbors(tiles[0], tiles[1], tiles[2], tiles[3]);
-						onComplete();
-					});
-				} else {
-					WeldNeighbors(neighbors, hideTerrain);
-				}
-			}
-
-			if (onComplete == null) {
-				UnityEngine.Terrain[] tiles = GetValidNeighbors(n);
-
-				t.SetNeighbors(tiles[0], tiles[1], tiles[2], tiles[3]);
-			}
+            //WeldNeighbors(neighbors, hideTerrain);
+			UnityEngine.Terrain[] tiles = GetValidNeighbors(n);
+			t.SetNeighbors(tiles[0], tiles[1], tiles[2], tiles[3]);
 		}
 
 		/// <summary>
@@ -253,12 +234,9 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <remarks>Since this method creates and adds a <see cref="UnityEngine.Terrain"/> 
 		/// component, it is not thread safe.</remarks>
-		/// <param name="useCoroutine">Should the heightmap be set over a series of frames?</param>
-		/// <param name="hideTerrain">Should the terrain be disabled when setting the heightmap?</param>
-		/// <param name="onComplete">Called when the coroutine has finished</param>
 		/// <param name="heightmap">Optionally use the passed heightmap instead of 
 		/// <see cref="TileMesh"/>'s <see cref="Heightmap"/></param>
-		public void SetTerrainHeightmap(bool useCoroutine, bool hideTerrain, Action onComplete = null, float[,] heightmap = null) {
+		public void SetTerrainHeightmap(float[,] heightmap = null) {
 			float[,] hm = heightmap ?? Heightmap;
 
 			if (hm == null) {
@@ -272,37 +250,32 @@ namespace Terra.Terrain {
 			TerrainData td = ActiveTerrain.terrainData;
 			TerraConfig conf = TerraConfig.Instance;
 			int length = conf.Generator.Length;
-
-			//Disable terrain rendering while generating
-			ActiveTerrain.enabled = !hideTerrain;
-
+            
 			td.heightmapResolution = HeightmapResolution;
-
-			if (useCoroutine) {
-				td.size = new Vector3(length, conf.Generator.Amplitude, length);
-				_tile.StartCoroutine(SetTerrainHeightmap_Coroutine(hm, () => {
-					td.size = new Vector3(length, conf.Generator.Amplitude, length);
-					ActiveTerrain.enabled = true;
-
-					if (onComplete != null) {	
-						onComplete();
-					}
-				}));
-			} else {
-				td.SetHeights(0, 0, hm);
-				td.size = new Vector3(length, conf.Generator.Amplitude, length);
-				ActiveTerrain.Flush();
-				ActiveTerrain.enabled = true;
-
-				if (onComplete != null) {	
-					onComplete();
-				}
-			}
+			td.SetHeights(0, 0, hm);
+			td.size = new Vector3(length, conf.Generator.Amplitude, length);
+			ActiveTerrain.Flush();
 		}
+
+        /// <summary>
+        /// Sets whether terrain rendering is enable
+        /// </summary>
+        /// <param name="isVisible">true if visible, false otherwise</param>
+        public void SetVisible(bool isVisible) {
+            ActiveTerrain.drawHeightmap = isVisible;
+            ActiveTerrain.drawTreesAndFoliage = isVisible;
+        }
+
+        /// <summary>
+        /// Sets terrain visibility from <see cref="TerraConfig"/>
+        /// </summary>
+        public void SetVisible() {
+            SetVisible(!TerraConfig.Instance.Generator.HideWhileGenerating);
+        }
 
 		private IEnumerator SetTerrainHeightmap_Coroutine(float[,] heightmap, Action onComplete) {
 			TerrainData td = ActiveTerrain.terrainData;
-			const int maxResPerFrame = 64;
+            int maxResPerFrame = TerraConfig.Instance.Generator.CoroutineRes;
 			int hmRes = heightmap.GetLength(0) - 1;
 
 			if (hmRes <= maxResPerFrame) {
@@ -336,13 +309,15 @@ namespace Terra.Terrain {
 					}
 
 					//Set heights for this subsection
-					//td.SetHeightsDelayLOD(subResolution * ix, subResolution * iy, subheights);
-					td.SetHeights(subResolution * ix, subResolution * iy, subheights);
+					td.SetHeightsDelayLOD(subResolution * ix, subResolution * iy, subheights);
+					//td.SetHeights(subResolution * ix, subResolution * iy, subheights);
 
 					//Wait for next frame
 					yield return null;
 				}
 			}
+
+            ActiveTerrain.ApplyDelayedHeightmapModification();
 
 			if (onComplete != null) {
 				onComplete();
@@ -355,7 +330,7 @@ namespace Terra.Terrain {
 		/// <param name="neighbors"></param>
 		/// <param name="hideTerrain">Hide the terrain when welding neighbors?</param>
 		/// <param name="onComplete">Called when the heightmap has finished applying</param>
-		private void WeldNeighbors(Neighborhood neighbors, bool hideTerrain, Action onComplete = null) {
+		private void WeldNeighbors(Neighborhood neighbors, bool hideTerrain) {
 			if (HeightmapResolution == 0) {
 				return;
 			}
@@ -377,12 +352,7 @@ namespace Terra.Terrain {
 				WeldEdges(neighbors.Down, false, true, hideTerrain);
 			}
 
-			if (_tile.GridPosition == new GridPosition(0, 0) && System.Diagnostics.Debugger.IsAttached)
-				System.Diagnostics.Debugger.Break();
-
-			bool useCoroutine = TerraConfig.Instance.Generator.UseCoroutineForHeightmap &&
-				!TerraConfig.IsInEditMode;
-			SetTerrainHeightmap(useCoroutine, false, onComplete);
+			SetTerrainHeightmap();
 		}
 
 		/// <summary>
@@ -481,9 +451,9 @@ namespace Terra.Terrain {
 					}
 				}
 
-				bool useCoroutine = TerraConfig.Instance.Generator.UseCoroutineForHeightmap &&
+				bool useCoroutine = TerraConfig.Instance.Generator.UseCoroutines &&
 					!TerraConfig.IsInEditMode;
-				neighbor.MeshManager.SetTerrainHeightmap(useCoroutine && !trackedOnNeighbor, hideTerrain && !trackedOnNeighbor);
+				neighbor.MeshManager.SetTerrainHeightmap();
 			}
 		}
 
@@ -606,7 +576,7 @@ namespace Terra.Terrain {
 			return new Vector2(worldX, worldZ);
 		}
 
-		#region Serialization
+#region Serialization
 
 		/// <summary>
 		/// One dimensional representation of the heightmap that 
@@ -644,7 +614,7 @@ namespace Terra.Terrain {
 			}
 		}
 
-		#endregion
+#endregion
 	}
 
 	/// <summary>

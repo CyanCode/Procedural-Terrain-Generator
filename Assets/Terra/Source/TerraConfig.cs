@@ -6,14 +6,12 @@ using UnityEngine;
 using Terra.Terrain;
 using Terra.Util;
 using UnityEditor;
-using XNode;
 using Random = UnityEngine.Random;
 
 namespace Terra {
 	[Serializable, ExecuteInEditMode]
 	public class TerraConfig: MonoBehaviour {
-		public static bool IsInitialized;
-
+        public static bool IsInitialized;
         /// <summary>
         /// TerraConfig singleton instance
         /// </summary>
@@ -29,7 +27,6 @@ namespace Terra {
 		public EditorStateData EditorState;
         
         internal bool IsEditor;
-        internal string DataPath;
 
         /// <returns>
         /// TerraConfig singleton or null if TerraConfig does not 
@@ -72,7 +69,6 @@ namespace Terra {
 
 		void Start() {
 		    IsEditor = IsInEditMode;
-            DataPath = Application.dataPath;
 
             CreateMTD();
 
@@ -241,40 +237,6 @@ namespace Terra {
 
 			Gizmos.DrawWireCube(sqrCenter, new Vector3(radius * 2, vertLen, 0f));
 			Gizmos.DrawWireCube(sqrCenter, new Vector3(0f, vertLen, radius * 2));
-		}
-		
-		/// <summary>
-		/// Toggles that can aid in debugging Terra.
-		/// </summary>
-		public static class TerraDebug {
-			/// <summary>
-			/// Sets components to display/hide in TerraSettings 
-			/// gameobject
-			/// </summary>
-			public const bool HIDE_IN_INSPECTOR = true;
-
-			/// <summary>
-			/// Writes splat control textures to the file system 
-			/// for debug purposes
-			/// </summary>
-			public const bool WRITE_SPLAT_TEXTURES = false;
-
-			/// <summary>
-			/// How many textures should be written to the file 
-			/// system when <see cref="WRITE_SPLAT_TEXTURES"/> or 
-			/// <see cref="WRITE_BIOME_DEBUG_TEXTURE"/> are true?
-			/// </summary>
-			public static int MAX_TEXTURE_WRITE_COUNT = 5;
-
-			/// <summary>
-			/// Writes the weighted biome map textures to the disk
-			/// </summary>
-			public const bool WRITE_BIOME_DEBUG_TEXTURE = false;
-
-			/// <summary>
-			/// Whether to show Debug.Log messages from Terra
-			/// </summary>
-			public const bool SHOW_DEBUG_MESSAGES = false;
 		}
 	}
 }

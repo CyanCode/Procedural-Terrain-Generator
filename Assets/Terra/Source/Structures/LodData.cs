@@ -13,12 +13,6 @@ namespace Terra.Structures {
 			public int StartRadius;
 			public int Resolution;
 
-			public int SplatResolution {
-				get {
-					return Resolution;
-				}
-			}
-
 			public Color PreviewColor {
 				get {
 					switch (StartRadius) {

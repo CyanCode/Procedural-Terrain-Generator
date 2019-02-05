@@ -10,11 +10,16 @@ namespace Terra.Structures {
 		public float LodChangeRadius = 250f;
 		public bool RemapHeightmap = true;
 		public int RemapResolution = 128;
-		public float RemapPadding = 0.1f;
+		public float RemapPadding = 0.08f;
 
 		public bool GenerateOnStart = true;
 		public bool UseRandomSeed = false;
-		public bool UseCoroutineForHeightmap = true;
+		public bool UseCoroutines = true;
+        /// <summary>
+        /// Should the terrain disable rendering while generating?
+        /// </summary>
+        public bool HideWhileGenerating = true;
+        public int CoroutineRes = 256;
 
 		public LodData Lod;
 		public int LodCount = 0;

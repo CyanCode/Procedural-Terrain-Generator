@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Terra.CoherentNoise;
 using Terra.Graph.Generators;
 using Terra.Structures;
-using Terra.Terrain;
 using Terra.Util;
 using UnityEngine;
 using XNode;
@@ -163,7 +162,7 @@ namespace Terra.Graph.Biome {
         /// <param name="gridSize">Size of the grid to sample</param>
         private Vector2[] GetPoissonGridSamples(float density, int gridSize) {
             PoissonDiscSampler pds = new PoissonDiscSampler(gridSize, gridSize, density, TerraConfig.Instance.Seed);
-            Boo.Lang.List<Vector2> total = new Boo.Lang.List<Vector2>();
+            List<Vector2> total = new List<Vector2>();
 
             foreach (Vector2 sample in pds.Samples()) {
                 total.Add(sample / gridSize);

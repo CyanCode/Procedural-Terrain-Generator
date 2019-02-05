@@ -19,36 +19,26 @@ namespace Terra.Terrain {
             }
         }
 
-        private float[,,] BiomeMap {
-            get {
-                if (_tile.Painter == null) {
-                    Debug.LogError("TileDetail requires a non-null TilePaint instance");
-                    return null;
-                }
-                if (_tile.Painter.BiomeMap == null) {
-                    Debug.LogError("TileDetail requires a non-null BiomeMap in TilePaint");
-                    return null;
-                }
+        private float[,,] _biomeMap;
+        private TilePaint _painter;
 
-                return _tile.Painter.BiomeMap;
-            }
-        }
-
-        public TileDetail(Tile tile) {
+        public TileDetail(Tile tile, TilePaint painter, float[,,] biomeMap) {
             _tile = tile;
+            _biomeMap = biomeMap;
+            _painter = painter;
         }
 
         /// <summary>
-        /// Adds trees according to the <see cref="BiomeMap"/> in 
+        /// Adds trees according to the <see cref="_biomeMap"/> in 
         /// this <see cref="Tile"/>
         /// </summary>
         public void AddTrees() {
-            if (BiomeMap == null) {
+            if (_biomeMap == null) {
                 return;
             }
 
             //Collect prototypes from tree nodes
-            TreeDetailNode[] allTreeNodes = _tile.Painter.Combiner
+            TreeDetailNode[] allTreeNodes = _painter.Combiner
                 .GetConnectedBiomeNodes()
                 .SelectMany(biome => biome.GetTreeInputs())
                 .ToArray();
@@ -65,7 +55,7 @@ namespace Terra.Terrain {
             _terrain.treeBillboardDistance = conf.BillboardStart;
             _terrain.treeMaximumFullLODCount = conf.MaxMeshTrees;
 
-            BiomeCombinerNode combiner = _tile.Painter.Combiner;
+            BiomeCombinerNode combiner = _painter.Combiner;
             BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
             int prototypeIndex = 0;
 
@@ -83,7 +73,7 @@ namespace Terra.Terrain {
                     Vector2[] samples = treeNode.SamplePositions();
 
                     foreach (Vector2 sample in samples) {
-                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(BiomeMap, sample.x, sample.y);
+                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(_biomeMap, sample.x, sample.y);
 
                         if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
                             continue; //Not in this biome, skip
@@ -112,11 +102,11 @@ namespace Terra.Terrain {
 
         /// <summary>
         /// Adds all non-tree details to the Terrain according to the 
-        /// <see cref="BiomeMap"/> in this <see cref="Tile"/>. This adds 
+        /// <see cref="_biomeMap"/> in this <see cref="Tile"/>. This adds 
         /// grass and detail meshes.
         /// </summary>
         public void AddDetailLayers() {
-            BiomeCombinerNode combiner = _tile.Painter.Combiner;
+            BiomeCombinerNode combiner = _painter.Combiner;
             BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
             int res = TerraConfig.Instance.Generator.DetailmapResolution;
 
@@ -152,7 +142,7 @@ namespace Terra.Terrain {
                     //Get map of normalized placement positions
                     Vector2[] samples = grassNode.SamplePositions();
                     foreach (Vector2 sample in samples) {
-                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(BiomeMap, sample.x, sample.y);
+                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(_biomeMap, sample.x, sample.y);
 
                         if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
                             continue; //Not in this biome, skip

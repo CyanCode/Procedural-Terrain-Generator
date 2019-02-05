@@ -98,7 +98,16 @@ namespace UnityEditor.Terra {
 			if (GUILayout.Button("Clear Tiles")) {
 				if (_config.Generator != null && _config.Generator.Pool != null) {
 					_config.Generator.Pool.RemoveAll();
-				}
+
+                    //Remove any trailing Tile components
+                    foreach (Tile t in _config.GetComponents<Tile>()) {
+#if UNITY_EDITOR
+                        Object.DestroyImmediate(t.gameObject);
+#else
+                        Object.Destroy(t.gameObject);
+#endif
+                    }
+                }
             }
 		}
 
@@ -131,6 +140,28 @@ namespace UnityEditor.Terra {
         private void ShowAdvanced() {
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Advanced", EditorStyles.boldLabel);
+
+            EditorGUILayout.BeginHorizontal();
+            _config.Generator.UseCoroutines = EditorGUILayout.Toggle("Use Coroutines", _config.Generator.UseCoroutines);
+            if (GUILayout.Button("?", GUILayout.Width(25))) {
+                const string msg = "Setting the heightmap on Unity terrain can be slow as the LODs need " +
+                                   "to be recalculated. This optionally splits setting the heightmap " +
+                                   "over a series of frames rather than setting it in one frame.";
+                EditorUtility.DisplayDialog("Help - Calculate Heightmap Transformation", msg, "Close");
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            _config.Generator.CoroutineRes = EditorGUILayout.IntPopup("Coroutine Res",
+                _config.Generator.CoroutineRes, strResOpts, mapResOpts);
+            if (GUILayout.Button("?", GUILayout.Width(25))) {
+                const string msg = "This is the max resolution that can be set over a single frame in " +
+                                   "the coroutine. In other words, when Use Coroutines is checked, this " +
+                                   "defines how much of the heightmap to set before waiting for the next frame.";
+                EditorUtility.DisplayDialog("Help - Calculate Heightmap Transformation", msg, "Close");
+            }
+            EditorGUILayout.EndHorizontal();
+
 
             EditorGUILayout.BeginHorizontal();
             _config.Generator.RemapHeightmap = EditorGUILayout.Toggle("Remap Heightmap", _config.Generator.RemapHeightmap);

@@ -33,7 +33,7 @@ namespace Terra.Graph {
 
 					BiomeNode node = p.GetInputValue<BiomeNode>();
 					if (node != null) {
-						EditorGUILayout.ColorField(GUIContent.none, node.PreviewColor, false, false, false, null,
+						EditorGUILayout.ColorField(GUIContent.none, node.PreviewColor, false, false, false,
 							GUILayout.MaxWidth(32f));
 					}
 

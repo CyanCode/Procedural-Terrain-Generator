@@ -22,6 +22,7 @@ namespace Terra {
 		public GenerationData Generator;
         public ObjectPlacer Placer;
 		public int Seed = 1337;
+        public BackgroundWorker Worker;
 
 		//Editor state information
 		public EditorStateData EditorState;
@@ -63,6 +64,7 @@ namespace Terra {
 			if (Generator == null) Generator = new GenerationData();
 			if (EditorState == null) EditorState = new EditorStateData();
             if (Placer == null) Placer = new ObjectPlacer();
+            if (Worker == null) Worker = new BackgroundWorker();
 
             IsEditor = IsInEditMode;
 		}

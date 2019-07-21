@@ -195,18 +195,23 @@ namespace Terra.Terrain {
 		/// A heightmap is 2D array of floats that represents the Y values (or heights) 
 		/// of to-be created vertices in 3D space.
 		/// </summary>
-		/// <param name="onComplete">Called when the heightmap has been created</param>
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
-		public void CalculateHeightmapAsync(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
+		/// <param name="onComplete">Called when the heightmap has been created</param>
+		public IEnumerator CalculateHeightmapAsync(float remapMin = 0f, float remapMax = 1f, Action onComplete = null) {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
 			Lod = _lastGeneratedLodLevel;
 
-            ThreadPool.QueueUserWorkItem(d => { //Worker thread
-                CalculateHeightmap(null, remapMin, remapMax);
+            bool madeHm = false;
+            TerraConfig.Instance.Worker.Enqueue(() => CalculateHeightmap(null, remapMin, remapMax), 
+                () => madeHm = true);
 
-				MTDispatch.Instance().Enqueue(onComplete);
-			});
+            while (!madeHm)
+                yield return null;
+
+            GC.Collect();
+            if (onComplete != null)
+                onComplete();
 		}
 
 		/// <summary>
@@ -582,37 +587,37 @@ namespace Terra.Terrain {
 		/// One dimensional representation of the heightmap that 
 		/// Unity can serialize.
 		/// </summary>
-		[SerializeField, HideInInspector]
-		private float[] _serializedHeightmap;
-
-		[SerializeField, HideInInspector]
-		private int[] _serializedMeshResolutions;
+//		[SerializeField, HideInInspector]
+//		private float[] _serializedHeightmap;
+//
+//		[SerializeField, HideInInspector]
+//		private int[] _serializedMeshResolutions;
 
 		public void OnBeforeSerialize() {
 			//Heightmap
-			if (Heightmap != null) {
-				_serializedHeightmap = new float[HeightmapResolution * HeightmapResolution];
-
-				for (int x = 0; x < HeightmapResolution; x++) {
-					for (int z = 0; z < HeightmapResolution; z++) {
-						_serializedHeightmap[x + z * HeightmapResolution] = Heightmap[x, z];
-					}
-				}
-			}
+//			if (Heightmap != null) {
+//				_serializedHeightmap = new float[HeightmapResolution * HeightmapResolution];
+//
+//				for (int x = 0; x < HeightmapResolution; x++) {
+//					for (int z = 0; z < HeightmapResolution; z++) {
+//						_serializedHeightmap[x + z * HeightmapResolution] = Heightmap[x, z];
+//					}
+//				}
+//			}
 		}
 
 		public void OnAfterDeserialize() {
 			//Heightmap
-			if (_serializedHeightmap != null) {
-				Heightmap = new float[HeightmapResolution, HeightmapResolution];
-
-				for (int x = 0; x < HeightmapResolution; x++) {
-					for (int z = 0; z < HeightmapResolution; z++) {
-						Heightmap[x, z] = _serializedHeightmap[x + z * HeightmapResolution];
-					}
-				}
-			}
-		}
+//			if (_serializedHeightmap != null) {
+//				Heightmap = new float[HeightmapResolution, HeightmapResolution];
+//
+//				for (int x = 0; x < HeightmapResolution; x++) {
+//					for (int z = 0; z < HeightmapResolution; z++) {
+//						Heightmap[x, z] = _serializedHeightmap[x + z * HeightmapResolution];
+//					}
+//				}
+//			}
+		} //TODO Possibly uncomment
 
 #endregion
 	}

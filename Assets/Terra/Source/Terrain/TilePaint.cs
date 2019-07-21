@@ -77,35 +77,48 @@ namespace Terra.Terrain {
 		}
 
 	    /// <summary>
-	    /// Paints this Tile according to <see cref="TerraConfig"/>
+	    /// Paints this Tile according to <see cref="TerraConfig"/> asynchronously
 	    /// </summary>
 	    /// <param name="biomeMap">Biomemap result from <see cref="GetBiomeMap"/></param>
 	    /// <param name="onComplete">Optional callback called after painting the terrain</param>
-	    public void Paint(float[,,] biomeMap, Action onComplete = null) {
+	    public IEnumerator PaintAsync(float[,,] biomeMap, Action onComplete) {
 			if (biomeMap == null) {
 				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
-				return;
+				yield break;
 			}
 
             int res = TerraConfig.Instance.Generator.SplatmapResolution - 1;
             PrecomputeAngleHeights(res);
 			SetSplatPrototypes(biomeMap);
-            
-            ThreadPool.QueueUserWorkItem(q => {
-                lock (_alphamapLock) {
-                    CalculateAlphamap(biomeMap, res);
-                }
 
-                MTDispatch.Instance().Enqueue(() => {
-                    ApplyAlphamap();
-                    _tile.StartCoroutine(Tile.SkipFrame());
+            bool madeAm = false;
+            TerraConfig.Instance.Worker.Enqueue(() => CalculateAlphamap(biomeMap, res), () => madeAm = true);
+            while (!madeAm)
+                yield return null;
 
-                    if (onComplete != null) {
-                        onComplete();
-                    }
-                });
-            });
+            ApplyAlphamap();
+            onComplete();
 		}
+
+	    /// <summary>
+	    /// Paints this Tile according to <see cref="TerraConfig"/> synchronously
+	    /// </summary>
+	    /// <param name="biomeMap">Biomemap result from <see cref="GetBiomeMap"/></param>
+	    /// <param name="onComplete">Optional callback called after painting the terrain</param>
+        public void Paint(float[,,] biomeMap) {
+            if (biomeMap == null) {
+                Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
+                return;
+            }
+
+            int res = TerraConfig.Instance.Generator.SplatmapResolution - 1;
+            PrecomputeAngleHeights(res);
+            SetSplatPrototypes(biomeMap);
+            
+            CalculateAlphamap(biomeMap, res);
+
+            ApplyAlphamap();
+        }
 
         public float[,,] GetBiomeMap() {
             lock (_biomeMapLock) {

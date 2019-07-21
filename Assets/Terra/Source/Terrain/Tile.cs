@@ -58,7 +58,13 @@ namespace Terra.Terrain {
         public void Generate(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
             //Ensure MTD is instantiated
             MTDispatch.Instance();
-            GenerateCoroutine(onComplete, remapMin, remapMax);
+
+#if UNITY_EDITOR
+            GenerateEditor(remapMin, remapMax);
+            onComplete();
+#else
+            StartCoroutine(GenerateCoroutine(onComplete, remapMin, remapMax));
+#endif
         }
 
         /// <summary>
@@ -82,17 +88,31 @@ namespace Terra.Terrain {
         }
 
         /// <summary>
-        /// Sets the heightmap to the current LOD
+        /// Sets the heightmap to the current LOD asynchronously
         /// </summary>
-        public void UpdateHeightmap(Action onComplete, float remapMin, float remapMax) {
+        public IEnumerator UpdateHeightmapAsync(Action onComplete, float remapMin, float remapMax) {
             MeshManager.Lod = GetLodLevel();
-            MeshManager.CalculateHeightmapAsync(() => {
+
+            bool updatedHm = false;
+            StartCoroutine(MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => {
                 MeshManager.SetTerrainHeightmap();
-                
-                if (onComplete != null) {
-                    onComplete();
-                }
-            }, remapMin, remapMax);
+                updatedHm = true;
+            }));
+
+            while (!updatedHm)
+                yield return null;
+
+            if (onComplete != null)
+                onComplete();
+        }
+
+        /// <summary>
+        /// Sets the heightmap to the current LOD synchronously
+        /// </summary>
+        public void UpdateHeightmap(float remapMin, float remapMax) {
+            MeshManager.Lod = GetLodLevel();
+            MeshManager.CalculateHeightmap(null, remapMin, remapMax);
+            MeshManager.SetTerrainHeightmap();   
         }
 
         /// <summary>
@@ -100,6 +120,10 @@ namespace Terra.Terrain {
         /// </summary>
         /// <returns>true if heightmap matches lod, false otherwise</returns>
         public bool IsHeightmapLodValid() {
+            if (MeshManager.LastGeneratedLodLevel == null) {
+                return false;
+            }
+
             return MeshManager.LastGeneratedLodLevel.Resolution >= GetLodLevel().Resolution;
         }
 
@@ -119,10 +143,6 @@ namespace Terra.Terrain {
             return Config.Generator.Lod.GetLevelForPosition(GridPosition, tracked.transform.position);
         }
 
-        public override string ToString() {
-            return "Tile[" + GridPosition.X + ", " + GridPosition.Z + "]";
-        }
-
         /// <summary>
         /// Creates a gameobject with an attached Tile component and 
         /// places it in the scene. This is a convienence method and is not required 
@@ -137,46 +157,7 @@ namespace Terra.Terrain {
             return tt;
         }
 
-        internal static IEnumerator SkipFrame() {
-            yield return null;
-        }
-
-        private IEnumerator PostCreateHeightmap(Action onComplete) {
-            MeshManager.SetTerrainHeightmap();
-            MeshManager.SetVisible();
-
-            //Create TilePaint object
-            TilePaint painter = new TilePaint(this);
-
-            yield return null;
-            var t = new Util.Timer().Start();
-            ThreadPool.QueueUserWorkItem(state => {
-                t.StopAndPrintMT("Context switch");
-                float[,,] map = painter.GetBiomeMap();
-
-                MTDispatch.Instance().Enqueue(() => {
-                    var skipCo = StartCoroutine(SkipFrame());
-
-                    painter.Paint(map, () => {
-                        StopCoroutine(skipCo);
-
-                        StartCoroutine(PostSetHeightmap(painter, map, () => {
-                            MeshManager.SetVisible(true);
-                            onComplete();
-                        }));
-                    });
-                });
-            });
-        }
-
-        private void GenerateCoroutine(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
-            //Cache current LOD
-            MeshManager.CalculateHeightmapAsync(() => {
-                StartCoroutine(PostCreateHeightmap(onComplete));
-            }, remapMin, remapMax);
-        }
-
-        private IEnumerator PostSetHeightmap(TilePaint painter, float[,,] biomeMap, Action onComplete) {
+        private IEnumerator ApplyDetails(TilePaint painter, float[,,] biomeMap, Action onComplete = null) {
             //Create detailer
             TileDetail detailer = new TileDetail(this, painter, biomeMap);
 
@@ -185,11 +166,95 @@ namespace Terra.Terrain {
             
             yield return null;
             detailer.AddDetailLayers();
+
+            if (onComplete != null) {
+                onComplete();
+            }
+        }
+
+        private IEnumerator GenerateCoroutine(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
+            TerraConfig conf = TerraConfig.Instance;
+            Debug.Log("Started tile " + GridPosition);
+
+            //Make & set heightmap
+            bool madeHm = false;
+            yield return StartCoroutine(MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => madeHm = true));
+            while (!madeHm)
+                yield return null;
+
+            MeshManager.SetTerrainHeightmap();
+            MeshManager.SetVisible();
+
+            //Create TilePaint object
+            TilePaint painter = new TilePaint(this);
+
+            //Make biomemap
+            bool madeBm = false;
+            float[,,] map = null;
+            conf.Worker.Enqueue(() => map = painter.GetBiomeMap(), () => madeBm = true);
+            int x = 0;
+            while (!madeBm) {
+                yield return null; //Skip frame until biomemap made
+                x++;
+            }
+            Debug.Log("X " + x);
+
+            //Paint terrain
+            bool madePaint = false;
+            yield return StartCoroutine(painter.PaintAsync(map, () => madePaint = true));
+            while (!madePaint)
+                yield return null;
+
+            //Apply details to terrain
+            bool madeDetails = false;
+            yield return StartCoroutine(ApplyDetails(painter, map, () => madeDetails = true));
+            while (!madeDetails)
+                yield return null;
+
+            MeshManager.SetVisible(true);
+
+            Debug.Log("Completed tile " + GridPosition);
             onComplete();
         }
 
+        /// <summary>
+        /// Works the same as <see cref="GenerateCoroutine"/> without the 
+        /// yield instructions. Runs synchronously.
+        /// </summary>
+        /// <param name="remapMin"></param>
+        /// <param name="remapMax"></param>
+        private void GenerateEditor(float remapMin = 0f, float remapMax = 1f) {
+            Debug.Log("Started tile " + GridPosition);
 
-		#region Serialization
+            //Make & set heightmap
+            MeshManager.CalculateHeightmap(GridPosition, remapMin, remapMax);
+
+            MeshManager.SetTerrainHeightmap();
+            MeshManager.SetVisible();
+
+            //Create TilePaint object
+            TilePaint painter = new TilePaint(this);
+
+            //Make biomemap
+            float[,,] map = painter.GetBiomeMap();
+
+            //Paint terrain
+            painter.Paint(map);
+
+            //Apply details to terrain
+            // ReSharper disable once IteratorMethodResultIsIgnored
+            ApplyDetails(painter, map);
+            MeshManager.SetVisible(true);
+
+            Debug.Log("Completed tile " + GridPosition);
+        }
+
+        public override string ToString() {
+            return "Tile[" + GridPosition.X + ", " + GridPosition.Z + "]";
+        }
+
+
+#region Serialization
 
 		[SerializeField]
 		private GridPosition _serializedGridPosition;
@@ -204,6 +269,6 @@ namespace Terra.Terrain {
 			GridPosition = _serializedGridPosition;
 		}
 
-		#endregion
+#endregion
 	}
 }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
+using System.Diagnostics;
 using UnityEngine;
 using Terra.Structures;
 using Terra.Util;
+using Debug = UnityEngine.Debug;
 
 namespace Terra.Terrain {
     /// <summary>
@@ -58,13 +59,14 @@ namespace Terra.Terrain {
         public void Generate(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
             //Ensure MTD is instantiated
             MTDispatch.Instance();
-
-#if UNITY_EDITOR
-            GenerateEditor(remapMin, remapMax);
-            onComplete();
-#else
-            StartCoroutine(GenerateCoroutine(onComplete, remapMin, remapMax));
-#endif
+            
+            if (TerraConfig.IsInEditMode) {
+                GenerateEditor(remapMin, remapMax);
+                onComplete();
+            } else {
+                Debug.Log("Generate play");
+                StartCoroutine(GenerateCoroutine(onComplete, remapMin, remapMax));
+            }
         }
 
         /// <summary>
@@ -94,10 +96,16 @@ namespace Terra.Terrain {
             MeshManager.Lod = GetLodLevel();
 
             bool updatedHm = false;
-            StartCoroutine(MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => {
+            Debug.Log("Updating heightmap start");
+            MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => {
+                Debug.Log("Updating heightmap - updateheightmapasync");
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 MeshManager.SetTerrainHeightmap();
+                sw.Stop();
+                Debug.Log("SetTerrainHeightmap time " + sw.ElapsedMilliseconds);
                 updatedHm = true;
-            }));
+            });
 
             while (!updatedHm)
                 yield return null;
@@ -178,7 +186,7 @@ namespace Terra.Terrain {
 
             //Make & set heightmap
             bool madeHm = false;
-            yield return StartCoroutine(MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => madeHm = true));
+            MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => madeHm = true);
             while (!madeHm)
                 yield return null;
 
@@ -197,8 +205,7 @@ namespace Terra.Terrain {
                 yield return null; //Skip frame until biomemap made
                 x++;
             }
-            Debug.Log("X " + x);
-
+               
             //Paint terrain
             bool madePaint = false;
             yield return StartCoroutine(painter.PaintAsync(map, () => madePaint = true));

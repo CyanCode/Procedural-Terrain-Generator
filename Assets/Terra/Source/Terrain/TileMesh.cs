@@ -1,18 +1,23 @@
-﻿using System;
+﻿#define ENABLE_BR_WORKER_PROFILER
+
+using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Threading;
 using Terra.CoherentNoise;
 using Terra.Structures;
 using Terra.Util;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Terra.Terrain {
-	/// <summary>
-	/// References the <see cref="UnityEngine.Terrain"/> Component attached to this Tile and 
-	/// handles modifying the heightmap.
-	/// </summary>
-	[Serializable]
+    /// <summary>
+    /// References the <see cref="UnityEngine.Terrain"/> Component attached to this Tile and 
+    /// handles modifying the heightmap.
+    /// </summary>
+    [Serializable]
 	public class TileMesh: ISerializationCallbackReceiver {
 		/// <summary>
 		/// The minimum value in the heightmap after the last call 
@@ -133,6 +138,8 @@ namespace Terra.Terrain {
 
 			t.terrainData = new TerrainData();
 			t.terrainData.size = new Vector3(length, conf.Generator.Amplitude, length);
+            t.allowAutoConnect = true;
+            t.drawInstanced = true;
 
 			TerrainCollider tc = _tile.gameObject.AddComponent<TerrainCollider>();
 			tc.terrainData = t.terrainData;
@@ -198,20 +205,29 @@ namespace Terra.Terrain {
 		/// <param name="remapMin">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="remapMax">Optionally linear transform the heightmap from [min, max] to [0, 1]</param>
 		/// <param name="onComplete">Called when the heightmap has been created</param>
-		public IEnumerator CalculateHeightmapAsync(float remapMin = 0f, float remapMax = 1f, Action onComplete = null) {
+		public void CalculateHeightmapAsync(float remapMin = 0f, float remapMax = 1f, Action onComplete = null) {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
 			Lod = _lastGeneratedLodLevel;
 
-            bool madeHm = false;
-            TerraConfig.Instance.Worker.Enqueue(() => CalculateHeightmap(null, remapMin, remapMax), 
-                () => madeHm = true);
-
-            while (!madeHm)
-                yield return null;
-
-            GC.Collect();
-            if (onComplete != null)
-                onComplete();
+            Stopwatch wsw = new Stopwatch();
+            wsw.Start();
+		    TerraConfig.Instance.Worker.Enqueue(() => {
+                Stopwatch sw = new Stopwatch();
+                
+#if ENABLE_BR_WORKER_PROFILER
+                Profiler.BeginThreadProfiling("Heightmap Workers", "Tile " + _tile.GridPosition);
+#endif
+		        sw.Start();
+                CalculateHeightmap(null, remapMin, remapMax);
+                sw.Stop();
+                UnityEngine.Debug.Log("Tile " + _tile.GridPosition + " heightmap time: " + sw.ElapsedMilliseconds);
+#if ENABLE_BR_WORKER_PROFILER
+                Profiler.EndThreadProfiling();
+#endif
+            }, () => {
+                wsw.Stop();
+                MTDispatch.Instance().Enqueue(() => { UnityEngine.Debug.Log("CalculateHM worker time elapsed " + wsw.ElapsedMilliseconds); onComplete(); });
+            });
 		}
 
 		/// <summary>
@@ -622,12 +638,43 @@ namespace Terra.Terrain {
 #endregion
 	}
 
-	/// <summary>
-	/// Enumeration of the three different levels of detail 
-	/// a TileMesh can have. Low, medium, and high which 
-	/// each correspond to a different mesh resolution.
-	/// </summary>
-	[Serializable]
+    public struct CalculateHeightmapJob : IJobParallelFor {
+        [NativeDisableParallelForRestriction]
+        public GeneratorSampler Sampler;
+        public NativeArray<float> Heights;
+        public GridPosition GridPosition;
+        public int Resolution;
+        public float Spread;
+        public int Length;
+        public float RemapMin;
+        public float RemapMax;
+        public float NewMin;
+        public float NewMax;
+
+        [NativeDisableUnsafePtrRestriction]
+        private static readonly object _generatorLock = new object();
+
+        public void Execute(int index) {
+            float height;
+            lock (_generatorLock) {
+                height = Sampler.GetValue(index, GridPosition, Resolution, Spread, Length);
+            }
+
+            //Transform height
+            if (RemapMin != 0f && RemapMax != 1f) {
+                height = (height - RemapMin) * (NewMax - NewMin) / (RemapMax - RemapMin) + NewMin;
+            }
+
+            Heights[index] = height;
+        }
+    }
+
+    /// <summary>
+    /// Enumeration of the three different levels of detail 
+    /// a TileMesh can have. Low, medium, and high which 
+    /// each correspond to a different mesh resolution.
+    /// </summary>
+    [Serializable]
 	public enum Resolution : int {
 		Low = 32, 
 		Medium = 64,

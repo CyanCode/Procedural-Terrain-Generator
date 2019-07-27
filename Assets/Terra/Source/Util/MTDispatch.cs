@@ -71,7 +71,7 @@ namespace Terra.Util {
 			yield return null;
 		}
 
-
+        [SerializeField]
 		private static MTDispatch _instance = null;
 
 		public static bool Exists() {
@@ -80,8 +80,9 @@ namespace Terra.Util {
 
 		public static MTDispatch Instance() {
 			if (!Exists()) {
-				throw new Exception("MTDispatch could not find the MTDispatch object. Please ensure you have added the MainThreadExecutor Prefab to your scene.");
-			}
+			    throw new Exception("MTDispatch could not find the MTDispatch object. Please ensure you have added the MainThreadExecutor Prefab to your scene.");
+            }
+
 			return _instance;
 		}
 

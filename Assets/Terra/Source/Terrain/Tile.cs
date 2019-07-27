@@ -64,7 +64,6 @@ namespace Terra.Terrain {
                 GenerateEditor(remapMin, remapMax);
                 onComplete();
             } else {
-                Debug.Log("Generate play");
                 StartCoroutine(GenerateCoroutine(onComplete, remapMin, remapMax));
             }
         }
@@ -98,12 +97,7 @@ namespace Terra.Terrain {
             bool updatedHm = false;
             Debug.Log("Updating heightmap start");
             MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => {
-                Debug.Log("Updating heightmap - updateheightmapasync");
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
                 MeshManager.SetTerrainHeightmap();
-                sw.Stop();
-                Debug.Log("SetTerrainHeightmap time " + sw.ElapsedMilliseconds);
                 updatedHm = true;
             });
 
@@ -182,7 +176,9 @@ namespace Terra.Terrain {
 
         private IEnumerator GenerateCoroutine(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
             TerraConfig conf = TerraConfig.Instance;
+#if TERRA_DEBUG
             Debug.Log("Started tile " + GridPosition);
+#endif
 
             //Make & set heightmap
             bool madeHm = false;
@@ -220,7 +216,9 @@ namespace Terra.Terrain {
 
             MeshManager.SetVisible(true);
 
+#if TERRA_DEBUG
             Debug.Log("Completed tile " + GridPosition);
+#endif
             onComplete();
         }
 
@@ -231,7 +229,9 @@ namespace Terra.Terrain {
         /// <param name="remapMin"></param>
         /// <param name="remapMax"></param>
         private void GenerateEditor(float remapMin = 0f, float remapMax = 1f) {
+#if TERRA_DEBUG
             Debug.Log("Started tile " + GridPosition);
+#endif
 
             //Make & set heightmap
             MeshManager.CalculateHeightmap(GridPosition, remapMin, remapMax);
@@ -253,7 +253,9 @@ namespace Terra.Terrain {
             ApplyDetails(painter, map);
             MeshManager.SetVisible(true);
 
+#if TERRA_DEBUG
             Debug.Log("Completed tile " + GridPosition);
+#endif
         }
 
         public override string ToString() {

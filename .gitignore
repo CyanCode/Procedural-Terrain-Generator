@@ -6,31 +6,9 @@
 /[Bb]uilds/
 /TerraBuilds/
 
-/Assets/AssetStoreTools*
-/Assets/Standard Assets/
-/Assets/Custom/Tests/
-/Assets/Ground textures pack
-/Assets/MegaSplat/
-/Assets/Stylized foliages pack/
-/Assets/Meshes/
-/Assets/Terrains/
+/Assets/*
+!/Assets/Terra/
 /AssetStore/
-/Assets/PBR Ground Materials/
-/Assets/PlantsReedCherry/
-/Assets/PostProcessing/
-/Assets/Profiles/
-/Assets/Promo/
-/Assets/Rocks Pack/
-/Assets/Skybox/
-/Assets/Terrain Textures Snow Free Samples/
-/Assets/Tree_Textures/
-/Assets/Tree9/
-/Assets/Ultra Skybox Fog/
-/Assets/DX11_Tessellation/
-/Assets/Imported/
-/Assets/SplatImages/
-/Assets/Tests/
-
 _site/
 .vs/
 

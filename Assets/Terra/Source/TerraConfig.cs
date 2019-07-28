@@ -53,6 +53,16 @@ namespace Terra {
 			}
 		}
 
+        /// <summary>
+        /// Logs the passed message if ShowDebugMessages is enabled
+        /// </summary>
+        /// <param name="message">message to log</param>
+        public static void Log(string message) {
+            if (Instance != null && Instance.EditorState.ShowDebugMessages) {
+                Debug.Log(message);
+            }
+        }
+
 		/// <summary>
 		/// Initializes fields to default values if they were null 
 		/// post serialization.
@@ -70,7 +80,11 @@ namespace Terra {
 		}
 
 		void Start() {
-		    IsEditor = IsInEditMode;
+            //Register play mode state handler once
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChange;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChange;
+
+            IsEditor = IsInEditMode;
 
             CreateMTD();
 
@@ -90,6 +104,15 @@ namespace Terra {
 		void Reset() {
 			OnEnable(); //Initialize default values
 		}
+
+        void OnPlayModeStateChange(PlayModeStateChange state) {
+            TerraConfig.Log("Killing worker threads before exiting play mode");
+
+            // Destroy lingering worker thread
+            if (state == PlayModeStateChange.ExitingPlayMode && Worker != null) {
+                Worker.ForceStop();
+            }
+        }
 
 		/// <summary>
 		/// Starts the generation process (for use in play mode)

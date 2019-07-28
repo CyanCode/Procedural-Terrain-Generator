@@ -208,25 +208,32 @@ namespace Terra.Terrain {
 		public void CalculateHeightmapAsync(float remapMin = 0f, float remapMax = 1f, Action onComplete = null) {
 			_lastGeneratedLodLevel = _tile.GetLodLevel();
 			Lod = _lastGeneratedLodLevel;
+            bool shouldProfile = TerraConfig.Instance.EditorState.ShowDebugMessages;
 
-            Stopwatch wsw = new Stopwatch();
-            wsw.Start();
-		    TerraConfig.Instance.Worker.Enqueue(() => {
-                Stopwatch sw = new Stopwatch();
-                
-#if ENABLE_BR_WORKER_PROFILER
-                Profiler.BeginThreadProfiling("Heightmap Workers", "Tile " + _tile.GridPosition);
-#endif
-		        sw.Start();
+            Stopwatch wsw = null;
+            if (shouldProfile) {
+                wsw = new Stopwatch();
+                wsw.Start();
+            }
+            TerraConfig.Instance.Worker.Enqueue(() => {
+                Stopwatch sw = null;
+                if (shouldProfile) {
+                    sw = new Stopwatch();
+                    Profiler.BeginThreadProfiling("Heightmap Workers", "Tile " + _tile.GridPosition);
+                    sw.Start();
+                }
                 CalculateHeightmap(null, remapMin, remapMax);
-                sw.Stop();
-                UnityEngine.Debug.Log("Tile " + _tile.GridPosition + " heightmap time: " + sw.ElapsedMilliseconds);
-#if ENABLE_BR_WORKER_PROFILER
-                Profiler.EndThreadProfiling();
-#endif
+
+                if (shouldProfile) {
+                    sw.Stop();
+                    TerraConfig.Log("Tile " + _tile.GridPosition + " heightmap time: " + sw.ElapsedMilliseconds);
+                    Profiler.EndThreadProfiling();
+                }
             }, () => {
-                wsw.Stop();
-                MTDispatch.Instance().Enqueue(() => { UnityEngine.Debug.Log("CalculateHM worker time elapsed " + wsw.ElapsedMilliseconds); onComplete(); });
+                if (shouldProfile) {
+                    wsw.Stop();
+                    MTDispatch.Instance().Enqueue(() => { TerraConfig.Log("CalculateHM worker time elapsed " + wsw.ElapsedMilliseconds); onComplete(); });
+                }
             });
 		}
 

@@ -175,6 +175,8 @@ namespace UnityEditor.Terra {
             EditorGUILayout.EndHorizontal();
 
             _config.Generator.RemapResolution = EditorGUILayout.IntPopup("Remap Resolution", _config.Generator.RemapResolution, strResOpts, mapResOpts);
+
+            _config.EditorState.ShowDebugMessages = EditorGUILayout.Toggle("Debug Messages", _config.EditorState.ShowDebugMessages);
         }
 
         private void ShowTreeDetails() {

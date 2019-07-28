@@ -31,7 +31,7 @@ namespace Terra.Util {
 	/// </summary>
 	[ExecuteInEditMode]
 	public class MTDispatch: MonoBehaviour {
-
+        private static bool IsExitingPlayMode = false;
 		private static readonly Queue<Action> _executionQueue = new Queue<Action>();
 
 		void Update() {
@@ -42,11 +42,23 @@ namespace Terra.Util {
 			}
 		}
 
-		/// <summary>
-		/// Locks the queue and adds the IEnumerator to the queue
-		/// </summary>
-		/// <param name="action">IEnumerator function that will be executed from the main thread.</param>
-		public void Enqueue(IEnumerator action) {
+        void Start() {
+            //Register play mode state handler once
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChange;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChange;
+        }
+
+	    void OnPlayModeStateChange(PlayModeStateChange state) { 
+	        if (state == PlayModeStateChange.ExitingPlayMode) {
+                IsExitingPlayMode = true;
+	        }
+	    }
+
+        /// <summary>
+        /// Locks the queue and adds the IEnumerator to the queue
+        /// </summary>
+        /// <param name="action">IEnumerator function that will be executed from the main thread.</param>
+        public void Enqueue(IEnumerator action) {
 			lock (_executionQueue) {
                 if (!TerraConfig.Instance.IsEditor) {
                     _executionQueue.Enqueue(() => {
@@ -79,8 +91,8 @@ namespace Terra.Util {
 		}
 
 		public static MTDispatch Instance() {
-			if (!Exists()) {
-			    throw new Exception("MTDispatch could not find the MTDispatch object. Please ensure you have added the MainThreadExecutor Prefab to your scene.");
+            if (!Exists() && !IsExitingPlayMode) {
+			    throw new Exception("MTDispatch could not find the MTDispatch Component. Please ensure you have added the MainThreadExecutor Prefab to your scene.");
             }
 
 			return _instance;

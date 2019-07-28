@@ -44,26 +44,51 @@ public class BackgroundWorker {
         _kill = true;
     }
 
+    /// <summary>
+    /// Force kills the background thread even if a job is running.
+    /// </summary>
+    public void ForceStop() {
+        if (_worker != null) {
+            _worker.Abort();
+            _worker = null;
+        }
+    }
+
     private void Start() {
         _worker = new Thread(() => {
-            while (!_kill) {
-                lock (_dequeueLock) {
-                    if (_jobs.Count > 0) {
-                        Job job = _jobs.Dequeue();
+            try {
+                while (!_kill) {
+                    lock (_dequeueLock) {
+                        if (_jobs.Count > 0) {
+                            Job job = _jobs.Dequeue();
 
-                        try {
-                            job.func();
-                        } catch (Exception e) {
-                            //Log exception in Unity before throwing
-                            MTDispatch.Instance().Enqueue(() => Debug.LogException(e));
+                            try {
+                                job.func();
+                            } catch (Exception e) {
+                                if (e is ThreadAbortException) {
+                                    // Rethrow ThreadAbortException, bubbling up to outer scope
+                                    // ReSharper disable once PossibleIntendedRethrow
+                                    throw e;
+                                }
 
-                            // ReSharper disable once PossibleIntendedRethrow
-                            throw e;
+                                //Log exception in Unity before throwing
+                                var mtd = MTDispatch.Instance();
+                                if (mtd != null) {
+                                    mtd.Enqueue(() => Debug.LogException(e));
+                                }
+
+                                // ReSharper disable once PossibleIntendedRethrow
+                                throw e;
+                            }
+
+                            job.onComplete();
                         }
-
-                        job.onComplete();
                     }
                 }
+            } catch (ThreadAbortException) {
+                // Release locks on thread abort
+                Monitor.Exit(_enqueueLock);
+                Monitor.Exit(_dequeueLock);
             }
         });
 

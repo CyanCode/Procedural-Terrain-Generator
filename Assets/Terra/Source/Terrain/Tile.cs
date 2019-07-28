@@ -95,7 +95,7 @@ namespace Terra.Terrain {
             MeshManager.Lod = GetLodLevel();
 
             bool updatedHm = false;
-            Debug.Log("Updating heightmap start");
+            TerraConfig.Log("Updating heightmap start");
             MeshManager.CalculateHeightmapAsync(remapMin, remapMax, () => {
                 MeshManager.SetTerrainHeightmap();
                 updatedHm = true;
@@ -176,9 +176,7 @@ namespace Terra.Terrain {
 
         private IEnumerator GenerateCoroutine(Action onComplete, float remapMin = 0f, float remapMax = 1f) {
             TerraConfig conf = TerraConfig.Instance;
-#if TERRA_DEBUG
-            Debug.Log("Started tile " + GridPosition);
-#endif
+            TerraConfig.Log("Started tile " + GridPosition);
 
             //Make & set heightmap
             bool madeHm = false;
@@ -216,9 +214,7 @@ namespace Terra.Terrain {
 
             MeshManager.SetVisible(true);
 
-#if TERRA_DEBUG
-            Debug.Log("Completed tile " + GridPosition);
-#endif
+            TerraConfig.Log("Completed tile " + GridPosition);
             onComplete();
         }
 
@@ -229,9 +225,7 @@ namespace Terra.Terrain {
         /// <param name="remapMin"></param>
         /// <param name="remapMax"></param>
         private void GenerateEditor(float remapMin = 0f, float remapMax = 1f) {
-#if TERRA_DEBUG
-            Debug.Log("Started tile " + GridPosition);
-#endif
+            TerraConfig.Log("Started tile " + GridPosition);
 
             //Make & set heightmap
             MeshManager.CalculateHeightmap(GridPosition, remapMin, remapMax);
@@ -253,9 +247,7 @@ namespace Terra.Terrain {
             ApplyDetails(painter, map);
             MeshManager.SetVisible(true);
 
-#if TERRA_DEBUG
-            Debug.Log("Completed tile " + GridPosition);
-#endif
+            TerraConfig.Log("Completed tile " + GridPosition);
         }
 
         public override string ToString() {

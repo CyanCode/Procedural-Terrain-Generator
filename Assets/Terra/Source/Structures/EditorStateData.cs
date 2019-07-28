@@ -23,6 +23,8 @@ namespace Terra.Structures {
 		public bool ShowLodCubes = true;
 		public bool ShowLodChangeRadius = true;
 
+        public bool ShowDebugMessages = true;
+
 		public float InspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
 	}
 

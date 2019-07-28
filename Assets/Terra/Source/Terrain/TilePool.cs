@@ -151,10 +151,12 @@ namespace Terra.Terrain {
         /// remap. This sets <see cref="RemapMax"/> and <see cref="RemapMin"/>.
         /// </summary>
         public void CalculateHeightmapRemap() {
-#if TERRA_DEBUG
-            Stopwatch sw = new Stopwatch();
-			sw.Start();
-#endif
+            bool shouldProfile = TerraConfig.Instance.EditorState.ShowDebugMessages;
+            Stopwatch sw = null;
+            if (shouldProfile) {
+                sw = new Stopwatch();
+                sw.Start();
+            }
 
             float min = float.PositiveInfinity;
             float max = float.NegativeInfinity;
@@ -178,11 +180,11 @@ namespace Terra.Terrain {
             _remapMin = min;
             _remapMax = max;
 
-#if TERRA_DEBUG
-			sw.Stop();
-			Debug.Log("CalculateHeightmapRemap took " + sw.ElapsedMilliseconds + "ms to complete. " +
-				        "New min=" + min + " New max=" + max);
-#endif
+            if (shouldProfile) {
+                sw.Stop();
+                TerraConfig.Log("CalculateHeightmapRemap took " + sw.ElapsedMilliseconds + "ms to complete. " +
+                            "New min=" + min + " New max=" + max);
+            }
         }
 
         /// <summary>
@@ -260,10 +262,8 @@ namespace Terra.Terrain {
                         continue;
                     }
 
-#if TERRA_DEBUG
-					Debug.Log("Cached tile " + cached + " has heightmap res=" + cached.MeshManager.HeightmapResolution +
+					TerraConfig.Log("Cached tile " + cached + " has heightmap res=" + cached.MeshManager.HeightmapResolution +
 					    ". requested res=" + cached.GetLodLevel().Resolution + ". Regenerating.");
-#endif
 
                     toRegenerate.Add(cached);
                     Cache.AddActiveTile(cached);
@@ -284,10 +284,8 @@ namespace Terra.Terrain {
             //Regenerate tiles with outdated heightmaps
             for (int i = 0; i < toRegenerate.Count; i++) {
                 Tile t = toRegenerate[i];
-#if TERRA_DEBUG
-				Debug.Log("Active tile " + t + " has heightmap res=" + t.MeshManager.HeightmapResolution +
+                TerraConfig.Log("Active tile " + t + " has heightmap res=" + t.MeshManager.HeightmapResolution +
 							". requested res=" + t.GetLodLevel().Resolution + ". Regenerating.");
-#endif
 
                 //Generate one tile per frame
                 if (Application.isPlaying)

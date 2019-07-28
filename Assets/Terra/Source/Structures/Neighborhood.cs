@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Terra.Terrain;
 
-namespace Terra.Structure {
-	public struct Neighborhood {
+namespace Terra.Structures {
+	public struct Neighborhood : IEnumerable<Tile> {
 		public Tile Up;
 		public Tile Right;
 		public Tile Down;
@@ -29,6 +31,27 @@ namespace Terra.Structure {
 			Right = tiles[1];
 			Down = tiles[2];
 			Left = tiles[3];
+		}
+
+		/// <summary>
+		/// Enumerate through all non-null Tiles in this neighborhood
+		/// </summary>
+		public IEnumerator<Tile> GetEnumerator() {
+			Tile[] all = { Up, Right, Down, Left };
+
+			foreach(Tile t in all) {
+				if (t != null) {
+					yield return t;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Enumerate through all non-null Tiles in this neighborhood
+		/// </summary>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 }

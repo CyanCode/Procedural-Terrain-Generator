@@ -17,14 +17,34 @@ namespace XNodeEditor {
         /// <summary> Draws the node GUI.</summary>
         /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
         public void OnNodeGUI() {
+	        SetEditorStyle();
+
             OnHeaderGUI();
+//            if (target.IsExpanded)
             OnBodyGUI();
+
+            ResetEditorStyle();
         }
 
         public virtual void OnHeaderGUI() {
             GUI.color = Color.white;
 			string title = GetTitle();
             GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+//
+//            const int buttonWidth = 25;
+//            Rect ctrl = new Rect {
+//                y = 15,
+//                x = GetWidth() - buttonWidth - 5,
+//                width = buttonWidth,
+//                height = 8
+//            };
+//
+//            var up = Resources.Load<Texture2D>("arrow_up");
+//            var down = Resources.Load<Texture2D>("arrow_down");
+//            var show = target.IsExpanded ? up : down;
+//            if (GUI.Button(ctrl, show, GUIStyle.none)) {
+//                target.IsExpanded = !target.IsExpanded;
+//            }
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>
@@ -42,6 +62,23 @@ namespace XNodeEditor {
             }
         }
 
+		public void OnBodyGUI(string[] excludes) {
+			List<string> excludesInit = new List<string>();
+			excludesInit.AddRange(excludes);
+			excludesInit.AddRange(new[] { "m_Script", "graph", "position", "ports" });
+
+			portPositions = new Dictionary<XNode.NodePort, Vector2>();
+
+			SerializedProperty iterator = serializedObject.GetIterator();
+			bool enterChildren = true;
+			EditorGUIUtility.labelWidth = 84;
+			while (iterator.NextVisible(enterChildren)) {
+				enterChildren = false;
+				if (excludesInit.Contains(iterator.name)) continue;
+				NodeEditorGUILayout.PropertyField(iterator, true);
+			}
+		}
+
         public virtual int GetWidth() {
             return 208;
         }
@@ -55,6 +92,29 @@ namespace XNodeEditor {
 		public virtual string GetTitle() {
 			return target.name;
 		}
+
+        /// <summary>
+        /// Sets the editor style for Terra's editor
+        /// </summary>
+        private void SetEditorStyle() {
+            EditorStyles.label.normal.textColor = Color.white;
+            EditorStyles.foldoutPreDrop.normal.textColor = Color.white;
+            EditorStyles.foldout.normal.textColor = Color.white;
+            EditorStyles.foldout.active.textColor = Color.white;
+            EditorStyles.foldout.onNormal.textColor = Color.white;
+        }
+
+        /// <summary>
+        /// Resets the editor style to default
+        /// </summary>
+        private void ResetEditorStyle() {
+            EditorStyles.label.normal.textColor = Color.black;
+            EditorStyles.foldoutPreDrop.normal.textColor = Color.black;
+            EditorStyles.foldout.normal.textColor = Color.black;
+            EditorStyles.foldout.active.textColor = Color.black;
+            EditorStyles.objectField.normal.textColor = Color.black;
+            EditorStyles.foldout.onNormal.textColor = Color.black;
+        }
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,

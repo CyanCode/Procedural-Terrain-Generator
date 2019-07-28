@@ -99,7 +99,7 @@ namespace Terra.CoherentNoise
 		///<returns></returns>
 		public static Generator operator *(Generator g1, Generator g2)
 		{
-			return new Function((x, y, z) => g1.GetValue(x, y, z) * g2.GetValue(x, y, z)); ;
+			return new Function((x, y, z) => g1.GetValue(x, y, z) * g2.GetValue(x, y, z)); 
 		}
 		///<summary>
 		/// Overloaded *

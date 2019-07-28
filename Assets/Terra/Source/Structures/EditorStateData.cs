@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Container for data relating to the state of the TerraSettingsEditor
 	/// </summary>
@@ -17,6 +17,13 @@ namespace Terra.Structure {
 		public float BiomePreviewZoom = 25f;
 		public Texture2D BiomePreview = null;
 		public bool ShowWhittakerInfo = false;
+
+		//Previewing
+		public bool ShowLodGrid = true;
+		public bool ShowLodCubes = true;
+		public bool ShowLodChangeRadius = true;
+
+        public bool ShowDebugMessages = true;
 
 		public float InspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
 	}

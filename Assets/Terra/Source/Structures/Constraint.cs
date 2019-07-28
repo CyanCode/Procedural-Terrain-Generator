@@ -1,7 +1,13 @@
 ﻿using System;
+using Terra.CoherentNoise.Generation.Combination;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
+	[Serializable]
+	public enum ConstraintMixMethod {
+		AND, OR
+	}
+
 	/// <summary>
 	/// Represents a constraint between a minimum and 
 	/// a maximum.
@@ -11,10 +17,35 @@ namespace Terra.Structure {
 		public float Min;
 		public float Max;
 
-		public Constraint(float min, float max) {
+		/// <summary>
+		/// If <see cref="Max"/> equals 1
+		/// </summary>
+		public bool IsMaxConstraint {
+			get {
+				return Max == 1f;
+			}
+		}
+
+		/// <summary>
+		/// If <see cref="Min"/> equals 0
+		/// </summary>
+		public bool IsMinConstraint {
+			get {
+				return Min == 0f;
+			}
+		}
+
+		public Constraint(float min, float max) : this() {
 			Min = min;
 			Max = max;
 		}
+
+        /// <summary>
+        /// Returns a random number in the range of min and max
+        /// </summary>
+        public float Random() {
+            return UnityEngine.Random.Range(Min, Max);
+        }
 
 		/// <summary>
 		/// Does the passed value fit within the min and max?
@@ -25,32 +56,49 @@ namespace Terra.Structure {
 		}
 
 		/// <summary>
-		/// Checks whether:
-		/// val >= max 
-		/// OR 
-		/// val <= min
-		/// </summary>
-		/// <param name="val">Value to check</param>
-		public bool FitsMinMax(float val) {
-			return val >= Max || val <= Min;
-		}
-
-		/// <summary>
 		/// Calculates the "weight" of the passed value by finding
-		/// the passed value's smaller distance between the min & max 
-		/// and dividing the value by <see cref="blend"/>. The result is 
-		/// then raised to the power of <see cref="falloff"/>.
+		/// the whether it fits within the min & max and how much to 
+		/// show if the value is within the blend distance
 		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="blend"></param>
-		/// <param name="falloff"></param>
+		/// <param name="value">Value within the range of 0 and 1 to weight</param>
+		/// <param name="blend">Blend distance</param>
 		/// <returns>A weight in the range of 0 and 1</returns>
-		public float Weight(float value, float blend, float falloff = 1f) {
-			float range = Max - Min;
-			float weight = (range - Mathf.Abs(value - Max)) * blend;
-			weight = Mathf.Pow(weight, falloff);
+		public float Weight(float value, float blend) {
+			if (value > Max - blend) {
+				//Value within max transition zone
+				if (IsMaxConstraint) {
+					return value;
+				}
 
-			return Mathf.Clamp01(weight);
+				float nmin = Max - blend;
+				float a = (value - nmin) / (Max - nmin);
+				return Mathf.Lerp(value, 0, a);
+			}
+			if (value < Min + blend) {
+				//Value within min transition zone
+				if (IsMinConstraint) {
+					return value;
+				}
+
+				float nmax = Min + blend;
+				float a = (value - Min) / (nmax - Min);
+				return Mathf.Lerp(value, 0, 1 - a);
+			}
+
+			return value;
 		}
-	}
+
+	    public Constraint Clamp(Constraint to) {
+	        Constraint from = new Constraint(Min, Max);
+
+	        if (from.Min < to.Min) {
+	            from.Min = to.Min;
+	        }
+	        if (from.Max > to.Max) {
+	            from.Max = to.Max;
+	        }
+
+	        return from;
+	    }
+    }
 }

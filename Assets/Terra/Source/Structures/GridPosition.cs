@@ -1,12 +1,18 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Terra.Structure {
+namespace Terra.Structures {
 	/// <summary>
 	/// Represents a position in the grid of <see cref="Tile"/>s
 	/// </summary>
 	[Serializable]
 	public struct GridPosition {
+		public static GridPosition Zero {
+			get {
+				return new GridPosition(0, 0);
+			}
+		}
+
 		public int X;
 		public int Z;
 
@@ -25,6 +31,11 @@ namespace Terra.Structure {
 			}
 		}
 
+		/// <summary>
+		/// Create a GridPosition at the passed X and Z coordinates
+		/// </summary>
+		/// <param name="x">X coordinate</param>
+		/// <param name="z">Z coordinate</param>
 		public GridPosition(int x, int z) {
 			X = x;
 			Z = z;
@@ -34,15 +45,24 @@ namespace Terra.Structure {
 		/// Creates a GridPosition from the passed XZ position in world space 
 		/// and the length of a grid tile.
 		/// </summary>
-		/// <param name="worldXZ">world x and z positions</param>
+		/// <param name="worldXz">world x and z positions</param>
 		/// <param name="length">length of grid tile</param>
-		public GridPosition(Vector2 worldXZ, float length) {
-			int x = Mathf.RoundToInt(worldXZ.x / length);
-			int z = Mathf.RoundToInt(worldXZ.y / length);
+		public GridPosition(Vector2 worldXz, float length) {
+			int x = Mathf.RoundToInt(worldXz.x / length);
+			int z = Mathf.RoundToInt(worldXz.y / length);
 
 			X = x;
 			Z = z;
 		}
+
+		/// <summary>
+		/// Creates a GridPosition from the passed gameobject's position
+		/// and the length of a grid tile.
+		/// </summary>
+		/// <param name="gameObject">Gameobject in the world</param>
+		/// <param name="length">length of grid tile</param>
+		public GridPosition(GameObject gameObject, float length) : 
+			this(new Vector2(gameObject.transform.position.x, gameObject.transform.position.z), length) { }
 
 		/// <summary>
 		/// The distance between <see cref="p"/> and this <see cref="GridPosition"/>

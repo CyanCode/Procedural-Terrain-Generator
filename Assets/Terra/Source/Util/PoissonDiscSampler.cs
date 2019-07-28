@@ -27,12 +27,13 @@ namespace Terra.Util {
 		private Vector2[,] grid;
 		private List<Vector2> activeSamples = new List<Vector2>();
 
+
 		/// Create a sampler with the following parameters:
 		///
 		/// width:  each sample's x coordinate will be between [0, width]
 		/// height: each sample's y coordinate will be between [0, height]
 		/// radius: each sample will be at least `radius` units away from any other sample, and at most 2 * `radius`.
-		public PoissonDiscSampler(float width, float height, float radius) {
+		public PoissonDiscSampler(float width, float height, float radius, int seed = -1) {
 			rect = new Rect(0, 0, width, height);
 			radius2 = radius * radius;
 			cellSize = radius / Mathf.Sqrt(2);

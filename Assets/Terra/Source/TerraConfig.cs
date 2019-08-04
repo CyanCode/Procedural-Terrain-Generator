@@ -80,9 +80,11 @@ namespace Terra {
 		}
 
 		void Start() {
-            //Register play mode state handler once
+            //Register play mode and assembly state handlers once
             EditorApplication.playModeStateChanged -= OnPlayModeStateChange;
             EditorApplication.playModeStateChanged += OnPlayModeStateChange;
+            AssemblyReloadEvents.beforeAssemblyReload -= OnBeforeAssemblyReload;
+		    AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
 
             IsEditor = IsInEditMode;
 
@@ -103,13 +105,20 @@ namespace Terra {
 
 		void Reset() {
 			OnEnable(); //Initialize default values
-		}
+		}    
 
         void OnPlayModeStateChange(PlayModeStateChange state) {
             TerraConfig.Log("Killing worker threads before exiting play mode");
 
             // Destroy lingering worker thread
             if (state == PlayModeStateChange.ExitingPlayMode && Worker != null) {
+                Worker.ForceStop();
+            }
+        }
+
+        void OnBeforeAssemblyReload() {
+            if (!IsEditor && Worker != null) {
+                Debug.LogWarning("Assembly reload detected in play mode, stopping worker threads.");
                 Worker.ForceStop();
             }
         }

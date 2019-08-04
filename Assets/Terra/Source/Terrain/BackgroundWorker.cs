@@ -49,6 +49,7 @@ public class BackgroundWorker {
     /// </summary>
     public void ForceStop() {
         if (_worker != null) {
+            _jobs.Clear();
             _worker.Abort();
             _worker = null;
         }
@@ -58,23 +59,14 @@ public class BackgroundWorker {
         _worker = new Thread(() => {
             while (!_kill) {
                 lock(_dequeueLock) { 
-                    Debug.Log("In background thread");
                     try {
                         if (_jobs.Count > 0) {
                             Job job = _jobs.Dequeue();
                             job.func();
                             job.onComplete();
                         }
-                    } catch (Exception e) {
-                        //Log exception in Unity before throwing
-                        //                        var mtd = MTDispatch.Instance();
-                        //                        if (mtd != null) {
-                        //                            mtd.Enqueue(() => Debug.LogException(e));
-                        //                        }
-                        Debug.Log("TEST");
+                    } catch (Exception) {
                         _kill = true;
-                        // ReSharper disable once PossibleIntendedRethrow
-                        //                        throw e;
                     }
                 }
             }

@@ -6,6 +6,7 @@ using Terra.Structures;
 using Terra.Util;
 using UnityEngine;
 using XNode;
+using Random = System.Random;
 
 namespace Terra.Graph.Biome {
     [Serializable]
@@ -15,7 +16,7 @@ namespace Terra.Graph.Biome {
 
         public int GridSize = 100;
 
-        public abstract Vector2[] SamplePositions(Vector2[] samples);
+        public abstract Vector2[] SamplePositions(Vector2[] samples, Random random);
 
         protected DetailNode GetOutputValue() {
             NodePort port = GetOutputPort("Output");
@@ -81,7 +82,7 @@ namespace Terra.Graph.Biome {
             if (maskNode != null)
                 gen = maskNode.GetGenerator();
 
-            Vector2[] samples = SamplePositions();
+            Vector2[] samples = SamplePositions(new System.Random());
             for (var i = 0; i < samples.Length; i++) {
                 Vector2 sample = samples[i];
 
@@ -107,11 +108,11 @@ namespace Terra.Graph.Biome {
             return tex;
         }
 
-        public Vector2[] SamplePositions() {
+        public Vector2[] SamplePositions(System.Random random) {
             Vector2[] samples = null;
             switch (DistributionType) {
                 case Distribution.PoissonDisc:
-                    samples = GetPoissonGridSamples();
+                    samples = GetPoissonGridSamples(random);
                     break;
                 case Distribution.Uniform:
                     samples = GetUniformSamples();
@@ -122,7 +123,7 @@ namespace Terra.Graph.Biome {
 
             DetailModifierNode mod = GetInputValue<DetailModifierNode>("Modifier");
             if (mod != null) {
-                return mod.SamplePositions(samples);
+                return mod.SamplePositions(samples, random);
             }
 
             return samples;
@@ -146,12 +147,12 @@ namespace Terra.Graph.Biome {
             return _cachedCv.ShouldPlaceAt(x, y, height, angle);
         }
 
-        protected float GetRandomWidthScale() {
-            return UnityEngine.Random.Range(WidthScale.x, WidthScale.y);
+        protected float GetRandomWidthScale(System.Random random) {
+            return random.NextFloat(WidthScale.x, WidthScale.y);
         }
 
-        protected float GetRandomHeight() {
-            return UnityEngine.Random.Range(HeightScale.x, HeightScale.y);
+        protected float GetRandomHeight(System.Random random) {
+            return random.NextFloat(HeightScale.x, HeightScale.y);
         }
 
         /// <summary>
@@ -160,8 +161,9 @@ namespace Terra.Graph.Biome {
         /// </summary>
         /// <param name="density">Density of the placement of objects</param>
         /// <param name="gridSize">Size of the grid to sample</param>
-        private Vector2[] GetPoissonGridSamples(float density, int gridSize) {
-            PoissonDiscSampler pds = new PoissonDiscSampler(gridSize, gridSize, density, TerraConfig.Instance.Seed);
+        /// <param name="random">Random number generator to sample</param>
+        private Vector2[] GetPoissonGridSamples(float density, int gridSize, System.Random random) {
+            PoissonDiscSampler pds = new PoissonDiscSampler(gridSize, gridSize, density, random);
             List<Vector2> total = new List<Vector2>();
 
             foreach (Vector2 sample in pds.Samples()) {
@@ -172,8 +174,8 @@ namespace Terra.Graph.Biome {
         }
         
         /// <inheritdoc cref="GetPoissonGridSamples(float,int)"/>
-        private Vector2[] GetPoissonGridSamples(int gridSize = 100) {
-            return GetPoissonGridSamples(Spread, gridSize);
+        private Vector2[] GetPoissonGridSamples(System.Random random, int gridSize = 100) {
+            return GetPoissonGridSamples(Spread, gridSize, random);
         }
 
         private Vector2[] GetUniformSamples() {

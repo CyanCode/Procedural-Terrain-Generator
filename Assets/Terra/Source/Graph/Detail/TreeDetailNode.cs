@@ -9,11 +9,11 @@ namespace Terra.Graph.Biome {
         public GameObject Prefab;
         public bool RandomRotation;
 
-        public TreeInstance GetTreeInstance(Vector3 position, int prototypeIndex) {
+        public TreeInstance GetTreeInstance(Vector3 position, int prototypeIndex, System.Random random) {
             return new TreeInstance {
                 position = position,
-                heightScale = GetRandomHeight(),
-                widthScale = GetRandomWidthScale(),
+                heightScale = GetRandomHeight(random),
+                widthScale = GetRandomWidthScale(random),
                 rotation = UnityEngine.Random.Range(0, Mathf.PI * 2),
                 color = Color.white,
                 lightmapColor = Color.white,

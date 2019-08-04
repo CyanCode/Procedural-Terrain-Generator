@@ -264,4 +264,14 @@ namespace Terra {
 			Gizmos.DrawWireCube(sqrCenter, new Vector3(0f, vertLen, radius * 2));
 		}
 	}
+
+    public static class TerraExtensions {
+        public static float NextFloat(this System.Random random) {
+            return (float)random.NextDouble();
+        }
+
+        public static float NextFloat(this System.Random random, float min, float max) {
+            return random.NextFloat() * (max - min) + min;
+        }
+    }
 }

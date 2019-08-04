@@ -56,39 +56,27 @@ public class BackgroundWorker {
 
     private void Start() {
         _worker = new Thread(() => {
-            try {
-                while (!_kill) {
-                    lock (_dequeueLock) {
+            while (!_kill) {
+                lock(_dequeueLock) { 
+                    Debug.Log("In background thread");
+                    try {
                         if (_jobs.Count > 0) {
                             Job job = _jobs.Dequeue();
-
-                            try {
-                                job.func();
-                            } catch (Exception e) {
-                                if (e is ThreadAbortException) {
-                                    // Rethrow ThreadAbortException, bubbling up to outer scope
-                                    // ReSharper disable once PossibleIntendedRethrow
-                                    throw e;
-                                }
-
-                                //Log exception in Unity before throwing
-                                var mtd = MTDispatch.Instance();
-                                if (mtd != null) {
-                                    mtd.Enqueue(() => Debug.LogException(e));
-                                }
-
-                                // ReSharper disable once PossibleIntendedRethrow
-                                throw e;
-                            }
-
+                            job.func();
                             job.onComplete();
                         }
+                    } catch (Exception e) {
+                        //Log exception in Unity before throwing
+                        //                        var mtd = MTDispatch.Instance();
+                        //                        if (mtd != null) {
+                        //                            mtd.Enqueue(() => Debug.LogException(e));
+                        //                        }
+                        Debug.Log("TEST");
+                        _kill = true;
+                        // ReSharper disable once PossibleIntendedRethrow
+                        //                        throw e;
                     }
                 }
-            } catch (ThreadAbortException) {
-                // Release locks on thread abort
-                Monitor.Exit(_enqueueLock);
-                Monitor.Exit(_dequeueLock);
             }
         });
 

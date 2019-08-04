@@ -32,6 +32,11 @@ namespace Terra.Terrain {
         public GridPosition GridPosition { get; private set; }
 
         /// <summary>
+        /// Random number generator used by this Tile
+        /// </summary>
+        public System.Random Random { get; private set; }
+
+        /// <summary>
         /// Create and manage mesh(es) attached to this Tile. This 
         /// provides an interface for creating and showing meshes of 
         /// varying resolutions.
@@ -43,6 +48,19 @@ namespace Terra.Terrain {
             set {
                 _meshManager = value;
             }
+        }
+
+        /// <summary>
+        /// Initialization sequence for this Tile
+        /// </summary>
+        void Init(GridPosition gp) {
+            //Set random number generator once
+            if (Random == null) {
+                int seed = gp.X + gp.Z + TerraConfig.Instance.Seed;
+                Random = new System.Random(seed);
+            }
+
+            UpdatePosition(gp);
         }
 
         /// <summary>
@@ -147,14 +165,15 @@ namespace Terra.Terrain {
 
         /// <summary>
         /// Creates a gameobject with an attached Tile component and 
-        /// places it in the scene. This is a convienence method and is not required 
-        /// for correct tile creation.
+        /// places it in the scene. This method is required for correct 
+        /// Tile creation.
         /// </summary>
         /// <param name="name">Name of the created gameobject</param>
         /// <returns>The attached Tile component</returns>
-        public static Tile CreateTileGameobject(string name) {
+        public static Tile CreateTileGameobject(string name, GridPosition position) {
             GameObject go = new GameObject(name);
             Tile tt = go.AddComponent<Tile>();
+            tt.Init(position);
 
             return tt;
         }
@@ -164,10 +183,10 @@ namespace Terra.Terrain {
             TileDetail detailer = new TileDetail(this, painter, biomeMap);
 
             yield return null;
-            detailer.AddTrees();
+            yield return detailer.AddTrees();
             
             yield return null;
-            detailer.AddDetailLayers();
+            yield return detailer.AddDetailLayers();
 
             if (onComplete != null) {
                 onComplete();
@@ -194,11 +213,9 @@ namespace Terra.Terrain {
             bool madeBm = false;
             float[,,] map = null;
             conf.Worker.Enqueue(() => map = painter.GetBiomeMap(), () => madeBm = true);
-            int x = 0;
-            while (!madeBm) {
+            while (!madeBm) 
                 yield return null; //Skip frame until biomemap made
-                x++;
-            }
+            
                
             //Paint terrain
             bool madePaint = false;

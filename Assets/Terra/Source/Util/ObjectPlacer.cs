@@ -329,7 +329,7 @@ namespace Terra.Terrain {
 
                 for (int i = 0; i < Positions.Length; i++) {
                     ObjectDetailNode objectPlacementData = Pool._placer.ObjectsToPlace[i];
-                    Vector2[] samples = objectPlacementData.SamplePositions();
+                    Vector2[] samples = objectPlacementData.SamplePositions(Tile.Random);
                     List<Vector3> worldPositions = new List<Vector3>((int) (Positions.Length * 0.66f));
 
                     for (var j = 0; j < samples.Length; j++) {

@@ -12,7 +12,7 @@ namespace Terra.Graph.Biome {
             return this;
         }
 
-        public override Vector2[] SamplePositions(Vector2[] samples) {
+        public override Vector2[] SamplePositions(Vector2[] samples, System.Random random) {
             List<Vector2> positions = new List<Vector2>(samples.Length);
 
             foreach (Vector2 pos in samples) {
@@ -20,7 +20,7 @@ namespace Terra.Graph.Biome {
                 float min = DistanceMin / GridSize;
                 float max = DistanceMax / GridSize;
 
-                Vector2 offset = GetRandomInCircle(pos, min, max);
+                Vector2 offset = GetRandomInCircle(pos, min, max, random);
                 float x = offset.x;
                 float y = offset.y;
 
@@ -32,14 +32,14 @@ namespace Terra.Graph.Biome {
             return positions.ToArray();
         }
 
-        private Vector2 GetRandomInCircle(Vector2 center, float min, float max) {
-            bool isPosX = Random.Range(0, 2) == 0;
-            bool isPosY = Random.Range(0, 2) == 0;
+        private Vector2 GetRandomInCircle(Vector2 center, float min, float max, System.Random random) {
+            bool isPosX = random.Next(0, 2) == 0;
+            bool isPosY = random.Next(0, 2) == 0;
 
-            float x = isPosX ? Random.Range(center.x + min, center.x + max) : 
-                Random.Range(center.x - min, center.x - max);
-            float y = isPosY ? Random.Range(center.y + min, center.y + max) :
-                Random.Range(center.y - min, center.y - max);
+            float x = isPosX ? random.NextFloat(center.x + min, center.x + max) :
+                random.NextFloat(center.x - min, center.x - max);
+            float y = isPosY ? random.NextFloat(center.y + min, center.y + max) :
+                random.NextFloat(center.y - min, center.y - max);
 
             return new Vector2(x, y);
         }

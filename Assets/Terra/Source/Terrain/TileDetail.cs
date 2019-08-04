@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Terra.Graph.Biome;
@@ -32,9 +33,9 @@ namespace Terra.Terrain {
         /// Adds trees according to the <see cref="_biomeMap"/> in 
         /// this <see cref="Tile"/>
         /// </summary>
-        public void AddTrees() {
+        public IEnumerator AddTrees() {
             if (_biomeMap == null) {
-                return;
+                yield break;
             }
 
             //Collect prototypes from tree nodes
@@ -48,6 +49,8 @@ namespace Terra.Terrain {
                 prototypes.Add((TreePrototype)treeNode.GetDetailPrototype());
             }
 
+            int coroutineRes = TerraConfig.Instance.Generator.CoroutineRes;
+            int iterations = 0;
             GenerationData conf = TerraConfig.Instance.Generator;
             _terrain.terrainData.treePrototypes = prototypes.ToArray();
             _terrain.terrainData.RefreshPrototypes();
@@ -70,11 +73,25 @@ namespace Terra.Terrain {
 
                 foreach (TreeDetailNode treeNode in treeNodes) {
                     //Get map of normalized "tree positions"
-                    Vector2[] samples = treeNode.SamplePositions();
+                    Vector2[] samples = null;
+                    if (!TerraConfig.Instance.IsEditor) {
+                        bool isDone = false;
+                        TreeDetailNode node = treeNode;
+                        TerraConfig.Instance.Worker.Enqueue(() => samples = node.SamplePositions(_tile.Random), () => isDone = true);
+
+                        while (!isDone)
+                            yield return null;
+                    } else {
+                        samples = treeNode.SamplePositions(_tile.Random);
+                    }
 
                     foreach (Vector2 sample in samples) {
                         float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(_biomeMap, sample.x, sample.y);
 
+                        if (iterations > coroutineRes) {
+                            iterations = 0;
+                            yield return null;
+                        }
                         if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
                             continue; //Not in this biome, skip
                         }
@@ -90,7 +107,7 @@ namespace Terra.Terrain {
                             Vector3 treeLoc = new Vector3(sample.x, height, sample.y);
 
                             //Tree sample set index matches the tree prototype index (j)
-                            TreeInstance tree = treeNode.GetTreeInstance(treeLoc, prototypeIndex);
+                            TreeInstance tree = treeNode.GetTreeInstance(treeLoc, prototypeIndex, _tile.Random);
                             _terrain.AddTreeInstance(tree);
                         }
                     }
@@ -105,7 +122,7 @@ namespace Terra.Terrain {
         /// <see cref="_biomeMap"/> in this <see cref="Tile"/>. This adds 
         /// grass and detail meshes.
         /// </summary>
-        public void AddDetailLayers() {
+        public IEnumerator AddDetailLayers() {
             BiomeCombinerNode combiner = _painter.Combiner;
             BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
             int res = TerraConfig.Instance.Generator.DetailmapResolution;
@@ -120,6 +137,8 @@ namespace Terra.Terrain {
                 prototypes.Add((DetailPrototype)detailNode.GetDetailPrototype());
             }
 
+            int coroutineRes = TerraConfig.Instance.Generator.CoroutineRes;
+            int iterations = 0;
             int prototypeIndex = 0;
             GenerationData conf = TerraConfig.Instance.Generator;
             _terrain.terrainData.SetDetailResolution(res, 16);
@@ -140,8 +159,25 @@ namespace Terra.Terrain {
                     int[,] layer = new int[res, res];
 
                     //Get map of normalized placement positions
-                    Vector2[] samples = grassNode.SamplePositions();
+                    Vector2[] samples = null;
+                    if (!TerraConfig.Instance.IsEditor) {
+                        bool isDone = false;
+                        GrassDetailNode node = grassNode;
+                        TerraConfig.Instance.Worker.Enqueue(() => samples = node.SamplePositions(_tile.Random), () => isDone = true);
+
+                        while (!isDone)
+                            yield return null;
+                    } else {
+                        samples = grassNode.SamplePositions(_tile.Random);
+                    }
+
                     foreach (Vector2 sample in samples) {
+                        iterations++;
+
+                        if (iterations > coroutineRes) {
+                            iterations = 0;
+                            yield return null;
+                        }
                         float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(_biomeMap, sample.x, sample.y);
 
                         if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {

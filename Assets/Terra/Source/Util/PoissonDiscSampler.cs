@@ -26,39 +26,41 @@ namespace Terra.Util {
 		private readonly float cellSize;
 		private Vector2[,] grid;
 		private List<Vector2> activeSamples = new List<Vector2>();
-
+        private System.Random Random;
 
 		/// Create a sampler with the following parameters:
 		///
 		/// width:  each sample's x coordinate will be between [0, width]
 		/// height: each sample's y coordinate will be between [0, height]
 		/// radius: each sample will be at least `radius` units away from any other sample, and at most 2 * `radius`.
-		public PoissonDiscSampler(float width, float height, float radius, int seed = -1) {
+		/// random: Random number generator to sample
+		public PoissonDiscSampler(float width, float height, float radius, System.Random random) {
 			rect = new Rect(0, 0, width, height);
 			radius2 = radius * radius;
 			cellSize = radius / Mathf.Sqrt(2);
 			grid = new Vector2[Mathf.CeilToInt(width / cellSize),
 							   Mathf.CeilToInt(height / cellSize)];
+            Random = random;
 		}
 
 		/// Return a lazy sequence of samples. You typically want to call this in a foreach loop, like so:
 		///   foreach (Vector2 sample in sampler.Samples()) { ... }
 		public IEnumerable<Vector2> Samples() {
 			// First sample is choosen randomly
-			yield return AddSample(new Vector2(Random.value * rect.width, Random.value * rect.height));
+			yield return AddSample(new Vector2(Random.NextFloat() * rect.width, Random.NextFloat() * rect.height));
 
 			while (activeSamples.Count > 0) {
 
 				// Pick a random active sample
-				int i = (int)Random.value * activeSamples.Count;
+				int i = (int)Random.NextFloat() * activeSamples.Count;
 				Vector2 sample = activeSamples[i];
 
 				// Try `k` random candidates between [radius, 2 * radius] from that sample.
 				bool found = false;
 				for (int j = 0; j < k; ++j) {
 
-					float angle = 2 * Mathf.PI * Random.value;
-					float r = Mathf.Sqrt(Random.value * 3 * radius2 + radius2); // See: http://stackoverflow.com/questions/9048095/create-random-number-within-an-annulus/9048443#9048443
+					float angle = 2 * Mathf.PI * Random.NextFloat();
+					float r = Mathf.Sqrt(Random.NextFloat() * 3 * radius2 + radius2); // See: http://stackoverflow.com/questions/9048095/create-random-number-within-an-annulus/9048443#9048443
 					Vector2 candidate = sample + r * new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
 
 					// Accept candidates if it's inside the rect and farther than 2 * radius to any existing sample.

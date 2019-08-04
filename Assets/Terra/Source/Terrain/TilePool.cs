@@ -137,8 +137,7 @@ namespace Terra.Terrain {
         /// <param name="p">position in grid to add tile at.</param>
         /// <param name="onComplete">called when the Tile has finished generating.</param>
         public void CreateTileAt(GridPosition p, Action<Tile> onComplete) {
-            Tile t = Tile.CreateTileGameobject("Tile [" + p.X + ", " + p.Z + "]");
-            t.UpdatePosition(p);
+            Tile t = Tile.CreateTileGameobject("Tile [" + p.X + ", " + p.Z + "]", p);
 
             t.Generate(() => {
                 AddTile(t);

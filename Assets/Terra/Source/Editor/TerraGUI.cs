@@ -126,6 +126,7 @@ namespace UnityEditor.Terra {
 
             ShowLod();
 
+            _config.Generator.TerrainMaterial = (Material)EditorGUILayout.ObjectField(_config.Generator.TerrainMaterial, typeof(Material), true);
             _config.Generator.Length = EditorGUILayout.IntField("Length", _config.Generator.Length);
             _config.Generator.Amplitude = EditorGUILayout.FloatField("Amplitude", _config.Generator.Amplitude);
             _config.Generator.Spread = EditorGUILayout.FloatField("Spread", _config.Generator.Spread);

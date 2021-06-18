@@ -113,6 +113,7 @@ namespace Terra {
             // Destroy lingering worker thread
             if (state == PlayModeStateChange.ExitingPlayMode && Worker != null) {
                 Worker.ForceStop();
+                Worker = null;
             }
         }
 
@@ -243,7 +244,6 @@ namespace Terra {
 		private Color GetLodPreviewColor(GridPosition position) {
 			if (Generator == null || Generator.Lod == null)
 				return Color.white;
-
 
 			Vector3 worldXYZ = Generator.TrackedObject == null ? Vector3.zero : Generator.TrackedObject.transform.position;
 

@@ -143,6 +143,8 @@ namespace Terra.Terrain {
 
 			TerrainCollider tc = _tile.gameObject.AddComponent<TerrainCollider>();
 			tc.terrainData = t.terrainData;
+
+			t.materialTemplate = conf.Generator.TerrainMaterial;
 		}
 
 		/// <summary>

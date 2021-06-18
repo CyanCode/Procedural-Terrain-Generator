@@ -6,6 +6,7 @@ namespace Terra.Structures {
 	[Serializable]
 	public class GenerationData {
 		public GameObject TrackedObject;
+		public Material TerrainMaterial;
 		public int GenerationRadius = 3;
 		public float LodChangeRadius = 250f;
 		public bool RemapHeightmap = true;

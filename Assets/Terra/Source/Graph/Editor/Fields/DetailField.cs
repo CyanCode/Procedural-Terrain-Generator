@@ -12,7 +12,7 @@ namespace Terra.Graph.Fields {
 
             ObjectDetailNode obj = objectNode.ObjectDetailNode;
             obj.Prefab = (GameObject)
-                EditorGUILayout.ObjectField(new GUIContent("Tree"), obj.Prefab, typeof(GameObject), false);
+                EditorGUILayout.ObjectField(new GUIContent("Prefab"), obj.Prefab, typeof(GameObject), false);
 
             Show(obj, () => {
                 //Translate

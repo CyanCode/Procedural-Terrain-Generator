@@ -240,12 +240,7 @@ namespace Terra.Structures {
 			File.WriteAllText(path, sb.ToString());
 		}
 
-		private static void WriteTexture(Texture2D tex, string path) {
-			byte[] encoded = tex.EncodeToJPG(100);
-			File.WriteAllBytes(path, encoded);
-		}
-
-		private static void Loop(float[,] values, Action<int, int> operation) {
+		public static void Loop(float[,] values, Action<int, int> operation) {
 			for (int x = 0; x < values.GetLength(0); x++) {
 				for (int y = 0; y < values.GetLength(1); y++) {
 					operation(x, y);
@@ -253,7 +248,7 @@ namespace Terra.Structures {
 			}
 		}
 
-		private static void Loop(float[,,] values, Action<int, int, int> operation) {
+		public static void Loop(float[,,] values, Action<int, int, int> operation) {
 			for (int x = 0; x < values.GetLength(0); x++) {
 				for (int y = 0; y < values.GetLength(1); y++) {
 					for (int z = 0; z < values.GetLength(2); z++) {
@@ -261,6 +256,19 @@ namespace Terra.Structures {
 					}
 				}
 			}
+		}
+
+		public static void LoopXY(int resolution, Action<int, int> operation) {
+			for (int x = 0; x < resolution; x++) {
+				for (int y = 0; y < resolution; y++) {
+					operation(x, y);
+				}
+			}
+		}
+
+		public static void WriteTexture(Texture2D tex, string path) {
+			byte[] encoded = tex.EncodeToJPG(100);
+			File.WriteAllBytes(path, encoded);
 		}
 	}
 }

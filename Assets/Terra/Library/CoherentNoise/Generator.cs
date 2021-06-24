@@ -9,6 +9,12 @@ namespace Terra.CoherentNoise
 	public abstract class Generator
 	{
 		/// <summary>
+		/// Whether this Generator returns values between 0 and 1 or not. 
+		/// Non-normalized values need to be remapped.
+		/// </summary>
+		public bool RequiresRemap = true;
+
+		/// <summary>
 		///  Returns settings value at given point. 
 		///  </summary>
 		/// <param name="x">X coordinate</param>

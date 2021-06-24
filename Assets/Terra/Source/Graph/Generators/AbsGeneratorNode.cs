@@ -9,15 +9,16 @@ namespace Terra.Graph.Generators {
 	/// This class represents a node that outputs a Generator
 	/// </summary>
 	public abstract class AbsGeneratorNode: PreviewableNode {
+		protected const string MENU_PARENT_NAME = "Noise/";
+
 		[Output] public AbsGeneratorNode Output;
 
 		public override object GetValue(NodePort port) {
 			return this;
 		}
 
-		public override Texture2D DidRequestTextureUpdate() {
-			int s = PreviewTextureSize;
-			Texture2D tex = new Texture2D(s, s);
+		public override Texture2D DidRequestTextureUpdate(int size, float spread) {
+			Texture2D tex = new Texture2D(size, size);
 
 			Generator g = GetGenerator();
 			if (g == null) {
@@ -29,11 +30,11 @@ namespace Terra.Graph.Generators {
 			//Retrieve values
 			float min = float.PositiveInfinity;
 			float max = float.NegativeInfinity;
-			float[,] values = new float[s, s];
+			float[,] values = new float[size, size];
 
-			for (int x = 0; x < s; x++) {
-				for (int y = 0; y < s; y++) {
-					float val = sampler.GetValue(x, y, GridPosition.Zero, s, s, 1);
+			for (int x = 0; x < size; x++) {
+				for (int y = 0; y < size; y++) {
+					float val = sampler.GetValue(x, y, GridPosition.Zero, size, size, 1);
 
 					if (val < min) {
 						min = val;
@@ -47,8 +48,8 @@ namespace Terra.Graph.Generators {
 			}
 
 			//Normalize values and set texture
-			for (int x = 0; x < s; x++) {
-				for (int y = 0; y < s; y++) {
+			for (int x = 0; x < size; x++) {
+				for (int y = 0; y < size; y++) {
 					float val = values[x, y];
 					float norm = (val - min) / (max - min);
 

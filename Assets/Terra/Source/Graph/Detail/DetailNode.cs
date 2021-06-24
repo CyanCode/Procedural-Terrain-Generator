@@ -64,13 +64,13 @@ namespace Terra.Graph.Biome {
 
         private ConstraintNode _cachedCv = null;
 
-        public override Texture2D DidRequestTextureUpdate() {
-            Texture2D tex = new Texture2D(PreviewTextureSize, PreviewTextureSize);
+        public override Texture2D DidRequestTextureUpdate(int size, float spread) {
+            Texture2D tex = new Texture2D(size, size);
             ConstraintNode cons = ConstraintValue;
 
             //Fill texture with black
-            for (int x = 0; x < PreviewTextureSize; x++) {
-                for (int y = 0; y < PreviewTextureSize; y++) {
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
                     tex.SetPixel(x, y, Color.black);
                 }
             }
@@ -94,8 +94,8 @@ namespace Terra.Graph.Biome {
                     }
                 }
 
-                int x = Mathf.Clamp((int)(sample.x * PreviewTextureSize), 0, PreviewTextureSize);
-                int y = Mathf.Clamp((int)(sample.y * PreviewTextureSize), 0, PreviewTextureSize);
+                int x = Mathf.Clamp((int)(sample.x * size), 0, size);
+                int y = Mathf.Clamp((int)(sample.y * size), 0, size);
 
                 tex.SetPixel(x, y, Color.white);
 

@@ -64,49 +64,38 @@ namespace Terra.Graph.Biome {
         [Input]
 		public float Blend = 1f;
 
-		[Input(ShowBackingValue.Never, ConnectionType.Override)] 
-		public AbsGeneratorNode HeightmapGenerator;
 		public bool UseHeightmap;
 		public Vector2 HeightmapMinMaxMask = new Vector2(0, 1);
 
-		[Input(ShowBackingValue.Never, ConnectionType.Override)] 
-		public AbsGeneratorNode TemperatureGenerator;
 		public bool UseTemperature;
 		public Vector2 TemperatureMinMaxMask = new Vector2(0, 1);
 
-		[Input(ShowBackingValue.Never, ConnectionType.Override)] 
-		public AbsGeneratorNode MoistureGenerator;
 		public bool UseMoisture;
 		public Vector2 MoistureMinMaxMask = new Vector2(0, 1);
 
-		private GeneratorSampler _heightmapSampler;
-		private GeneratorSampler _temperatureSampler;
-		private GeneratorSampler _moistureSampler;
+		private EndNode EndNode => TerraConfig.Instance.Graph.GetEndNode();
+		private GeneratorSampler _heightmapSampler => EndNode.GetHeightmapSampler();
+		private GeneratorSampler _temperatureSampler => EndNode.GetTemperatureSampler();
+		private GeneratorSampler _moistureSampler => EndNode.GetMoistureMapSampler();
 
-        private MinMaxResult? _heightRemap;
-        private MinMaxResult? _temperatureRemap;
-        private MinMaxResult? _moistureRemap;
-
-        private static object _asyncLock = new object();
+		private static object _asyncLock = new object();
 
 		public override object GetValue(NodePort port) {
 			return this;
 		}
 
-		public override Texture2D DidRequestTextureUpdate() {
-			return GetPreviewTexture(PreviewTextureSize);
+		public override Texture2D DidRequestTextureUpdate(int size, float spread) {
+			return GetPreviewTexture(size, spread);
 		}
 
 		public SplatDetailNode[] GetSplatInputs() {
 			return GetInputValues<SplatDetailNode>("SplatDetails", null);
 		}
         
-        /// <returns>All connected Tree inputs</returns>
         public TreeDetailNode[] GetTreeInputs() {
             return GetInputValues<TreeDetailNode>("Trees");
         }
 
-	    /// <returns>All connected Grass inputs</returns>
         public GrassDetailNode[] GetGrassInputs() {
             return GetInputValues<GrassDetailNode>("Grass");
         }
@@ -132,93 +121,107 @@ namespace Terra.Graph.Biome {
             }
 
             float[] heights = new float[3];
-            float padding = TerraConfig.Instance.Generator.RemapPadding;
 
             if (UseHeightmap && _heightmapSampler != null) {
-                if (_heightRemap == null) {
-                    _heightRemap = _heightmapSampler.GetRemap();
-                }
-
-                float val = _heightmapSampler.GetValue(x, y, position, resolution, spread, length);
-                heights[0] = MathUtil.Map01(val, _heightRemap.Value.Min - padding, _heightRemap.Value.Max + padding);
-            }
+                       heights[0] = _heightmapSampler.GetValue(x, y, position, resolution, spread, length);
+			}
             if (UseTemperature && _temperatureSampler != null) {
-                if (_temperatureRemap == null) {
-                    _temperatureRemap = _temperatureSampler.GetRemap();
-                }
-
-                float val = _temperatureSampler.GetValue(x, y, position, resolution, spread, length);
-                heights[1] = MathUtil.Map01(val, _temperatureRemap.Value.Min - padding, _temperatureRemap.Value.Max + padding);
-            }
+                heights[1] = _temperatureSampler.GetValue(x, y, position, resolution, spread, length);
+			}
             if (UseMoisture && _moistureSampler != null) {
-                if (_moistureRemap == null) {
-                    _moistureRemap = _moistureSampler.GetRemap();
-                }
-
-                float val = _moistureSampler.GetValue(x, y, position, resolution, spread, length);
-                heights[2] = MathUtil.Map01(val, _moistureRemap.Value.Min - padding, _moistureRemap.Value.Max + padding);
-            }
+                heights[2] = _moistureSampler.GetValue(x, y, position, resolution, spread, length);
+			}
 
             return heights;
 		}
+
+		/// <summary>
+		/// Calculate the weight of the biome based on the height, 
+		/// temperature, and moisture
+		/// </summary>
+		public float[,] GetWeights(GridPosition position, int resolution, float spread, int length) {
+			float[,] weights = new float[resolution, resolution];
+
+			Constraint hc = new Constraint(HeightmapMinMaxMask.x, HeightmapMinMaxMask.y);
+			Constraint tc = new Constraint(TemperatureMinMaxMask.x, TemperatureMinMaxMask.y);
+			Constraint mc = new Constraint(MoistureMinMaxMask.x, MoistureMinMaxMask.y);
+			float blend = 0.1f;
+
+			Func<bool, int> boolToInt = (i) => i ? 1 : 0;
+			int mapsInUseCount = boolToInt(UseHeightmap) + boolToInt(UseTemperature) + boolToInt(UseMoisture);
+
+			MathUtil.LoopXY(resolution, (x, y) => {
+				Func<GeneratorSampler, float> sample = (sampler) => Mathf.Clamp01(sampler.GetValue(x, y, position, resolution, spread, length));
+				float weight = 0;
+
+				if (UseHeightmap) {
+					weight += hc.Weight(sample(_heightmapSampler), blend);
+				}
+				if (UseTemperature) {
+					weight += tc.Weight(sample(_temperatureSampler), blend);
+				}
+				if (UseMoisture) {
+					weight += mc.Weight(sample(_moistureSampler), blend);
+				}
+
+				weights[x, y] = weight / mapsInUseCount;
+			});
+
+			return weights;
+        }
 		
 		/// <summary>
-		/// Creates a map of weights where each weight represents "how much" of 
-		/// this biome to show.
+		/// Creates a map of weights where each weight representing the probability 
+		/// between 0 and 1 that the biome will appear
 		/// </summary>
 		/// <param name="values"></param>
 		/// <param name="min"></param>
 		/// <param name="max"></param>
-		/// <returns></returns>
-		public float[,] GetWeightedValues(float[,,] values, float min, float max) {
-			if (values == null) {
-				return null;
-			}
+		//public float[,] GetWeightedValues() {
+		//	//Constraint
+		//	Constraint hc = new Constraint(HeightmapMinMaxMask.x, HeightmapMinMaxMask.y);
+		//	Constraint tc = new Constraint(TemperatureMinMaxMask.x, TemperatureMinMaxMask.y);
+		//	Constraint mc = new Constraint(MoistureMinMaxMask.x, MoistureMinMaxMask.y);
 
-			//Constraint
-			Constraint hc = new Constraint(HeightmapMinMaxMask.x, HeightmapMinMaxMask.y);
-			Constraint tc = new Constraint(TemperatureMinMaxMask.x, TemperatureMinMaxMask.y);
-			Constraint mc = new Constraint(MoistureMinMaxMask.x, MoistureMinMaxMask.y);
+		//	int resolution = values.GetLength(0);
+		//	float[,] map = new float[resolution, resolution];
 
-			int resolution = values.GetLength(0);
-			float[,] map = new float[resolution, resolution];
+		//	//Normalize values
+		//	for (int x = 0; x < resolution; x++) {
+		//		for (int y = 0; y < resolution; y++) {
+		//			if (!UseHeightmap && !UseTemperature && !UseMoisture) {
+		//				map[x, y] = 1f;
+		//				continue;
+		//			}
 
-			//Normalize values
-			for (int x = 0; x < resolution; x++) {
-				for (int y = 0; y < resolution; y++) {
-					if (!UseHeightmap && !UseTemperature && !UseMoisture) {
-						map[x, y] = 1f;
-						continue;
-					}
+		//			float hv = MathUtil.Map01(values[x, y, 0], min, max);
+		//			float tv = MathUtil.Map01(values[x, y, 1], min, max);
+		//			float mv = MathUtil.Map01(values[x, y, 2], min, max);
 
-					float hv = MathUtil.Map01(values[x, y, 0], min, max);
-					float tv = MathUtil.Map01(values[x, y, 1], min, max);
-					float mv = MathUtil.Map01(values[x, y, 2], min, max);
-
-					float val = 0;
-					int count = 0;
+		//			float val = 0;
+		//			int count = 0;
 			
-					//Gather heights that fit set min/max
-					if (UseHeightmap && hc.Fits(hv)) {
-						val += hc.Weight(hv, Blend);
-						count++;
-					}
-					if (UseTemperature && tc.Fits(tv)) {
-						val += tc.Weight(tv, Blend);
-						count++;
-					}
-					if (UseMoisture && mc.Fits(mv)) {
-						val += mc.Weight(mv, Blend);
-						count++;
-					}
+		//			//Gather heights that fit set min/max
+		//			if (UseHeightmap && hc.Fits(hv)) {
+		//				val += hc.Weight(hv, Blend);
+		//				count++;
+		//			}
+		//			if (UseTemperature && tc.Fits(tv)) {
+		//				val += tc.Weight(tv, Blend);
+		//				count++;
+		//			}
+		//			if (UseMoisture && mc.Fits(mv)) {
+		//				val += mc.Weight(mv, Blend);
+		//				count++;
+		//			}
 
-					val = count > 0 ? val / count : 0;
-					map[x, y] = Mathf.Clamp01(val);
-				}
-			}
+		//			val = count > 0 ? val / count : 0;
+		//			map[x, y] = Mathf.Clamp01(val);
+		//		}
+		//	}
 
-			return map;
-		}
+		//	return map;
+		//}
 
 		/// <summary>
 		/// Create a map of weights each representing the weights of 
@@ -234,39 +237,39 @@ namespace Terra.Graph.Biome {
 		/// coordinates while the last index is the weight of the height, temperature, and 
 		/// moisture maps (in that order).
 		/// </returns>
-		public BiomeMapResult GetMapsValues(GridPosition position, int resolution, float spread = -1f, int length = -1) {
-            lock (_asyncLock) {
-                float[,,] heights = new float[resolution, resolution, 3];
+		//public BiomeMapResult GetMapsValues(GridPosition position, int resolution, float spread = -1f, int length = -1) {
+  //          lock (_asyncLock) {
+  //              float[,,] heights = new float[resolution, resolution, 3];
 
-                //Update generators
-                SetHeightmapSampler();
-                SetTemperatureSampler();
-                SetMoistureSampler();
+  //              //Update generators
+  //              SetHeightmapSampler();
+  //              SetTemperatureSampler();
+  //              SetMoistureSampler();
 
-                //Default spread/length to TerraConfig settings
-                spread = spread == -1f ? TerraConfig.Instance.Generator.Spread : spread;
-                length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
+  //              //Default spread/length to TerraConfig settings
+  //              spread = spread == -1f ? TerraConfig.Instance.Generator.Spread : spread;
+  //              length = length == -1 ? TerraConfig.Instance.Generator.Length : length;
 
-                //Track min/max
-                MinMaxRecorder minMax = new MinMaxRecorder();
+  //              //Track min/max
+  //              MinMaxRecorder minMax = new MinMaxRecorder();
 
-                //Fill heights structure and set min/max values
-                for (int x = 0; x < resolution; x++) {
-                    for (int y = 0; y < resolution; y++) {
-                        float[] generated = GetMapHeightsAt(x, y, position, resolution, spread, length);
+  //              //Fill heights structure and set min/max values
+  //              for (int x = 0; x < resolution; x++) {
+  //                  for (int y = 0; y < resolution; y++) {
+  //                      float[] generated = GetMapHeightsAt(x, y, position, resolution, spread, length);
 
-                        for (int z = 0; z < 3; z++) {
-                            float height = generated[z];
-                            heights[x, y, z] = height;
-                            minMax.Register(height);
-                        }
-                    }
-                }
+  //                      for (int z = 0; z < 3; z++) {
+  //                          float height = generated[z];
+  //                          heights[x, y, z] = height;
+  //                          minMax.Register(height);
+  //                      }
+  //                  }
+  //              }
                 
-                MinMaxResult result = minMax.GetMinMax();
-                return new BiomeMapResult(heights, result.Min, result.Max);
-            }
-		}
+  //              MinMaxResult result = minMax.GetMinMax();
+  //              return new BiomeMapResult(heights, result.Min, result.Max);
+  //          }
+		//}
 
         /// <summary>
         /// Calculates the min and max result for this Biome's 
@@ -300,16 +303,14 @@ namespace Terra.Graph.Biome {
 		/// </summary>
 		/// <param name="size">width & height</param>
 		/// <returns></returns>
-		private Texture2D GetPreviewTexture(int size) {
+		private Texture2D GetPreviewTexture(int size, float spread) {
 			Texture2D tex = new Texture2D(size, size);
-			
-			BiomeMapResult mapVals = GetMapsValues(GridPosition.Zero, size, size, 1);
-			float[,] normalized = GetWeightedValues(mapVals.Values, mapVals.Min, mapVals.Max);
+			float[,] weights = GetWeights(GridPosition.Zero, size, spread, 1);
 
 			//Set texture
 			for (int x = 0; x < size; x++) {
 				for (int y = 0; y < size; y++) {
-					float val = normalized[x, y];
+					float val = weights[x, y];
 					tex.SetPixel(x, y, new Color(val, val, val, 1f));
 				}
 			}
@@ -318,31 +319,24 @@ namespace Terra.Graph.Biome {
 			return tex;
 		}
 
-		private void SetHeightmapSampler() {
-			if (!UseHeightmap) {
-				return;
-			}
 
-			AbsGeneratorNode gen = GetInputValue<AbsGeneratorNode>("HeightmapGenerator");
-			_heightmapSampler = gen == null ? null : new GeneratorSampler(gen.GetGenerator());
-		}
+		//private Texture2D GetPreviewTexture(int size) {
+		//          Texture2D tex = new Texture2D(size, size);
 
-		private void SetTemperatureSampler() {
-			if (!UseTemperature) {
-				return;
-			}
+		//	GetWeights
+		//          BiomeMapResult mapVals = GetMapsValues(GridPosition.Zero, size, size, 1);
+		//          float[,] normalized = GetWeightedValues(mapVals.Values, mapVals.Min, mapVals.Max);
 
-			AbsGeneratorNode gen = GetInputValue<AbsGeneratorNode>("TemperatureGenerator");
-			_temperatureSampler = gen == null ? null : new GeneratorSampler(gen.GetGenerator());
-		}
+		//          //Set texture
+		//          for (int x = 0; x < size; x++) {
+		//              for (int y = 0; y < size; y++) {
+		//                  float val = normalized[x, y];
+		//                  tex.SetPixel(x, y, new Color(val, val, val, 1f));
+		//              }
+		//          }
 
-		private void SetMoistureSampler() {
-			if (!UseMoisture) {
-				return;
-			}
-
-			AbsGeneratorNode gen = GetInputValue<AbsGeneratorNode>("MoistureGenerator");
-			_moistureSampler = gen == null ? null : new GeneratorSampler(gen.GetGenerator());
-		}
+		//          tex.Apply();
+		//          return tex;
+		//      }
 	}
 }

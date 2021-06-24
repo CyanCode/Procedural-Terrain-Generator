@@ -122,7 +122,8 @@ namespace Terra.Terrain {
 
         public float[,,] GetBiomeMap() {
             lock (_biomeMapLock) {
-                return Combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
+				return null; //TODO return int[,]
+                //return Combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
             }
         }
 

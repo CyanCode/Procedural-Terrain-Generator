@@ -32,9 +32,9 @@ namespace Terra.Graph {
 			EditorGUILayout.Space(); 
 			EditorGUILayout.LabelField("Masks");
 
-			ShowMapField("HeightmapGenerator", "HeightmapMinMaxMask", "UseHeightmap", "Heightmap");
-			ShowMapField("TemperatureGenerator", "TemperatureMinMaxMask", "UseTemperature", "Temperature");
-			ShowMapField("MoistureGenerator", "MoistureMinMaxMask", "UseMoisture", "Moisture");
+			ShowMapField("HeightmapMinMaxMask", "UseHeightmap", "Heightmap");
+			ShowMapField("TemperatureMinMaxMask", "UseTemperature", "Temperature");
+			ShowMapField("MoistureMinMaxMask", "UseMoisture", "Moisture");
 
 			//Splats
 			EditorGUILayout.Space(); 
@@ -70,8 +70,7 @@ namespace Terra.Graph {
 		/// <param name="minMaxMaskProperty">Name of the serialized float min max mask property</param>
 		/// <param name="useMapProperty">Name of the serialized bool use map property</param>
 		/// <param name="displayName">Display name of this map (heightmap, temperature, etc)</param>
-		private void ShowMapField(string mapProperty, string minMaxMaskProperty, string useMapProperty, string displayName) {
-			SerializedProperty mapProp = serializedObject.FindProperty(mapProperty);
+		private void ShowMapField(string minMaxMaskProperty, string useMapProperty, string displayName) {
 			SerializedProperty minMaxProp = serializedObject.FindProperty(minMaxMaskProperty);
 			SerializedProperty useMapProp = serializedObject.FindProperty(useMapProperty);
 
@@ -80,8 +79,6 @@ namespace Terra.Graph {
 			//Use this map as a mask
 			if (useMapProp.boolValue) {
 				EditorGUI.indentLevel++;
-
-				NodeEditorGUILayout.PropertyField(mapProp, new GUIContent("Generator"));
 
 				//Min / Max Slider
 				Rect ctrl = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);

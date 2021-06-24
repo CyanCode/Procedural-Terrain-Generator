@@ -6,7 +6,6 @@ namespace Terra.Graph {
 	[Serializable]
 	public abstract class PreviewableNode: Node {
 		public Texture2D PreviewTexture;
-		public int PreviewTextureSize = 100;
 
 		[SerializeField] public bool IsPreviewDropdown;
 
@@ -16,6 +15,6 @@ namespace Terra.Graph {
 			}
 		}
 
-		public abstract Texture2D DidRequestTextureUpdate();
+		public abstract Texture2D DidRequestTextureUpdate(int size, float spread);
 	}
 }

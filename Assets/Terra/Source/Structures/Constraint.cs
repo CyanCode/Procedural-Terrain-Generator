@@ -17,6 +17,9 @@ namespace Terra.Structures {
 		public float Min;
 		public float Max;
 
+		private float? _cachedBlendValue;
+		private AnimationCurve _animationCurve;
+
 		/// <summary>
 		/// If <see cref="Max"/> equals 1
 		/// </summary>
@@ -64,31 +67,50 @@ namespace Terra.Structures {
 		/// <param name="blend">Blend distance</param>
 		/// <returns>A weight in the range of 0 and 1</returns>
 		public float Weight(float value, float blend) {
-			if (value > Max - blend) {
-				//Value within max transition zone
-				if (IsMaxConstraint) {
-					return value;
-				}
-
-				float nmin = Max - blend;
-				float a = (value - nmin) / (Max - nmin);
-				return Mathf.Lerp(value, 0, a);
-			}
-			if (value < Min + blend) {
-				//Value within min transition zone
-				if (IsMinConstraint) {
-					return value;
-				}
-
-				float nmax = Min + blend;
-				float a = (value - Min) / (nmax - Min);
-				return Mathf.Lerp(value, 0, 1 - a);
-			}
-
-			return value;
+			return GetAnimationCurve(blend).Evaluate(value);
 		}
 
-	    public Constraint Clamp(Constraint to) {
+
+		//public float Weight(float value, float blend) {
+		//	if (Fits(value)) {
+		//		float midpoint = (Max - Min) / 2f;
+
+		//		if (value < midpoint) {
+		//			return value * (Min == 0f ? 1f : 1-Mathf.Clamp01(((1 - Min) - value) / blend));
+		//              } else {
+		//			return value * (Max == 1f ? 1f : Mathf.Clamp01((Max - value) / blend));
+		//              }
+		//          }
+
+		//	return 0f;
+		//}
+
+		//public float Weight(float value, float blend) {
+		//	if (value > Max - blend) {
+		//		//Value within max transition zone
+		//		if (IsMaxConstraint) {
+		//			return value;
+		//		}
+
+		//		float nmin = Max - blend;
+		//		float a = (value - nmin) / (Max - nmin);
+		//		return Mathf.Lerp(value, 0, a);
+		//	}
+		//	if (value < Min + blend) {
+		//		//Value within min transition zone
+		//		if (IsMinConstraint) {
+		//			return value;
+		//		}
+
+		//		float nmax = Min + blend;
+		//		float a = (value - Min) / (nmax - Min);
+		//		return Mathf.Lerp(value, 0, 1 - a);
+		//	}
+
+		//	return value;
+		//}
+
+		public Constraint Clamp(Constraint to) {
 	        Constraint from = new Constraint(Min, Max);
 
 	        if (from.Min < to.Min) {
@@ -100,5 +122,30 @@ namespace Terra.Structures {
 
 	        return from;
 	    }
+
+		private AnimationCurve GetAnimationCurve(float blend) {
+			if (_animationCurve == null || _cachedBlendValue == null || _cachedBlendValue.Value != blend || _animationCurve == null) {
+				_cachedBlendValue = blend;
+				_animationCurve = new AnimationCurve();
+				
+				if (IsMinConstraint) {
+					_animationCurve.AddKey(new Keyframe(0, 1));
+				} else {
+					_animationCurve.AddKey(new Keyframe(0, 0));
+					_animationCurve.AddKey(new Keyframe(Min, 0));
+					_animationCurve.AddKey(new Keyframe(Min + blend, 1f));
+                }
+
+				if (IsMaxConstraint) {
+					_animationCurve.AddKey(new Keyframe(1f, 1f));
+                } else {
+					_animationCurve.AddKey(new Keyframe(Max - blend, 1f));
+					_animationCurve.AddKey(new Keyframe(Max, 0));
+					_animationCurve.AddKey(1, 0);
+                }
+			}
+
+			return _animationCurve;
+        }
     }
 }

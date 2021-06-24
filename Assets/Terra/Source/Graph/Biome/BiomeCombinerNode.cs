@@ -23,7 +23,7 @@ namespace Terra.Graph.Biome {
 		/// </summary>
 		public bool DidAddPort;
 
-		public BiomeCombinerSampler Sampler;
+		public BiomeSampler Sampler;
 		public MixMethod Mix;
 
 		private LinkedList<NodePort> _activePorts;
@@ -34,9 +34,9 @@ namespace Terra.Graph.Biome {
 			if (_activePorts == null) {
 				_activePorts = new LinkedList<NodePort>();
 			}
-			if (Sampler == null) {
-				Sampler = new BiomeCombinerSampler(this);
-			}
+			//if (Sampler == null) {
+			//	Sampler = new BiomeSampler(this);
+			//}
 
 			//Add first biome instance port
 			if (GetInstanceInputs().Length < 1) {
@@ -62,8 +62,8 @@ namespace Terra.Graph.Biome {
 			return this;
 		}
 
-		public override Texture2D DidRequestTextureUpdate() {
-			return Sampler.GetPreviewTexture(PreviewTextureSize);
+		public override Texture2D DidRequestTextureUpdate(int size, float spread) {
+			return Sampler.GetPreviewTexture(size, spread);
 		}
 
 		public BiomeNode[] GetConnectedBiomeNodes() {

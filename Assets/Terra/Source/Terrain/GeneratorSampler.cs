@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Terra.Terrain {
 	public class GeneratorSampler {
 		private Generator _generator;
+		private MinMaxResult? _cachedRemap;
 
 		public GeneratorSampler(Generator generator) {
 			_generator = generator;
@@ -25,7 +26,8 @@ namespace Terra.Terrain {
 	        Vector2 local = TileMesh.PositionToLocal(x, y, resolution);
 	        Vector2 world = TileMesh.LocalToWorld(position, local.x, local.y, length);
 
-	        return _generator.GetValue(world.x / spread, world.y / spread, 0f);
+	        float value = _generator.GetValue(world.x / spread, world.y / spread, 0f);
+			return GetRemappedValue(value);
 	    }
 
         /// <summary>
@@ -41,7 +43,8 @@ namespace Terra.Terrain {
 			Vector2 local = TileMesh.PositionToLocal(x, y, resolution);
 			Vector2 world = TileMesh.LocalToWorld(position, local.x, local.y, length);
 
-			return _generator.GetValue(world.x / spread, world.y / spread, 0f);
+			float value = _generator.GetValue(world.x / spread, world.y / spread, 0f);
+			return GetRemappedValue(value);
 		}
 
 		/// <summary>
@@ -55,8 +58,23 @@ namespace Terra.Terrain {
 			GenerationData gen = TerraConfig.Instance.Generator;
 			return GetValue(x, y, position, resolution, gen.Spread, gen.Length);			
 		}
+
+		private float GetRemappedValue(float value) {
+			if (!_generator.RequiresRemap) {
+				return value;
+            }
+
+			MinMaxResult remap = GetRemap();
+			float padding = TerraConfig.Instance.Generator.RemapPadding;
+
+			return MathUtil.Map01(value, remap.Min - padding, remap.Max + padding);
+        }
         
-	    public MinMaxResult GetRemap() {
+	    private MinMaxResult GetRemap() {
+			if (_cachedRemap != null) {
+				return _cachedRemap.Value;
+            }
+
 	        int res = TerraConfig.Instance.Generator.RemapResolution;
 	        MinMaxRecorder recorder = new MinMaxRecorder();
 
@@ -66,7 +84,8 @@ namespace Terra.Terrain {
 	            }
 	        }
 
-	        return recorder.GetMinMax();
+			_cachedRemap = recorder.GetMinMax();
+			return _cachedRemap.Value;
 	    }
     }
 }

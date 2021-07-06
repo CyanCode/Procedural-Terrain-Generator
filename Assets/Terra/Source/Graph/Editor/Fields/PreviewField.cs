@@ -24,7 +24,7 @@ namespace Terra.Graph.Fields {
 					node.PreviewTexture = node.DidRequestTextureUpdate(PreviewTextureSize, PreviewTextureSize);
 				}
 				if (showExport && GUILayout.Button("Export Preview")) {
-					string path = Application.dataPath + "/TerraPreview.jpg";
+					string path = Application.dataPath + "/TerraPreview.png";
 					MathUtil.WriteTexture(node.DidRequestTextureUpdate(ExportTextureSize, ExportSpread), path);
 					Debug.Log("Exported preview texture to " + path);
 				}

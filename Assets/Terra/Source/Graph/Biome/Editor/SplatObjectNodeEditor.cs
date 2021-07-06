@@ -75,5 +75,10 @@ namespace Terra.Graph {
 		public override Color GetTint() {
 			return EditorColors.TintValue;
 		}
+
+		private int GetObjectPickerControlId(bool isDiffuse) {
+			int id = EditorGUIUtility.GetControlID(FocusType.Passive) + Node.name.GetHashCode() + Node.position.GetHashCode();
+			return isDiffuse ? id + 1 : id - 1;
+		}
 	}
 }

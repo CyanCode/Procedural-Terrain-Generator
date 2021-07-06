@@ -270,5 +270,10 @@ namespace Terra.Structures {
 			byte[] encoded = tex.EncodeToJPG(100);
 			File.WriteAllBytes(path, encoded);
 		}
+
+		public static void WriteTexturePng(Texture2D tex, string path) {
+			byte[] encoded = tex.EncodeToPNG();
+			File.WriteAllBytes(path, encoded);
+        }
 	}
 }

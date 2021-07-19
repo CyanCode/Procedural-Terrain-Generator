@@ -1,7 +1,9 @@
-﻿using Terra.Graph.Biome;
+﻿using System;
+using Terra.Graph.Biome;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor;
+using Object = UnityEngine.Object;
 
 namespace Terra.Graph {
 	[CustomNodeEditor(typeof(SplatDetailNode))]
@@ -26,39 +28,46 @@ namespace Terra.Graph {
 			SerializedProperty normal = serializedObject.FindProperty("Normal");
 
 			int texDimens = GetWidth() / 2 - TEXTURE_PADDING - NODE_PADDING * 2;
-			Rect ctrl = EditorGUILayout.GetControlRect(false, texDimens);
-			ctrl.width = texDimens;
 
-			//Diffuse & Normal
-			EditorGUI.BeginProperty(ctrl, GUIContent.none, diffuse);
+			Rect MakeTexCtrl() {
+				Rect diffTexCtrl = EditorGUILayout.GetControlRect(false, texDimens + TEXTURE_PADDING);
+				diffTexCtrl.x = GetWidth() - texDimens - NODE_PADDING * 3;
+				diffTexCtrl.width = texDimens;
+				diffTexCtrl.height = texDimens;
+				return diffTexCtrl;
+			}
+
+			//Diffuse
 			EditorGUI.BeginChangeCheck();
-			Object diffRef = EditorGUI.ObjectField(ctrl, diffuse.objectReferenceValue, typeof(Texture2D), false);
+			
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.PrefixLabel("Diffuse ");
+			Object diffRef = EditorGUILayout.ObjectField(diffuse.objectReferenceValue, typeof(Texture2D), false);
+			EditorGUILayout.EndHorizontal();
+
+			if (diffuse.objectReferenceValue != null) {
+				EditorGUI.DrawPreviewTexture(MakeTexCtrl(), (Texture) diffRef);
+			}
+			
 			if (EditorGUI.EndChangeCheck()) {
 				diffuse.objectReferenceValue = diffRef;
 			}
-			EditorGUI.EndProperty();
 
-			ctrl.x += texDimens + TEXTURE_PADDING;
-
-			EditorGUI.BeginProperty(ctrl, GUIContent.none, normal);
+			//Normal
 			EditorGUI.BeginChangeCheck();
-			Object normRef = EditorGUI.ObjectField(ctrl, normal.objectReferenceValue, typeof(Texture2D), false);
+			
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.PrefixLabel("Normal ");
+			Object normRef = EditorGUILayout.ObjectField(normal.objectReferenceValue, typeof(Texture2D), false);
+			EditorGUILayout.EndHorizontal();
+			
+			if (normal.objectReferenceValue != null) {
+				EditorGUI.DrawPreviewTexture(MakeTexCtrl(), (Texture) normRef);
+			}
+			
 			if (EditorGUI.EndChangeCheck()) {
 				normal.objectReferenceValue = normRef;
 			}
-			EditorGUI.EndProperty();
-
-			//Labels
-			GUIStyle centeredStyle = GUI.skin.GetStyle("Label");
-            centeredStyle.normal.textColor = Color.white;
-			centeredStyle.alignment = TextAnchor.UpperCenter;
-
-			ctrl = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
-			ctrl.width = texDimens;
-
-			EditorGUI.LabelField(ctrl, "Diffuse", centeredStyle);
-			ctrl.x += texDimens + TEXTURE_PADDING;
-			EditorGUI.LabelField(ctrl, "Normal", centeredStyle);
 
 			//Tiling/Offset
 			NodeEditorGUILayout.PropertyField(serializedObject.FindProperty("Tiling"));

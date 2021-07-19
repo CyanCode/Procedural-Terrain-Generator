@@ -1,5 +1,6 @@
 ﻿using Terra.CoherentNoise;
 using Terra.CoherentNoise.Generation.Fractal;
+using Terra.Source;
 
 namespace Terra.Graph.Generators {
 	[CreateNodeMenu(MENU_PARENT_NAME + "Ridge")]

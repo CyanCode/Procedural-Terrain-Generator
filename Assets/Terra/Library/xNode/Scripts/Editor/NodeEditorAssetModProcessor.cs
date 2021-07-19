@@ -1,13 +1,18 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.IO;
 
 namespace XNodeEditor {
     /// <summary> Deals with modified assets </summary>
     class NodeEditorAssetModProcessor : UnityEditor.AssetModificationProcessor {
 
         /// <summary> Automatically delete Node sub-assets before deleting their script.
-        /// <para/> This is important to do, because you can't delete null sub assets. </summary> 
+        /// This is important to do, because you can't delete null sub assets.
+        /// <para/> For another workaround, see: https://gitlab.com/RotaryHeart-UnityShare/subassetmissingscriptdelete </summary> 
         private static AssetDeleteResult OnWillDeleteAsset (string path, RemoveAssetOptions options) {
+            // Skip processing anything without the .cs extension
+            if (Path.GetExtension(path) != ".cs") return AssetDeleteResult.DidNotDelete;
+            
             // Get the object that is requested for deletion
             UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object> (path);
 
@@ -17,7 +22,7 @@ namespace XNodeEditor {
             // Check script type. Return if deleting a non-node script
             UnityEditor.MonoScript script = obj as UnityEditor.MonoScript;
             System.Type scriptType = script.GetClass ();
-            if (scriptType != typeof (XNode.Node) && !scriptType.IsSubclassOf (typeof (XNode.Node))) return AssetDeleteResult.DidNotDelete;
+            if (scriptType == null || (scriptType != typeof (XNode.Node) && !scriptType.IsSubclassOf (typeof (XNode.Node)))) return AssetDeleteResult.DidNotDelete;
 
             // Find all ScriptableObjects using this script
             string[] guids = AssetDatabase.FindAssets ("t:" + scriptType);
@@ -51,6 +56,8 @@ namespace XNodeEditor {
                 Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath (assetpath);
                 // Ensure that all sub node assets are present in the graph node list
                 for (int u = 0; u < objs.Length; u++) {
+                    // Ignore null sub assets
+                    if (objs[u] == null) continue;
                     if (!graph.nodes.Contains (objs[u] as XNode.Node)) graph.nodes.Add(objs[u] as XNode.Node);
                 }
             }

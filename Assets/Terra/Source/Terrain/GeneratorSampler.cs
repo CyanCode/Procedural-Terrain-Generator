@@ -1,4 +1,5 @@
 ﻿using Terra.CoherentNoise;
+using Terra.Source;
 using Terra.Structures;
 using UnityEngine;
 
@@ -80,7 +81,7 @@ namespace Terra.Terrain {
 
 	        for (int x = 0; x < res; x++) {
 	            for (int y = 0; y < res; y++) {
-	                recorder.Register(_generator.GetValue(x / (float)res, y / (float)res, 0));
+	                recorder.Register(_generator.GetValue(x, y, 0));
 	            }
 	        }
 

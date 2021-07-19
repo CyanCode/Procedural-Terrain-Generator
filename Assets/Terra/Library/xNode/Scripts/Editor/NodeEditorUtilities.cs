@@ -9,11 +9,17 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace XNodeEditor {
-    /// <summary> A set of editor-only utilities and extensions for UnityNodeEditorBase </summary>
+    /// <summary> A set of editor-only utilities and extensions for xNode </summary>
     public static class NodeEditorUtilities {
 
         /// <summary>C#'s Script Icon [The one MonoBhevaiour Scripts have].</summary>
         private static Texture2D scriptIcon = (EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D);
+
+        /// Saves Attribute from Type+Field for faster lookup. Resets on recompiles.
+        private static Dictionary<Type, Dictionary<string, Dictionary<Type, Attribute>>> typeAttributes = new Dictionary<Type, Dictionary<string, Dictionary<Type, Attribute>>>();
+
+        /// Saves ordered PropertyAttribute from Type+Field for faster lookup. Resets on recompiles.
+        private static Dictionary<Type, Dictionary<string, List<PropertyAttribute>>> typeOrderedPropertyAttributes = new Dictionary<Type, Dictionary<string, List<PropertyAttribute>>>();
 
         public static bool GetAttrib<T>(Type classType, out T attribOut) where T : Attribute {
             object[] attribs = classType.GetCustomAttributes(typeof(T), false);
@@ -22,7 +28,7 @@ namespace XNodeEditor {
 
         public static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute {
             for (int i = 0; i < attribs.Length; i++) {
-                if (attribs[i].GetType() == typeof(T)) {
+                if (attribs[i] is T) {
                     attribOut = attribs[i] as T;
                     return true;
                 }
@@ -32,7 +38,15 @@ namespace XNodeEditor {
         }
 
         public static bool GetAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
-            object[] attribs = classType.GetField(fieldName).GetCustomAttributes(typeof(T), false);
+            // If we can't find field in the first run, it's probably a private field in a base class.
+            FieldInfo field = classType.GetFieldInfo(fieldName);
+            // This shouldn't happen. Ever.
+            if (field == null) {
+                Debug.LogWarning("Field " + fieldName + " couldnt be found");
+                attribOut = null;
+                return false;
+            }
+            object[] attribs = field.GetCustomAttributes(typeof(T), true);
             return GetAttrib(attribs, out attribOut);
         }
 
@@ -43,6 +57,62 @@ namespace XNodeEditor {
                 }
             }
             return false;
+        }
+
+        public static bool GetCachedAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
+            Dictionary<string, Dictionary<Type, Attribute>> typeFields;
+            if (!typeAttributes.TryGetValue(classType, out typeFields)) {
+                typeFields = new Dictionary<string, Dictionary<Type, Attribute>>();
+                typeAttributes.Add(classType, typeFields);
+            }
+
+            Dictionary<Type, Attribute> typeTypes;
+            if (!typeFields.TryGetValue(fieldName, out typeTypes)) {
+                typeTypes = new Dictionary<Type, Attribute>();
+                typeFields.Add(fieldName, typeTypes);
+            }
+
+            Attribute attr;
+            if (!typeTypes.TryGetValue(typeof(T), out attr)) {
+                if (GetAttrib<T>(classType, fieldName, out attribOut)) {
+                    typeTypes.Add(typeof(T), attribOut);
+                    return true;
+                } else typeTypes.Add(typeof(T), null);
+            }
+
+            if (attr == null) {
+                attribOut = null;
+                return false;
+            }
+
+            attribOut = attr as T;
+            return true;
+        }
+
+        public static List<PropertyAttribute> GetCachedPropertyAttribs(Type classType, string fieldName) {
+            Dictionary<string, List<PropertyAttribute>> typeFields;
+            if (!typeOrderedPropertyAttributes.TryGetValue(classType, out typeFields)) {
+                typeFields = new Dictionary<string, List<PropertyAttribute>>();
+                typeOrderedPropertyAttributes.Add(classType, typeFields);
+            }
+
+            List<PropertyAttribute> typeAttributes;
+            if (!typeFields.TryGetValue(fieldName, out typeAttributes)) {
+                FieldInfo field = classType.GetFieldInfo(fieldName);
+                object[] attribs = field.GetCustomAttributes(typeof(PropertyAttribute), true);
+                typeAttributes = attribs.Cast<PropertyAttribute>().Reverse().ToList(); //Unity draws them in reverse
+                typeFields.Add(fieldName, typeAttributes);
+            }
+
+            return typeAttributes;
+        }
+
+        public static bool IsMac() {
+#if UNITY_2017_1_OR_NEWER
+            return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
+#else
+            return SystemInfo.operatingSystem.StartsWith("Mac");
+#endif
         }
 
         /// <summary> Returns true if this can be casted to <see cref="Type"/></summary>
@@ -56,6 +126,57 @@ namespace XNodeEditor {
                 );
             return methods.Count() > 0;
         }
+
+        /// <summary>
+        /// Looking for ports with value Type compatible with a given type. 
+        /// </summary>
+        /// <param name="nodeType">Node to search</param>
+        /// <param name="compatibleType">Type to find compatiblities</param>
+        /// <param name="direction"></param>
+        /// <returns>True if NodeType has some port with value type compatible</returns>
+        public static bool HasCompatiblePortType(Type nodeType, Type compatibleType, XNode.NodePort.IO direction = XNode.NodePort.IO.Input) {
+            Type findType = typeof(XNode.Node.InputAttribute);
+            if (direction == XNode.NodePort.IO.Output)
+                findType = typeof(XNode.Node.OutputAttribute);
+
+            //Get All fields from node type and we go filter only field with portAttribute.
+            //This way is possible to know the values of the all ports and if have some with compatible value tue
+            foreach (FieldInfo f in XNode.NodeDataCache.GetNodeFields(nodeType)) {
+                var portAttribute = f.GetCustomAttributes(findType, false).FirstOrDefault();
+                if (portAttribute != null) {
+                    if (IsCastableTo(f.FieldType, compatibleType)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Filter only node types that contains some port value type compatible with an given type
+        /// </summary>
+        /// <param name="nodeTypes">List with all nodes type to filter</param>
+        /// <param name="compatibleType">Compatible Type to Filter</param>
+        /// <returns>Return Only Node Types with ports compatible, or an empty list</returns>
+        public static List<Type> GetCompatibleNodesTypes(Type[] nodeTypes, Type compatibleType, XNode.NodePort.IO direction = XNode.NodePort.IO.Input) {
+            //Result List
+            List<Type> filteredTypes = new List<Type>();
+
+            //Return empty list
+            if (nodeTypes == null) { return filteredTypes; }
+            if (compatibleType == null) { return filteredTypes; }
+
+            //Find compatiblity
+            foreach (Type findType in nodeTypes) {
+                if (HasCompatiblePortType(findType, compatibleType, direction)) {
+                    filteredTypes.Add(findType);
+                }
+            }
+
+            return filteredTypes;
+        }
+
 
         /// <summary> Return a prettiefied type name. </summary>
         public static string PrettyName(this Type type) {
@@ -92,6 +213,24 @@ namespace XNodeEditor {
                     return s.Substring(0, i) + "[" + rank + "]" + s.Substring(i);
                 }
             } else return type.ToString();
+        }
+
+        /// <summary> Returns the default name for the node type. </summary>
+        public static string NodeDefaultName(Type type) {
+            string typeName = type.Name;
+            // Automatically remove redundant 'Node' postfix
+            if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
+            typeName = UnityEditor.ObjectNames.NicifyVariableName(typeName);
+            return typeName;
+        }
+
+        /// <summary> Returns the default creation path for the node type. </summary>
+        public static string NodeDefaultPath(Type type) {
+            string typePath = type.ToString().Replace('.', '/');
+            // Automatically remove redundant 'Node' postfix
+            if (typePath.EndsWith("Node")) typePath = typePath.Substring(0, typePath.LastIndexOf("Node"));
+            typePath = UnityEditor.ObjectNames.NicifyVariableName(typePath);
+            return typePath;
         }
 
         /// <summary>Creates a new C# Class.</summary>

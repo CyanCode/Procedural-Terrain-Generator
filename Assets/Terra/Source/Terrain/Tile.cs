@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
+using Terra.Source;
 using UnityEngine;
 using Terra.Structures;
 using Terra.Util;
@@ -43,10 +44,7 @@ namespace Terra.Terrain {
         /// </summary>
         public TileMesh MeshManager {
             get {
-                return _meshManager ?? (_meshManager = new TileMesh(this, GetLodLevel()));
-            }
-            set {
-                _meshManager = value;
+                return _meshManager ??= new TileMesh(this, GetLodLevel());
             }
         }
 
@@ -178,7 +176,7 @@ namespace Terra.Terrain {
             return tt;
         }
 
-        private IEnumerator ApplyDetails(TilePaint painter, float[,,] biomeMap, Action onComplete = null) {
+        private IEnumerator ApplyDetails(TilePaint painter, int[,] biomeMap, Action onComplete = null) {
             //Create detailer
             TileDetail detailer = new TileDetail(this, painter, biomeMap);
 
@@ -211,7 +209,7 @@ namespace Terra.Terrain {
 
             //Make biomemap
             bool madeBm = false;
-            float[,,] map = null;
+            int[,] map = null;
             conf.Worker.Enqueue(() => map = painter.GetBiomeMap(), () => madeBm = true);
             while (!madeBm) 
                 yield return null; //Skip frame until biomemap made
@@ -242,7 +240,7 @@ namespace Terra.Terrain {
         /// <param name="remapMin"></param>
         /// <param name="remapMax"></param>
         private void GenerateEditor(float remapMin = 0f, float remapMax = 1f) {
-            TerraConfig.Log("Started tile " + GridPosition);
+            TerraConfig.Log($"Started tile {GridPosition.ToString()}");
 
             //Make & set heightmap
             MeshManager.CalculateHeightmap(GridPosition, remapMin, remapMax);
@@ -254,7 +252,7 @@ namespace Terra.Terrain {
             TilePaint painter = new TilePaint(this);
 
             //Make biomemap
-            float[,,] map = painter.GetBiomeMap();
+            int[,] map = painter.GetBiomeMap();
 
             //Paint terrain
             painter.Paint(map);

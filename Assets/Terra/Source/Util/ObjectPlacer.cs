@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Terra.Graph.Biome;
+using Terra.Source;
 using Terra.Structures;
 
 namespace Terra.Terrain {
@@ -17,13 +18,12 @@ namespace Terra.Terrain {
 
         public List<ObjectDetailNode> ObjectsToPlace {
             get {
-                BiomeCombinerNode combiner = TerraConfig.Instance.Graph.GetBiomeCombiner();
-                if (combiner == null) {
+                BiomeNode[] biomes = TerraConfig.Instance.Graph.GetEndNode().GetBiomes();
+                if (biomes == null) {
                     return null;
                 }
 
-                return combiner
-                    .GetConnectedBiomeNodes()
+                return biomes
                     .SelectMany(bn => bn.GetObjectInputs())
                     .ToList();
             }

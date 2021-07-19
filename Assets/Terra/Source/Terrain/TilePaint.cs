@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Terra.Graph.Biome;
+using Terra.Source;
 using Terra.Structures;
 using Terra.Util;
 using UnityEngine;
@@ -42,16 +43,18 @@ namespace Terra.Terrain {
 		/// </summary>
 		public float[,,] Alphamap { get; private set; }
 
-	    public BiomeCombinerNode Combiner;
+		public BiomeNode[] Biomes;
 
-        private UnityEngine.Terrain _terrain;
-
+		private BiomeSampler _biomeSampler;
+		
+		private UnityEngine.Terrain _terrain;
+		
         /// <summary>
         /// Since terrain height & angle interpolated methods cannot be accessed 
         /// off the main thread, they must be precomputed
         /// </summary>
         private AngleHeights _angleHeightResults;
-        
+
         [SerializeField]
 		private Tile _tile;
 		[SerializeField]
@@ -66,22 +69,23 @@ namespace Terra.Terrain {
 			_tile = tile;
 
 			//Get biome combiner from terraconfig
-			Combiner = TerraConfig.Instance.Graph.GetBiomeCombiner();
-            _resolution = TerraConfig.Instance.Generator.SplatmapResolution - 1;
+			Biomes = TerraConfig.Instance.Graph.GetEndNode().GetBiomes();
+			_biomeSampler = new BiomeSampler(Biomes);
+		    _resolution = TerraConfig.Instance.Generator.SplatmapResolution - 1;
 			_gridPosition = _tile.GridPosition;
             _terrain = _tile.GetComponent<UnityEngine.Terrain>();
 
             if (_terrain == null) {
                 Debug.LogError("TilePaint's passed Tile must have an attached Terrain component");
             }
-		}
+        }
 
 	    /// <summary>
 	    /// Paints this Tile according to <see cref="TerraConfig"/> asynchronously
 	    /// </summary>
 	    /// <param name="biomeMap">Biomemap result from <see cref="GetBiomeMap"/></param>
 	    /// <param name="onComplete">Optional callback called after painting the terrain</param>
-	    public IEnumerator PaintAsync(float[,,] biomeMap, Action onComplete) {
+	    public IEnumerator PaintAsync(int[,] biomeMap, Action onComplete) {
 			if (biomeMap == null) {
 				Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
 				yield break;
@@ -89,7 +93,7 @@ namespace Terra.Terrain {
 
             int res = TerraConfig.Instance.Generator.SplatmapResolution - 1;
             PrecomputeAngleHeights(res);
-			SetSplatPrototypes(biomeMap);
+			SetTerrainLayers(biomeMap);
 
             bool madeAm = false;
             TerraConfig.Instance.Worker.Enqueue(() => CalculateAlphamap(biomeMap, res), () => madeAm = true);
@@ -104,8 +108,7 @@ namespace Terra.Terrain {
 	    /// Paints this Tile according to <see cref="TerraConfig"/> synchronously
 	    /// </summary>
 	    /// <param name="biomeMap">Biomemap result from <see cref="GetBiomeMap"/></param>
-	    /// <param name="onComplete">Optional callback called after painting the terrain</param>
-        public void Paint(float[,,] biomeMap) {
+        public void Paint(int[,] biomeMap) {
             if (biomeMap == null) {
                 Debug.LogWarning("CalculateBiomeMap() failed to produce a non-null BiomeMap");
                 return;
@@ -113,33 +116,30 @@ namespace Terra.Terrain {
 
             int res = TerraConfig.Instance.Generator.SplatmapResolution - 1;
             PrecomputeAngleHeights(res);
-            SetSplatPrototypes(biomeMap);
+            SetTerrainLayers(biomeMap);
             
             CalculateAlphamap(biomeMap, res);
 
             ApplyAlphamap();
         }
 
-        public float[,,] GetBiomeMap() {
+        public int[,] GetBiomeMap() {
             lock (_biomeMapLock) {
-				return null; //TODO return int[,]
-                //return Combiner.Sampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
+                return _biomeSampler.GetBiomeMap(TerraConfig.Instance, _gridPosition, _resolution);
             }
         }
 
         /// <summary>
         /// Calculates the <see cref="Alphamap"/> for this <see cref="Tile"/>. 
         /// </summary>
-        public void CalculateAlphamap(float[,,] biomeMap, int resolution) { 
+        public void CalculateAlphamap(int[,] biomeMap, int resolution) { 
 			//Initialize Alphamap structure
 			Alphamap = new float[resolution, resolution, Splats.Length];
 
 			//Sample weights and fill in textures
-			BiomeNode[] biomes = Combiner.GetConnectedBiomeNodes();
-
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
-                    float[] weights = GetSplatWeights(x, y, biomeMap, biomes, resolution);
+                    float[] weights = GetSplatWeights(x, y, biomeMap, resolution);
 
                     //Normalize weights before assigning to Alphamap
                     float sum = weights.Sum();
@@ -167,28 +167,28 @@ namespace Terra.Terrain {
 //            }
 		}
 		
-		public void SetSplatPrototypes(float[,,] biomeMap) {
-			SetSplats(biomeMap);	
+		public void SetTerrainLayers(int[,] biomeMap) {
+			SetSplats(biomeMap);
 
-			SplatPrototype[] prototypes = new SplatPrototype[Splats.Length];
+			TerrainLayer[] layers = new TerrainLayer[Splats.Length];
 			
 			for (int i = 0; i < Splats.Length; i++) {
 				SplatDetailNode sd = Splats[i];
-				SplatPrototype sp = new SplatPrototype();
+				TerrainLayer layer = new TerrainLayer();
 
-				sp.metallic = 0;
-				sp.smoothness = 0.2f;
+				layer.metallic = 0;
+				layer.smoothness = 0.2f;
 
-				sp.tileOffset = sd.Offset;
-				sp.tileSize = sd.Tiling;
+				layer.tileOffset = sd.Offset;
+				layer.tileSize = sd.Tiling;
 
-				sp.normalMap = sd.Normal;
-				sp.texture = sd.Diffuse;
+				layer.normalMapTexture = sd.Normal;
+				layer.diffuseTexture = sd.Diffuse;
 
-				prototypes[i] = sp;
+				layers[i] = layer;
 			}
 
-			_terrain.terrainData.splatPrototypes = prototypes;
+			_terrain.terrainData.terrainLayers = layers;
 		}
 
         private IEnumerator ApplyAlphamapCoroutine(int res, int maxResPerFrame, int splatCount) {
@@ -244,7 +244,7 @@ namespace Terra.Terrain {
             _angleHeightResults = new AngleHeights(heights, angles);
         }
 
-	    private float[] GetSplatWeights(int x, int y, float[,,] biomeMap, BiomeNode[] biomes, int resolution) {
+	    private float[] GetSplatWeights(int x, int y, int[,] biomeMap, int resolution) {
 	        float[] weights = new float[Splats.Length];
 	        Vector2 norm = new Vector2(x / (float)resolution, y / (float)resolution);
 	        Vector2 world = MathUtil.NormalToWorld(_tile.GridPosition, norm);
@@ -253,8 +253,11 @@ namespace Terra.Terrain {
             float height = _angleHeightResults.Heights[x, y];
             float angle = _angleHeightResults.Angles[x, y];
 
-	        for (int z = 0; z < biomes.Length; z++) {
-	            SplatDetailNode[] splats = biomes[z].GetSplatInputs();
+	        for (int z = 0; z < Biomes.Length; z++) {
+	            SplatDetailNode[] splats = Biomes[z].GetSplatInputs();
+	            if (splats == null) {
+		            continue;
+	            }
 
 	            float[] splatsWeights = new float[splats.Length];
 	            float curMax = 1f;
@@ -266,7 +269,7 @@ namespace Terra.Terrain {
 	                SplatDetailNode splat = splats[i];
 	                ConstraintNode cons = splat.GetConstraintValue();
 	                if (cons == null) {
-	                    splatsWeights[i] = biomeMap[x, y, z];
+		                splatsWeights[i] = biomeMap[x, y] == z ? 1f : 0f;
 	                    continue;
 	                }
 
@@ -294,29 +297,25 @@ namespace Terra.Terrain {
 	                splatsWeights[i] = weight / count;
 	            }
 
-	            for (int i = 0; i < splats.Length; i++) {
-	                float val = splatsWeights[i];
-	                float remapped = MathUtil.Map(val, 0f, oldMax, 0f, curMax);
-
-	                if (sum >= 1f) {
-	                    //No remaining weight to assign, terminate
-	                    break;
-	                }
-	                if (i == splats.Length - 1) {
-	                    //All remaining weight goes to last idx 
-	                    splatsWeights[i] = 1 - sum;
-	                    break;
-	                }
-
-	                sum += remapped;
-	                splatsWeights[i] = remapped;
-	                oldMax = curMax;
-	                curMax = 1 - remapped;
-	            }
-
-	            for (int i = 0; i < splats.Length; i++) {
-	                splatsWeights[i] *= biomeMap[x, y, z];
-	            }
+	            // for (int i = 0; i < splats.Length; i++) {
+	            //     float val = splatsWeights[i];
+	            //     float remapped = MathUtil.Map(val, 0f, oldMax, 0f, curMax);
+	            //
+	            //     if (sum >= 1f) {
+	            //         //No remaining weight to assign, terminate
+	            //         break;
+	            //     }
+	            //     if (i == splats.Length - 1) {
+	            //         //All remaining weight goes to last idx 
+	            //         splatsWeights[i] = 1 - sum;
+	            //         break;
+	            //     }
+	            //
+	            //     sum += remapped;
+	            //     splatsWeights[i] = remapped;
+	            //     oldMax = curMax;
+	            //     curMax = 1 - remapped;
+	            // }
 
 	            for (int i = 0; i < splatsWeights.Length; i++) {
 	                weights[i + splatOffset] = splatsWeights[i];
@@ -333,11 +332,11 @@ namespace Terra.Terrain {
 		/// terrain. Assumes <see cref="BiomeMap"/> has been calculated
 		/// first.
 		/// </summary>
-		private void SetSplats(float[,,] biomeMap) {
+		private void SetSplats(int[,] biomeMap) {
 			if (biomeMap == null)
 				return;
 
-            Splats = Combiner.GetConnectedBiomeNodes()
+            Splats = Biomes
                 .Where(b => b.GetSplatInputs() != null)
                 .SelectMany(b => b.GetSplatInputs())
                 .ToArray();

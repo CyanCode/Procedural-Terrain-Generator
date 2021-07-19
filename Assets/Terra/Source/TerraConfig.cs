@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using Terra.Graph;
 using Terra.Structures;
-using UnityEngine;
 using Terra.Terrain;
 using Terra.Util;
 using UnityEditor;
-using Random = UnityEngine.Random;
+using UnityEngine;
+using Random = System.Random;
 
-namespace Terra {
+namespace Terra.Source {
 	[Serializable, ExecuteInEditMode]
 	public class TerraConfig: MonoBehaviour {
         public static bool IsInitialized;
@@ -16,6 +16,8 @@ namespace Terra {
         /// TerraConfig singleton instance
         /// </summary>
         private static TerraConfig _instance;
+
+        private static bool _singletonSet;
         
 		//Topology Generation
 		public TerraGraph Graph;
@@ -35,7 +37,7 @@ namespace Terra {
         /// </returns>
         public static TerraConfig Instance {
 			get {
-				if (_instance != null) {
+				if (_singletonSet) {
 					return _instance;
 				}
 				if (!IsInitialized) {
@@ -43,17 +45,14 @@ namespace Terra {
 				}
 
 				_instance = FindObjectOfType<TerraConfig>();
+				_singletonSet = true;
 				return _instance;
 			}
 		}
 
-		public static bool IsInEditMode {
-			get {
-				return !Application.isPlaying && Application.isEditor;
-			}
-		}
+		public static bool IsInEditMode => !Application.isPlaying && Application.isEditor;
 
-        /// <summary>
+		/// <summary>
         /// Logs the passed message if ShowDebugMessages is enabled
         /// </summary>
         /// <param name="message">message to log</param>
@@ -69,12 +68,13 @@ namespace Terra {
 		/// </summary>
 		void OnEnable() {
 			_instance = this;
+			_singletonSet = true;
 			IsInitialized = true;
 			 
-			if (Generator == null) Generator = new GenerationData();
-			if (EditorState == null) EditorState = new EditorStateData();
-            if (Placer == null) Placer = new ObjectPlacer();
-            if (Worker == null) Worker = new BackgroundWorker();
+			Generator ??= new GenerationData();
+			EditorState ??= new EditorStateData();
+            Placer ??= new ObjectPlacer();
+            Worker ??= new BackgroundWorker();
 
             IsEditor = IsInEditMode;
 		}
@@ -108,7 +108,7 @@ namespace Terra {
 		}    
 
         void OnPlayModeStateChange(PlayModeStateChange state) {
-            TerraConfig.Log("Killing worker threads before exiting play mode");
+            Log("Killing worker threads before exiting play mode");
 
             // Destroy lingering worker thread
             if (state == PlayModeStateChange.ExitingPlayMode && Worker != null) {
@@ -137,9 +137,9 @@ namespace Terra {
 
 			//Set seed for RNG
 			if (!Generator.UseRandomSeed)
-				Random.InitState(Seed);
+				UnityEngine.Random.InitState(Seed);
 			else
-				Seed = new System.Random().Next(0, Int32.MaxValue);
+				Seed = new Random().Next(0, Int32.MaxValue);
 			
 			//Allows for update to continue
 			Generator.GenerateOnStart = true;
@@ -159,9 +159,9 @@ namespace Terra {
 
 			//Set seed for RNG
 			if (!Generator.UseRandomSeed)
-				Random.InitState(Seed);
+				UnityEngine.Random.InitState(Seed);
 			else
-				Seed = new System.Random().Next(0, Int32.MaxValue);
+				Seed = new Random().Next(0, Int32.MaxValue);
 
 			Generator.Pool.ResetQueue(); 
 			Generator.Pool.Update();
@@ -275,11 +275,11 @@ namespace Terra {
 	}
 
     public static class TerraExtensions {
-        public static float NextFloat(this System.Random random) {
+        public static float NextFloat(this Random random) {
             return (float)random.NextDouble();
         }
 
-        public static float NextFloat(this System.Random random, float min, float max) {
+        public static float NextFloat(this Random random, float min, float max) {
             return random.NextFloat() * (max - min) + min;
         }
     }

@@ -20,7 +20,9 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using Terra.Source;
 using UnityEditor;
+using UnityEngine.Networking;
 using Debug = UnityEngine.Debug;
 
 namespace Terra.Util {
@@ -278,13 +280,13 @@ namespace Terra.Util {
             EditorCoroutineRunner.UpdateUIProgressBar(0.35f); // we can use the UpdateUI helper methods to update the UI whenever, without yielding a EditorStatusUpdate
             yield return DemoTwo(); // it shouldnt matter how we start the nested coroutine, the editor runner can hadle it
 
-            // we can even yield a WWW object if we want to grab data from the internets!
+            // we can even yield a UnityWebRequest object if we want to grab data from the internets!
             Debug.Log("Step: 3");
 
             // for example, lets as random.org to generate us a list of random numbers and shove it into the console
-            var www = new WWW("https://www.random.org/integers/?num=100&min=1&max=1000&col=1&base=10&col=5&format=plain&rnd=new");
+            var www = new UnityWebRequest("https://www.random.org/integers/?num=100&min=1&max=1000&col=1&base=10&col=5&format=plain&rnd=new");
             yield return www;
-            Debug.Log(www.text);
+            Debug.Log(www.ToString());
 
             EditorCoroutineRunner.UpdateUI("Half way!", 0.5f);
             yield return new WaitForSeconds(1);
@@ -516,9 +518,9 @@ namespace Terra.Util {
                     } else if (currentType == typeof(WaitForEndOfFrame) || currentType == typeof(WaitForFixedUpdate)) {
                         // These dont make sense in editor, so we will treat them the same as a null return...
                         isWaiting = false;
-                    } else if (currentType == typeof(WWW)) {
+                    } else if (currentType == typeof(UnityWebRequest)) {
                         // Web download request, lets see if its done!
-                        var www = current as WWW;
+                        var www = current as UnityWebRequest;
                         if (!www.isDone) {
                             isWaiting = true;
                         }

@@ -10,7 +10,7 @@ using XNodeEditor;
 
 namespace Terra.Graph {
     [CustomNodeEditor(typeof(EndNode))]
-    class EndNodeEditor : NodeEditor {
+    class EndNodeEditor : TerraNodeEditor {
         private readonly int NODE_WIDTH = 200;
 
         private EndNode En => (EndNode) target;

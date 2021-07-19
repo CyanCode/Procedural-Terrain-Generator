@@ -1,16 +1,11 @@
 ﻿using System;
-using Terra;
-using Terra.Structures;
+using UnityEditor;
 using UnityEngine;
 
-namespace UnityEditor.Terra {
+namespace Terra.Source.Editor {
 	[ExecuteInEditMode, CustomEditor(typeof(TerraConfig)), Serializable]
-	public class TerrainSettingsEditor: Editor {
-		private TerraConfig Config {
-			get {
-				return target as TerraConfig;
-			}
-		}
+	public class TerrainSettingsEditor: UnityEditor.Editor {
+		private TerraConfig Config => target as TerraConfig;
 
 		private TerraGUI _gui;
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Terra.CoherentNoise;
 using Terra.Graph.Generators;
+using Terra.Source;
 using Terra.Structures;
 using Terra.Util;
 using UnityEngine;

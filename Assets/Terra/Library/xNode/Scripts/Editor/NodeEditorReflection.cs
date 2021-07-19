@@ -7,48 +7,103 @@ using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
-    /// <summary> Contains reflection-related info </summary>
-    public partial class NodeEditorWindow {
-        /// <summary> Custom node tint colors defined with [NodeColor(r, g, b)] </summary>
-        public static Dictionary<Type, Color> nodeTint { get { return _nodeTint != null ? _nodeTint : _nodeTint = GetNodeTint(); } }
-            [NonSerialized] private static Dictionary<Type, Color> _nodeTint;
+    /// <summary> Contains reflection-related extensions built for xNode </summary>
+    public static class NodeEditorReflection {
+        [NonSerialized] private static Dictionary<Type, Color> nodeTint;
+        [NonSerialized] private static Dictionary<Type, int> nodeWidth;
         /// <summary> All available node types </summary>
         public static Type[] nodeTypes { get { return _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes(); } }
-            [NonSerialized] private static Type[] _nodeTypes = null;
+
+        [NonSerialized] private static Type[] _nodeTypes = null;
+
+        /// <summary> Return a delegate used to determine whether window is docked or not. It is faster to cache this delegate than run the reflection required each time. </summary>
+        public static Func<bool> GetIsDockedDelegate(this EditorWindow window) {
+            BindingFlags fullBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+            MethodInfo isDockedMethod = typeof(EditorWindow).GetProperty("docked", fullBinding).GetGetMethod(true);
+            return (Func<bool>) Delegate.CreateDelegate(typeof(Func<bool>), window, isDockedMethod);
+        }
 
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
             return GetDerivedTypes(typeof(XNode.Node));
         }
 
-        public static Dictionary<Type, Color> GetNodeTint() {
-            Dictionary<Type, Color> tints = new Dictionary<Type, Color>();
-            for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTint), true);
-                if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeTint attrib = attribs[0] as XNode.Node.NodeTint;
-                tints.Add(nodeTypes[i], attrib.color);
+        /// <summary> Custom node tint colors defined with [NodeColor(r, g, b)] </summary>
+        public static bool TryGetAttributeTint(this Type nodeType, out Color tint) {
+            if (nodeTint == null) {
+                CacheAttributes<Color, XNode.Node.NodeTintAttribute>(ref nodeTint, x => x.color);
             }
-            return tints;
+            return nodeTint.TryGetValue(nodeType, out tint);
         }
 
-        public static Type[] GetDerivedTypes(Type baseType) {
-            //Get all classes deriving from baseType via reflection
-            Assembly assembly = Assembly.GetAssembly(baseType);
-            return assembly.GetTypes().Where(t =>
-                !t.IsAbstract &&
-                baseType.IsAssignableFrom(t)
-            ).ToArray();
+        /// <summary> Get custom node widths defined with [NodeWidth(width)] </summary>
+        public static bool TryGetAttributeWidth(this Type nodeType, out int width) {
+            if (nodeWidth == null) {
+                CacheAttributes<int, XNode.Node.NodeWidthAttribute>(ref nodeWidth, x => x.width);
+            }
+            return nodeWidth.TryGetValue(nodeType, out width);
         }
 
-        public static object ObjectFromType(Type type) {
-            return Activator.CreateInstance(type);
+        private static void CacheAttributes<V, A>(ref Dictionary<Type, V> dict, Func<A, V> getter) where A : Attribute {
+            dict = new Dictionary<Type, V>();
+            for (int i = 0; i < nodeTypes.Length; i++) {
+                object[] attribs = nodeTypes[i].GetCustomAttributes(typeof(A), true);
+                if (attribs == null || attribs.Length == 0) continue;
+                A attrib = attribs[0] as A;
+                dict.Add(nodeTypes[i], getter(attrib));
+            }
         }
 
-        public static object ObjectFromFieldName(object obj, string fieldName) {
-            Type type = obj.GetType();
-            FieldInfo fieldInfo = type.GetField(fieldName);
-            return fieldInfo.GetValue(obj);
+        /// <summary> Get FieldInfo of a field, including those that are private and/or inherited </summary>
+        public static FieldInfo GetFieldInfo(this Type type, string fieldName) {
+            // If we can't find field in the first run, it's probably a private field in a base class.
+            FieldInfo field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            // Search base classes for private fields only. Public fields are found above
+            while (field == null && (type = type.BaseType) != typeof(XNode.Node)) field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            return field;
+        }
+
+        /// <summary> Get all classes deriving from baseType via reflection </summary>
+        public static Type[] GetDerivedTypes(this Type baseType) {
+            List<System.Type> types = new List<System.Type>();
+            System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies) {
+                try {
+                    types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                } catch (ReflectionTypeLoadException) { }
+            }
+            return types.ToArray();
+        }
+
+        /// <summary> Find methods marked with the [ContextMenu] attribute and add them to the context menu </summary>
+        public static void AddCustomContextMenuItems(this GenericMenu contextMenu, object obj) {
+            KeyValuePair<ContextMenu, MethodInfo>[] items = GetContextMenuMethods(obj);
+            if (items.Length != 0) {
+                contextMenu.AddSeparator("");
+                List<string> invalidatedEntries = new List<string>();
+                foreach (KeyValuePair<ContextMenu, MethodInfo> checkValidate in items) {
+                    if (checkValidate.Key.validate && !(bool) checkValidate.Value.Invoke(obj, null)) {
+                        invalidatedEntries.Add(checkValidate.Key.menuItem);
+                    }
+                }
+                for (int i = 0; i < items.Length; i++) {
+                    KeyValuePair<ContextMenu, MethodInfo> kvp = items[i];
+                    if (invalidatedEntries.Contains(kvp.Key.menuItem)) {
+                        contextMenu.AddDisabledItem(new GUIContent(kvp.Key.menuItem));
+                    } else {
+                        contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+                    }
+                }
+            }
+        }
+
+        /// <summary> Call OnValidate on target </summary>
+        public static void TriggerOnValidate(this UnityEngine.Object target) {
+            System.Reflection.MethodInfo onValidate = null;
+            if (target != null) {
+                onValidate = target.GetType().GetMethod("OnValidate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (onValidate != null) onValidate.Invoke(target, null);
+            }
         }
 
         public static KeyValuePair<ContextMenu, MethodInfo>[] GetContextMenuMethods(object obj) {
@@ -71,16 +126,19 @@ namespace XNodeEditor {
                     kvp.Add(new KeyValuePair<ContextMenu, MethodInfo>(attribs[k], methods[i]));
                 }
             }
-            #if UNITY_5_5_OR_NEWER
+#if UNITY_5_5_OR_NEWER
             //Sort menu items
             kvp.Sort((x, y) => x.Key.priority.CompareTo(y.Key.priority));
-            #endif
+#endif
             return kvp.ToArray();
         }
 
         /// <summary> Very crude. Uses a lot of reflection. </summary>
         public static void OpenPreferences() {
             try {
+#if UNITY_2018_3_OR_NEWER
+                SettingsService.OpenUserPreferences("Preferences/Node Editor");
+#else
                 //Open preferences window
                 Assembly assembly = Assembly.GetAssembly(typeof(UnityEditor.EditorWindow));
                 Type type = assembly.GetType("UnityEditor.PreferencesWindow");
@@ -112,6 +170,7 @@ namespace XNodeEditor {
                         return;
                     }
                 }
+#endif
             } catch (Exception e) {
                 Debug.LogError(e);
                 Debug.LogWarning("Unity has changed around internally. Can't open properties through reflection. Please contact xNode developer and supply unity version number.");

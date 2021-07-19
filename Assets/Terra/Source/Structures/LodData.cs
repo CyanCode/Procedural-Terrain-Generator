@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Linq;
+using Terra.Source;
 
 namespace Terra.Structures {
 	[Serializable]

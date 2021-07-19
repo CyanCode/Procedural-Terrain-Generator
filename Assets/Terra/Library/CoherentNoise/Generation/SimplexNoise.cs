@@ -1,4 +1,5 @@
 ﻿using Terra.SimplexNoise;
+using Terra.Source;
 using UnityEngine;
 
 namespace Terra.CoherentNoise {

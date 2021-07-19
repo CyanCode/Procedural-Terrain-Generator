@@ -1,6 +1,5 @@
 ﻿using System;
 using Terra.CoherentNoise;
-using Terra.Graph.Biome;
 using UnityEngine;
 using XNode;
 
@@ -28,16 +27,6 @@ namespace Terra.Graph {
 				if (n is EndNode) {
 					_endNode = (EndNode)n;
 					return _endNode;
-				}
-			}
-
-			return null;
-		}
-
-		public BiomeCombinerNode GetBiomeCombiner() {
-			foreach (Node n in nodes) {
-				if (n is BiomeCombinerNode) {
-					return (BiomeCombinerNode)n;
 				}
 			}
 

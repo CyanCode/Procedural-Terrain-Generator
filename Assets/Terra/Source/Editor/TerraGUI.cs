@@ -1,10 +1,10 @@
-﻿using Terra;
-using Terra.Graph;
+﻿using Terra.Graph;
 using Terra.Structures;
 using Terra.Terrain;
+using UnityEditor;
 using UnityEngine;
 
-namespace UnityEditor.Terra {
+namespace Terra.Source.Editor {
     /// <summary>
     /// Handles displaying various GUI elements for the Terra
     /// Settings custom inspector

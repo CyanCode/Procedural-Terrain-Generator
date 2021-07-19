@@ -25,7 +25,7 @@ namespace Terra.Structures {
 
         public bool ShowDebugMessages = true;
 
-		public float InspectorWidth { get { return EditorGUIUtility.currentViewWidth; } }
+		public float InspectorWidth => EditorGUIUtility.currentViewWidth;
 	}
 
 	[Serializable]

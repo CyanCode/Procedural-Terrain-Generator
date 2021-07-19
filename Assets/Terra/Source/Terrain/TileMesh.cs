@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using Terra.CoherentNoise;
+using Terra.Source;
 using Terra.Structures;
 using Terra.Util;
 using Unity.Collections;
@@ -144,7 +145,7 @@ namespace Terra.Terrain {
 			TerrainCollider tc = _tile.gameObject.AddComponent<TerrainCollider>();
 			tc.terrainData = t.terrainData;
 
-			t.materialTemplate = conf.Generator.TerrainMaterial;
+			t.materialTemplate = conf.Generator.TerrainMaterial != null ? conf.Generator.TerrainMaterial : GetDefaultTerrainMaterial();
 		}
 
 		/// <summary>
@@ -303,6 +304,10 @@ namespace Terra.Terrain {
             SetVisible(!TerraConfig.Instance.Generator.HideWhileGenerating);
         }
 
+        private Material GetDefaultTerrainMaterial() {
+	        return Resources.Load<Material>("Terra_Terrain_Mat");
+        }
+
 		private IEnumerator SetTerrainHeightmap_Coroutine(float[,] heightmap, Action onComplete) {
 			TerrainData td = ActiveTerrain.terrainData;
             int maxResPerFrame = TerraConfig.Instance.Generator.CoroutineRes;
@@ -347,7 +352,7 @@ namespace Terra.Terrain {
 				}
 			}
 
-            ActiveTerrain.ApplyDelayedHeightmapModification();
+            ActiveTerrain.terrainData.SyncHeightmap();
 
 			if (onComplete != null) {
 				onComplete();
@@ -527,10 +532,10 @@ namespace Terra.Terrain {
 				}
 			}
 
-			ActiveTerrain.ApplyDelayedHeightmapModification();
+			ActiveTerrain.terrainData.SyncHeightmap();
 
 			if (neighbor != null) {
-				neighbor.MeshManager.ActiveTerrain.ApplyDelayedHeightmapModification();
+				neighbor.MeshManager.ActiveTerrain.terrainData.SyncHeightmap();
 			}
 		}
 

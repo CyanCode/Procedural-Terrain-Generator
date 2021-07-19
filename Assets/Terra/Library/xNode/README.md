@@ -1,9 +1,14 @@
+<img align="right" width="100" height="100" src="https://user-images.githubusercontent.com/37786733/41541140-71602302-731a-11e8-9434-79b3a57292b6.png">
+
 [![Discord](https://img.shields.io/discord/361769369404964864.svg)](https://discord.gg/qgPrHv4)
 [![GitHub issues](https://img.shields.io/github/issues/Siccity/xNode.svg)](https://github.com/Siccity/xNode/issues)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Siccity/xNode/master/LICENSE.md)
 [![GitHub Wiki](https://img.shields.io/badge/wiki-available-brightgreen.svg)](https://github.com/Siccity/xNode/wiki)
+[![openupm](https://img.shields.io/npm/v/com.github.siccity.xnode?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.github.siccity.xnode/)
 
 [Downloads](https://github.com/Siccity/xNode/releases) / [Asset Store](http://u3d.as/108S) / [Documentation](https://github.com/Siccity/xNode/wiki)
+
+Support xNode on [Ko-fi](https://ko-fi.com/Z8Z5DYWA) or [Patreon](https://www.patreon.com/thorbrigsted)
 
 ### xNode
 Thinking of developing a node-based plugin? Then this is for you. You can download it as an archive and unpack to a new unity project, or connect it as git submodule.
@@ -11,7 +16,9 @@ Thinking of developing a node-based plugin? Then this is for you. You can downlo
 xNode is super userfriendly, intuitive and will help you reap the benefits of node graphs in no time.
 With a minimal footprint, it is ideal as a base for custom state machines, dialogue systems, decision makers etc.
 
-![editor](https://user-images.githubusercontent.com/6402525/33150712-01d60602-cfd5-11e7-83b4-eb008fd9d711.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/6402525/53689100-3821e680-3d4e-11e9-8440-e68bd802bfd9.png">
+</p>
 
 ### Key features
 * Lightweight in runtime
@@ -20,10 +27,56 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 * No runtime reflection (unless you need to edit/build node graphs at runtime. In this case, all reflection is cached.)
 * Does not rely on any 3rd party plugins
 * Custom node inspector code is very similar to regular custom inspector code
+* Supported from Unity 5.3 and up
+
+### Wiki
+* [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph
+* [Examples branch](https://github.com/Siccity/xNode/tree/examples) - look at other small projects
+
+### Installation
+<details><summary>Instructions</summary>
+
+### Installing with Unity Package Manager
+***Via Git URL***
+*(Requires Unity version 2018.3.0b7  or above)*
+
+To install this project as a [Git dependency](https://docs.unity3d.com/Manual/upm-git.html) using the Unity Package Manager,
+add the following line to your project's `manifest.json`:
+
+```
+"com.github.siccity.xnode": "https://github.com/siccity/xNode.git"
+```
+
+You will need to have Git installed and available in your system's PATH.
+
+If you are using [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) in your project, you will need to add `XNode` and/or `XNodeEditor` as Assembly Definition References.
+
+***Via OpenUPM***
+
+The package is available on the [openupm registry](https://openupm.com). It's recommended to install it via [openupm-cli](https://github.com/openupm/openupm-cli).
+
+```
+openupm add com.github.siccity.xnode
+```
+
+### Installing with git
+***Via Git Submodule***
+
+To add xNode as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) in your existing git project,
+run the following git command from your project root:
+
+```
+git submodule add git@github.com:Siccity/xNode.git Assets/Submodules/xNode
+```
+
+### Installing 'the old way'
+If no source control or package manager is available to you, you can simply copy/paste the source files into your assets folder.
+
+</details>
 
 ### Node example:
 ```csharp
-[System.Serializable]
+// public classes deriving from Node are registered as nodes for use within a graph
 public class MathNode : Node {
     // Adding [Input] or [Output] is all you need to do to register a field as a valid port on your node 
     [Input] public float a;
@@ -57,9 +110,10 @@ public class MathNode : Node {
 }
 ```
 
+### Plugins
+Plugins are repositories that add functionality to xNode
+* [xNodeGroups](https://github.com/Siccity/xNodeGroups): adds resizable groups
+
+### Community
 Join the [Discord](https://discord.gg/qgPrHv4 "Join Discord server") server to leave feedback or get support.
 Feel free to also leave suggestions/requests in the [issues](https://github.com/Siccity/xNode/issues "Go to Issues") page.
-
-Projects using xNode:
-* [Graphmesh](https://github.com/Siccity/Graphmesh "Go to github page")
-* [Dialogue](https://github.com/Siccity/Dialogue "Go to github page")

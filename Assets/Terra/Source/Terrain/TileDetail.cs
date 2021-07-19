@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Terra.Graph.Biome;
+using Terra.Source;
 using Terra.Structures;
 using UnityEngine;
 
@@ -14,19 +15,17 @@ namespace Terra.Terrain {
         [SerializeField]
         private Tile _tile;
 
-        private UnityEngine.Terrain _terrain {
-            get {
-                return _tile.GetComponent<UnityEngine.Terrain>();
-            }
-        }
+        private UnityEngine.Terrain _terrain => _tile.GetComponent<UnityEngine.Terrain>();
 
-        private float[,,] _biomeMap;
+        private int[,] _biomeMap;
         private TilePaint _painter;
+        private BiomeSampler _sampler;
 
-        public TileDetail(Tile tile, TilePaint painter, float[,,] biomeMap) {
+        public TileDetail(Tile tile, TilePaint painter, int[,] biomeMap) {
             _tile = tile;
             _biomeMap = biomeMap;
             _painter = painter;
+            _sampler = new BiomeSampler(_painter.Biomes);
         }
 
         /// <summary>
@@ -39,8 +38,7 @@ namespace Terra.Terrain {
             }
 
             //Collect prototypes from tree nodes
-            TreeDetailNode[] allTreeNodes = _painter.Combiner
-                .GetConnectedBiomeNodes()
+            TreeDetailNode[] allTreeNodes = _painter.Biomes
                 .SelectMany(biome => biome.GetTreeInputs())
                 .ToArray();
             List<TreePrototype> prototypes = new List<TreePrototype>(allTreeNodes.Length);
@@ -58,8 +56,7 @@ namespace Terra.Terrain {
             _terrain.treeBillboardDistance = conf.BillboardStart;
             _terrain.treeMaximumFullLODCount = conf.MaxMeshTrees;
 
-            BiomeCombinerNode combiner = _painter.Combiner;
-            BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
+            BiomeNode[] biomeNodes = _painter.Biomes;
             int prototypeIndex = 0;
 
             for (int i = 0; i < biomeNodes.Length; i++) {
@@ -86,13 +83,13 @@ namespace Terra.Terrain {
                     }
 
                     foreach (Vector2 sample in samples) {
-                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(_biomeMap, sample.x, sample.y);
+                        int selectedBiome = _sampler.GetBiomeAtInterpolatedCoords(_biomeMap, sample.x, sample.y);
 
                         if (iterations > coroutineRes) {
                             iterations = 0;
                             yield return null;
                         }
-                        if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
+                        if (selectedBiome != i) {
                             continue; //Not in this biome, skip
                         }
 
@@ -123,8 +120,7 @@ namespace Terra.Terrain {
         /// grass and detail meshes.
         /// </summary>
         public IEnumerator AddDetailLayers() {
-            BiomeCombinerNode combiner = _painter.Combiner;
-            BiomeNode[] biomeNodes = combiner.GetConnectedBiomeNodes();
+            BiomeNode[] biomeNodes = _painter.Biomes;
             int res = TerraConfig.Instance.Generator.DetailmapResolution;
 
             //Collect prototypes
@@ -178,9 +174,9 @@ namespace Terra.Terrain {
                             iterations = 0;
                             yield return null;
                         }
-                        float[] biomeWeights = combiner.Sampler.GetBiomeWeightsInterpolated(_biomeMap, sample.x, sample.y);
 
-                        if (biomeWeights[i] < DETAIL_SHOW_THRESHHOLD) {
+                        int selectedBiome = _sampler.GetBiomeAtInterpolatedCoords(_biomeMap, sample.x, sample.y);
+                        if (selectedBiome != i) {
                             continue; //Not in this biome, skip
                         }
 

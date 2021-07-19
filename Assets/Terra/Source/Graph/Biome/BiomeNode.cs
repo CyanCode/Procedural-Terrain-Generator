@@ -1,6 +1,7 @@
 ﻿using System;
 using Terra.CoherentNoise;
 using Terra.Graph.Generators;
+using Terra.Source;
 using Terra.Structures;
 using Terra.Terrain;
 using Terra.Util;

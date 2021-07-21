@@ -1,6 +1,9 @@
+using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Terra.Graph.Biome;
+using Terra.Source.Util;
 using Terra.Structures;
 using Terra.Terrain;
 using UnityEditor;
@@ -22,6 +25,10 @@ namespace Terra.Source.Editor {
                 ExportBiomeMap();
             }
 
+            if (GUILayout.Button("Export blurred biome map")) {
+                ExportBlurredBiomeMap();
+            }
+ 
             if (_previewTexture != null) {
                 int padding = 4;
                 int width = Mathf.FloorToInt(EditorGUIUtility.currentViewWidth) - padding * 2;
@@ -49,36 +56,58 @@ namespace Terra.Source.Editor {
         private void ExportBiomeMap() {
             Tile tile = (Tile) target;
             int res = tile.MeshManager.HeightmapResolution;
+            int[,] map = GetBiomeMap();
+            
+            string tileName = tile.name.Replace(" ", "_");
+            WriteMap(map, res, $"{tileName}_biome_map.txt");
+        }
+
+        private void ExportBlurredBiomeMap() {
+            Tile tile = (Tile) target;
+            int res = tile.MeshManager.HeightmapResolution;
+            int[,] map = GetBiomeMap();
+            // float[,] blurred = BlurUtils.BoxBlur(map, 20);
+            float[,] blurred = BlurUtils.GaussianConvolution(map, 4);
+         
+            string tileName = tile.name.Replace(" ", "_");
+            WriteMap(blurred, res, $"{tileName}_blurred_biome_map.txt");
+        }
+
+        private int[,] GetBiomeMap() {
+            Tile tile = (Tile) target;
+            int res = tile.MeshManager.HeightmapResolution;
             BiomeNode[] biomes = TerraConfig.Instance.Graph.GetEndNode().GetBiomes();
             BiomeSampler sampler = new BiomeSampler(biomes);
 
-            int[,] map = sampler.GetBiomeMap(TerraConfig.Instance, tile.GridPosition, res);
+            return sampler.GetBiomeMap(TerraConfig.Instance, tile.GridPosition, res);
+        }
 
-            string tileName = tile.name.Replace(" ", "_");
-            string path = $"Assets/Terra/{tileName}_biome_map.txt";
+        private void WriteMap(int[,] map, int res, string fileName) {
+            WriteMapGeneric((x,y) => map[x,y].ToString(), res, fileName);
+        }
 
-            //Write some text to the test.txt file
-            StreamWriter writer = new StreamWriter(path, true);
+        private void WriteMap(float[,] map, int res, string fileName) {
+            WriteMapGeneric((x, y) => map[x, y].ToString("0.00000"), res, fileName);
+        }
 
-            StringBuilder sb = new StringBuilder("[");
+        private void WriteMapGeneric(Func<int, int, String> sampler, int res, string fileName) {
+            string path = $"Assets/Terra/{fileName}";
+            
+            StreamWriter writer = new StreamWriter(path, false);
+            StringBuilder sb = new StringBuilder();
             for (int x = 0; x < res; x++) {
-                sb.Append("[");
-                
                 for (int y = 0; y < res; y++) {
-                    sb.Append(map[x, y]);
+                    sb.Append(sampler.Invoke(x, y));
 
                     if (y != res - 1) {
-                        sb.Append(", ");
+                        sb.Append(" ");
                     }
                 }
 
-                sb.Append("]");
                 if (x != res - 1) {
-                    sb.Append(",\n");
+                    sb.Append("\n");
                 }
             }
-
-            sb.Append("]");
             
             writer.Write(sb.ToString());
             writer.Close();

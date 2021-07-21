@@ -6,6 +6,7 @@ using Terra.CoherentNoise;
 using Terra.Graph;
 using Terra.Graph.Biome;
 using Terra.Source;
+using Terra.Source.Util;
 using Terra.Structures;
 using Terra.Util;
 using UnityEngine;
@@ -153,9 +154,29 @@ namespace Terra.Terrain {
 		/// </summary>
 		/// <param name="config">TerraConfig instance for pulling length & spread</param>
 		/// <param name="position">Position of in Terra grid units of this map</param>
-		/// <param name="resolution">Resolution of thsi biome map</param>
+		/// <param name="resolution">Resolution of this biome map</param>
 		public int[,] GetBiomeMap(TerraConfig config, GridPosition position, int resolution) {
 			return GetBiomeMap(position, config.Generator.Length, config.Generator.Spread, resolution);
+		}
+
+		/// <summary>
+		/// Generates a map of constructed from connected biome nodes. Instead of
+		/// returning a biome map of size [resolution, resolution], it returns one
+		/// of size [resolution + kernel size, resolution + kernel size] where
+		/// kernel size is defined in <code>BlurUtils.GetGaussianKernelSize()</code>
+		/// </summary>
+		/// <param name="config"></param>
+		/// <param name="position"></param>
+		/// <param name="resolution"></param>
+		/// <param name="deviation"></param>
+		/// <returns></returns>
+		public int[,] GetGaussianBlurrableBiomeMap(TerraConfig config, GridPosition position, int resolution, int deviation) {
+			int[,] biomeMap = GetBiomeMap(config, position, resolution);
+			int kernelSize = BlurUtils.GetGaussianKernelSize(deviation);
+			int newRes = resolution + kernelSize;
+			int[,] blurrableBiomeMap = new int[newRes,newRes];
+			
+			// Fill in area surrounding the center biome map
 		}
 
         /// <summary>

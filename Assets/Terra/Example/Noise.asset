@@ -207,7 +207,7 @@ MonoBehaviour:
   IsPreviewDropdown: 1
   Output: {fileID: 0}
   Name: Desert
-  PreviewColor: {r: 0.990566, g: 0.8252201, b: 0.3037113, a: 1}
+  PreviewColor: {r: 0, g: 0, b: 1, a: 1}
   SplatDetails: {fileID: 0}
   Trees: {fileID: 0}
   Grass: {fileID: 0}
@@ -536,7 +536,7 @@ MonoBehaviour:
   IsPreviewDropdown: 1
   Output: {fileID: 0}
   Name: Snowy
-  PreviewColor: {r: 1, g: 1, b: 1, a: 0}
+  PreviewColor: {r: 1, g: 0, b: 0, a: 1}
   SplatDetails: {fileID: 0}
   Trees: {fileID: 0}
   Grass: {fileID: 0}
@@ -738,7 +738,7 @@ MonoBehaviour:
   IsPreviewDropdown: 1
   Output: {fileID: 0}
   Name: Grassy
-  PreviewColor: {r: 0.05724919, g: 1, b: 0, a: 0}
+  PreviewColor: {r: 0, g: 1, b: 0, a: 1}
   SplatDetails: {fileID: 0}
   Trees: {fileID: 0}
   Grass: {fileID: 0}

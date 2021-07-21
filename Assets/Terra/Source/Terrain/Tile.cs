@@ -27,6 +27,12 @@ namespace Terra.Terrain {
         [HideInInspector]
         public bool IsColliderDirty = false;
 
+        [HideInInspector]
+        public int PreviewDeviation = 4;
+
+        [HideInInspector]
+        public Gradient PreviewGradient;
+        
         /// <summary>
         /// Position of this Tile in the grid of Tiles
         /// </summary>

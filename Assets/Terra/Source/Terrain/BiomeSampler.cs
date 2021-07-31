@@ -9,6 +9,7 @@ using Terra.Source;
 using Terra.Source.Util;
 using Terra.Structures;
 using Terra.Util;
+using TMPro;
 using UnityEngine;
 using Object = System.Object;
 
@@ -102,6 +103,38 @@ namespace Terra.Terrain {
 			return biomeMap;
 		}
 
+		public int[,] GetBiomeMap(Vector2 worldPosition, float spread, int resolution, int length) {
+			// TODO Factor out reuseable
+			List<float[,]> allBiomeWeights = new List<float[,]>(_biomes.Length);
+
+			//Gather each biome's weights
+			lock (_valueLock) {
+				foreach (BiomeNode biome in _biomes) {
+					allBiomeWeights.Add(biome.GetWeights(worldPosition, spread, resolution, length));
+				}
+			}
+
+			// Choose biome to display
+			int[,] biomeMap = new int[resolution, resolution];
+			BlendStrategy blendStrategy = TerraConfig.Instance.Graph.GetEndNode().BlendStrategy;
+			MathUtil.LoopXY(resolution, (x, y) => {
+				int toShow = 0;
+
+				switch (blendStrategy) {
+					case BlendStrategy.RANDOM:
+						toShow = GetShownBiomeRandom(x, y, allBiomeWeights);
+						break;
+					case BlendStrategy.ORDERED:
+						toShow = GetShownBiomeOrdered(x, y, allBiomeWeights);
+						break;
+				}
+
+				biomeMap[x, y] = toShow;
+			});
+
+			return biomeMap;
+		}
+
 		private int GetShownBiomeOrdered(int x, int y, List<float[,]> allBiomeWeights) {
 			float prevWeight = -1f;
 			int selectedBiome = 0;
@@ -170,13 +203,35 @@ namespace Terra.Terrain {
 		/// <param name="resolution"></param>
 		/// <param name="deviation"></param>
 		/// <returns></returns>
-		public int[,] GetGaussianBlurrableBiomeMap(TerraConfig config, GridPosition position, int resolution, int deviation) {
-			int[,] biomeMap = GetBiomeMap(config, position, resolution);
+		public float[,] GetGaussianBlurredBiomeMap(TerraConfig config, GridPosition position, int resolution, int deviation) {
 			int kernelSize = BlurUtils.GetGaussianKernelSize(deviation);
-			int newRes = resolution + kernelSize;
-			int[,] blurrableBiomeMap = new int[newRes,newRes];
+			int newRes = resolution + kernelSize * 2;
 			
-			// Fill in area surrounding the center biome map
+			// Create biome map that extends out enough to fit kernel neighbors
+			int length = config.Generator.Length;
+			Vector2 world = TileMesh.LocalToWorld(position, 0, 0, length);
+			float lengthRatio = length / (float) resolution;
+			int newLength = (int) Math.Round(lengthRatio * newRes * 2f);
+			int lengthDifference = newLength - length;
+			Vector2 worldStartPosition = new Vector2 {
+				x = world.x - lengthDifference,
+				y = world.y - lengthDifference
+			};
+
+			int[,] blurrableBiomeMap = GetBiomeMap(worldStartPosition, config.Generator.Spread, newRes, newLength);
+			float[,] blurred = BlurUtils.GaussianConvolution(blurrableBiomeMap, deviation);
+			
+			// Trim map to only use center matrix
+			// float[,] result = new float[resolution, resolution];
+			// int resultX = 0;
+			// for (int x = kernelSize; x < resolution + kernelSize - 1; x++, resultX++) {
+			// 	int resultY = 0;
+			// 	for (int y = kernelSize; y < resolution + kernelSize - 1; y++, resultY++) {
+			// 		result[resultX, resultY] = blurred[x, y];
+			// 	}
+			// }
+
+			return blurred;
 		}
 
         /// <summary>

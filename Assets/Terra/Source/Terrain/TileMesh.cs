@@ -611,7 +611,7 @@ namespace Terra.Terrain {
 			return new Vector2(worldX, worldZ);
 		}
 
-#region Serialization
+		#region Serialization
 
 		/// <summary>
 		/// One dimensional representation of the heightmap that 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Terra.Graph.Biome;
 using Terra.Graph.Fields;
+using Terra.Source.Graph.Editor.Fields;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;

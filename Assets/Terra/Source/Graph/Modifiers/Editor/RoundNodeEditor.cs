@@ -1,5 +1,6 @@
 ﻿using Terra.Graph.Fields;
 using Terra.Graph.Generators.Modifiers;
+using Terra.Source.Graph.Editor.Fields;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor;

@@ -1,8 +1,9 @@
-﻿using Terra.Structures;
+﻿using Terra.Graph;
+using Terra.Structures;
 using UnityEditor;
 using UnityEngine;
 
-namespace Terra.Graph.Fields {
+namespace Terra.Source.Graph.Editor.Fields {
 	public static class PreviewField {
 		private static int PreviewTextureSize = 100;
 		private static int ExportTextureSize = 500;
@@ -24,9 +25,9 @@ namespace Terra.Graph.Fields {
 					node.PreviewTexture = node.DidRequestTextureUpdate(PreviewTextureSize, PreviewTextureSize);
 				}
 				if (showExport && GUILayout.Button("Export Preview")) {
-					string path = Application.dataPath + "/TerraPreview.png";
+					string path = $"{Application.dataPath}/TerraPreview.png";
 					MathUtil.WriteTexture(node.DidRequestTextureUpdate(ExportTextureSize, ExportSpread), path);
-					Debug.Log("Exported preview texture to " + path);
+					Debug.Log($"Exported preview texture to {path}");
 				}
 			}
 		}

@@ -48,6 +48,11 @@ namespace Terra.Terrain {
 			return GetRemappedValue(value);
 		}
 
+        public float GetValue(Vector2 worldPosition, float spread) {
+	        float value = _generator.GetValue(worldPosition.x / spread, worldPosition.y / spread, 0f);
+	        return GetRemappedValue(value);
+        }
+
 		/// <summary>
 		/// Get the value of the Generator in world space.
 		/// </summary>

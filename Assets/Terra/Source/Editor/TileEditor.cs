@@ -86,8 +86,7 @@ namespace Terra.Source.Editor {
                 return;
             }
 
-            int[,] map = sampler.GetBiomeMap(TerraConfig.Instance, tile.GridPosition, res);
-            float[,] blurredMap = BlurUtils.GaussianConvolution(map, _tile.PreviewDeviation);
+            float[,] blurredMap = GetBlurredBiomeMap(tile.PreviewDeviation);
 
             _tile.PreviewGradient = new Gradient();
             GradientColorKey[] colorKeys = new GradientColorKey[biomes.Length];
@@ -126,10 +125,11 @@ namespace Terra.Source.Editor {
         private void ExportBlurredBiomeMap() {
             Tile tile = (Tile) target;
             int res = tile.MeshManager.HeightmapResolution;
-            int[,] map = GetBiomeMap();
-            // float[,] blurred = BlurUtils.BoxBlur(map, 20);
-            float[,] blurred = BlurUtils.GaussianConvolution(map, 4);
-
+            // int[,] map = GetBiomeMap();
+            // // float[,] blurred = BlurUtils.BoxBlur(map, 20);
+            // float[,] blurred = BlurUtils.GaussianConvolution(map, 4);
+            float[,] blurred = GetBlurredBiomeMap(tile.PreviewDeviation);
+            
             string tileName = tile.name.Replace(" ", "_");
             WriteMap(blurred, res, $"{tileName}_blurred_biome_map.txt");
         }
@@ -141,6 +141,15 @@ namespace Terra.Source.Editor {
             BiomeSampler sampler = new BiomeSampler(biomes);
 
             return sampler.GetBiomeMap(TerraConfig.Instance, tile.GridPosition, res);
+        }
+
+        private float[,] GetBlurredBiomeMap(int deviation) {
+            Tile tile = (Tile) target;
+            int res = tile.MeshManager.HeightmapResolution;
+            BiomeNode[] biomes = TerraConfig.Instance.Graph.GetEndNode().GetBiomes();
+            BiomeSampler sampler = new BiomeSampler(biomes);
+
+            return sampler.GetGaussianBlurredBiomeMap(TerraConfig.Instance, tile.GridPosition, res, deviation);
         }
 
         private void WriteMap(int[,] map, int res, string fileName) {

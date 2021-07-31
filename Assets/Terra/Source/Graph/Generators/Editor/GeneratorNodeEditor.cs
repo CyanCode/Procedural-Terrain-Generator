@@ -2,6 +2,7 @@
 using Terra.CoherentNoise;
 using Terra.Graph.Fields;
 using Terra.Graph.Generators;
+using Terra.Source.Graph.Editor.Fields;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor;

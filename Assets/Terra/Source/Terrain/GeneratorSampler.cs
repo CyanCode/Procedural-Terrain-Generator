@@ -44,6 +44,9 @@ namespace Terra.Terrain {
 			Vector2 local = TileMesh.PositionToLocal(x, y, resolution);
 			Vector2 world = TileMesh.LocalToWorld(position, local.x, local.y, length);
 
+			if (x == 129 && y == 129) {
+				var z = 1;
+			}
 			float value = _generator.GetValue(world.x / spread, world.y / spread, 0f);
 			return GetRemappedValue(value);
 		}

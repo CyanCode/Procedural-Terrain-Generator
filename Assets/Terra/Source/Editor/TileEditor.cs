@@ -36,6 +36,10 @@ namespace Terra.Source.Editor {
                 SetBlurredBiomePreviewTexture();
             }
 
+            if (GUILayout.Button("Preview expanded biome map")) {
+                SetExpandedBiomePreviewTexture();
+            }
+            
             if (GUILayout.Button("Export biome map")) {
                 ExportBiomeMap();
             }
@@ -62,7 +66,34 @@ namespace Terra.Source.Editor {
 
             //Set texture
             Texture2D tex = new Texture2D(res, res);
-            MathUtil.LoopXY(res, (x, y) => { tex.SetPixel(x, y, biomes[map[x, y]].PreviewColor); });
+            MathUtil.LoopXy(res, (x, y) => { tex.SetPixel(x, y, biomes[map[x, y]].PreviewColor); });
+
+            tex.Apply();
+            _previewTexture = tex;
+        }
+        
+        private void SetExpandedBiomePreviewTexture() {
+            Tile tile = (Tile) target;
+            int res = tile.MeshManager.HeightmapResolution;
+            BiomeNode[] biomes = TerraConfig.Instance.Graph.GetEndNode().GetBiomes();
+            BiomeSampler sampler = new BiomeSampler(biomes);
+
+            Texture2D tex;
+            if (biomes.Length == 1) {
+                tex = new Texture2D(res, res);
+                MathUtil.LoopXy(res, (x, y) => {
+                    // Set colors based on how much biome is showing
+                    tex.SetPixel(x, y, biomes[0].PreviewColor);
+                });
+                tex.Apply();
+                _previewTexture = tex;
+                return;
+            }
+
+            int[,] blurredMap = GetBlurredBiomeMapInt(tile.PreviewDeviation);
+            res = blurredMap.GetLength(0);
+            tex = new Texture2D(res, res);
+            MathUtil.LoopXy(res, (x, y) => { tex.SetPixel(x, y, biomes[blurredMap[x, y]].PreviewColor); });
 
             tex.Apply();
             _previewTexture = tex;
@@ -77,7 +108,7 @@ namespace Terra.Source.Editor {
             Texture2D tex;
             if (biomes.Length == 1) {
                 tex = new Texture2D(res, res);
-                MathUtil.LoopXY(res, (x, y) => {
+                MathUtil.LoopXy(res, (x, y) => {
                     // Set colors based on how much biome is showing
                     tex.SetPixel(x, y, biomes[0].PreviewColor);
                 });
@@ -90,7 +121,7 @@ namespace Terra.Source.Editor {
 
             _tile.PreviewGradient = new Gradient();
             GradientColorKey[] colorKeys = new GradientColorKey[biomes.Length];
-            float stepSize = 1f / (biomes.Length - 1);
+            float stepSize = 1f / (biomes.Length);
             float offset = 0f;
             for (int i = 0; i < biomes.Length; i++) {
                 GradientColorKey colorKey = new GradientColorKey {color = biomes[i].PreviewColor, time = offset};
@@ -102,8 +133,9 @@ namespace Terra.Source.Editor {
             _tile.PreviewGradient.colorKeys = colorKeys;
 
             //Set texture
+            res = blurredMap.GetLength(0);
             tex = new Texture2D(res, res);
-            MathUtil.LoopXY(res, (x, y) => {
+            MathUtil.LoopXy(res, (x, y) => {
                 // Set colors based on how much biome is showing
                 float normalized = blurredMap[x, y] / biomes.Length;
                 tex.SetPixel(x, y, _tile.PreviewGradient.Evaluate(normalized));
@@ -124,11 +156,8 @@ namespace Terra.Source.Editor {
 
         private void ExportBlurredBiomeMap() {
             Tile tile = (Tile) target;
-            int res = tile.MeshManager.HeightmapResolution;
-            // int[,] map = GetBiomeMap();
-            // // float[,] blurred = BlurUtils.BoxBlur(map, 20);
-            // float[,] blurred = BlurUtils.GaussianConvolution(map, 4);
             float[,] blurred = GetBlurredBiomeMap(tile.PreviewDeviation);
+            int res = blurred.GetLength(0);
             
             string tileName = tile.name.Replace(" ", "_");
             WriteMap(blurred, res, $"{tileName}_blurred_biome_map.txt");
@@ -150,6 +179,15 @@ namespace Terra.Source.Editor {
             BiomeSampler sampler = new BiomeSampler(biomes);
 
             return sampler.GetGaussianBlurredBiomeMap(TerraConfig.Instance, tile.GridPosition, res, deviation);
+        }
+        
+        private int[,] GetBlurredBiomeMapInt(int deviation) {
+            Tile tile = (Tile) target;
+            int res = tile.MeshManager.HeightmapResolution;
+            BiomeNode[] biomes = TerraConfig.Instance.Graph.GetEndNode().GetBiomes();
+            BiomeSampler sampler = new BiomeSampler(biomes);
+
+            return sampler.GetGaussianBlurredBiomeMapInt(TerraConfig.Instance, tile.GridPosition, res, deviation);
         }
 
         private void WriteMap(int[,] map, int res, string fileName) {

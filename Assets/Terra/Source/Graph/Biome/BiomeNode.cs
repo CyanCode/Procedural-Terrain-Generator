@@ -151,7 +151,7 @@ namespace Terra.Graph.Biome {
 			Func<bool, int> boolToInt = (i) => i ? 1 : 0;
 			int mapsInUseCount = boolToInt(UseHeightmap) + boolToInt(UseTemperature) + boolToInt(UseMoisture);
 
-			MathUtil.LoopXY(resolution, (x, y) => {
+			MathUtil.LoopXy(resolution, (x, y) => {
 				Func<GeneratorSampler, float> sample = (sampler) => Mathf.Clamp01(sampler.GetValue(x, y, position, resolution, spread, length));
 				float weight = 0;
 
@@ -183,11 +183,14 @@ namespace Terra.Graph.Biome {
 			int BoolToInt(bool i) => i ? 1 : 0;
 			int mapsInUseCount = BoolToInt(UseHeightmap) + BoolToInt(UseTemperature) + BoolToInt(UseMoisture);
 
-			MathUtil.LoopXY(resolution, (x, y) => {
+			MathUtil.LoopXy(resolution, (x, y) => {
 				Vector2 world = new Vector2 {
-					x = startingWorldPos.x + (x / resolution) * length,
-					y = startingWorldPos.y + (y / resolution) * length
+					x = startingWorldPos.x + (x / (float)resolution) * length,
+					y = startingWorldPos.y + (y / (float)resolution) * length
 				};
+				if (x == 0 && y == 0) {
+					var z = 1;
+				}
 				float Sample(GeneratorSampler sampler) => Mathf.Clamp01(sampler.GetValue(world, spread));
 				float weight = 0;
 

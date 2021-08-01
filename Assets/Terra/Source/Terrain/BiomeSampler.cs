@@ -85,7 +85,7 @@ namespace Terra.Terrain {
 			// Choose biome to display
 			int[,] biomeMap = new int[resolution, resolution];
 			BlendStrategy blendStrategy = TerraConfig.Instance.Graph.GetEndNode().BlendStrategy;
-			MathUtil.LoopXY(resolution, (x, y) => {
+			MathUtil.LoopXy(resolution, (x, y) => {
 				int toShow = 0;
 
 				switch (blendStrategy) {
@@ -117,7 +117,7 @@ namespace Terra.Terrain {
 			// Choose biome to display
 			int[,] biomeMap = new int[resolution, resolution];
 			BlendStrategy blendStrategy = TerraConfig.Instance.Graph.GetEndNode().BlendStrategy;
-			MathUtil.LoopXY(resolution, (x, y) => {
+			MathUtil.LoopXy(resolution, (x, y) => {
 				int toShow = 0;
 
 				switch (blendStrategy) {
@@ -205,19 +205,22 @@ namespace Terra.Terrain {
 		/// <returns></returns>
 		public float[,] GetGaussianBlurredBiomeMap(TerraConfig config, GridPosition position, int resolution, int deviation) {
 			int kernelSize = BlurUtils.GetGaussianKernelSize(deviation);
-			int newRes = resolution + kernelSize * 2;
+			int newRes = (kernelSize - 1) * 2 + resolution;
 			
 			// Create biome map that extends out enough to fit kernel neighbors
 			int length = config.Generator.Length;
-			Vector2 world = TileMesh.LocalToWorld(position, 0, 0, length);
-			float lengthRatio = length / (float) resolution;
-			int newLength = (int) Math.Round(lengthRatio * newRes * 2f);
-			int lengthDifference = newLength - length;
-			Vector2 worldStartPosition = new Vector2 {
-				x = world.x - lengthDifference,
-				y = world.y - lengthDifference
-			};
+			float halfLength = length / 2f;
+			Vector2 tileCornerWorld = TileMesh.LocalToWorld(position, 0, 0, length);
+			tileCornerWorld.x -= halfLength;
+			tileCornerWorld.y -= halfLength;
 
+			int newLength = (int) Math.Round(length / (float) resolution * newRes);
+			int lengthDifference = (newLength - length) / 2;
+			Vector2 worldStartPosition = new Vector2 {
+				x = tileCornerWorld.x - lengthDifference,
+				y = tileCornerWorld.y - lengthDifference
+			};
+			
 			int[,] blurrableBiomeMap = GetBiomeMap(worldStartPosition, config.Generator.Spread, newRes, newLength);
 			float[,] blurred = BlurUtils.GaussianConvolution(blurrableBiomeMap, deviation);
 			
@@ -232,6 +235,29 @@ namespace Terra.Terrain {
 			// }
 
 			return blurred;
+		}
+		
+		// TODO testing--remove later
+		public int[,] GetGaussianBlurredBiomeMapInt(TerraConfig config, GridPosition position, int resolution, int deviation) {
+			int kernelSize = BlurUtils.GetGaussianKernelSize(deviation);
+			int newRes = (kernelSize - 1) * 2 + resolution;
+			
+			// Create biome map that extends out enough to fit kernel neighbors
+			int length = config.Generator.Length;
+			float halfLength = length / 2f;
+			Vector2 tileCornerWorld = TileMesh.LocalToWorld(position, 0, 0, length);
+			tileCornerWorld.x -= halfLength;
+			tileCornerWorld.y -= halfLength;
+
+			int newLength = (int) Math.Round(length / (float) resolution * newRes);
+			int lengthDifference = (newLength - length) / 2;
+			Vector2 worldStartPosition = new Vector2 {
+				x = tileCornerWorld.x - lengthDifference,
+				y = tileCornerWorld.y - lengthDifference
+			};
+
+			return GetBiomeMap(worldStartPosition, config.Generator.Spread, newRes, newLength);
+			
 		}
 
         /// <summary>

@@ -259,7 +259,7 @@ namespace Terra.Structures {
 			}
 		}
 
-		public static void LoopXY(int resolution, Action<int, int> operation) {
+		public static void LoopXy(int resolution, Action<int, int> operation) {
 			for (int x = 0; x < resolution; x++) {
 				for (int y = 0; y < resolution; y++) {
 					operation(x, y);

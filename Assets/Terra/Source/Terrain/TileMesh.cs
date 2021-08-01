@@ -596,6 +596,21 @@ namespace Terra.Terrain {
 		}
 
 		/// <summary>
+		/// Transforms the passed x and z incrementors into local coordinates.
+		/// </summary>
+		/// <param name="x">x position to transform</param>
+		/// <param name="z">z position to transform</param>
+		/// <param name="resolution">resolution of structure (mesh or heightmap)</param>
+		/// <param name="length">Length</param>
+		/// <returns></returns>
+		public static Vector2 PositionToLocal(int x, int z, int resolution, float length) {
+			float xLocal = ((float)x / (resolution - 1) - .5f) * length;
+			float zLocal = ((float)z / (resolution - 1) - .5f) * length;
+
+			return new Vector2(xLocal, zLocal);
+		}
+
+		/// <summary>
 		/// Converts local X and Z coordinates to <see cref="Tile"/> world 
 		/// coordinates.
 		/// </summary>

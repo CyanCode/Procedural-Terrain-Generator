@@ -364,8 +364,8 @@ MonoBehaviour:
       _dynamic: 0
   Output: {fileID: 0}
   Constraint: {fileID: 0}
-  Diffuse: {fileID: 2800000, guid: 20cdc66efde0b4af8a1e54739493c8d5, type: 3}
-  Normal: {fileID: 2800000, guid: dfeb7fd65816748bf8f53aab76f79986, type: 3}
+  Diffuse: {fileID: 2800000, guid: af2fc4247036ddf4d81662c80f7bc975, type: 3}
+  Normal: {fileID: 2800000, guid: de39b6e968d0e57448f1835bcf73f312, type: 3}
   Tiling: {x: 2, y: 2}
   Offset: {x: 0, y: 0}
   MixMethod: 0

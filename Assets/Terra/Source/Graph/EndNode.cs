@@ -84,7 +84,7 @@ namespace Terra.Graph {
             int[,] map = sampler.GetBiomeMap(GridPosition.Zero, 1, spread, size);
 
             //Set texture
-            MathUtil.LoopXY(size, (x, y) => { tex.SetPixel(x, y, biomes[map[x, y]].PreviewColor); });
+            MathUtil.LoopXy(size, (x, y) => { tex.SetPixel(x, y, biomes[map[x, y]].PreviewColor); });
 
             tex.Apply();
             return tex;
